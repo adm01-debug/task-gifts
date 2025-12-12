@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,57 +6,81 @@
 
 @layer base {
   :root {
-    /* Dark theme as default - designed for impact */
-    --background: 240 10% 4%;
+    /* Task Gifts - Modern Gamification Theme */
+    --background: 225 25% 6%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 6%;
+    --card: 225 25% 9%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 6%;
+    --popover: 225 25% 9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 190 100% 50%;
-    --primary-foreground: 240 10% 4%;
+    /* Vibrant Orange/Coral Primary - Energetic */
+    --primary: 24 95% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 100% 65%;
-    --secondary-foreground: 0 0% 98%;
+    /* Electric Blue Secondary */
+    --secondary: 210 100% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 10% 12%;
-    --muted-foreground: 240 5% 55%;
+    /* Success Green */
+    --success: 142 70% 50%;
+    --success-foreground: 0 0% 100%;
 
-    --accent: 340 90% 60%;
-    --accent-foreground: 0 0% 98%;
+    /* Warning Yellow */
+    --warning: 45 100% 55%;
+    --warning-foreground: 225 25% 6%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --muted: 225 20% 14%;
+    --muted-foreground: 225 10% 55%;
 
-    --border: 240 10% 15%;
-    --input: 240 10% 15%;
-    --ring: 190 100% 50%;
+    --accent: 280 80% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --radius: 1rem;
+    --destructive: 0 80% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(190 100% 50%), hsl(270 100% 65%), hsl(340 90% 60%));
-    --gradient-glow: linear-gradient(135deg, hsl(190 100% 50% / 0.4), hsl(270 100% 65% / 0.4));
-    --gradient-subtle: linear-gradient(180deg, hsl(240 10% 6%), hsl(240 10% 4%));
-    
-    --glow-primary: 0 0 60px hsl(190 100% 50% / 0.3);
-    --glow-secondary: 0 0 60px hsl(270 100% 65% / 0.3);
-    --glow-accent: 0 0 60px hsl(340 90% 60% / 0.3);
-    
-    --shadow-elevated: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
-    --shadow-glow: 0 0 40px hsl(190 100% 50% / 0.15);
+    --border: 225 20% 15%;
+    --input: 225 20% 15%;
+    --ring: 24 95% 55%;
 
-    /* Glass effect */
-    --glass-bg: hsl(240 10% 8% / 0.6);
-    --glass-border: hsl(0 0% 100% / 0.08);
-  }
+    --radius: 0.75rem;
 
-  .dark {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 98%;
+    /* XP/Level Colors */
+    --xp: 142 70% 50%;
+    --coins: 45 100% 55%;
+    --streak: 24 95% 55%;
+
+    /* Rank Colors */
+    --gold: 45 100% 55%;
+    --silver: 220 10% 70%;
+    --bronze: 25 60% 50%;
+
+    /* Glass & Effects */
+    --glass-bg: 225 25% 10% / 0.7;
+    --glass-border: 0 0% 100% / 0.08;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(24 95% 55%), hsl(340 80% 55%));
+    --gradient-secondary: linear-gradient(135deg, hsl(210 100% 60%), hsl(280 80% 60%));
+    --gradient-success: linear-gradient(135deg, hsl(142 70% 50%), hsl(170 70% 45%));
+    --gradient-xp: linear-gradient(90deg, hsl(142 70% 50%), hsl(180 70% 50%));
+
+    /* Shadows */
+    --shadow-glow-primary: 0 0 40px hsl(24 95% 55% / 0.3);
+    --shadow-glow-secondary: 0 0 40px hsl(210 100% 60% / 0.3);
+    --shadow-glow-success: 0 0 40px hsl(142 70% 50% / 0.3);
+
+    /* Sidebar */
+    --sidebar-background: 225 25% 7%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 24 95% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 225 20% 12%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 225 20% 12%;
+    --sidebar-ring: 24 95% 55%;
   }
 }
 
@@ -71,12 +95,11 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Sora', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 
   ::selection {
     background: hsl(var(--primary) / 0.3);
-    color: hsl(var(--foreground));
   }
 }
 
@@ -86,88 +109,125 @@
     background-image: var(--gradient-primary);
   }
 
+  .gradient-text-secondary {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-secondary);
+  }
+
   .glass {
-    background: var(--glass-bg);
+    background: hsl(var(--glass-bg));
     backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid hsl(var(--glass-border));
   }
 
   .glow-primary {
-    box-shadow: var(--glow-primary);
+    box-shadow: var(--shadow-glow-primary);
   }
 
   .glow-secondary {
-    box-shadow: var(--glow-secondary);
+    box-shadow: var(--shadow-glow-secondary);
   }
 
-  .glow-accent {
-    box-shadow: var(--glow-accent);
+  .glow-success {
+    box-shadow: var(--shadow-glow-success);
   }
 
-  .text-balance {
-    text-wrap: balance;
+  /* XP Bar Animation */
+  .xp-bar {
+    background: linear-gradient(90deg, 
+      hsl(var(--xp)) 0%, 
+      hsl(170 70% 50%) 50%, 
+      hsl(var(--xp)) 100%
+    );
+    background-size: 200% 100%;
+    animation: xp-shimmer 2s ease-in-out infinite;
+  }
+
+  @keyframes xp-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Streak Fire Animation */
+  .streak-fire {
+    animation: fire-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes fire-pulse {
+    0%, 100% { 
+      filter: drop-shadow(0 0 8px hsl(24 95% 55% / 0.6));
+      transform: scale(1);
+    }
+    50% { 
+      filter: drop-shadow(0 0 16px hsl(24 95% 55% / 0.9));
+      transform: scale(1.1);
+    }
+  }
+
+  /* Coin Shine */
+  .coin-shine {
+    animation: coin-rotate 3s linear infinite;
+  }
+
+  @keyframes coin-rotate {
+    0% { filter: drop-shadow(0 0 4px hsl(45 100% 55% / 0.5)); }
+    50% { filter: drop-shadow(0 0 12px hsl(45 100% 55% / 0.9)); }
+    100% { filter: drop-shadow(0 0 4px hsl(45 100% 55% / 0.5)); }
+  }
+
+  /* Rank Badge */
+  .rank-gold {
+    background: linear-gradient(135deg, hsl(45 100% 60%), hsl(35 100% 45%));
+    box-shadow: 0 0 20px hsl(45 100% 55% / 0.5);
+  }
+
+  .rank-silver {
+    background: linear-gradient(135deg, hsl(220 15% 75%), hsl(220 10% 55%));
+    box-shadow: 0 0 15px hsl(220 10% 70% / 0.4);
+  }
+
+  .rank-bronze {
+    background: linear-gradient(135deg, hsl(25 70% 55%), hsl(15 60% 40%));
+    box-shadow: 0 0 15px hsl(25 60% 50% / 0.4);
+  }
+
+  /* Level Up Flash */
+  @keyframes level-up {
+    0% { 
+      transform: scale(1);
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7);
+    }
+    50% { 
+      transform: scale(1.05);
+      box-shadow: 0 0 0 20px hsl(var(--primary) / 0);
+    }
+    100% { 
+      transform: scale(1);
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+    }
+  }
+
+  .animate-level-up {
+    animation: level-up 0.6s ease-out;
   }
 }
 
-/* Animated gradient background */
-@keyframes gradient-shift {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(5deg);
-  }
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 3px;
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient-shift 8s ease infinite;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    hsl(0 0% 100% / 0.1),
-    transparent
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
 }
