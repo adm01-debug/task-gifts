@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { Menu, Bell, Search, Sparkles, X, Check, Gift, Trophy, Zap, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Menu, Bell, Search, Sparkles, X, Clock, LogOut, User } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { StatsGrid, QuickActions } from "@/components/StatsGrid";
 import { LiveLeaderboard } from "@/components/LiveLeaderboard";
@@ -9,6 +10,10 @@ import { TeamChallenges } from "@/components/TeamChallenges";
 import { RewardsShop } from "@/components/RewardsShop";
 import { AnalyticsWidget } from "@/components/AnalyticsWidget";
 import { AchievementContainer, useAchievements } from "@/components/AchievementSystem";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Trophy, Zap, Gift } from "lucide-react";
 
 // Demo notifications
 const notifications = [
@@ -20,9 +25,24 @@ const notifications = [
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const { achievements, showAchievement, hideAchievement, levelUp, triggerLevelUp, closeLevelUp } = useAchievements();
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
 
-  // Demo: Trigger achievement after 3 seconds
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Até logo! 👋");
+    navigate("/auth");
+  };
+
   const triggerDemoAchievement = () => {
     showAchievement({
       id: Date.now().toString(),
@@ -37,6 +57,20 @@ const Index = () => {
   const triggerDemoLevelUp = () => {
     triggerLevelUp(43);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent"
+        />
+      </div>
+    );
+  }
+
+  const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Jogador";
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -70,7 +104,7 @@ const Index = () => {
               </motion.button>
               
               <div>
-                <h1 className="text-xl font-bold">Bom dia, João! 👋</h1>
+                <h1 className="text-xl font-bold">Olá, {displayName}! 👋</h1>
                 <p className="text-sm text-muted-foreground">
                   Você está no <span className="text-primary font-semibold">#4</span> lugar. Continue assim!
                 </p>
@@ -106,7 +140,6 @@ const Index = () => {
                   <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
                 </motion.button>
 
-                {/* Notifications Dropdown */}
                 <AnimatePresence>
                   {showNotifications && (
                     <motion.div
@@ -153,11 +186,6 @@ const Index = () => {
                           </motion.div>
                         ))}
                       </div>
-                      <div className="p-2 border-t border-border">
-                        <button className="w-full py-2 text-sm font-medium text-primary hover:bg-muted/30 rounded-lg transition-colors">
-                          Ver todas
-                        </button>
-                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -167,11 +195,55 @@ const Index = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-accent/20 to-primary/20 border border-accent/30 hover:border-accent/50 transition-colors"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-accent/20 to-primary/20 border border-accent/30 hover:border-accent/50 transition-colors"
               >
                 <Sparkles className="w-4 h-4 text-accent" />
                 <span className="text-sm font-medium">AI Coach</span>
               </motion.button>
+
+              {/* User Menu */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center font-bold text-sm"
+                >
+                  {displayName.charAt(0).toUpperCase()}
+                </motion.button>
+
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 top-12 w-56 bg-card border border-border rounded-xl shadow-2xl overflow-hidden"
+                    >
+                      <div className="p-3 border-b border-border">
+                        <p className="font-semibold text-sm">{displayName}</p>
+                        <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                      </div>
+                      <div className="p-2">
+                        <button
+                          onClick={() => navigate("/profile")}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm"
+                        >
+                          <User className="w-4 h-4" />
+                          Meu Perfil
+                        </button>
+                        <button
+                          onClick={handleSignOut}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors text-sm"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Sair
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </header>
