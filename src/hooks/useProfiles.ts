@@ -68,12 +68,12 @@ export function useAddXp() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: ({ id, xpAmount }: { id: string; xpAmount: number }) =>
-      profilesService.addXp(id, xpAmount),
+    mutationFn: ({ id, xpAmount, source }: { id: string; xpAmount: number; source?: string }) =>
+      profilesService.addXp(id, xpAmount, source),
     onSuccess: (data) => {
-      queryClient.setQueryData(profileKeys.detail(data.id), data);
-      if (user?.id === data.id) {
-        queryClient.setQueryData(profileKeys.current(), data);
+      queryClient.setQueryData(profileKeys.detail(data.profile.id), data.profile);
+      if (user?.id === data.profile.id) {
+        queryClient.setQueryData(profileKeys.current(), data.profile);
       }
       queryClient.invalidateQueries({ queryKey: profileKeys.leaderboard(10) });
     },

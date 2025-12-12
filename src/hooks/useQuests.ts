@@ -213,9 +213,9 @@ export function useCompleteQuest() {
   return useMutation({
     mutationFn: (assignmentId: string) => questsService.completeQuest(assignmentId),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: questKeys.assignments(data.quest_id) });
-      queryClient.invalidateQueries({ queryKey: questKeys.userAssignments(data.user_id) });
-      queryClient.invalidateQueries({ queryKey: questKeys.stats(data.quest_id) });
+      queryClient.invalidateQueries({ queryKey: questKeys.assignments(data.assignment.quest_id) });
+      queryClient.invalidateQueries({ queryKey: questKeys.userAssignments(data.assignment.user_id) });
+      queryClient.invalidateQueries({ queryKey: questKeys.stats(data.assignment.quest_id) });
     },
   });
 }
