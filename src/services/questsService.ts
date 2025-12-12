@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate, Enums } from "@/integrations/supabase/types";
+import { notificationsService } from "./notificationsService";
 
 export type Quest = Tables<"custom_quests">;
 export type QuestInsert = TablesInsert<"custom_quests">;
@@ -161,6 +162,17 @@ export const questsService = {
       .single();
     
     if (error) throw error;
+
+    // Get quest details for notification
+    try {
+      const quest = await this.getById(questId);
+      if (quest) {
+        await notificationsService.notifyQuestAssigned(userId, quest.title, questId);
+      }
+    } catch (e) {
+      console.error("Failed to create quest assignment notification:", e);
+    }
+
     return data;
   },
 
@@ -176,7 +188,7 @@ export const questsService = {
     return data;
   },
 
-  async completeQuest(assignmentId: string): Promise<QuestAssignment> {
+  async completeQuest(assignmentId: string): Promise<{ assignment: QuestAssignment; quest: Quest | null }> {
     const { data, error } = await supabase
       .from("quest_assignments")
       .update({ completed_at: new Date().toISOString() })
@@ -185,7 +197,30 @@ export const questsService = {
       .single();
     
     if (error) throw error;
-    return data;
+
+    // Get quest details for notification
+    let quest: Quest | null = null;
+    try {
+      quest = await this.getById(data.quest_id);
+      if (quest) {
+        await notificationsService.create({
+          user_id: data.user_id,
+          type: "quest_complete",
+          title: "🎉 Quest Completada!",
+          message: `Você finalizou: ${quest.title}`,
+          data: { 
+            questId: quest.id, 
+            questTitle: quest.title,
+            xpReward: quest.xp_reward,
+            coinReward: quest.coin_reward
+          },
+        });
+      }
+    } catch (e) {
+      console.error("Failed to create quest completion notification:", e);
+    }
+
+    return { assignment: data, quest };
   },
 
   // Stats
