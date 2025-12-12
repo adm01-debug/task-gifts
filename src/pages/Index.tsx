@@ -13,6 +13,7 @@ import { AnalyticsWidget } from "@/components/AnalyticsWidget";
 import { AchievementContainer, useAchievements } from "@/components/AchievementSystem";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { PeerRecognition } from "@/components/PeerRecognition";
+import { KudosRanking } from "@/components/KudosRanking";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -235,9 +236,10 @@ const Index = () => {
               <TeamChallenges />
             </div>
 
-            {/* Right Column - Leaderboard, Analytics & Rewards */}
+            {/* Right Column - Leaderboard, Kudos Ranking, Analytics & Rewards */}
             <div className="space-y-4 md:space-y-6">
               <LiveLeaderboard />
+              <KudosRanking />
               <AnalyticsWidget />
               <RewardsShop />
             </div>
