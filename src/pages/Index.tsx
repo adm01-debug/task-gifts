@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, Bell, Search, Sparkles, X, Clock, LogOut, User, Trophy, Zap, Gift } from "lucide-react";
+import { Menu, Search, Sparkles, LogOut, User } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileDrawer } from "@/components/MobileDrawer";
 import { StatsGrid, QuickActions } from "@/components/StatsGrid";
@@ -11,22 +11,15 @@ import { TeamChallenges } from "@/components/TeamChallenges";
 import { RewardsShop } from "@/components/RewardsShop";
 import { AnalyticsWidget } from "@/components/AnalyticsWidget";
 import { AchievementContainer, useAchievements } from "@/components/AchievementSystem";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 
-// Demo notifications
-const notifications = [
-  { id: "1", icon: Trophy, title: "Novo ranking!", message: "Você subiu para #4", time: "2min", color: "warning" },
-  { id: "2", icon: Zap, title: "+150 XP", message: "Quest completada", time: "5min", color: "success" },
-  { id: "3", icon: Gift, title: "Recompensa!", message: "Badge desbloqueado", time: "1h", color: "accent" },
-];
-
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { achievements, showAchievement, hideAchievement, levelUp, triggerLevelUp, closeLevelUp } = useAchievements();
   const { user, loading, signOut } = useAuth();
@@ -141,67 +134,7 @@ const Index = () => {
               </motion.div>
 
               {/* Notifications */}
-              <div className="relative">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 rounded-lg hover:bg-muted transition-colors"
-                >
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
-                </motion.button>
-
-                <AnimatePresence>
-                  {showNotifications && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute right-0 top-12 w-80 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
-                    >
-                      <div className="p-3 border-b border-border flex items-center justify-between">
-                        <h4 className="font-semibold">Notificações</h4>
-                        <button 
-                          onClick={() => setShowNotifications(false)}
-                          className="p-1 rounded hover:bg-muted"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="divide-y divide-border max-h-80 overflow-y-auto">
-                        {notifications.map((notif, i) => (
-                          <motion.div
-                            key={notif.id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="p-3 hover:bg-muted/30 transition-colors flex items-start gap-3"
-                          >
-                            <div className={`
-                              w-8 h-8 rounded-lg flex items-center justify-center
-                              ${notif.color === "warning" ? "bg-warning/20 text-warning" : ""}
-                              ${notif.color === "success" ? "bg-success/20 text-success" : ""}
-                              ${notif.color === "accent" ? "bg-accent/20 text-accent" : ""}
-                            `}>
-                              <notif.icon className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">{notif.title}</p>
-                              <p className="text-xs text-muted-foreground">{notif.message}</p>
-                            </div>
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {notif.time}
-                            </span>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <NotificationCenter />
 
               {/* AI Assistant */}
               <motion.button
