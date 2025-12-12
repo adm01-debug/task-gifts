@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X } from "lucide-react";
+import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   Drawer,
@@ -14,13 +15,15 @@ interface NavItem {
   icon: React.ElementType;
   label: string;
   badge?: number;
+  path?: string;
 }
 
 const navItems: NavItem[] = [
-  { icon: Home, label: "Dashboard" },
+  { icon: Home, label: "Dashboard", path: "/" },
   { icon: Target, label: "Quests", badge: 3 },
   { icon: Trophy, label: "Leaderboard" },
   { icon: Users, label: "Equipes" },
+  { icon: ClipboardList, label: "Gestor", path: "/manager" },
   { icon: Gift, label: "Recompensas", badge: 2 },
   { icon: BarChart3, label: "Analytics" },
 ];
@@ -32,9 +35,13 @@ interface MobileDrawerProps {
 
 export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
   const [activeItem, setActiveItem] = useState("Dashboard");
+  const navigate = useNavigate();
 
-  const handleItemClick = (label: string) => {
-    setActiveItem(label);
+  const handleItemClick = (item: NavItem) => {
+    setActiveItem(item.label);
+    if (item.path) {
+      navigate(item.path);
+    }
     onClose();
   };
 
@@ -110,7 +117,7 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              onClick={() => handleItemClick(item.label)}
+              onClick={() => handleItemClick(item)}
               className={cn(
                 "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all",
                 "active:scale-[0.98]",
