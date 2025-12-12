@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
   { icon: Users, label: "Equipes" },
   { icon: ClipboardList, label: "Gestor", path: "/manager" },
   { icon: Gift, label: "Recompensas", badge: 2 },
-  { icon: BarChart3, label: "Analytics" },
+  { icon: BarChart3, label: "Relatórios", path: "/reports" },
 ];
 
 interface MobileDrawerProps {
