@@ -106,6 +106,74 @@ export type Database = {
         }
         Relationships: []
       }
+      kudos: {
+        Row: {
+          badge_id: string | null
+          created_at: string
+          from_user_id: string
+          id: string
+          is_public: boolean
+          message: string
+          to_user_id: string
+        }
+        Insert: {
+          badge_id?: string | null
+          created_at?: string
+          from_user_id: string
+          id?: string
+          is_public?: boolean
+          message: string
+          to_user_id: string
+        }
+        Update: {
+          badge_id?: string | null
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          is_public?: boolean
+          message?: string
+          to_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kudos_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "kudos_badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kudos_badges: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          xp_value: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+          xp_value?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          xp_value?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string

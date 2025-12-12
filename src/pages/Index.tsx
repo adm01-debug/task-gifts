@@ -12,6 +12,7 @@ import { RewardsShop } from "@/components/RewardsShop";
 import { AnalyticsWidget } from "@/components/AnalyticsWidget";
 import { AchievementContainer, useAchievements } from "@/components/AchievementSystem";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { PeerRecognition } from "@/components/PeerRecognition";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -227,9 +228,10 @@ const Index = () => {
 
           {/* Main Grid */}
           <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
-            {/* Left Column - Quests & Team */}
+            {/* Left Column - Quests, Team & Recognition */}
             <div className="lg:col-span-2 space-y-4 md:space-y-6">
               <DailyQuests />
+              <PeerRecognition />
               <TeamChallenges />
             </div>
 

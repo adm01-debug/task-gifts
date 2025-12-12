@@ -1,0 +1,289 @@
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, Send, Users, Sparkles, X, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useKudosBadges, useRecentKudos, useGiveKudos } from "@/hooks/useKudos";
+import { useProfiles } from "@/hooks/useProfiles";
+import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import type { KudosBadge } from "@/services/kudosService";
+
+interface GiveKudosFormProps {
+  onSuccess: () => void;
+}
+
+const GiveKudosForm = ({ onSuccess }: GiveKudosFormProps) => {
+  const { user } = useAuth();
+  const { data: badges = [] } = useKudosBadges();
+  const { data: profiles = [] } = useProfiles();
+  const giveKudos = useGiveKudos();
+  
+  const [selectedBadge, setSelectedBadge] = useState<KudosBadge | null>(null);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const otherUsers = profiles.filter(p => p.id !== user?.id);
+  const filteredUsers = otherUsers.filter(p => 
+    p.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSubmit = () => {
+    if (!user?.id || !selectedUser || !message.trim()) return;
+
+    giveKudos.mutate({
+      from_user_id: user.id,
+      to_user_id: selectedUser,
+      badge_id: selectedBadge?.id ?? null,
+      message: message.trim(),
+      is_public: true,
+    }, {
+      onSuccess: () => {
+        setSelectedBadge(null);
+        setSelectedUser(null);
+        setMessage("");
+        onSuccess();
+      },
+    });
+  };
+
+  const selectedProfile = profiles.find(p => p.id === selectedUser);
+
+  return (
+    <div className="space-y-4">
+      {/* Badge Selection */}
+      <div>
+        <label className="text-sm font-medium mb-2 block">Escolha um badge (opcional)</label>
+        <div className="grid grid-cols-4 gap-2">
+          {badges.map((badge) => (
+            <motion.button
+              key={badge.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSelectedBadge(selectedBadge?.id === badge.id ? null : badge)}
+              className={cn(
+                "p-3 rounded-xl border text-center transition-all",
+                selectedBadge?.id === badge.id
+                  ? "border-primary bg-primary/10"
+                  : "border-border hover:border-primary/50"
+              )}
+            >
+              <span className="text-2xl block">{badge.icon}</span>
+              <span className="text-[10px] text-muted-foreground line-clamp-1">{badge.name}</span>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* User Selection */}
+      <div>
+        <label className="text-sm font-medium mb-2 block">Para quem?</label>
+        <div className="relative mb-2">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Buscar colega..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-lg bg-muted border border-border text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <ScrollArea className="h-32 rounded-lg border border-border">
+          <div className="p-2 space-y-1">
+            {filteredUsers.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-4">
+                Nenhum colega encontrado
+              </p>
+            ) : (
+              filteredUsers.map((profile) => (
+                <motion.button
+                  key={profile.id}
+                  whileHover={{ scale: 1.01 }}
+                  onClick={() => setSelectedUser(profile.id)}
+                  className={cn(
+                    "w-full flex items-center gap-2 p-2 rounded-lg transition-all text-left",
+                    selectedUser === profile.id
+                      ? "bg-primary/10 border border-primary"
+                      : "hover:bg-muted"
+                  )}
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-xs font-bold text-primary-foreground">
+                    {profile.display_name?.charAt(0).toUpperCase() || "?"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{profile.display_name || "Sem nome"}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{profile.email}</p>
+                  </div>
+                </motion.button>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+        {selectedProfile && (
+          <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/20 flex items-center gap-2">
+            <span className="text-xs">Selecionado:</span>
+            <span className="text-xs font-semibold">{selectedProfile.display_name}</span>
+            <button onClick={() => setSelectedUser(null)} className="ml-auto p-1 rounded hover:bg-muted">
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Message */}
+      <div>
+        <label className="text-sm font-medium mb-2 block">Mensagem</label>
+        <Textarea
+          placeholder="Escreva uma mensagem de reconhecimento..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={3}
+          maxLength={500}
+        />
+        <p className="text-[10px] text-muted-foreground text-right mt-1">
+          {message.length}/500
+        </p>
+      </div>
+
+      {/* Submit */}
+      <Button
+        onClick={handleSubmit}
+        disabled={!selectedUser || !message.trim() || giveKudos.isPending}
+        className="w-full"
+      >
+        {giveKudos.isPending ? (
+          <>
+            <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
+            Enviando...
+          </>
+        ) : (
+          <>
+            <Send className="w-4 h-4 mr-2" />
+            Enviar Reconhecimento
+          </>
+        )}
+      </Button>
+    </div>
+  );
+};
+
+export const PeerRecognition = () => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { data: recentKudos = [], isLoading } = useRecentKudos(10);
+  const { data: profiles = [] } = useProfiles();
+
+  const getProfileName = (userId: string) => {
+    const profile = profiles.find(p => p.id === userId);
+    return profile?.display_name || "Usuário";
+  };
+
+  const getProfileInitial = (userId: string) => {
+    const name = getProfileName(userId);
+    return name.charAt(0).toUpperCase();
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-card rounded-2xl border border-border overflow-hidden"
+    >
+      {/* Header */}
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500/20 to-rose-500/20 flex items-center justify-center">
+            <Heart className="w-4 h-4 text-pink-500" />
+          </div>
+          <div>
+            <h3 className="font-bold">Peer Recognition</h3>
+            <p className="text-xs text-muted-foreground">Reconheça seus colegas</p>
+          </div>
+        </div>
+        
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline" className="gap-1">
+              <Sparkles className="w-3 h-3" />
+              Dar Kudos
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Heart className="w-5 h-5 text-pink-500" />
+                Reconhecer um colega
+              </DialogTitle>
+            </DialogHeader>
+            <GiveKudosForm onSuccess={() => setDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Recent Kudos */}
+      <ScrollArea className="max-h-80">
+        {isLoading ? (
+          <div className="p-8 text-center">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-xs text-muted-foreground mt-2">Carregando...</p>
+          </div>
+        ) : recentKudos.length === 0 ? (
+          <div className="p-8 text-center">
+            <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Nenhum reconhecimento ainda</p>
+            <p className="text-xs text-muted-foreground/70">Seja o primeiro a reconhecer um colega!</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            <AnimatePresence mode="popLayout">
+              {recentKudos.map((kudos, index) => (
+                <motion.div
+                  key={kudos.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="p-3 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex -space-x-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xs font-bold text-primary-foreground border-2 border-card">
+                        {getProfileInitial(kudos.from_user_id)}
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-pink-500 flex items-center justify-center text-xs font-bold text-primary-foreground border-2 border-card">
+                        {getProfileInitial(kudos.to_user_id)}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs">
+                        <span className="font-semibold">{getProfileName(kudos.from_user_id)}</span>
+                        {" → "}
+                        <span className="font-semibold">{getProfileName(kudos.to_user_id)}</span>
+                      </p>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
+                        {kudos.message}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {formatDistanceToNow(new Date(kudos.created_at), { addSuffix: true, locale: ptBR })}
+                      </p>
+                    </div>
+                    {kudos.badge && (
+                      <span className="text-2xl" title={kudos.badge.name}>
+                        {kudos.badge.icon}
+                      </span>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </ScrollArea>
+    </motion.div>
+  );
+};
