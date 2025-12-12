@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, Trophy, Zap, Flame, Star, Target, Users, Calendar,
-  Medal, Crown, Award, TrendingUp, Edit2, Camera
+  Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProfileKudosSection } from "@/components/ProfileKudosSection";
 import { toast } from "sonner";
 
 interface ProfileData {
@@ -296,6 +297,8 @@ const Profile = () => {
           </div>
         </motion.div>
 
+        {/* Kudos Received Section */}
+        {user?.id && <ProfileKudosSection userId={user.id} />}
         {/* Activity Timeline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
