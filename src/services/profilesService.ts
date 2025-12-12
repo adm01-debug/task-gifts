@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { notificationsService } from "./notificationsService";
+import { auditService } from "./auditService";
 
 export type Profile = Tables<"profiles">;
 export type ProfileInsert = TablesInsert<"profiles">;
@@ -65,6 +66,13 @@ export const profilesService = {
       level: newLevel 
     });
 
+    // Audit XP gain
+    try {
+      await auditService.logXpGain(id, xpAmount, source || "atividade");
+    } catch (e) {
+      console.error("Failed to audit XP gain:", e);
+    }
+
     // Create XP notification
     try {
       await notificationsService.notifyXpGain(id, xpAmount, source || "atividade");
@@ -72,8 +80,13 @@ export const profilesService = {
       console.error("Failed to create XP notification:", e);
     }
 
-    // Create level up notification if leveled up
+    // Create level up notification and audit if leveled up
     if (leveledUp) {
+      try {
+        await auditService.logLevelUp(id, oldLevel, newLevel);
+      } catch (e) {
+        console.error("Failed to audit level up:", e);
+      }
       try {
         await notificationsService.notifyLevelUp(id, newLevel);
       } catch (e) {
@@ -97,13 +110,23 @@ export const profilesService = {
     const profile = await this.getById(id);
     if (!profile) throw new Error("Profile not found");
 
+    const oldStreak = profile.streak;
     const newStreak = profile.streak + 1;
     const bestStreak = Math.max(profile.best_streak, newStreak);
 
-    return this.update(id, { 
+    const updatedProfile = await this.update(id, { 
       streak: newStreak,
       best_streak: bestStreak
     });
+
+    // Audit streak update
+    try {
+      await auditService.logStreakUpdate(id, oldStreak, newStreak);
+    } catch (e) {
+      console.error("Failed to audit streak update:", e);
+    }
+
+    return updatedProfile;
   },
 
   async incrementQuestsCompleted(id: string): Promise<Profile> {

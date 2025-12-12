@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { notificationsService } from "./notificationsService";
 import { profilesService } from "./profilesService";
+import { auditService } from "./auditService";
 
 export interface KudosBadge {
   id: string;
@@ -183,6 +184,14 @@ export const kudosService = {
       }
     } catch (e) {
       console.error("Failed to get sender name:", e);
+    }
+
+    // Audit kudos given and received
+    try {
+      await auditService.logKudosGiven(kudos.from_user_id, kudos.to_user_id, data.id, kudos.badge_id ?? undefined);
+      await auditService.logKudosReceived(kudos.to_user_id, kudos.from_user_id, data.id, kudos.badge_id ?? undefined);
+    } catch (e) {
+      console.error("Failed to audit kudos:", e);
     }
 
     // Notify the recipient

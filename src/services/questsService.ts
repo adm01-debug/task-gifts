@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate, Enums } from "@/integrations/supabase/types";
 import { notificationsService } from "./notificationsService";
+import { auditService } from "./auditService";
 
 export type Quest = Tables<"custom_quests">;
 export type QuestInsert = TablesInsert<"custom_quests">;
@@ -59,6 +60,14 @@ export const questsService = {
       .single();
     
     if (error) throw error;
+
+    // Audit quest creation
+    try {
+      await auditService.logQuestCreated(quest.created_by, data.id, data.title);
+    } catch (e) {
+      console.error("Failed to audit quest creation:", e);
+    }
+
     return data;
   },
 
@@ -198,11 +207,14 @@ export const questsService = {
     
     if (error) throw error;
 
-    // Get quest details for notification
+    // Get quest details for notification and audit
     let quest: Quest | null = null;
     try {
       quest = await this.getById(data.quest_id);
       if (quest) {
+        // Audit quest completion
+        await auditService.logQuestCompleted(data.user_id, quest.id, quest.xp_reward, quest.coin_reward);
+
         await notificationsService.create({
           user_id: data.user_id,
           type: "quest_complete",

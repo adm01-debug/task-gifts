@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          new_data: Json | null
+          old_data: Json | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_data?: Json | null
+          old_data?: Json | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_data?: Json | null
+          old_data?: Json | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       custom_quests: {
         Row: {
           coin_reward: number
@@ -397,6 +439,29 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "employee"
+      audit_action:
+        | "user_signup"
+        | "user_login"
+        | "profile_update"
+        | "xp_gained"
+        | "level_up"
+        | "coins_earned"
+        | "coins_spent"
+        | "quest_created"
+        | "quest_updated"
+        | "quest_deleted"
+        | "quest_assigned"
+        | "quest_completed"
+        | "kudos_given"
+        | "kudos_received"
+        | "achievement_unlocked"
+        | "streak_updated"
+        | "department_created"
+        | "department_updated"
+        | "team_member_added"
+        | "team_member_removed"
+        | "role_assigned"
+        | "role_removed"
       quest_difficulty: "easy" | "medium" | "hard" | "expert"
       quest_status: "draft" | "active" | "archived"
     }
@@ -527,6 +592,30 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "employee"],
+      audit_action: [
+        "user_signup",
+        "user_login",
+        "profile_update",
+        "xp_gained",
+        "level_up",
+        "coins_earned",
+        "coins_spent",
+        "quest_created",
+        "quest_updated",
+        "quest_deleted",
+        "quest_assigned",
+        "quest_completed",
+        "kudos_given",
+        "kudos_received",
+        "achievement_unlocked",
+        "streak_updated",
+        "department_created",
+        "department_updated",
+        "team_member_added",
+        "team_member_removed",
+        "role_assigned",
+        "role_removed",
+      ],
       quest_difficulty: ["easy", "medium", "hard", "expert"],
       quest_status: ["draft", "active", "archived"],
     },
