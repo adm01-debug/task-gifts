@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList } from "lucide-react";
+import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: Home, label: "Dashboard", path: "/" },
   { icon: Target, label: "Quests", badge: 3 },
+  { icon: PlusCircle, label: "Criar Quest", path: "/quest-builder" },
   { icon: Trophy, label: "Leaderboard" },
   { icon: Users, label: "Equipes" },
   { icon: ClipboardList, label: "Gestor", path: "/manager" },

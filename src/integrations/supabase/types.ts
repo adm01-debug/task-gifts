@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      custom_quests: {
+        Row: {
+          coin_reward: number
+          created_at: string
+          created_by: string
+          deadline_days: number | null
+          department_id: string | null
+          description: string
+          difficulty: Database["public"]["Enums"]["quest_difficulty"]
+          icon: string
+          id: string
+          max_participants: number | null
+          requirements: string[] | null
+          status: Database["public"]["Enums"]["quest_status"]
+          tags: string[] | null
+          title: string
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          created_at?: string
+          created_by: string
+          deadline_days?: number | null
+          department_id?: string | null
+          description: string
+          difficulty?: Database["public"]["Enums"]["quest_difficulty"]
+          icon?: string
+          id?: string
+          max_participants?: number | null
+          requirements?: string[] | null
+          status?: Database["public"]["Enums"]["quest_status"]
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          created_at?: string
+          created_by?: string
+          deadline_days?: number | null
+          department_id?: string | null
+          description?: string
+          difficulty?: Database["public"]["Enums"]["quest_difficulty"]
+          icon?: string
+          id?: string
+          max_participants?: number | null
+          requirements?: string[] | null
+          status?: Database["public"]["Enums"]["quest_status"]
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_quests_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           color: string | null
@@ -85,6 +150,79 @@ export type Database = {
           xp?: number
         }
         Relationships: []
+      }
+      quest_assignments: {
+        Row: {
+          completed_at: string | null
+          current_step: number
+          id: string
+          quest_id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          current_step?: number
+          id?: string
+          quest_id: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          current_step?: number
+          id?: string
+          quest_id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_assignments_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "custom_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_steps: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_index: number
+          quest_id: string
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          quest_id: string
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          quest_id?: string
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_steps_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "custom_quests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
@@ -158,6 +296,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "employee"
+      quest_difficulty: "easy" | "medium" | "hard" | "expert"
+      quest_status: "draft" | "active" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -286,6 +426,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "employee"],
+      quest_difficulty: ["easy", "medium", "hard", "expert"],
+      quest_status: ["draft", "active", "archived"],
     },
   },
 } as const
