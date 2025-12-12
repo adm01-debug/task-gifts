@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, 
@@ -6,13 +6,11 @@ import {
   TrendingDown,
   Target, 
   Award, 
-  Clock, 
   AlertTriangle,
   ChevronRight,
   BarChart3,
   BookOpen,
   Flame,
-  Medal,
   ArrowLeft,
   Filter
 } from "lucide-react";
@@ -21,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Select,
   SelectContent,
@@ -28,8 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { QuestsList } from "@/components/manager/QuestsList";
 
 // Types
 interface TeamMember {
@@ -444,54 +443,79 @@ export default function ManagerDashboard() {
             delay={0.3}
           />
         </div>
-        
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Team Members List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">Membros da Equipe</h2>
-              <Badge variant="outline">{filteredMembers.length} membros</Badge>
-            </div>
-            
-            <div className="space-y-3">
-              <AnimatePresence mode="popLayout">
-                {filteredMembers.map((member, index) => (
-                  <TeamMemberRow key={member.id} member={member} index={index} />
-                ))}
-              </AnimatePresence>
-            </div>
-          </div>
-          
-          {/* Departments Sidebar */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-foreground">Por Departamento</h2>
-            
-            <div className="space-y-3">
-              {departments.map((dept, index) => (
-                <DepartmentCard key={dept.id} department={dept} index={index} />
-              ))}
-            </div>
-            
-            {/* Quick Actions */}
-            <Card className="p-4 bg-card/40 backdrop-blur-sm border-border/40">
-              <h3 className="font-semibold text-foreground mb-3">Ações Rápidas</h3>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start gap-2" size="sm">
-                  <BookOpen className="w-4 h-4" />
-                  Criar Nova Trilha
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2" size="sm">
-                  <Award className="w-4 h-4" />
-                  Enviar Reconhecimento
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2" size="sm">
-                  <BarChart3 className="w-4 h-4" />
-                  Exportar Relatório
-                </Button>
+
+        {/* Tabs for different sections */}
+        <Tabs defaultValue="team" className="space-y-6">
+          <TabsList className="bg-muted/50">
+            <TabsTrigger value="team" className="gap-2">
+              <Users className="h-4 w-4" />
+              Equipe
+            </TabsTrigger>
+            <TabsTrigger value="quests" className="gap-2">
+              <Target className="h-4 w-4" />
+              Quests
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="team" className="space-y-6">
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Team Members List */}
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-foreground">Membros da Equipe</h2>
+                  <Badge variant="outline">{filteredMembers.length} membros</Badge>
+                </div>
+                
+                <div className="space-y-3">
+                  <AnimatePresence mode="popLayout">
+                    {filteredMembers.map((member, index) => (
+                      <TeamMemberRow key={member.id} member={member} index={index} />
+                    ))}
+                  </AnimatePresence>
+                </div>
               </div>
-            </Card>
-          </div>
-        </div>
+              
+              {/* Departments Sidebar */}
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold text-foreground">Por Departamento</h2>
+                
+                <div className="space-y-3">
+                  {departments.map((dept, index) => (
+                    <DepartmentCard key={dept.id} department={dept} index={index} />
+                  ))}
+                </div>
+                
+                {/* Quick Actions */}
+                <Card className="p-4 bg-card/40 backdrop-blur-sm border-border/40">
+                  <h3 className="font-semibold text-foreground mb-3">Ações Rápidas</h3>
+                  <div className="space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start gap-2" 
+                      size="sm"
+                      onClick={() => navigate("/quest-builder")}
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      Criar Nova Trilha
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                      <Award className="w-4 h-4" />
+                      Enviar Reconhecimento
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                      <BarChart3 className="w-4 h-4" />
+                      Exportar Relatório
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="quests">
+            <QuestsList />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
