@@ -23,6 +23,7 @@ import { ComboHistory } from "@/components/ComboHistory";
 import { WeeklyPerformanceComparison } from "@/components/WeeklyPerformanceComparison";
 import { SocialFeed } from "@/components/SocialFeed";
 import { RankingBadge } from "@/components/RankingBadge";
+import { WeeklyChallengeCard } from "@/components/WeeklyChallengeCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -266,6 +267,7 @@ const Index = () => {
 
             {/* Right Column - Combo, Attendance, Rankings, Leaderboard, Kudos, Analytics & Rewards */}
             <div className="space-y-4 md:space-y-6">
+              <WeeklyChallengeCard />
               <ComboIndicator variant="full" />
               <ComboHistory />
               <WeeklyPerformanceComparison />
