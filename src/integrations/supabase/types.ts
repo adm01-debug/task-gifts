@@ -1151,6 +1151,45 @@ export type Database = {
           },
         ]
       }
+      quiz_scores: {
+        Row: {
+          correct_answers: number
+          created_at: string
+          id: string
+          played_at: string
+          quiz_type: string
+          score: number
+          streak_bonus: number
+          time_bonus: number
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          correct_answers?: number
+          created_at?: string
+          id?: string
+          played_at?: string
+          quiz_type?: string
+          score?: number
+          streak_bonus?: number
+          time_bonus?: number
+          total_questions?: number
+          user_id: string
+        }
+        Update: {
+          correct_answers?: number
+          created_at?: string
+          id?: string
+          played_at?: string
+          quiz_type?: string
+          score?: number
+          streak_bonus?: number
+          time_bonus?: number
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       seasonal_challenges: {
         Row: {
           badge_icon: string | null
