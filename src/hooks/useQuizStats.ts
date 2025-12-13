@@ -5,6 +5,7 @@ const statsKeys = {
   all: ['quiz-stats'] as const,
   categories: () => [...statsKeys.all, 'categories'] as const,
   question: (id: string) => [...statsKeys.all, 'question', id] as const,
+  hardest: (limit: number) => [...statsKeys.all, 'hardest', limit] as const,
 };
 
 export function useCategoryStats() {
@@ -22,6 +23,13 @@ export function useQuestionStats(questionId: string) {
   });
 }
 
+export function useHardestQuestions(limit: number = 10) {
+  return useQuery({
+    queryKey: statsKeys.hardest(limit),
+    queryFn: () => quizStatsService.getHardestQuestions(limit),
+  });
+}
+
 export function useRecordAnswer() {
   const queryClient = useQueryClient();
 
@@ -30,6 +38,7 @@ export function useRecordAnswer() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: statsKeys.categories() });
       queryClient.invalidateQueries({ queryKey: statsKeys.question(variables.question_id) });
+      queryClient.invalidateQueries({ queryKey: statsKeys.all });
     },
   });
 }
