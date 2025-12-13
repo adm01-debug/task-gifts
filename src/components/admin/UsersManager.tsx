@@ -72,6 +72,10 @@ import {
   useAssignDepartment,
   useRemoveDepartmentMember,
   useAllTeamMembers,
+  useBulkAssignRole,
+  useBulkRemoveRole,
+  useBulkAssignDepartment,
+  useBulkRemoveFromDepartments,
 } from "@/hooks/useAdminUsers";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -95,6 +99,14 @@ export function UsersManager() {
   const [selectedRole, setSelectedRole] = useState<AppRole>("employee");
   const [selectedDept, setSelectedDept] = useState<string>("");
   const [removeRoleConfirm, setRemoveRoleConfirm] = useState<{ userId: string; role: AppRole } | null>(null);
+  
+  // Bulk action states
+  const [bulkRoleDialog, setBulkRoleDialog] = useState(false);
+  const [bulkDeptDialog, setBulkDeptDialog] = useState(false);
+  const [bulkRole, setBulkRole] = useState<AppRole>("employee");
+  const [bulkDept, setBulkDept] = useState<string>("");
+  const [bulkRemoveRoleConfirm, setBulkRemoveRoleConfirm] = useState<AppRole | null>(null);
+  const [bulkRemoveDeptsConfirm, setBulkRemoveDeptsConfirm] = useState(false);
 
   const { data: profiles, isLoading: profilesLoading } = useProfiles();
   const { data: departments } = useDepartments();
@@ -104,6 +116,12 @@ export function UsersManager() {
   const removeRole = useRemoveRole();
   const assignDepartment = useAssignDepartment();
   const removeDepartmentMember = useRemoveDepartmentMember();
+  
+  // Bulk mutations
+  const bulkAssignRole = useBulkAssignRole();
+  const bulkRemoveRole = useBulkRemoveRole();
+  const bulkAssignDepartment = useBulkAssignDepartment();
+  const bulkRemoveFromDepartments = useBulkRemoveFromDepartments();
 
   // Build user roles map
   const userRolesMap = new Map<string, AppRole[]>();
@@ -275,11 +293,78 @@ export function UsersManager() {
         >
           <Card className="border-primary/30 bg-primary/5">
             <CardContent className="p-3">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm font-medium">
                   {selectedUsers.length} selecionado{selectedUsers.length > 1 ? "s" : ""}
                 </span>
-                <Button variant="outline" size="sm" onClick={() => setSelectedUsers([])}>
+                
+                <div className="h-4 w-px bg-border" />
+                
+                {/* Bulk Assign Role */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setBulkRoleDialog(true)}
+                  disabled={bulkAssignRole.isPending}
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Atribuir Role
+                </Button>
+                
+                {/* Bulk Assign Dept */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setBulkDeptDialog(true)}
+                  disabled={bulkAssignDepartment.isPending}
+                >
+                  <Building2 className="w-4 h-4 mr-2" />
+                  Adicionar a Depto
+                </Button>
+                
+                <div className="h-4 w-px bg-border" />
+                
+                {/* Bulk Remove Role */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-destructive hover:text-destructive"
+                      disabled={bulkRemoveRole.isPending}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Remover Role
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setBulkRemoveRoleConfirm("admin")}>
+                      Admin
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setBulkRemoveRoleConfirm("manager")}>
+                      Gestor
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setBulkRemoveRoleConfirm("employee")}>
+                      Colaborador
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                {/* Bulk Remove from Depts */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => setBulkRemoveDeptsConfirm(true)}
+                  disabled={bulkRemoveFromDepartments.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Remover de Deptos
+                </Button>
+                
+                <div className="flex-1" />
+                
+                <Button variant="ghost" size="sm" onClick={() => setSelectedUsers([])}>
                   Limpar seleção
                 </Button>
               </div>
@@ -598,6 +683,182 @@ export function UsersManager() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRemoveRole}
+              className="bg-destructive text-destructive-foreground"
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Assign Role Dialog */}
+      <Dialog open={bulkRoleDialog} onOpenChange={setBulkRoleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Atribuir Role em Lote</DialogTitle>
+            <DialogDescription>
+              Atribuir role para {selectedUsers.length} usuário{selectedUsers.length > 1 ? "s" : ""} selecionado{selectedUsers.length > 1 ? "s" : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select value={bulkRole} onValueChange={(v) => setBulkRole(v as AppRole)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-red-500" />
+                      Admin
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="manager">
+                    <div className="flex items-center gap-2">
+                      <UserCog className="w-4 h-4 text-amber-500" />
+                      Gestor
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="employee">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-blue-500" />
+                      Colaborador
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkRoleDialog(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={async () => {
+                try {
+                  const result = await bulkAssignRole.mutateAsync({ userIds: selectedUsers, role: bulkRole });
+                  toast.success(`Role atribuído para ${result.successful} usuário(s)`);
+                  setBulkRoleDialog(false);
+                  setSelectedUsers([]);
+                } catch (error) {
+                  toast.error("Erro ao atribuir roles");
+                }
+              }} 
+              disabled={bulkAssignRole.isPending}
+            >
+              {bulkAssignRole.isPending ? "Atribuindo..." : `Atribuir para ${selectedUsers.length}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Assign Department Dialog */}
+      <Dialog open={bulkDeptDialog} onOpenChange={setBulkDeptDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar a Departamento em Lote</DialogTitle>
+            <DialogDescription>
+              Adicionar {selectedUsers.length} usuário{selectedUsers.length > 1 ? "s" : ""} ao departamento
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Departamento</Label>
+              <Select value={bulkDept} onValueChange={setBulkDept}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments?.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkDeptDialog(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={async () => {
+                try {
+                  const result = await bulkAssignDepartment.mutateAsync({ userIds: selectedUsers, departmentId: bulkDept });
+                  toast.success(`${result.successful} usuário(s) adicionado(s) ao departamento`);
+                  setBulkDeptDialog(false);
+                  setBulkDept("");
+                  setSelectedUsers([]);
+                } catch (error) {
+                  toast.error("Erro ao adicionar ao departamento");
+                }
+              }} 
+              disabled={!bulkDept || bulkAssignDepartment.isPending}
+            >
+              {bulkAssignDepartment.isPending ? "Adicionando..." : `Adicionar ${selectedUsers.length}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Remove Role Confirmation */}
+      <AlertDialog open={!!bulkRemoveRoleConfirm} onOpenChange={() => setBulkRemoveRoleConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover Role em Lote</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover o role{" "}
+              <strong>{bulkRemoveRoleConfirm && roleConfig[bulkRemoveRoleConfirm].label}</strong>{" "}
+              de {selectedUsers.length} usuário{selectedUsers.length > 1 ? "s" : ""}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!bulkRemoveRoleConfirm) return;
+                try {
+                  const result = await bulkRemoveRole.mutateAsync({ userIds: selectedUsers, role: bulkRemoveRoleConfirm });
+                  toast.success(`Role removido de ${result.successful} usuário(s)`);
+                  setBulkRemoveRoleConfirm(null);
+                  setSelectedUsers([]);
+                } catch (error) {
+                  toast.error("Erro ao remover roles");
+                }
+              }}
+              className="bg-destructive text-destructive-foreground"
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Remove from Departments Confirmation */}
+      <AlertDialog open={bulkRemoveDeptsConfirm} onOpenChange={setBulkRemoveDeptsConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover de Departamentos em Lote</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover {selectedUsers.length} usuário{selectedUsers.length > 1 ? "s" : ""}{" "}
+              de todos os departamentos?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                try {
+                  const result = await bulkRemoveFromDepartments.mutateAsync(selectedUsers);
+                  toast.success(`${result.successful} usuário(s) removido(s) dos departamentos`);
+                  setBulkRemoveDeptsConfirm(false);
+                  setSelectedUsers([]);
+                } catch (error) {
+                  toast.error("Erro ao remover dos departamentos");
+                }
+              }}
               className="bg-destructive text-destructive-foreground"
             >
               Remover

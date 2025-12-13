@@ -13,6 +13,7 @@ import {
   Award,
   ChevronRight,
   Search,
+  History,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { UsersManager } from "@/components/admin/UsersManager";
 import { DepartmentsManager } from "@/components/admin/DepartmentsManager";
+import { AdminChangeHistory } from "@/components/admin/AdminChangeHistory";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -196,6 +198,10 @@ function AdminPanelContent() {
               <Building2 className="h-4 w-4" />
               Departamentos
             </TabsTrigger>
+            <TabsTrigger value="history" className="gap-2">
+              <History className="h-4 w-4" />
+              Histórico
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -282,6 +288,11 @@ function AdminPanelContent() {
           {/* Departments Tab */}
           <TabsContent value="departments">
             <DepartmentsManager />
+          </TabsContent>
+
+          {/* History Tab */}
+          <TabsContent value="history">
+            <AdminChangeHistory />
           </TabsContent>
         </Tabs>
       </main>
