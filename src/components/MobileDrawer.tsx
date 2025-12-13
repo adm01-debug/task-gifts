@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle, Shield, Activity, BookOpen, Clock, LineChart, ShoppingBag, MessageSquare, TrendingUp, Swords, Heart, Gamepad2, HelpCircle } from "lucide-react";
+import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle, Shield, Activity, BookOpen, Clock, LineChart, ShoppingBag, MessageSquare, TrendingUp, Swords, Heart, Gamepad2, HelpCircle, Bot } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AICoachDialog } from "@/components/AICoachDialog";
 import {
   Drawer,
   DrawerClose,
@@ -182,8 +183,25 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
           </div>
         </div>
 
-        {/* Theme Toggle & Settings */}
+        {/* AI Coach & Theme Toggle & Settings */}
         <div className="p-4 pt-0 space-y-2">
+          <AICoachDialog
+            trigger={
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 hover:from-primary/20 hover:to-accent/20 transition-all"
+              >
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div className="text-left">
+                  <span className="font-semibold text-primary">AI Coach</span>
+                  <p className="text-xs text-muted-foreground">Pergunte qualquer coisa</p>
+                </div>
+              </motion.button>
+            }
+          />
+          
           <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-muted/50">
             <span className="font-medium">Tema</span>
             <ThemeToggle />
