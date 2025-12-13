@@ -31,6 +31,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { QuestsList } from "@/components/manager/QuestsList";
 import { ChurnPredictionPanel } from "@/components/ChurnPredictionPanel";
+import { CompetencyRadar } from "@/components/CompetencyRadar";
 
 // Types
 interface TeamMember {
@@ -457,6 +458,10 @@ export default function ManagerDashboard() {
               <Brain className="h-4 w-4" />
               Predição IA
             </TabsTrigger>
+            <TabsTrigger value="competencies" className="gap-2">
+              <Target className="h-4 w-4" />
+              Competências
+            </TabsTrigger>
             <TabsTrigger value="quests" className="gap-2">
               <Target className="h-4 w-4" />
               Quests
@@ -520,6 +525,10 @@ export default function ManagerDashboard() {
 
           <TabsContent value="churn">
             <ChurnPredictionPanel />
+          </TabsContent>
+
+          <TabsContent value="competencies">
+            <CompetencyRadar showDetails={true} />
           </TabsContent>
 
           <TabsContent value="quests">
