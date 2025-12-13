@@ -32,6 +32,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { QuestsList } from "@/components/manager/QuestsList";
 import { ChurnPredictionPanel } from "@/components/ChurnPredictionPanel";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
+import { TeamCompetencyDashboard } from "@/components/manager/TeamCompetencyDashboard";
 
 // Types
 interface TeamMember {
@@ -528,7 +529,7 @@ export default function ManagerDashboard() {
           </TabsContent>
 
           <TabsContent value="competencies">
-            <CompetencyRadar showDetails={true} />
+            <TeamCompetencyDashboard />
           </TabsContent>
 
           <TabsContent value="quests">
