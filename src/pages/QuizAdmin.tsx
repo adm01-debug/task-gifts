@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import AIQuestionGenerator from "@/components/quiz/AIQuestionGenerator";
 import QuizCategoryStats from "@/components/quiz/QuizCategoryStats";
+import QuestionStatsInline from "@/components/quiz/QuestionStatsInline";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -419,6 +420,9 @@ function QuizAdminContent() {
                                   {q.category}
                                 </Badge>
                               )}
+                              <div className="ml-auto">
+                                <QuestionStatsInline questionId={q.id} />
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
