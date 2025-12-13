@@ -19,6 +19,7 @@ import DepartmentRankings from "@/components/DepartmentRankings";
 import { AttendanceModule } from "@/components/AttendanceModule";
 import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
 import { ComboIndicator } from "@/components/ComboIndicator";
+import { SocialFeed } from "@/components/SocialFeed";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -242,6 +243,7 @@ const Index = () => {
           <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
             {/* Left Column - Missions, Quests, Team & Recognition */}
             <div className="lg:col-span-2 space-y-4 md:space-y-6">
+              <SocialFeed limit={20} />
               <DepartmentMissions />
               <DailyQuests />
               <PeerRecognition />
