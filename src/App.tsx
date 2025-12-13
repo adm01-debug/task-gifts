@@ -15,6 +15,7 @@ import RealTimeAnalytics from "./pages/RealTimeAnalytics";
 import LearningTrails from "./pages/LearningTrails";
 import TrailDetail from "./pages/TrailDetail";
 import Attendance from "./pages/Attendance";
+import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/trails" element={<LearningTrails />} />
             <Route path="/trails/:id" element={<TrailDetail />} />
             <Route path="/ponto" element={<Attendance />} />
+            <Route path="/executivo" element={<ExecutiveDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
