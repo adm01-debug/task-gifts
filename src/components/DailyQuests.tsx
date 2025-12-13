@@ -4,7 +4,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAllMissions, useClaimMissionReward } from "@/hooks/useMissions";
 import { useCurrentProfile } from "@/hooks/useProfiles";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonQuestList } from "@/components/ui/skeleton";
 import type { MissionWithProgress } from "@/services/missionsService";
 
 export const DailyQuests = () => {
@@ -39,21 +39,19 @@ export const DailyQuests = () => {
         className="bg-card rounded-2xl border border-border overflow-hidden"
       >
         <div className="p-4 border-b border-border">
-          <Skeleton className="h-8 w-48 mb-2" />
-          <Skeleton className="h-2 w-full" />
-        </div>
-        <div className="p-4 space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="flex items-start gap-3">
-              <Skeleton className="w-5 h-5 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-                <Skeleton className="h-1.5 w-full" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <Target className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold">Quests Diárias</h3>
+                <p className="text-xs text-muted-foreground">Carregando...</p>
               </div>
             </div>
-          ))}
+          </div>
         </div>
+        <SkeletonQuestList items={3} />
       </motion.div>
     );
   }

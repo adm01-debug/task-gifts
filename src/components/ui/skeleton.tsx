@@ -214,6 +214,162 @@ function SkeletonLeaderboard({ items = 5, className, ...props }: SkeletonProps &
   );
 }
 
+function SkeletonMission({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("p-4 rounded-xl border border-border bg-card", className)} {...props}>
+      <div className="flex items-start gap-4">
+        {/* Icon */}
+        <Skeleton variant="glow" shape="card" className="h-12 w-12 shrink-0" />
+        
+        {/* Content */}
+        <div className="flex-1 space-y-3">
+          <div className="flex items-center gap-2">
+            <Skeleton variant="shimmer" className="h-5 w-40" />
+            <Skeleton variant="shimmer" shape="pill" className="h-5 w-16" />
+          </div>
+          <Skeleton variant="shimmer" className="h-4 w-3/4" />
+          
+          {/* Progress */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between">
+              <Skeleton variant="shimmer" className="h-3 w-16" />
+              <Skeleton variant="shimmer" className="h-3 w-12" />
+            </div>
+            <Skeleton variant="shimmer" className="h-2 w-full" />
+          </div>
+        </div>
+        
+        {/* Rewards */}
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className="flex gap-2">
+            <Skeleton variant="shimmer" shape="pill" className="h-6 w-14" />
+            <Skeleton variant="shimmer" shape="pill" className="h-6 w-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonMissionList({ items = 3, className, ...props }: SkeletonProps & { items?: number }) {
+  return (
+    <div className={cn("space-y-3", className)} {...props}>
+      {Array.from({ length: items }).map((_, i) => (
+        <div key={i} style={{ animationDelay: `${i * 100}ms` }}>
+          <SkeletonMission />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SkeletonQuest({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("p-4 border-b border-border last:border-b-0", className)} {...props}>
+      <div className="flex items-start gap-3">
+        {/* Status */}
+        <Skeleton variant="shimmer" shape="circle" className="h-5 w-5 mt-0.5 shrink-0" />
+        
+        {/* Content */}
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center gap-2">
+            <Skeleton variant="glow" className="h-6 w-6" />
+            <Skeleton variant="shimmer" className="h-4 w-32" />
+          </div>
+          <Skeleton variant="shimmer" className="h-3 w-2/3" />
+          
+          {/* Progress */}
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <Skeleton variant="shimmer" className="h-3 w-14" />
+              <Skeleton variant="shimmer" className="h-3 w-10" />
+            </div>
+            <Skeleton variant="shimmer" className="h-1.5 w-full" />
+          </div>
+          
+          {/* Rewards */}
+          <div className="flex gap-3">
+            <Skeleton variant="shimmer" className="h-4 w-16" />
+            <Skeleton variant="shimmer" className="h-4 w-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonQuestList({ items = 3, className, ...props }: SkeletonProps & { items?: number }) {
+  return (
+    <div className={cn("divide-y divide-border", className)} {...props}>
+      {Array.from({ length: items }).map((_, i) => (
+        <div key={i} style={{ animationDelay: `${i * 80}ms` }}>
+          <SkeletonQuest />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SkeletonDuel({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("p-4", className)} {...props}>
+      {/* Title */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Skeleton variant="shimmer" className="h-4 w-24" />
+            <Skeleton variant="glow" shape="pill" className="h-4 w-14" />
+          </div>
+          <Skeleton variant="shimmer" className="h-3 w-36" />
+        </div>
+        <Skeleton variant="shimmer" className="h-4 w-4" />
+      </div>
+      
+      {/* VS Battle */}
+      <div className="space-y-2 mb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Skeleton variant="glow" shape="circle" className="h-8 w-8" />
+            <div className="space-y-1">
+              <Skeleton variant="shimmer" className="h-4 w-16" />
+              <Skeleton variant="shimmer" className="h-3 w-12" />
+            </div>
+          </div>
+          <Skeleton variant="shimmer" className="h-5 w-8" />
+          <div className="flex items-center gap-2">
+            <div className="space-y-1 text-right">
+              <Skeleton variant="shimmer" className="h-4 w-16 ml-auto" />
+              <Skeleton variant="shimmer" className="h-3 w-12 ml-auto" />
+            </div>
+            <Skeleton variant="glow" shape="circle" className="h-8 w-8" />
+          </div>
+        </div>
+        
+        {/* Progress Bar */}
+        <Skeleton variant="shimmer" className="h-3 w-full" />
+      </div>
+      
+      {/* Footer */}
+      <div className="flex items-center justify-between">
+        <Skeleton variant="shimmer" className="h-3 w-20" />
+        <Skeleton variant="glow" className="h-4 w-16" />
+      </div>
+    </div>
+  );
+}
+
+function SkeletonDuelList({ items = 2, className, ...props }: SkeletonProps & { items?: number }) {
+  return (
+    <div className={cn("divide-y divide-border", className)} {...props}>
+      {Array.from({ length: items }).map((_, i) => (
+        <div key={i} style={{ animationDelay: `${i * 120}ms` }}>
+          <SkeletonDuel />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export { 
   Skeleton,
   SkeletonText,
@@ -224,5 +380,11 @@ export {
   SkeletonList,
   SkeletonChart,
   SkeletonLeaderboard,
+  SkeletonMission,
+  SkeletonMissionList,
+  SkeletonQuest,
+  SkeletonQuestList,
+  SkeletonDuel,
+  SkeletonDuelList,
   skeletonVariants,
 };

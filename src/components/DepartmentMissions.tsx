@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SkeletonMissionList } from "@/components/ui/skeleton";
 import { useDepartmentMissions, useClaimMissionReward } from "@/hooks/useMissions";
 import { useDepartments } from "@/hooks/useDepartments";
 import type { MissionWithProgress } from "@/services/missionsService";
@@ -153,12 +154,21 @@ export default function DepartmentMissions() {
   if (isLoading) {
     return (
       <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-        <CardContent className="p-6 flex items-center justify-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full"
-          />
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-primary/10">
+                <Target className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Missões do Setor</CardTitle>
+                <p className="text-sm text-muted-foreground">Carregando...</p>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <SkeletonMissionList items={3} />
         </CardContent>
       </Card>
     );
