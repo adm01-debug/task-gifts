@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Check, X, Trophy, Zap, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import confetti from "canvas-confetti";
+import { useRecordAnswer } from "@/hooks/useQuizStats";
 
 export interface QuizQuestion {
   id: string;
@@ -161,6 +162,8 @@ export function MagicCardQuiz({ questions, title = "Quiz Cartas Mágicas", onCom
   const [score, setScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [streak, setStreak] = useState(0);
+  const questionStartTime = useRef<number>(Date.now());
+  const recordAnswer = useRecordAnswer();
 
   const currentQuestion = questions[currentIndex];
   const isCurrentFlipped = flippedCards.has(currentIndex);
@@ -175,12 +178,23 @@ export function MagicCardQuiz({ questions, title = "Quiz Cartas Mágicas", onCom
 
   const handleFlip = () => {
     setFlippedCards(prev => new Set([...prev, currentIndex]));
+    questionStartTime.current = Date.now();
   };
 
   const handleAnswer = (optionId: string) => {
-    const isCorrect = currentQuestion.options.find(o => o.id === optionId)?.isCorrect;
+    const selectedOption = currentQuestion.options.find(o => o.id === optionId);
+    const isCorrect = selectedOption?.isCorrect || false;
+    const timeSpent = Date.now() - questionStartTime.current;
     
     setAnswers(prev => new Map([...prev, [currentIndex, optionId]]));
+    
+    // Record answer for statistics
+    recordAnswer.mutate({
+      question_id: currentQuestion.id,
+      selected_option_id: optionId,
+      is_correct: isCorrect,
+      time_spent_ms: timeSpent,
+    });
     
     if (isCorrect) {
       const streakBonus = streak >= 2 ? Math.floor(currentQuestion.points * 0.1 * streak) : 0;
