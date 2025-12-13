@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle, Shield, Activity, BookOpen, Clock, LineChart, ShoppingBag, MessageSquare, TrendingUp } from "lucide-react";
+import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle, Shield, Activity, BookOpen, Clock, LineChart, ShoppingBag, MessageSquare, TrendingUp, Swords, Heart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,8 @@ const navItems: NavItem[] = [
   { icon: Trophy, label: "Conquistas", path: "/conquistas" },
   { icon: TrendingUp, label: "Estatísticas", path: "/estatisticas" },
   { icon: Clock, label: "Ponto", path: "/ponto" },
+  { icon: Swords, label: "Duelos", path: "/duelos" },
+  { icon: Heart, label: "Mentoria", path: "/mentoria" },
   { icon: LineChart, label: "Executivo", path: "/executivo" },
   { icon: BookOpen, label: "Trilhas", path: "/trails" },
   { icon: Target, label: "Quests", badge: 3 },

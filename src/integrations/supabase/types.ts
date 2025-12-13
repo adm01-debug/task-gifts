@@ -457,6 +457,66 @@ export type Database = {
         }
         Relationships: []
       }
+      direct_duels: {
+        Row: {
+          challenger_id: string
+          challenger_xp_gained: number
+          challenger_xp_start: number
+          coin_reward: number
+          created_at: string
+          duration_hours: number
+          ends_at: string | null
+          id: string
+          message: string | null
+          opponent_id: string
+          opponent_xp_gained: number
+          opponent_xp_start: number
+          starts_at: string | null
+          status: string
+          updated_at: string
+          winner_id: string | null
+          xp_reward: number
+        }
+        Insert: {
+          challenger_id: string
+          challenger_xp_gained?: number
+          challenger_xp_start?: number
+          coin_reward?: number
+          created_at?: string
+          duration_hours?: number
+          ends_at?: string | null
+          id?: string
+          message?: string | null
+          opponent_id: string
+          opponent_xp_gained?: number
+          opponent_xp_start?: number
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          winner_id?: string | null
+          xp_reward?: number
+        }
+        Update: {
+          challenger_id?: string
+          challenger_xp_gained?: number
+          challenger_xp_start?: number
+          coin_reward?: number
+          created_at?: string
+          duration_hours?: number
+          ends_at?: string | null
+          id?: string
+          message?: string | null
+          opponent_id?: string
+          opponent_xp_gained?: number
+          opponent_xp_start?: number
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          winner_id?: string | null
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       kudos: {
         Row: {
           badge_id: string | null
