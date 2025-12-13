@@ -17,6 +17,7 @@ import {
 import { useShopRewards, useUserPurchases, usePurchaseReward } from "@/hooks/useShop";
 import { useProfile } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { shopService, type ShopReward, type RewardCategory } from "@/services/shopService";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -224,15 +225,20 @@ export default function Shop() {
   const { data: profile } = useProfile(user?.id ?? "");
   const { data: rewards, isLoading } = useShopRewards();
   const purchaseMutation = usePurchaseReward();
+  const { playEpicCelebrationSound, playLegendaryCelebrationSound } = useSoundEffects();
   const [selectedReward, setSelectedReward] = useState<ShopReward | null>(null);
   const [activeCategory, setActiveCategory] = useState<"all" | RewardCategory>("all");
   const [celebration, setCelebration] = useState<{ active: boolean; type: "epic" | "legendary" } | null>(null);
 
   const triggerCelebration = useCallback((rarity: string) => {
-    if (rarity === "legendary" || rarity === "epic") {
-      setCelebration({ active: true, type: rarity as "epic" | "legendary" });
+    if (rarity === "legendary") {
+      setCelebration({ active: true, type: "legendary" });
+      playLegendaryCelebrationSound();
+    } else if (rarity === "epic") {
+      setCelebration({ active: true, type: "epic" });
+      playEpicCelebrationSound();
     }
-  }, []);
+  }, [playEpicCelebrationSound, playLegendaryCelebrationSound]);
 
   const userCoins = profile?.coins ?? 0;
 
