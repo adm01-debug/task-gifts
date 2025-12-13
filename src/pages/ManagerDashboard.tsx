@@ -33,6 +33,7 @@ import { QuestsList } from "@/components/manager/QuestsList";
 import { ChurnPredictionPanel } from "@/components/ChurnPredictionPanel";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
 import { TeamCompetencyDashboard } from "@/components/manager/TeamCompetencyDashboard";
+import { CompetencyAlertsPanel } from "@/components/CompetencyAlertsPanel";
 
 // Types
 interface TeamMember {
@@ -529,7 +530,14 @@ export default function ManagerDashboard() {
           </TabsContent>
 
           <TabsContent value="competencies">
-            <TeamCompetencyDashboard />
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <TeamCompetencyDashboard />
+              </div>
+              <div>
+                <CompetencyAlertsPanel />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="quests">
