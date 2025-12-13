@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
-import { Volume2, VolumeX, Music } from "lucide-react";
+import { Volume2, VolumeX, Music, Play } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 import { useSoundSettings } from "@/contexts/SoundSettingsContext";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 export const SoundSettingsCard = () => {
   const { settings, setEnabled, setVolume } = useSoundSettings();
-  const { playClickSound } = useSoundEffects();
+  const { playClickSound, playAchievementSound } = useSoundEffects();
 
   const handleToggle = (enabled: boolean) => {
     setEnabled(enabled);
@@ -18,6 +19,10 @@ export const SoundSettingsCard = () => {
 
   const handleVolumeChange = (value: number[]) => {
     setVolume(value[0]);
+  };
+
+  const handleTestSound = () => {
+    playAchievementSound();
   };
 
   return (
@@ -70,14 +75,25 @@ export const SoundSettingsCard = () => {
               <span className="text-muted-foreground">Volume</span>
               <span className="font-medium">{Math.round(settings.volume * 100)}%</span>
             </div>
-            <Slider
-              value={[settings.volume]}
-              onValueChange={handleVolumeChange}
-              min={0}
-              max={1}
-              step={0.1}
-              className="cursor-pointer"
-            />
+            <div className="flex items-center gap-3">
+              <Slider
+                value={[settings.volume]}
+                onValueChange={handleVolumeChange}
+                min={0}
+                max={1}
+                step={0.1}
+                className="cursor-pointer flex-1"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleTestSound}
+                className="shrink-0 gap-1.5"
+              >
+                <Play className="w-3.5 h-3.5" />
+                Testar
+              </Button>
+            </div>
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Baixo</span>
               <span>Alto</span>
@@ -108,3 +124,4 @@ export const SoundSettingsCard = () => {
     </motion.div>
   );
 };
+
