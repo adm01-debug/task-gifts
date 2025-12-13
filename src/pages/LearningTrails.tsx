@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
   BookOpen, Clock, Star, Trophy, Users, Play, 
-  CheckCircle2, Lock, ChevronRight, Sparkles, Filter
+  CheckCircle2, Lock, ChevronRight, Sparkles, Filter, Award
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { usePublishedTrails, useUserEnrollments, useEnrollInTrail } from "@/hooks/useTrails";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAuth } from "@/hooks/useAuth";
+import { useCertifications } from "@/hooks/useCertifications";
 import { TrailRecommendations } from "@/components/TrailRecommendations";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { LearningTrail, TrailEnrollment } from "@/services/trailsService";
 
 const statusConfig = {
@@ -26,11 +28,15 @@ const statusConfig = {
 function TrailCard({ 
   trail, 
   enrollment,
+  hasCertification,
+  certificationName,
   onEnroll,
   onContinue,
 }: { 
   trail: LearningTrail; 
   enrollment?: TrailEnrollment;
+  hasCertification?: boolean;
+  certificationName?: string;
   onEnroll: () => void;
   onContinue: () => void;
 }) {
@@ -51,11 +57,18 @@ function TrailCard({
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className="overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300 h-full flex flex-col">
+      <Card className={`overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300 h-full flex flex-col ${hasCertification ? 'ring-1 ring-amber-500/30' : ''}`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="text-4xl">{trail.icon}</div>
+              <div className="relative">
+                <div className="text-4xl">{trail.icon}</div>
+                {hasCertification && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center shadow-lg">
+                    <Award className="w-3 h-3 text-white" />
+                  </div>
+                )}
+              </div>
               <div className="flex-1">
                 <CardTitle className="text-lg leading-tight">{trail.title}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
@@ -86,6 +99,21 @@ function TrailCard({
                 <Trophy className="h-3 w-3 text-primary" />
                 {trail.badge_icon} {trail.badge_name}
               </Badge>
+            )}
+            {hasCertification && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge className="gap-1 bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30">
+                      <Award className="h-3 w-3" />
+                      Certificação
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Concede: {certificationName}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
 
@@ -122,7 +150,15 @@ export default function LearningTrails() {
   const { data: trails = [], isLoading: trailsLoading } = usePublishedTrails();
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useUserEnrollments();
   const { data: departments = [] } = useDepartments();
+  const { data: certifications = [] } = useCertifications();
   const enrollMutation = useEnrollInTrail();
+
+  // Create map of trail IDs to certifications
+  const trailCertificationMap = new Map(
+    certifications
+      .filter(cert => cert.trail_id)
+      .map(cert => [cert.trail_id, cert])
+  );
 
   const isLoading = trailsLoading || enrollmentsLoading;
 
@@ -329,6 +365,8 @@ export default function LearningTrails() {
                   <TrailCard
                     trail={trail}
                     enrollment={enrollmentMap.get(trail.id)}
+                    hasCertification={trailCertificationMap.has(trail.id)}
+                    certificationName={trailCertificationMap.get(trail.id)?.name}
                     onEnroll={() => handleEnroll(trail.id)}
                     onContinue={() => handleContinue(trail.id)}
                   />
