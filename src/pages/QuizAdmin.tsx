@@ -8,6 +8,7 @@ import {
 import AIQuestionGenerator from "@/components/quiz/AIQuestionGenerator";
 import QuizCategoryStats from "@/components/quiz/QuizCategoryStats";
 import QuestionStatsInline from "@/components/quiz/QuestionStatsInline";
+import HardestQuestionsRanking from "@/components/quiz/HardestQuestionsRanking";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -312,9 +313,10 @@ function QuizAdminContent() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-6 overflow-hidden"
+              className="mb-6 overflow-hidden space-y-6"
             >
               <QuizCategoryStats />
+              <HardestQuestionsRanking />
             </motion.div>
           )}
         </AnimatePresence>

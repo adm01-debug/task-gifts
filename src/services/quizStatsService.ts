@@ -88,4 +88,77 @@ export const quizStatsService = {
 
     return { total, correct, rate };
   },
+
+  async getHardestQuestions(limit: number = 10): Promise<Array<{
+    question_id: string;
+    question_text: string;
+    category: string | null;
+    difficulty: string;
+    total_answers: number;
+    correct_answers: number;
+    accuracy_rate: number;
+    avg_time_ms: number;
+  }>> {
+    // Get all answers with question info
+    const { data: answers, error: answersError } = await supabase
+      .from('quiz_answers')
+      .select(`
+        question_id,
+        is_correct,
+        time_spent_ms
+      `);
+
+    if (answersError) {
+      console.error('Error fetching answers:', answersError);
+      return [];
+    }
+
+    // Get questions
+    const { data: questions, error: questionsError } = await supabase
+      .from('quiz_questions')
+      .select('id, question, category, difficulty')
+      .eq('is_active', true);
+
+    if (questionsError) {
+      console.error('Error fetching questions:', questionsError);
+      return [];
+    }
+
+    // Aggregate stats per question
+    const statsMap = new Map<string, {
+      total: number;
+      correct: number;
+      totalTime: number;
+    }>();
+
+    (answers || []).forEach(a => {
+      const existing = statsMap.get(a.question_id) || { total: 0, correct: 0, totalTime: 0 };
+      existing.total++;
+      if (a.is_correct) existing.correct++;
+      existing.totalTime += a.time_spent_ms || 0;
+      statsMap.set(a.question_id, existing);
+    });
+
+    // Build result with question info
+    const result = (questions || [])
+      .filter(q => statsMap.has(q.id) && (statsMap.get(q.id)?.total || 0) >= 3)
+      .map(q => {
+        const stats = statsMap.get(q.id)!;
+        const rate = Math.round((stats.correct / stats.total) * 100);
+        return {
+          question_id: q.id,
+          question_text: q.question,
+          category: q.category,
+          difficulty: q.difficulty,
+          total_answers: stats.total,
+          correct_answers: stats.correct,
+          accuracy_rate: rate,
+          avg_time_ms: Math.round(stats.totalTime / stats.total),
+        };
+      })
+      .sort((a, b) => a.accuracy_rate - b.accuracy_rate)
+      .slice(0, limit);
+
+    return result;
+  },
 };
