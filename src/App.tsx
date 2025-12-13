@@ -31,6 +31,7 @@ import Mentorship from "./pages/Mentorship";
 import Duels from "./pages/Duels";
 import DailyQuiz from "./pages/DailyQuiz";
 import QuizAdmin from "./pages/QuizAdmin";
+import AdminPanel from "./pages/AdminPanel";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/duelos" element={<Duels />} />
                 <Route path="/quiz" element={<DailyQuiz />} />
                 <Route path="/quiz/admin" element={<QuizAdmin />} />
+                <Route path="/admin" element={<AdminPanel />} />
                 <Route
                   path="/loja/admin"
                   element={

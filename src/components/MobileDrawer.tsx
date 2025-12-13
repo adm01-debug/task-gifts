@@ -42,6 +42,7 @@ const navItems: NavItem[] = [
   { icon: BarChart3, label: "Relatórios", path: "/reports" },
   { icon: Activity, label: "Analytics", path: "/analytics" },
   { icon: Shield, label: "Auditoria", path: "/audit" },
+  { icon: Settings, label: "Painel Admin", path: "/admin" },
 ];
 
 interface MobileDrawerProps {
