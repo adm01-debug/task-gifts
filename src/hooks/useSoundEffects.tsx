@@ -329,6 +329,140 @@ export const useSoundEffects = () => {
     }
   }, [getAudioContext]);
 
+  // Combo tier up sound - escalating power-up
+  const playComboTierUpSound = useCallback((tier: number) => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    
+    // Base frequencies increase with tier
+    const baseFreq = 300 + tier * 100;
+    
+    // Power-up sweep
+    const sweep = ctx.createOscillator();
+    const sweepGain = ctx.createGain();
+    sweep.connect(sweepGain);
+    sweepGain.connect(ctx.destination);
+    
+    sweep.type = "sawtooth";
+    sweep.frequency.setValueAtTime(baseFreq, now);
+    sweep.frequency.exponentialRampToValueAtTime(baseFreq * 3, now + 0.25);
+    sweep.frequency.setValueAtTime(baseFreq * 2, now + 0.3);
+    
+    sweepGain.gain.setValueAtTime(0.08 + tier * 0.02, now);
+    sweepGain.gain.linearRampToValueAtTime(0.15 + tier * 0.03, now + 0.15);
+    sweepGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    
+    sweep.start(now);
+    sweep.stop(now + 0.5);
+
+    // Impact hit
+    const impact = ctx.createOscillator();
+    const impactGain = ctx.createGain();
+    impact.connect(impactGain);
+    impactGain.connect(ctx.destination);
+    
+    impact.type = "sine";
+    impact.frequency.setValueAtTime(100 + tier * 30, now + 0.25);
+    impact.frequency.exponentialRampToValueAtTime(50, now + 0.4);
+    
+    impactGain.gain.setValueAtTime(0.2, now + 0.25);
+    impactGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    
+    impact.start(now + 0.25);
+    impact.stop(now + 0.6);
+
+    // Sparkle burst based on tier
+    const sparkleCount = 3 + tier * 2;
+    for (let i = 0; i < sparkleCount; i++) {
+      const sparkle = ctx.createOscillator();
+      const sparkleGain = ctx.createGain();
+      
+      sparkle.connect(sparkleGain);
+      sparkleGain.connect(ctx.destination);
+      
+      const sparkleFreq = 1000 + tier * 200 + Math.random() * 1000;
+      sparkle.frequency.setValueAtTime(sparkleFreq, now + 0.3 + i * 0.05);
+      sparkle.type = "sine";
+      
+      sparkleGain.gain.setValueAtTime(0, now + 0.3 + i * 0.05);
+      sparkleGain.gain.linearRampToValueAtTime(0.06, now + 0.32 + i * 0.05);
+      sparkleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45 + i * 0.05);
+      
+      sparkle.start(now + 0.3 + i * 0.05);
+      sparkle.stop(now + 0.5 + i * 0.05);
+    }
+
+    // For legendary tier (4), add epic finale
+    if (tier >= 4) {
+      const grandChord = [523.25, 659.25, 783.99, 1046.50]; // C major
+      
+      grandChord.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.frequency.setValueAtTime(freq, now + 0.5);
+        osc.type = "triangle";
+        
+        gain.gain.setValueAtTime(0, now + 0.5);
+        gain.gain.linearRampToValueAtTime(0.1, now + 0.55);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        
+        osc.start(now + 0.5);
+        osc.stop(now + 1.3);
+      });
+    }
+  }, [getAudioContext]);
+
+  // Combo action sound - quick positive feedback
+  const playComboActionSound = useCallback((multiplier: number) => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    
+    // Higher pitch for higher multiplier
+    const baseFreq = 600 + (multiplier - 1) * 200;
+    
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(baseFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, now + 0.08);
+    
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    
+    osc.start(now);
+    osc.stop(now + 0.15);
+
+    // Add extra blip for higher multipliers
+    if (multiplier >= 2) {
+      const blip = ctx.createOscillator();
+      const blipGain = ctx.createGain();
+      
+      blip.connect(blipGain);
+      blipGain.connect(ctx.destination);
+      
+      blip.type = "sine";
+      blip.frequency.setValueAtTime(baseFreq * 1.5, now + 0.1);
+      
+      blipGain.gain.setValueAtTime(0.05, now + 0.1);
+      blipGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      
+      blip.start(now + 0.1);
+      blip.stop(now + 0.2);
+    }
+  }, [getAudioContext]);
+
   return {
     playAchievementSound,
     playLevelUpSound,
@@ -337,5 +471,7 @@ export const useSoundEffects = () => {
     playQuestCompleteSound,
     playEpicCelebrationSound,
     playLegendaryCelebrationSound,
+    playComboTierUpSound,
+    playComboActionSound,
   };
 };
