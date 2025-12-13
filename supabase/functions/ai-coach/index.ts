@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.87.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,7 +10,7 @@ const SYSTEM_PROMPT = `Você é o AI Coach do Task Gifts, uma plataforma de gami
 
 Seu papel é:
 1. Responder dúvidas sobre gamificação, XP, moedas, conquistas e rankings
-2. Sugerir trilhas de aprendizado baseadas no perfil do usuário
+2. Sugerir trilhas de aprendizado baseadas no perfil e competências do usuário
 3. Dar dicas personalizadas para aumentar engajamento e performance
 4. Explicar mecânicas do sistema (combos, streaks, missões, duelos)
 5. Motivar os colaboradores com linguagem positiva e encorajadora
@@ -24,6 +25,12 @@ Contexto da plataforma:
 
 Filosofia da empresa: "Só existem 2 formas de executar uma tarefa: com Excelência ou com mediocridade. E nós não somos medíocres!"
 
+IMPORTANTE SOBRE RECOMENDAÇÕES DE TRILHAS:
+- Quando sugerir trilhas, use os dados reais das competências e trilhas disponíveis fornecidos no contexto
+- Mencione trilhas específicas pelo nome e explique por que são relevantes
+- Relacione as trilhas com as competências que precisam ser desenvolvidas
+- Use formato estruturado: "📚 [Nome da Trilha] - [Razão da recomendação]"
+
 Responda sempre em português brasileiro, de forma amigável e motivadora. Seja conciso mas útil.`;
 
 serve(async (req) => {
@@ -34,6 +41,8 @@ serve(async (req) => {
   try {
     const { messages, userContext } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
@@ -41,8 +50,9 @@ serve(async (req) => {
 
     // Build context-aware system prompt
     let enhancedSystemPrompt = SYSTEM_PROMPT;
+    
     if (userContext) {
-      enhancedSystemPrompt += `\n\nContexto do usuário atual:
+      enhancedSystemPrompt += `\n\n=== CONTEXTO DO USUÁRIO ===
 - Nome: ${userContext.displayName || "Colaborador"}
 - Nível: ${userContext.level || 1}
 - XP Total: ${userContext.xp || 0}
@@ -50,6 +60,35 @@ serve(async (req) => {
 - Quests Completadas: ${userContext.questsCompleted || 0}
 - Streak Atual: ${userContext.streak || 0} dias
 - Departamento: ${userContext.department || "Não definido"}`;
+
+      // Add competencies if available
+      if (userContext.competencies && userContext.competencies.length > 0) {
+        enhancedSystemPrompt += `\n\n=== COMPETÊNCIAS DO USUÁRIO ===`;
+        for (const comp of userContext.competencies) {
+          const percentage = Math.round((comp.value / comp.maxValue) * 100);
+          let status = "🟢 Excelente";
+          if (percentage < 40) status = "🔴 Precisa desenvolver";
+          else if (percentage < 70) status = "🟡 Em desenvolvimento";
+          enhancedSystemPrompt += `\n- ${comp.icon} ${comp.area}: ${comp.value}/${comp.maxValue} (${percentage}%) - ${status}`;
+        }
+      }
+
+      // Add available trails if provided
+      if (userContext.availableTrails && userContext.availableTrails.length > 0) {
+        enhancedSystemPrompt += `\n\n=== TRILHAS DISPONÍVEIS ===`;
+        for (const trail of userContext.availableTrails) {
+          const statusLabel = trail.enrolled ? (trail.completed ? "✅ Concluída" : "🔄 Em progresso") : "📖 Disponível";
+          enhancedSystemPrompt += `\n- ${trail.icon || "📚"} "${trail.title}" (${trail.estimated_hours || "?"}h, ${trail.xp_reward || 0} XP) - ${statusLabel}`;
+          if (trail.description) {
+            enhancedSystemPrompt += ` | ${trail.description.substring(0, 80)}...`;
+          }
+        }
+      }
+
+      // Add completed trails count
+      if (userContext.completedTrailsCount !== undefined) {
+        enhancedSystemPrompt += `\n\n- Trilhas concluídas: ${userContext.completedTrailsCount}`;
+      }
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
