@@ -1,10 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Send, X, Trash2, Bot, User, Loader2 } from "lucide-react";
+import { Sparkles, Send, X, Trash2, Bot, User, Loader2, BookOpen, Clock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAICoach } from "@/hooks/useAICoach";
+import { usePublishedTrails } from "@/hooks/useTrails";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const QUICK_PROMPTS = [
@@ -14,10 +16,60 @@ const QUICK_PROMPTS = [
   "Dicas para subir no ranking",
 ];
 
+interface TrailCardProps {
+  trail: {
+    id: string;
+    title: string;
+    icon?: string | null;
+    estimated_hours?: number | null;
+    xp_reward?: number | null;
+  };
+  onNavigate: (id: string) => void;
+}
+
+function TrailCard({ trail, onNavigate }: TrailCardProps) {
+  return (
+    <motion.button
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => onNavigate(trail.id)}
+      className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 hover:border-primary/40 transition-all w-full text-left group"
+    >
+      <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-lg flex-shrink-0">
+        {trail.icon || "📚"}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors">
+          {trail.title}
+        </p>
+        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+          {trail.estimated_hours && (
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {trail.estimated_hours}h
+            </span>
+          )}
+          {trail.xp_reward && (
+            <span className="flex items-center gap-1 text-primary">
+              <Zap className="w-3 h-3" />
+              {trail.xp_reward} XP
+            </span>
+          )}
+        </div>
+      </div>
+      <BookOpen className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+    </motion.button>
+  );
+}
+
 export function AICoachDialog() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const { messages, isLoading, error, sendMessage, clearMessages } = useAICoach();
+  const { data: trails } = usePublishedTrails();
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -43,6 +95,58 @@ export function AICoachDialog() {
 
   const handleQuickPrompt = (prompt: string) => {
     sendMessage(prompt);
+  };
+
+  const handleNavigateToTrail = (trailId: string) => {
+    setOpen(false);
+    navigate(`/trails/${trailId}`);
+  };
+
+  // Find trails mentioned in a message
+  const findMentionedTrails = (content: string) => {
+    if (!trails) return [];
+    
+    const mentionedTrails: typeof trails = [];
+    const lowerContent = content.toLowerCase();
+    
+    for (const trail of trails) {
+      // Check if trail title is mentioned (case insensitive)
+      const trailTitleLower = trail.title.toLowerCase();
+      if (lowerContent.includes(trailTitleLower) || 
+          lowerContent.includes(`"${trailTitleLower}"`) ||
+          lowerContent.includes(`"${trail.title}"`) ||
+          lowerContent.includes(trail.title)) {
+        mentionedTrails.push(trail);
+      }
+    }
+    
+    return mentionedTrails.slice(0, 5); // Limit to 5 trails
+  };
+
+  const renderMessageContent = (content: string, isAssistant: boolean) => {
+    if (!isAssistant) {
+      return <p className="whitespace-pre-wrap">{content}</p>;
+    }
+
+    const mentionedTrails = findMentionedTrails(content);
+
+    return (
+      <div className="space-y-3">
+        <p className="whitespace-pre-wrap">{content}</p>
+        {mentionedTrails.length > 0 && (
+          <div className="space-y-2 pt-2 border-t border-border/50">
+            <p className="text-xs text-muted-foreground font-medium">Trilhas mencionadas:</p>
+            {mentionedTrails.map((trail) => (
+              <TrailCard
+                key={trail.id}
+                trail={trail}
+                onNavigate={handleNavigateToTrail}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -126,13 +230,13 @@ export function AICoachDialog() {
                     )}
                     <div
                       className={cn(
-                        "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm",
+                        "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm",
                         msg.role === "user"
                           ? "bg-primary text-primary-foreground rounded-br-md"
                           : "bg-muted rounded-bl-md"
                       )}
                     >
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                      {renderMessageContent(msg.content, msg.role === "assistant")}
                     </div>
                     {msg.role === "user" && (
                       <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
