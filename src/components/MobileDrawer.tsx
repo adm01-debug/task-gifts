@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
-import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle, Shield, Activity, BookOpen, Clock, LineChart, ShoppingBag, MessageSquare, TrendingUp, Swords, Heart, Gamepad2, HelpCircle, Bot } from "lucide-react";
+import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle, Shield, Activity, BookOpen, Clock, LineChart, ShoppingBag, MessageSquare, TrendingUp, Swords, Heart, Gamepad2, HelpCircle, Bot, Search } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AICoachDialog } from "@/components/AICoachDialog";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import {
   Drawer,
   DrawerClose,
@@ -183,8 +184,28 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
           </div>
         </div>
 
-        {/* AI Coach & Theme Toggle & Settings */}
+        {/* Global Search, AI Coach & Theme Toggle & Settings */}
         <div className="p-4 pt-0 space-y-2">
+          <GlobalSearch
+            trigger={
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-muted/50 border border-border hover:bg-muted transition-all"
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <Search className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div className="text-left flex-1">
+                  <span className="font-medium">Buscar</span>
+                  <p className="text-xs text-muted-foreground">Trilhas, quests, usuários</p>
+                </div>
+                <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">
+                  ⌘K
+                </kbd>
+              </motion.button>
+            }
+          />
+
           <AICoachDialog
             trigger={
               <motion.button
