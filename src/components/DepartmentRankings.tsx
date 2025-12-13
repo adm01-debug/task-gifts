@@ -54,14 +54,15 @@ const departmentMetrics: Record<string, RankingMetric[]> = {
   ],
 };
 
-// Mock data for demonstration
-const mockRankings = [
-  { id: "1", name: "Ana Silva", avatar: null as string | null, score: 2450, xp: 12500, metrics: { orders: 45, rate: 78, time: 15 } },
-  { id: "2", name: "Carlos Santos", avatar: null as string | null, score: 2280, xp: 11200, metrics: { orders: 42, rate: 72, time: 18 } },
-  { id: "3", name: "Maria Oliveira", avatar: null as string | null, score: 2100, xp: 10800, metrics: { orders: 38, rate: 70, time: 20 } },
-  { id: "4", name: "João Pedro", avatar: null as string | null, score: 1950, xp: 9500, metrics: { orders: 35, rate: 68, time: 22 } },
-  { id: "5", name: "Fernanda Lima", avatar: null as string | null, score: 1800, xp: 8900, metrics: { orders: 32, rate: 65, time: 25 } },
-];
+
+interface RankingUser {
+  id: string;
+  name: string;
+  avatar: string | null;
+  score: number;
+  xp: number;
+  metrics: { orders: number; rate: number; time: number };
+}
 
 function getRankIcon(rank: number) {
   if (rank === 1) return <Crown className="h-5 w-5 text-amber-400" />;
@@ -82,7 +83,7 @@ function RankingCard({
   rank, 
   maxScore 
 }: { 
-  user: typeof mockRankings[0]; 
+  user: RankingUser; 
   rank: number;
   maxScore: number;
 }) {

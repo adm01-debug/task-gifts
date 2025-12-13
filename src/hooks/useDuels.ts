@@ -54,6 +54,14 @@ export function useActiveDuel(userId: string | undefined) {
   });
 }
 
+export function useActiveDuels() {
+  return useQuery<DuelWithProfiles[]>({
+    queryKey: [...duelKeys.all, "all-active"],
+    queryFn: () => duelsService.getAllActiveDuels(),
+    refetchInterval: 30000,
+  });
+}
+
 export function usePotentialOpponents(userId: string | undefined) {
   return useQuery({
     queryKey: duelKeys.opponents(userId || ""),

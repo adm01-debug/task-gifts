@@ -98,6 +98,36 @@ export const duelsService = {
     };
   },
 
+  async getAllActiveDuels(): Promise<DuelWithProfiles[]> {
+    const { data, error } = await supabase
+      .from("direct_duels")
+      .select("*")
+      .in("status", ["active"])
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    const userIds = new Set<string>();
+    data?.forEach(d => {
+      userIds.add(d.challenger_id);
+      userIds.add(d.opponent_id);
+    });
+
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url, level, xp")
+      .in("id", Array.from(userIds));
+
+    const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+    return (data || []).map(duel => ({
+      ...duel,
+      status: duel.status as DirectDuel['status'],
+      challenger: profileMap.get(duel.challenger_id),
+      opponent: profileMap.get(duel.opponent_id),
+    }));
+  },
+
   async createDuel(
     challengerId: string,
     opponentId: string,
