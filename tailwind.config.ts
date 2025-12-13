@@ -114,6 +114,7 @@ export default {
         "3xl": "calc(var(--radius) + 12px)",
       },
       boxShadow: {
+        'xs': 'var(--shadow-xs)',
         'sm': 'var(--shadow-sm)',
         'md': 'var(--shadow-md)',
         'lg': 'var(--shadow-lg)',
@@ -121,6 +122,7 @@ export default {
         'glow-primary': 'var(--shadow-glow-primary)',
         'glow-secondary': 'var(--shadow-glow-secondary)',
         'glow-success': 'var(--shadow-glow-success)',
+        'none': 'none',
       },
       keyframes: {
         "accordion-down": {
