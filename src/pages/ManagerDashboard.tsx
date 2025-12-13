@@ -34,6 +34,7 @@ import { ChurnPredictionPanel } from "@/components/ChurnPredictionPanel";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
 import { TeamCompetencyDashboard } from "@/components/manager/TeamCompetencyDashboard";
 import { CompetencyAlertsPanel } from "@/components/CompetencyAlertsPanel";
+import { TeamCertificationsPanel } from "@/components/TeamCertificationsPanel";
 
 // Types
 interface TeamMember {
@@ -464,6 +465,10 @@ export default function ManagerDashboard() {
               <Target className="h-4 w-4" />
               Competências
             </TabsTrigger>
+            <TabsTrigger value="certifications" className="gap-2">
+              <Award className="h-4 w-4" />
+              Certificações
+            </TabsTrigger>
             <TabsTrigger value="quests" className="gap-2">
               <Target className="h-4 w-4" />
               Quests
@@ -538,6 +543,10 @@ export default function ManagerDashboard() {
                 <CompetencyAlertsPanel />
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="certifications">
+            <TeamCertificationsPanel />
           </TabsContent>
 
           <TabsContent value="quests">
