@@ -12,6 +12,8 @@ import { ProfileKudosSection } from "@/components/ProfileKudosSection";
 import { RankingBadge } from "@/components/RankingBadge";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
+import { AvatarPreview } from "@/components/AvatarPreview";
+import { ProfileAvatarSection } from "@/components/ProfileAvatarSection";
 import { useAvatarConfig } from "@/hooks/useAvatar";
 import { useUserRank } from "@/hooks/useUserRank";
 import { toast } from "sonner";
@@ -162,30 +164,21 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row items-center gap-6">
               {/* Avatar */}
               <div className="relative group">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="w-28 h-28 rounded-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center text-4xl font-bold shadow-2xl cursor-pointer"
+                <AvatarPreview
+                  userId={user?.id || ""}
+                  userLevel={profile?.level || 1}
+                  userStreak={profile?.streak || 0}
+                  displayName={profile?.display_name || "Jogador"}
+                  size="xl"
+                  showEffects={true}
                   onClick={() => setAvatarOpen(true)}
-                >
-                  {profile?.display_name?.charAt(0).toUpperCase() || "?"}
-                </motion.div>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-card border-4 border-background flex items-center justify-center">
-                  <span className="text-sm font-bold text-primary">{profile?.level || 1}</span>
-                </div>
+                />
                 {/* Ranking Badge */}
                 {rankData?.rank && (
                   <div className="absolute -top-2 -left-2">
                     <RankingBadge rank={rankData.rank} size="md" />
                   </div>
                 )}
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  onClick={() => setAvatarOpen(true)}
-                  className="absolute inset-0 rounded-full bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
-                >
-                  <Wand2 className="w-5 h-5" />
-                  <span className="text-sm font-medium">Personalizar</span>
-                </motion.button>
               </div>
 
               {/* Info */}
@@ -269,6 +262,17 @@ const Profile = () => {
             </motion.div>
           ))}
         </motion.div>
+
+        {/* Avatar Collection Section */}
+        {user?.id && profile && (
+          <ProfileAvatarSection
+            userId={user.id}
+            userLevel={profile.level}
+            userStreak={profile.streak}
+            userCoins={profile.coins}
+            displayName={profile.display_name || "Jogador"}
+          />
+        )}
 
         {/* Achievements */}
         <motion.div
