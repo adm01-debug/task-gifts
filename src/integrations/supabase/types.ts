@@ -1523,6 +1523,42 @@ export type Database = {
           },
         ]
       }
+      trail_prerequisites: {
+        Row: {
+          created_at: string
+          id: string
+          prerequisite_trail_id: string
+          trail_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          prerequisite_trail_id: string
+          trail_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          prerequisite_trail_id?: string
+          trail_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_prerequisites_prerequisite_trail_id_fkey"
+            columns: ["prerequisite_trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trail_prerequisites_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           achievement_id: string

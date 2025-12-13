@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { trailsService, type LearningTrail, type TrailModule } from "@/services/trailsService";
+import { trailsService, type LearningTrail, type TrailModule, type TrailPrerequisite } from "@/services/trailsService";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
@@ -10,6 +10,7 @@ export const trailKeys = {
   detail: (id: string) => [...trailKeys.all, "detail", id] as const,
   enrollments: (userId: string) => [...trailKeys.all, "enrollments", userId] as const,
   moduleProgress: (userId: string, moduleIds: string[]) => [...trailKeys.all, "progress", userId, moduleIds] as const,
+  prerequisites: () => [...trailKeys.all, "prerequisites"] as const,
 };
 
 export function usePublishedTrails() {
@@ -177,6 +178,52 @@ export function useDeleteTrail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: trailKeys.all });
       toast.success("Trilha excluída");
+    },
+  });
+}
+
+export function useTrailPrerequisites() {
+  return useQuery({
+    queryKey: trailKeys.prerequisites(),
+    queryFn: () => trailsService.getPrerequisites(),
+  });
+}
+
+export function useCheckPrerequisites(trailId: string) {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: [...trailKeys.prerequisites(), "check", user?.id, trailId],
+    queryFn: () => trailsService.checkPrerequisitesCompleted(user!.id, trailId),
+    enabled: !!user?.id && !!trailId,
+  });
+}
+
+export function useAddPrerequisite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ trailId, prerequisiteTrailId }: { trailId: string; prerequisiteTrailId: string }) =>
+      trailsService.addPrerequisite(trailId, prerequisiteTrailId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: trailKeys.prerequisites() });
+      toast.success("Pré-requisito adicionado!");
+    },
+    onError: () => {
+      toast.error("Erro ao adicionar pré-requisito");
+    },
+  });
+}
+
+export function useRemovePrerequisite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ trailId, prerequisiteTrailId }: { trailId: string; prerequisiteTrailId: string }) =>
+      trailsService.removePrerequisite(trailId, prerequisiteTrailId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: trailKeys.prerequisites() });
+      toast.success("Pré-requisito removido!");
     },
   });
 }
