@@ -29,7 +29,7 @@ import SeasonalEventDetail from "./pages/SeasonalEventDetail";
 import Mentorship from "./pages/Mentorship";
 import Duels from "./pages/Duels";
 import DailyQuiz from "./pages/DailyQuiz";
-
+import QuizAdmin from "./pages/QuizAdmin";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -62,6 +62,7 @@ const App = () => (
                 <Route path="/mentoria" element={<Mentorship />} />
                 <Route path="/duelos" element={<Duels />} />
                 <Route path="/quiz" element={<DailyQuiz />} />
+                <Route path="/quiz/admin" element={<QuizAdmin />} />
                 <Route
                   path="/loja/admin"
                   element={
