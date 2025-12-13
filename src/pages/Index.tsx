@@ -19,6 +19,7 @@ import DepartmentRankings from "@/components/DepartmentRankings";
 import { AttendanceModule } from "@/components/AttendanceModule";
 import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
 import { ComboIndicator } from "@/components/ComboIndicator";
+import { ComboHistory } from "@/components/ComboHistory";
 import { SocialFeed } from "@/components/SocialFeed";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -253,6 +254,7 @@ const Index = () => {
             {/* Right Column - Combo, Attendance, Rankings, Leaderboard, Kudos, Analytics & Rewards */}
             <div className="space-y-4 md:space-y-6">
               <ComboIndicator variant="full" />
+              <ComboHistory />
               <AttendanceModule />
               <DepartmentRankings />
               <LiveLeaderboard />
