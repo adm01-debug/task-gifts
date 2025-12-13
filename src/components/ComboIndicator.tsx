@@ -1,10 +1,12 @@
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Zap, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { useTodayCombo, COMBO_TIERS } from "@/hooks/useCombo";
+import { useTodayCombo, setTierUpCallback, COMBO_TIERS } from "@/hooks/useCombo";
 import { comboService } from "@/services/comboService";
+import { ComboExplosion } from "@/components/effects/ComboExplosion";
 
 interface ComboIndicatorProps {
   variant?: "compact" | "full";
@@ -12,6 +14,23 @@ interface ComboIndicatorProps {
 
 export function ComboIndicator({ variant = "compact" }: ComboIndicatorProps) {
   const { data: combo, isLoading } = useTodayCombo();
+  const [explosionTrigger, setExplosionTrigger] = useState(false);
+  const [explosionTier, setExplosionTier] = useState(0);
+
+  // Register callback for tier-up explosions
+  const handleTierUp = useCallback((tier: number) => {
+    setExplosionTier(tier);
+    setExplosionTrigger(true);
+  }, []);
+
+  useEffect(() => {
+    setTierUpCallback(handleTierUp);
+    return () => setTierUpCallback(null);
+  }, [handleTierUp]);
+
+  const handleExplosionComplete = () => {
+    setExplosionTrigger(false);
+  };
 
   if (isLoading || !combo) return null;
 
@@ -28,47 +47,60 @@ export function ComboIndicator({ variant = "compact" }: ComboIndicatorProps) {
 
   if (variant === "compact") {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${currentTier.bgColor} ${
-          isOnFire ? "animate-pulse" : ""
-        }`}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentTier.label}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-          >
-            {isOnFire ? (
-              <Flame className={`w-4 h-4 ${currentTier.color}`} />
-            ) : (
-              <Zap className={`w-4 h-4 ${currentTier.color}`} />
-            )}
-          </motion.div>
-        </AnimatePresence>
+      <>
+        <ComboExplosion
+          trigger={explosionTrigger}
+          tier={explosionTier}
+          onComplete={handleExplosionComplete}
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${currentTier.bgColor} ${
+            isOnFire ? "animate-pulse" : ""
+          }`}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentTier.label}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+            >
+              {isOnFire ? (
+                <Flame className={`w-4 h-4 ${currentTier.color}`} />
+              ) : (
+                <Zap className={`w-4 h-4 ${currentTier.color}`} />
+              )}
+            </motion.div>
+          </AnimatePresence>
 
-        <span className={`text-sm font-bold ${currentTier.color}`}>
-          x{combo.current_multiplier}
-        </span>
-
-        {combo.actions_count > 0 && (
-          <span className="text-xs text-muted-foreground">
-            ({combo.actions_count} ações)
+          <span className={`text-sm font-bold ${currentTier.color}`}>
+            x{combo.current_multiplier}
           </span>
-        )}
-      </motion.div>
+
+          {combo.actions_count > 0 && (
+            <span className="text-xs text-muted-foreground">
+              ({combo.actions_count} ações)
+            </span>
+          )}
+        </motion.div>
+      </>
     );
   }
 
   return (
-    <Card
-      className={`overflow-hidden ${
-        isOnFire ? "border-orange-500/50 shadow-orange-500/20 shadow-lg" : ""
-      }`}
-    >
+    <>
+      <ComboExplosion
+        trigger={explosionTrigger}
+        tier={explosionTier}
+        onComplete={handleExplosionComplete}
+      />
+      <Card
+        className={`overflow-hidden ${
+          isOnFire ? "border-orange-500/50 shadow-orange-500/20 shadow-lg" : ""
+        }`}
+      >
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -168,5 +200,6 @@ export function ComboIndicator({ variant = "compact" }: ComboIndicatorProps) {
         </div>
       </CardContent>
     </Card>
+    </>
   );
 }
