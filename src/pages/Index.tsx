@@ -26,6 +26,7 @@ import { SocialFeed } from "@/components/SocialFeed";
 import { RankingBadge } from "@/components/RankingBadge";
 import { WeeklyChallengeCard } from "@/components/WeeklyChallengeCard";
 import { SeasonalEventBanner } from "@/components/SeasonalEventBanner";
+import { StaggeredContainer, StaggeredItem, StaggeredItemLeft, StaggeredItemRight } from "@/components/StaggeredContainer";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -268,27 +269,35 @@ const Index = () => {
           {/* Main Grid */}
           <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
             {/* Left Column - Missions, Quests, Team & Recognition */}
-            <div className="lg:col-span-2 space-y-4 md:space-y-6">
-              <SocialFeed limit={20} />
-              <DepartmentMissions />
-              <DailyQuests />
-              <PeerRecognition />
-              <TeamChallenges />
-            </div>
+            <StaggeredContainer 
+              className="lg:col-span-2 space-y-4 md:space-y-6"
+              staggerDelay={0.12}
+              initialDelay={0.1}
+            >
+              <StaggeredItemLeft><SocialFeed limit={20} /></StaggeredItemLeft>
+              <StaggeredItemLeft><DepartmentMissions /></StaggeredItemLeft>
+              <StaggeredItemLeft><DailyQuests /></StaggeredItemLeft>
+              <StaggeredItemLeft><PeerRecognition /></StaggeredItemLeft>
+              <StaggeredItemLeft><TeamChallenges /></StaggeredItemLeft>
+            </StaggeredContainer>
 
             {/* Right Column - Combo, Attendance, Rankings, Leaderboard, Kudos, Analytics & Rewards */}
-            <div className="space-y-4 md:space-y-6">
-              <WeeklyChallengeCard />
-              <ComboIndicator variant="full" />
-              <ComboHistory />
-              <WeeklyPerformanceComparison />
-              <AttendanceModule />
-              <DepartmentRankings />
-              <LiveLeaderboard />
-              <KudosRanking />
-              <AnalyticsWidget />
-              <RewardsShop />
-            </div>
+            <StaggeredContainer 
+              className="space-y-4 md:space-y-6"
+              staggerDelay={0.1}
+              initialDelay={0.2}
+            >
+              <StaggeredItemRight><WeeklyChallengeCard /></StaggeredItemRight>
+              <StaggeredItemRight><ComboIndicator variant="full" /></StaggeredItemRight>
+              <StaggeredItemRight><ComboHistory /></StaggeredItemRight>
+              <StaggeredItemRight><WeeklyPerformanceComparison /></StaggeredItemRight>
+              <StaggeredItemRight><AttendanceModule /></StaggeredItemRight>
+              <StaggeredItemRight><DepartmentRankings /></StaggeredItemRight>
+              <StaggeredItemRight><LiveLeaderboard /></StaggeredItemRight>
+              <StaggeredItemRight><KudosRanking /></StaggeredItemRight>
+              <StaggeredItemRight><AnalyticsWidget /></StaggeredItemRight>
+              <StaggeredItemRight><RewardsShop /></StaggeredItemRight>
+            </StaggeredContainer>
           </div>
         </div>
 
