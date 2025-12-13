@@ -1,9 +1,38 @@
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Zap, Flame, Trophy, Target, TrendingUp, Users, Clock, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useUserRank } from "@/hooks/useUserRank";
 import { SkeletonStatCard } from "@/components/ui/skeleton";
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const cardVariants: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: 30,
+    scale: 0.9,
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 24,
+    },
+  },
+};
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -53,9 +82,7 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay }}
+      variants={cardVariants}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className={cn(
         "relative p-4 rounded-2xl border border-border bg-card overflow-hidden",
@@ -71,30 +98,40 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
 
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-3">
-          <div className={cn(
-            "w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center",
-            colors.bg
-          )}>
+          <motion.div 
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: delay + 0.2, type: "spring", stiffness: 260, damping: 20 }}
+            className={cn(
+              "w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center",
+              colors.bg
+            )}
+          >
             <Icon className={cn("w-5 h-5", colors.icon)} />
-          </div>
+          </motion.div>
           {change && (
-            <div className={cn(
-              "flex items-center gap-0.5 text-xs font-medium px-2 py-1 rounded-full",
-              changeType === "positive" && "bg-success/10 text-success",
-              changeType === "negative" && "bg-destructive/10 text-destructive",
-              changeType === "neutral" && "bg-muted text-muted-foreground"
-            )}>
+            <motion.div 
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: delay + 0.3 }}
+              className={cn(
+                "flex items-center gap-0.5 text-xs font-medium px-2 py-1 rounded-full",
+                changeType === "positive" && "bg-success/10 text-success",
+                changeType === "negative" && "bg-destructive/10 text-destructive",
+                changeType === "neutral" && "bg-muted text-muted-foreground"
+              )}
+            >
               {changeType === "positive" && <TrendingUp className="w-3 h-3" />}
               {change}
-            </div>
+            </motion.div>
           )}
         </div>
 
         <p className="text-sm text-muted-foreground mb-1">{label}</p>
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: delay + 0.2 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: delay + 0.25, type: "spring", stiffness: 300 }}
           className="text-2xl font-bold"
         >
           {value}
@@ -150,11 +187,16 @@ export const StatsGrid = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <motion.div 
+      className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {stats.map((stat, i) => (
         <StatCard key={stat.label} {...stat} delay={i * 0.1} />
       ))}
-    </div>
+    </motion.div>
   );
 };
 
