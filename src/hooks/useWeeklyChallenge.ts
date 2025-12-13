@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
 import { weeklyChallengesService, WeeklyChallenge } from "@/services/weeklyChallengesService";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { profilesService } from "@/services/profilesService";
 import { notificationsService } from "@/services/notificationsService";
 
@@ -23,9 +23,19 @@ interface ChallengeWithProfiles extends WeeklyChallenge {
   } | null;
 }
 
+export interface VictoryData {
+  opponentName: string;
+  xpGained: number;
+  opponentXpGained: number;
+  xpReward: number;
+  coinReward: number;
+}
+
 export function useWeeklyChallenge() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [showVictory, setShowVictory] = useState(false);
+  const [victoryData, setVictoryData] = useState<VictoryData | null>(null);
 
   const { data: challenge, isLoading, refetch } = useQuery({
     queryKey: ["weekly-challenge", user?.id],
@@ -143,6 +153,66 @@ export function useWeeklyChallenge() {
     };
   }, [user?.id, queryClient]);
 
+  // Check for challenge completion and victory
+  useEffect(() => {
+    if (!challenge || !user?.id) return;
+
+    const weekEnd = new Date(challenge.week_end);
+    const now = new Date();
+    
+    // Check if challenge week has ended and hasn't been processed
+    if (now > weekEnd && challenge.status === "active") {
+      const isChallenger = user.id === challenge.challenger_id;
+      const myXpGained = isChallenger ? challenge.challenger_xp_gained : challenge.opponent_xp_gained;
+      const opponentXpGained = isChallenger ? challenge.opponent_xp_gained : challenge.challenger_xp_gained;
+      const opponentProfile = isChallenger ? challenge.opponentProfile : challenge.challengerProfile;
+
+      // Determine winner
+      const iWon = myXpGained > opponentXpGained;
+      const winnerId = myXpGained > opponentXpGained 
+        ? (isChallenger ? challenge.challenger_id : challenge.opponent_id)
+        : myXpGained < opponentXpGained
+        ? (isChallenger ? challenge.opponent_id : challenge.challenger_id)
+        : null; // Tie
+
+      // Complete the challenge
+      weeklyChallengesService.completeChallenge(challenge.id, winnerId);
+
+      // Show victory celebration if user won
+      if (iWon) {
+        const victoryKey = `victory-shown-${challenge.id}`;
+        if (!localStorage.getItem(victoryKey)) {
+          setVictoryData({
+            opponentName: opponentProfile?.display_name || "Oponente",
+            xpGained: myXpGained,
+            opponentXpGained: opponentXpGained,
+            xpReward: challenge.xp_reward,
+            coinReward: challenge.coin_reward,
+          });
+          setShowVictory(true);
+          localStorage.setItem(victoryKey, "true");
+
+          // Award rewards
+          profilesService.addXp(user.id, challenge.xp_reward, "weekly_challenge_victory");
+          profilesService.addCoins(user.id, challenge.coin_reward);
+
+          // Send notification
+          notificationsService.create({
+            user_id: user.id,
+            type: "victory",
+            title: "🏆 Desafio Semanal Vencido!",
+            message: `Você venceu ${opponentProfile?.display_name || "seu oponente"} e ganhou ${challenge.xp_reward} XP e ${challenge.coin_reward} moedas!`,
+          });
+        }
+      }
+    }
+  }, [challenge, user?.id]);
+
+  const closeVictory = useCallback(() => {
+    setShowVictory(false);
+    setVictoryData(null);
+  }, []);
+
   const pastChallenges = useQuery({
     queryKey: ["past-challenges", user?.id],
     queryFn: () => weeklyChallengesService.getPastChallenges(user!.id),
@@ -155,5 +225,8 @@ export function useWeeklyChallenge() {
     refetch,
     pastChallenges: pastChallenges.data || [],
     isLoadingPast: pastChallenges.isLoading,
+    showVictory,
+    victoryData,
+    closeVictory,
   };
 }

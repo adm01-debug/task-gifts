@@ -2,17 +2,26 @@ import { motion } from "framer-motion";
 import { Swords, Trophy, Clock, TrendingUp, Flame } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useWeeklyChallenge } from "@/hooks/useWeeklyChallenge";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format, differenceInDays, differenceInHours } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { differenceInDays, differenceInHours } from "date-fns";
+import { WeeklyChallengeVictory } from "@/components/effects/WeeklyChallengeVictory";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { useEffect } from "react";
 
 export function WeeklyChallengeCard() {
   const { user } = useAuth();
-  const { challenge, isLoading } = useWeeklyChallenge();
+  const { challenge, isLoading, showVictory, victoryData, closeVictory } = useWeeklyChallenge();
+  const { playAchievementSound } = useSoundEffects();
+
+  // Play sound when victory modal shows
+  useEffect(() => {
+    if (showVictory) {
+      playAchievementSound();
+    }
+  }, [showVictory, playAchievementSound]);
 
   if (isLoading) {
     return (
@@ -213,6 +222,19 @@ export function WeeklyChallengeCard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Victory Celebration Modal */}
+      {victoryData && (
+        <WeeklyChallengeVictory
+          show={showVictory}
+          onClose={closeVictory}
+          opponentName={victoryData.opponentName}
+          xpGained={victoryData.xpGained}
+          opponentXpGained={victoryData.opponentXpGained}
+          xpReward={victoryData.xpReward}
+          coinReward={victoryData.coinReward}
+        />
+      )}
     </motion.div>
   );
 }
