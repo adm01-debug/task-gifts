@@ -4,6 +4,7 @@ import { profilesService } from "./profilesService";
 import { auditService } from "./auditService";
 import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
+import { achievementsService } from "./achievementsService";
 
 export interface KudosBadge {
   id: string;
@@ -243,6 +244,14 @@ export const kudosService = {
       await missionsService.incrementByMetricKey(kudos.to_user_id, 'kudos_received', 1);
     } catch (e) {
       console.error("Failed to update kudos mission progress:", e);
+    }
+
+    // Check for kudos achievements
+    try {
+      await achievementsService.checkKudosGivenAchievements(kudos.from_user_id);
+      await achievementsService.checkKudosReceivedAchievements(kudos.to_user_id);
+    } catch (e) {
+      console.error("Failed to check kudos achievements:", e);
     }
 
     return { kudos: data as Kudos, comboResult };

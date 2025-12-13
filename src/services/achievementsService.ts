@@ -120,21 +120,155 @@ export const achievementsService = {
   },
 
   async checkComboAchievements(userId: string, multiplier: number): Promise<Achievement | null> {
-    // Define thresholds
     const comboAchievements = [
       { multiplier: 2, key: "combo_primeira_chama" },
       { multiplier: 3, key: "combo_fogo_azul" },
       { multiplier: 4, key: "combo_inferno" },
     ];
 
-    // Find highest applicable achievement
     const applicable = comboAchievements
       .filter((a) => multiplier >= a.multiplier)
       .sort((a, b) => b.multiplier - a.multiplier);
 
     if (applicable.length === 0) return null;
 
-    // Try to unlock from highest to lowest
+    for (const ach of applicable) {
+      const result = await this.unlockAchievement(userId, ach.key);
+      if (result.success && result.achievement) {
+        return result.achievement;
+      }
+    }
+
+    return null;
+  },
+
+  async checkTrailAchievements(userId: string): Promise<Achievement | null> {
+    // Count completed trails
+    const { count } = await supabase
+      .from("trail_enrollments")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .not("completed_at", "is", null);
+
+    const completedCount = count || 0;
+
+    const trailAchievements = [
+      { count: 1, key: "trail_first_complete" },
+      { count: 5, key: "trail_5_complete" },
+      { count: 10, key: "trail_10_complete" },
+    ];
+
+    const applicable = trailAchievements
+      .filter((a) => completedCount >= a.count)
+      .sort((a, b) => b.count - a.count);
+
+    for (const ach of applicable) {
+      const result = await this.unlockAchievement(userId, ach.key);
+      if (result.success && result.achievement) {
+        return result.achievement;
+      }
+    }
+
+    return null;
+  },
+
+  async checkKudosGivenAchievements(userId: string): Promise<Achievement | null> {
+    const { count } = await supabase
+      .from("kudos")
+      .select("*", { count: "exact", head: true })
+      .eq("from_user_id", userId);
+
+    const givenCount = count || 0;
+
+    const kudosAchievements = [
+      { count: 1, key: "kudos_first_given" },
+      { count: 10, key: "kudos_10_given" },
+      { count: 50, key: "kudos_50_given" },
+    ];
+
+    const applicable = kudosAchievements
+      .filter((a) => givenCount >= a.count)
+      .sort((a, b) => b.count - a.count);
+
+    for (const ach of applicable) {
+      const result = await this.unlockAchievement(userId, ach.key);
+      if (result.success && result.achievement) {
+        return result.achievement;
+      }
+    }
+
+    return null;
+  },
+
+  async checkKudosReceivedAchievements(userId: string): Promise<Achievement | null> {
+    const { count } = await supabase
+      .from("kudos")
+      .select("*", { count: "exact", head: true })
+      .eq("to_user_id", userId);
+
+    const receivedCount = count || 0;
+
+    const kudosAchievements = [
+      { count: 1, key: "kudos_first_received" },
+      { count: 10, key: "kudos_10_received" },
+      { count: 50, key: "kudos_50_received" },
+    ];
+
+    const applicable = kudosAchievements
+      .filter((a) => receivedCount >= a.count)
+      .sort((a, b) => b.count - a.count);
+
+    for (const ach of applicable) {
+      const result = await this.unlockAchievement(userId, ach.key);
+      if (result.success && result.achievement) {
+        return result.achievement;
+      }
+    }
+
+    return null;
+  },
+
+  async checkStreakAchievements(userId: string, currentStreak: number): Promise<Achievement | null> {
+    const streakAchievements = [
+      { streak: 3, key: "streak_3_days" },
+      { streak: 7, key: "streak_7_days" },
+      { streak: 30, key: "streak_30_days" },
+      { streak: 100, key: "streak_100_days" },
+    ];
+
+    const applicable = streakAchievements
+      .filter((a) => currentStreak >= a.streak)
+      .sort((a, b) => b.streak - a.streak);
+
+    for (const ach of applicable) {
+      const result = await this.unlockAchievement(userId, ach.key);
+      if (result.success && result.achievement) {
+        return result.achievement;
+      }
+    }
+
+    return null;
+  },
+
+  async checkQuestAchievements(userId: string): Promise<Achievement | null> {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("quests_completed")
+      .eq("id", userId)
+      .single();
+
+    const completedCount = profile?.quests_completed || 0;
+
+    const questAchievements = [
+      { count: 1, key: "quest_first_complete" },
+      { count: 10, key: "quest_10_complete" },
+      { count: 50, key: "quest_50_complete" },
+    ];
+
+    const applicable = questAchievements
+      .filter((a) => completedCount >= a.count)
+      .sort((a, b) => b.count - a.count);
+
     for (const ach of applicable) {
       const result = await this.unlockAchievement(userId, ach.key);
       if (result.success && result.achievement) {
