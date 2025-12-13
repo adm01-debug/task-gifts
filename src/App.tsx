@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AchievementNotificationProvider } from "@/contexts/AchievementNotificationContext";
+import { ThemeProvider } from "@/hooks/useTheme";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -31,45 +32,47 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <AchievementNotificationProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/manager" element={<ManagerDashboard />} />
-              <Route path="/quest-builder" element={<QuestBuilder />} />
-              <Route path="/reports" element={<EngagementReports />} />
-              <Route path="/audit" element={<AuditLogs />} />
-              <Route path="/analytics" element={<RealTimeAnalytics />} />
-              <Route path="/trails" element={<LearningTrails />} />
-              <Route path="/trails/:id" element={<TrailDetail />} />
-              <Route path="/ponto" element={<Attendance />} />
-              <Route path="/executivo" element={<ExecutiveDashboard />} />
-              <Route path="/feed" element={<SocialFeed />} />
-              <Route path="/conquistas" element={<Achievements />} />
-              <Route path="/estatisticas" element={<PersonalStats />} />
-              <Route path="/loja" element={<Shop />} />
-              <Route path="/eventos/:eventId" element={<SeasonalEventDetail />} />
-              <Route path="/mentoria" element={<Mentorship />} />
-              <Route
-                path="/loja/admin"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <ShopAdmin />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AchievementNotificationProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AchievementNotificationProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/manager" element={<ManagerDashboard />} />
+                <Route path="/quest-builder" element={<QuestBuilder />} />
+                <Route path="/reports" element={<EngagementReports />} />
+                <Route path="/audit" element={<AuditLogs />} />
+                <Route path="/analytics" element={<RealTimeAnalytics />} />
+                <Route path="/trails" element={<LearningTrails />} />
+                <Route path="/trails/:id" element={<TrailDetail />} />
+                <Route path="/ponto" element={<Attendance />} />
+                <Route path="/executivo" element={<ExecutiveDashboard />} />
+                <Route path="/feed" element={<SocialFeed />} />
+                <Route path="/conquistas" element={<Achievements />} />
+                <Route path="/estatisticas" element={<PersonalStats />} />
+                <Route path="/loja" element={<Shop />} />
+                <Route path="/eventos/:eventId" element={<SeasonalEventDetail />} />
+                <Route path="/mentoria" element={<Mentorship />} />
+                <Route
+                  path="/loja/admin"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <ShopAdmin />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AchievementNotificationProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

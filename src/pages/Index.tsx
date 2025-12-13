@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, Search, Sparkles, LogOut, User } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileDrawer } from "@/components/MobileDrawer";
 import { StatsGrid, QuickActions } from "@/components/StatsGrid";
@@ -151,6 +152,9 @@ const Index = () => {
                   ⌘K
                 </kbd>
               </motion.div>
+
+              {/* Theme Toggle */}
+              <ThemeToggle />
 
               {/* Notifications */}
               <NotificationCenter />
