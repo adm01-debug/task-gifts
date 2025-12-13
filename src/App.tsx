@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import QuestBuilder from "./pages/QuestBuilder";
 import EngagementReports from "./pages/EngagementReports";
+import AuditLogs from "./pages/AuditLogs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/manager" element={<ManagerDashboard />} />
             <Route path="/quest-builder" element={<QuestBuilder />} />
             <Route path="/reports" element={<EngagementReports />} />
+            <Route path="/audit" element={<AuditLogs />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
