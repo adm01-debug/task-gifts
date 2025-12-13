@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { Zap, Flame, Trophy, Target, TrendingUp, Users, Clock, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCurrentProfile } from "@/hooks/useProfiles";
+import { useUserRank } from "@/hooks/useUserRank";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -10,6 +13,7 @@ interface StatCardProps {
   changeType?: "positive" | "negative" | "neutral";
   color: "primary" | "secondary" | "success" | "warning" | "accent";
   delay?: number;
+  isLoading?: boolean;
 }
 
 const colorClasses = {
@@ -40,8 +44,23 @@ const colorClasses = {
   },
 };
 
-const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0 }: StatCardProps) => {
+const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading }: StatCardProps) => {
   const colors = colorClasses[color];
+
+  if (isLoading) {
+    return (
+      <div className="relative p-4 rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="relative z-10">
+          <div className="flex items-start justify-between mb-3">
+            <Skeleton className="w-10 h-10 rounded-xl" />
+            <Skeleton className="w-16 h-5 rounded-full" />
+          </div>
+          <Skeleton className="w-20 h-4 mb-2" />
+          <Skeleton className="w-24 h-8" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -97,38 +116,47 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
 };
 
 export const StatsGrid = () => {
+  const { data: profile, isLoading: profileLoading } = useCurrentProfile();
+  const { data: rankData, isLoading: rankLoading } = useUserRank();
+
+  const isLoading = profileLoading || rankLoading;
+
   const stats: StatCardProps[] = [
     {
       icon: Zap,
       label: "XP Total",
-      value: "9,650",
-      change: "+450 hoje",
+      value: profile?.xp?.toLocaleString() || "0",
+      change: profile?.xp ? `Nível ${profile.level}` : undefined,
       changeType: "positive",
       color: "success",
+      isLoading,
     },
     {
       icon: Flame,
       label: "Streak Atual",
-      value: "12 dias",
-      change: "Melhor: 28",
+      value: `${profile?.streak || 0} dias`,
+      change: profile?.best_streak ? `Melhor: ${profile.best_streak}` : undefined,
       changeType: "neutral",
       color: "primary",
+      isLoading,
     },
     {
       icon: Trophy,
       label: "Ranking",
-      value: "#4",
-      change: "↑ 2 posições",
+      value: rankData?.rank ? `#${rankData.rank}` : "-",
+      change: rankData?.tier || undefined,
       changeType: "positive",
       color: "warning",
+      isLoading,
     },
     {
       icon: Target,
       label: "Quests Completas",
-      value: "127",
-      change: "+8 esta semana",
+      value: profile?.quests_completed?.toString() || "0",
+      change: profile?.coins ? `${profile.coins} coins` : undefined,
       changeType: "positive",
       color: "secondary",
+      isLoading,
     },
   ];
 

@@ -1,55 +1,10 @@
 import { motion } from "framer-motion";
 import { Gift, Star, Lock, Sparkles, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface Reward {
-  id: string;
-  title: string;
-  description: string;
-  cost: number;
-  image: string;
-  rarity: "common" | "rare" | "epic" | "legendary";
-  available: boolean;
-}
-
-const rewards: Reward[] = [
-  {
-    id: "1",
-    title: "Day Off",
-    description: "Um dia de folga extra",
-    cost: 5000,
-    image: "🏖️",
-    rarity: "legendary",
-    available: false,
-  },
-  {
-    id: "2",
-    title: "Gift Card R$50",
-    description: "Vale presente iFood",
-    cost: 1200,
-    image: "🎁",
-    rarity: "rare",
-    available: true,
-  },
-  {
-    id: "3",
-    title: "Badge Exclusivo",
-    description: "Badge 'Early Adopter'",
-    cost: 500,
-    image: "🏅",
-    rarity: "common",
-    available: true,
-  },
-  {
-    id: "4",
-    title: "Curso Premium",
-    description: "Acesso Udemy Business",
-    cost: 3000,
-    image: "📚",
-    rarity: "epic",
-    available: false,
-  },
-];
+import { useShopRewards } from "@/hooks/useShop";
+import { useCurrentProfile } from "@/hooks/useProfiles";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
 const rarityConfig = {
   common: {
@@ -82,8 +37,45 @@ const rarityConfig = {
   },
 };
 
+// Category emojis
+const categoryEmojis: Record<string, string> = {
+  benefit: "🎁",
+  product: "📦",
+  experience: "✨",
+};
+
 export const RewardsShop = () => {
-  const userCoins = 1250;
+  const navigate = useNavigate();
+  const { data: rewards = [], isLoading: rewardsLoading } = useShopRewards();
+  const { data: profile, isLoading: profileLoading } = useCurrentProfile();
+
+  const userCoins = profile?.coins || 0;
+  const isLoading = rewardsLoading || profileLoading;
+
+  // Take only first 4 rewards for preview
+  const previewRewards = rewards.slice(0, 4);
+
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-8 h-8 rounded-lg" />
+            <div>
+              <Skeleton className="w-24 h-5 mb-1" />
+              <Skeleton className="w-16 h-3" />
+            </div>
+          </div>
+          <Skeleton className="w-20 h-8 rounded-full" />
+        </div>
+        <div className="p-4 grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -110,91 +102,101 @@ export const RewardsShop = () => {
       </div>
 
       {/* Rewards Grid */}
-      <div className="p-4 grid grid-cols-2 gap-3">
-        {rewards.map((reward, i) => {
-          const config = rarityConfig[reward.rarity];
-          const canAfford = userCoins >= reward.cost;
+      {previewRewards.length === 0 ? (
+        <div className="p-8 text-center text-muted-foreground">
+          <Gift className="w-12 h-12 mx-auto mb-2 opacity-30" />
+          <p className="text-sm">Nenhuma recompensa disponível</p>
+        </div>
+      ) : (
+        <div className="p-4 grid grid-cols-2 gap-3">
+          {previewRewards.map((reward, i) => {
+            const config = rarityConfig[reward.rarity as keyof typeof rarityConfig] || rarityConfig.common;
+            const canAfford = userCoins >= reward.price_coins;
+            const isAvailable = reward.is_active && (reward.stock === null || reward.stock > 0);
+            const emoji = categoryEmojis[reward.category] || "🎁";
 
-          return (
-            <motion.div
-              key={reward.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 + i * 0.1 }}
-              whileHover={reward.available && canAfford ? { scale: 1.03, y: -4 } : {}}
-              className={cn(
-                "relative p-3 rounded-xl border transition-all duration-200",
-                config.border,
-                reward.rarity === "legendary" && config.glow,
-                !reward.available && "opacity-60"
-              )}
-            >
-              {/* Background gradient */}
-              <div className={cn(
-                "absolute inset-0 rounded-xl bg-gradient-to-b opacity-50",
-                config.bg
-              )} />
+            return (
+              <motion.div
+                key={reward.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 + i * 0.1 }}
+                whileHover={isAvailable && canAfford ? { scale: 1.03, y: -4 } : {}}
+                className={cn(
+                  "relative p-3 rounded-xl border transition-all duration-200",
+                  config.border,
+                  reward.rarity === "legendary" && config.glow,
+                  !isAvailable && "opacity-60"
+                )}
+              >
+                {/* Background gradient */}
+                <div className={cn(
+                  "absolute inset-0 rounded-xl bg-gradient-to-b opacity-50",
+                  config.bg
+                )} />
 
-              <div className="relative z-10">
-                {/* Rarity badge */}
-                <div className="flex justify-between items-start mb-2">
-                  <span className={cn(
-                    "px-1.5 py-0.5 rounded text-[10px] font-bold",
-                    config.badge
-                  )}>
-                    {config.label}
-                  </span>
-                  {reward.rarity === "legendary" && (
-                    <motion.div
-                      animate={{ rotate: [0, 15, -15, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
+                <div className="relative z-10">
+                  {/* Rarity badge */}
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={cn(
+                      "px-1.5 py-0.5 rounded text-[10px] font-bold",
+                      config.badge
+                    )}>
+                      {config.label}
+                    </span>
+                    {reward.rarity === "legendary" && (
+                      <motion.div
+                        animate={{ rotate: [0, 15, -15, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <Sparkles className="w-4 h-4 text-gold" />
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {/* Image/Emoji */}
+                  <div className="text-3xl mb-2 text-center">{emoji}</div>
+
+                  {/* Info */}
+                  <h4 className="font-semibold text-sm text-center mb-1 line-clamp-1">{reward.name}</h4>
+                  <p className="text-[10px] text-muted-foreground text-center mb-2 line-clamp-1">
+                    {reward.description || "Recompensa especial"}
+                  </p>
+
+                  {/* Price/Action */}
+                  {isAvailable ? (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      disabled={!canAfford}
+                      className={cn(
+                        "w-full py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-colors",
+                        canAfford
+                          ? "bg-coins/20 text-coins hover:bg-coins/30"
+                          : "bg-muted text-muted-foreground cursor-not-allowed"
+                      )}
                     >
-                      <Sparkles className="w-4 h-4 text-gold" />
-                    </motion.div>
+                      <Star className="w-3 h-3" />
+                      {reward.price_coins.toLocaleString()}
+                    </motion.button>
+                  ) : (
+                    <div className="w-full py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium flex items-center justify-center gap-1">
+                      <Lock className="w-3 h-3" />
+                      Esgotado
+                    </div>
                   )}
                 </div>
-
-                {/* Image/Emoji */}
-                <div className="text-3xl mb-2 text-center">{reward.image}</div>
-
-                {/* Info */}
-                <h4 className="font-semibold text-sm text-center mb-1">{reward.title}</h4>
-                <p className="text-[10px] text-muted-foreground text-center mb-2 line-clamp-1">
-                  {reward.description}
-                </p>
-
-                {/* Price/Action */}
-                {reward.available ? (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    disabled={!canAfford}
-                    className={cn(
-                      "w-full py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-colors",
-                      canAfford
-                        ? "bg-coins/20 text-coins hover:bg-coins/30"
-                        : "bg-muted text-muted-foreground cursor-not-allowed"
-                    )}
-                  >
-                    <Star className="w-3 h-3" />
-                    {reward.cost.toLocaleString()}
-                  </motion.button>
-                ) : (
-                  <div className="w-full py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium flex items-center justify-center gap-1">
-                    <Lock className="w-3 h-3" />
-                    Em breve
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
 
       {/* View All */}
       <div className="p-4 border-t border-border">
         <motion.button
           whileHover={{ x: 4 }}
+          onClick={() => navigate("/loja")}
           className="w-full flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Ver todas as recompensas
