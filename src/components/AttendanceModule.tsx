@@ -66,7 +66,7 @@ export const AttendanceModule = () => {
   return (
     <div className="space-y-6">
       {/* Main Check-in Card */}
-      <Card className="bg-gradient-to-br from-card to-card/80 border-border/50 overflow-hidden relative">
+      <Card variant="prominent" className="overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
         
         <CardHeader className="relative">
@@ -200,7 +200,7 @@ export const AttendanceModule = () => {
       </Card>
 
       {/* Streak Card */}
-      <Card className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/20">
+      <Card variant="elevated" className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/20">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Flame className="h-5 w-5 text-orange-500" />
@@ -253,7 +253,7 @@ export const AttendanceModule = () => {
       </Card>
 
       {/* Weekly History */}
-      <Card>
+      <Card variant="subtle">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-lg">
             <div className="flex items-center gap-2">
@@ -316,7 +316,7 @@ export const AttendanceModule = () => {
       </Card>
 
       {/* Streak Leaderboard */}
-      <Card>
+      <Card variant="subtle">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Trophy className="h-5 w-5 text-yellow-500" />

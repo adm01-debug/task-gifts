@@ -74,7 +74,7 @@ export function ComboHistory() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="overflow-hidden">
+      <Card variant="subtle" className="overflow-hidden">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Flame className="h-5 w-5 text-orange-500" />

@@ -129,6 +129,7 @@ export function ComboIndicator({ variant = "compact" }: ComboIndicatorProps) {
         transition={{ repeat: Infinity, duration: 2 }}
       >
       <Card
+        variant="elevated"
         className={`overflow-hidden transition-all duration-300 ${
           isOnFire ? "border-orange-500/50" : ""
         } ${glowClass}`}

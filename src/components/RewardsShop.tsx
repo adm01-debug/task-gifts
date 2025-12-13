@@ -82,7 +82,7 @@ export const RewardsShop = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
-      className="bg-card rounded-2xl border border-border overflow-hidden"
+      className="rounded-2xl overflow-hidden shadow-sm border border-border/60 bg-card/80"
     >
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">

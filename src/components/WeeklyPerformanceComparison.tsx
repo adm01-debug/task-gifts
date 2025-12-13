@@ -140,7 +140,7 @@ export function WeeklyPerformanceComparison() {
 
   if (loadingCurrent || loadingPrevious) {
     return (
-      <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+      <Card variant="glass" className="border-border/50">
         <CardHeader className="pb-2">
           <Skeleton className="h-6 w-48" />
         </CardHeader>
@@ -215,7 +215,7 @@ export function WeeklyPerformanceComparison() {
   ];
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+    <Card variant="glass" className="border-border/50">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-primary" />
