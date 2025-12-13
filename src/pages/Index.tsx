@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, Search, Sparkles, LogOut, User } from "lucide-react";
+import { Menu, LogOut, User } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileDrawer } from "@/components/MobileDrawer";
@@ -152,22 +152,6 @@ const Index = () => {
             </div>
 
             <div className="flex items-center gap-2 md:gap-3">
-              {/* Search */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-muted/50 border border-border"
-              >
-                <Search className="w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Buscar quests, usuários..."
-                  className="bg-transparent text-sm outline-none w-48 placeholder:text-muted-foreground"
-                />
-                <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono text-muted-foreground">
-                  ⌘K
-                </kbd>
-              </motion.div>
-
               {/* Theme Toggle */}
               <ThemeToggle />
 
@@ -176,16 +160,6 @@ const Index = () => {
 
               {/* Combo Indicator */}
               <ComboIndicator variant="compact" />
-
-              {/* AI Assistant */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-accent/20 to-primary/20 border border-accent/30 hover:border-accent/50 transition-colors"
-              >
-                <Sparkles className="w-4 h-4 text-accent" />
-                <span className="text-sm font-medium">AI Coach</span>
-              </motion.button>
 
               {/* User Menu */}
               <div className="relative flex items-center gap-2">
