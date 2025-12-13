@@ -686,6 +686,95 @@ export type Database = {
           },
         ]
       }
+      shop_purchases: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          processed_at: string | null
+          processed_by: string | null
+          quantity: number
+          reward_id: string
+          status: Database["public"]["Enums"]["purchase_status"]
+          total_coins: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          quantity?: number
+          reward_id: string
+          status?: Database["public"]["Enums"]["purchase_status"]
+          total_coins: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          quantity?: number
+          reward_id?: string
+          status?: Database["public"]["Enums"]["purchase_status"]
+          total_coins?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_purchases_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "shop_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_rewards: {
+        Row: {
+          category: Database["public"]["Enums"]["reward_category"]
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          price_coins: number
+          rarity: Database["public"]["Enums"]["reward_rarity"]
+          stock: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["reward_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          price_coins?: number
+          rarity?: Database["public"]["Enums"]["reward_rarity"]
+          stock?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["reward_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          price_coins?: number
+          rarity?: Database["public"]["Enums"]["reward_rarity"]
+          stock?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           department_id: string
@@ -931,8 +1020,11 @@ export type Database = {
         | "infographic"
         | "simulation"
         | "checklist"
+      purchase_status: "pending" | "approved" | "delivered" | "cancelled"
       quest_difficulty: "easy" | "medium" | "hard" | "expert"
       quest_status: "draft" | "active" | "archived"
+      reward_category: "product" | "benefit" | "experience"
+      reward_rarity: "common" | "rare" | "epic" | "legendary"
       trail_status: "draft" | "published" | "archived"
     }
     CompositeTypes: {
@@ -1096,8 +1188,11 @@ export const Constants = {
         "simulation",
         "checklist",
       ],
+      purchase_status: ["pending", "approved", "delivered", "cancelled"],
       quest_difficulty: ["easy", "medium", "hard", "expert"],
       quest_status: ["draft", "active", "archived"],
+      reward_category: ["product", "benefit", "experience"],
+      reward_rarity: ["common", "rare", "epic", "legendary"],
       trail_status: ["draft", "published", "archived"],
     },
   },
