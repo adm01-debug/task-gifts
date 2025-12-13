@@ -7,8 +7,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSocialFeed } from "@/hooks/useSocialFeed";
 import { useCommentsCounts } from "@/hooks/useActivityComments";
+import { useActivityReactions } from "@/hooks/useActivityReactions";
 import { ActivityComments } from "@/components/ActivityComments";
-import { Activity, Heart, Sparkles, Users } from "lucide-react";
+import { ActivityReactions } from "@/components/ActivityReactions";
+import { Activity, Users } from "lucide-react";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
@@ -20,23 +22,11 @@ interface SocialFeedProps {
 
 export function SocialFeed({ limit = 30, compact = false, className }: SocialFeedProps) {
   const { activities, isLoading } = useSocialFeed(limit);
-  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
   const [openComments, setOpenComments] = useState<string | null>(null);
 
   const activityIds = useMemo(() => activities.map((a) => a.id), [activities]);
   const { data: commentCounts = {} } = useCommentsCounts(activityIds);
-
-  const handleLike = (id: string) => {
-    setLikedItems((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
+  const { reactions } = useActivityReactions(activityIds);
 
   const toggleComments = (id: string) => {
     setOpenComments((prev) => (prev === id ? null : id));
@@ -170,36 +160,14 @@ export function SocialFeed({ limit = 30, compact = false, className }: SocialFee
                               locale: ptBR,
                             })}
                           </span>
+                        </div>
 
-                          {/* Interaction buttons */}
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <motion.button
-                              onClick={() => handleLike(activity.id)}
-                              className={cn(
-                                "flex items-center gap-1 text-xs transition-colors",
-                                likedItems.has(activity.id)
-                                  ? "text-pink-500"
-                                  : "text-muted-foreground hover:text-pink-500"
-                              )}
-                              whileTap={{ scale: 0.9 }}
-                            >
-                              <motion.div
-                                animate={
-                                  likedItems.has(activity.id)
-                                    ? { scale: [1, 1.3, 1] }
-                                    : {}
-                                }
-                              >
-                                <Heart
-                                  className="h-3.5 w-3.5"
-                                  fill={likedItems.has(activity.id) ? "currentColor" : "none"}
-                                />
-                              </motion.div>
-                            </motion.button>
-                            <button className="text-muted-foreground hover:text-amber-500 transition-colors">
-                              <Sparkles className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
+                        {/* Reactions */}
+                        <div className="mt-2">
+                          <ActivityReactions
+                            activityId={activity.id}
+                            reactions={reactions[activity.id] || []}
+                          />
                         </div>
 
                         {/* Comments section */}
