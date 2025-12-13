@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Search,
   History,
+  TrendingUp,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { UsersManager } from "@/components/admin/UsersManager";
 import { DepartmentsManager } from "@/components/admin/DepartmentsManager";
 import { AdminChangeHistory } from "@/components/admin/AdminChangeHistory";
+import { AdminMetricsDashboard } from "@/components/admin/AdminMetricsDashboard";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -190,6 +192,10 @@ function AdminPanelContent() {
               <LayoutDashboard className="h-4 w-4" />
               Visão Geral
             </TabsTrigger>
+            <TabsTrigger value="metrics" className="gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Métricas
+            </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
               <Users className="h-4 w-4" />
               Usuários
@@ -278,6 +284,11 @@ function AdminPanelContent() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Metrics Tab */}
+          <TabsContent value="metrics">
+            <AdminMetricsDashboard />
           </TabsContent>
 
           {/* Users Tab */}
