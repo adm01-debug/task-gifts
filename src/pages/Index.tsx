@@ -24,6 +24,7 @@ import { WeeklyPerformanceComparison } from "@/components/WeeklyPerformanceCompa
 import { SocialFeed } from "@/components/SocialFeed";
 import { RankingBadge } from "@/components/RankingBadge";
 import { WeeklyChallengeCard } from "@/components/WeeklyChallengeCard";
+import { SeasonalEventBanner } from "@/components/SeasonalEventBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -221,6 +222,9 @@ const Index = () => {
 
         {/* Dashboard Content */}
         <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+          {/* Seasonal Event Banner */}
+          <SeasonalEventBanner />
+          
           {/* Onboarding Widget */}
           <OnboardingWidget />
 

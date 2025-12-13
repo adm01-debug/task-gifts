@@ -812,6 +812,107 @@ export type Database = {
           },
         ]
       }
+      seasonal_challenges: {
+        Row: {
+          badge_icon: string | null
+          badge_name: string | null
+          coin_reward: number
+          created_at: string
+          description: string | null
+          event_id: string
+          icon: string
+          id: string
+          metric_key: string
+          order_index: number
+          target_value: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          badge_icon?: string | null
+          badge_name?: string | null
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          event_id: string
+          icon?: string
+          id?: string
+          metric_key: string
+          order_index?: number
+          target_value?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          badge_icon?: string | null
+          badge_name?: string | null
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          icon?: string
+          id?: string
+          metric_key?: string
+          order_index?: number
+          target_value?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonal_challenges_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "seasonal_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasonal_events: {
+        Row: {
+          banner_color: string
+          created_at: string
+          description: string | null
+          ends_at: string
+          icon: string
+          id: string
+          is_active: boolean
+          starts_at: string
+          theme: string
+          title: string
+          updated_at: string
+          xp_multiplier: number
+        }
+        Insert: {
+          banner_color?: string
+          created_at?: string
+          description?: string | null
+          ends_at: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          starts_at: string
+          theme: string
+          title: string
+          updated_at?: string
+          xp_multiplier?: number
+        }
+        Update: {
+          banner_color?: string
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          starts_at?: string
+          theme?: string
+          title?: string
+          updated_at?: string
+          xp_multiplier?: number
+        }
+        Relationships: []
+      }
       shop_promotions: {
         Row: {
           created_at: string
@@ -1215,6 +1316,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_seasonal_progress: {
+        Row: {
+          challenge_id: string
+          claimed: boolean
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          claimed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          claimed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_seasonal_progress_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "seasonal_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       weekly_challenges: {
         Row: {

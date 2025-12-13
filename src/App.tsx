@@ -24,6 +24,7 @@ import SocialFeed from "./pages/SocialFeed";
 import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 import PersonalStats from "./pages/PersonalStats";
+import SeasonalEventDetail from "./pages/SeasonalEventDetail";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="/conquistas" element={<Achievements />} />
               <Route path="/estatisticas" element={<PersonalStats />} />
               <Route path="/loja" element={<Shop />} />
+              <Route path="/eventos/:eventId" element={<SeasonalEventDetail />} />
               <Route
                 path="/loja/admin"
                 element={
