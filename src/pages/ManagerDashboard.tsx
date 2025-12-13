@@ -12,7 +12,8 @@ import {
   BookOpen,
   Flame,
   ArrowLeft,
-  Filter
+  Filter,
+  Brain,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { QuestsList } from "@/components/manager/QuestsList";
+import { ChurnPredictionPanel } from "@/components/ChurnPredictionPanel";
 
 // Types
 interface TeamMember {
@@ -451,6 +453,10 @@ export default function ManagerDashboard() {
               <Users className="h-4 w-4" />
               Equipe
             </TabsTrigger>
+            <TabsTrigger value="churn" className="gap-2">
+              <Brain className="h-4 w-4" />
+              Predição IA
+            </TabsTrigger>
             <TabsTrigger value="quests" className="gap-2">
               <Target className="h-4 w-4" />
               Quests
@@ -510,6 +516,10 @@ export default function ManagerDashboard() {
                 </Card>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="churn">
+            <ChurnPredictionPanel />
           </TabsContent>
 
           <TabsContent value="quests">

@@ -1,1 +1,7 @@
 project_id = "rvwpdecdopqqyvhdhsam"
+
+[functions.trail-recommendations]
+verify_jwt = true
+
+[functions.churn-prediction]
+verify_jwt = true
