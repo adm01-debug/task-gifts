@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useActiveDuels } from "@/hooks/useDuels";
 import { useAuth } from "@/hooks/useAuth";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonDuelList } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { differenceInHours, differenceInMinutes } from "date-fns";
 
@@ -38,22 +38,18 @@ export const TeamChallenges = () => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-card rounded-2xl border border-border overflow-hidden"
       >
-        <div className="p-4 border-b border-border">
-          <Skeleton className="h-8 w-48" />
-        </div>
-        <div className="p-4 space-y-4">
-          {[1, 2].map(i => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="h-5 w-3/4" />
-              <div className="flex justify-between">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <Skeleton className="h-6 w-12" />
-                <Skeleton className="h-10 w-10 rounded-full" />
-              </div>
-              <Skeleton className="h-3 w-full" />
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/5 flex items-center justify-center">
+              <Swords className="w-4 h-4 text-secondary" />
             </div>
-          ))}
+            <div>
+              <h3 className="font-bold">Desafios Ativos</h3>
+              <p className="text-xs text-muted-foreground">Carregando...</p>
+            </div>
+          </div>
         </div>
+        <SkeletonDuelList items={2} />
       </motion.div>
     );
   }
