@@ -14,6 +14,8 @@ import { AchievementContainer, useAchievements } from "@/components/AchievementS
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { PeerRecognition } from "@/components/PeerRecognition";
 import { KudosRanking } from "@/components/KudosRanking";
+import DepartmentMissions from "@/components/DepartmentMissions";
+import DepartmentRankings from "@/components/DepartmentRankings";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -229,15 +231,17 @@ const Index = () => {
 
           {/* Main Grid */}
           <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
-            {/* Left Column - Quests, Team & Recognition */}
+            {/* Left Column - Missions, Quests, Team & Recognition */}
             <div className="lg:col-span-2 space-y-4 md:space-y-6">
+              <DepartmentMissions />
               <DailyQuests />
               <PeerRecognition />
               <TeamChallenges />
             </div>
 
-            {/* Right Column - Leaderboard, Kudos Ranking, Analytics & Rewards */}
+            {/* Right Column - Rankings, Leaderboard, Kudos, Analytics & Rewards */}
             <div className="space-y-4 md:space-y-6">
+              <DepartmentRankings />
               <LiveLeaderboard />
               <KudosRanking />
               <AnalyticsWidget />
