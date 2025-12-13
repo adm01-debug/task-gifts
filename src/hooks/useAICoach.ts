@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { useCurrentProfile } from "./useProfiles";
+import { useCompetencies } from "./useCompetencies";
+import { usePublishedTrails, useUserEnrollments } from "./useTrails";
 
 interface Message {
   role: "user" | "assistant";
@@ -15,6 +17,9 @@ export function useAICoach() {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const { data: profile } = useCurrentProfile();
+  const { data: competencies } = useCompetencies(user?.id);
+  const { data: trails } = usePublishedTrails();
+  const { data: enrollments } = useUserEnrollments();
 
   const sendMessage = useCallback(async (input: string) => {
     if (!input.trim() || isLoading) return;
@@ -38,6 +43,24 @@ export function useAICoach() {
     };
 
     try {
+      // Build enriched trails data with enrollment status
+      const availableTrails = trails?.map(trail => {
+        const enrollment = enrollments?.find(e => e.trail_id === trail.id);
+        return {
+          id: trail.id,
+          title: trail.title,
+          description: trail.description,
+          icon: trail.icon,
+          estimated_hours: trail.estimated_hours,
+          xp_reward: trail.xp_reward,
+          enrolled: !!enrollment,
+          completed: !!enrollment?.completed_at,
+          progress: enrollment?.progress_percent || 0,
+        };
+      }) || [];
+
+      const completedTrailsCount = enrollments?.filter(e => e.completed_at).length || 0;
+
       const userContext = profile ? {
         displayName: profile.display_name,
         level: profile.level,
@@ -45,6 +68,9 @@ export function useAICoach() {
         coins: profile.coins,
         questsCompleted: profile.quests_completed,
         streak: profile.streak,
+        competencies: competencies || [],
+        availableTrails,
+        completedTrailsCount,
       } : undefined;
 
       const resp = await fetch(CHAT_URL, {
@@ -126,7 +152,7 @@ export function useAICoach() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, profile]);
+  }, [messages, isLoading, profile, competencies, trails, enrollments]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
