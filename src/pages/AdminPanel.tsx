@@ -15,6 +15,7 @@ import {
   Search,
   History,
   TrendingUp,
+  AlertTriangle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { UsersManager } from "@/components/admin/UsersManager";
 import { DepartmentsManager } from "@/components/admin/DepartmentsManager";
 import { AdminChangeHistory } from "@/components/admin/AdminChangeHistory";
 import { AdminMetricsDashboard } from "@/components/admin/AdminMetricsDashboard";
+import { AdminAlertsPanel } from "@/components/admin/AdminAlertsPanel";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -204,6 +206,10 @@ function AdminPanelContent() {
               <Building2 className="h-4 w-4" />
               Departamentos
             </TabsTrigger>
+            <TabsTrigger value="alerts" className="gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              Alertas
+            </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
               Histórico
@@ -299,6 +305,11 @@ function AdminPanelContent() {
           {/* Departments Tab */}
           <TabsContent value="departments">
             <DepartmentsManager />
+          </TabsContent>
+
+          {/* Alerts Tab */}
+          <TabsContent value="alerts">
+            <AdminAlertsPanel />
           </TabsContent>
 
           {/* History Tab */}
