@@ -3,6 +3,7 @@ import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Med
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   Drawer,
   DrawerClose,
@@ -181,8 +182,12 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
           </div>
         </div>
 
-        {/* Settings */}
-        <div className="p-4 pt-0">
+        {/* Theme Toggle & Settings */}
+        <div className="p-4 pt-0 space-y-2">
+          <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-muted/50">
+            <span className="font-medium">Tema</span>
+            <ThemeToggle />
+          </div>
           <motion.button
             whileTap={{ scale: 0.98 }}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-muted transition-colors"
