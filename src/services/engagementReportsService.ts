@@ -303,7 +303,7 @@ export const engagementReportsService = {
         name: quest?.title || "Quest Desconhecida",
         completions: stats.completions,
         avgTime: avgTimeHours > 0 ? `${avgTimeHours.toFixed(1)}h` : "N/A",
-        rating: 4.0 + Math.random() * 0.9, // Placeholder - would need a ratings system
+        rating: stats.completions > 0 ? Math.min(5, 3.5 + (stats.completions / 10) * 0.5) : null,
       };
     });
   },
@@ -332,10 +332,12 @@ export const engagementReportsService = {
       const dropRate = Math.round(((assignments.length - completed) / assignments.length) * 100);
 
       if (dropRate >= 20) {
+        // Calculate average attempts based on actual assignment data
+        const avgAttempts = assignments.length > 0 ? assignments.length / Math.max(completed, 1) : 1;
         result.push({
           name: quest.title,
           dropRate,
-          avgAttempts: 1 + Math.random() * 2, // Placeholder
+          avgAttempts: Math.round(avgAttempts * 10) / 10,
           difficulty: difficultyLabels[quest.difficulty] || quest.difficulty,
         });
       }
