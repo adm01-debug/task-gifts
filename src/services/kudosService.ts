@@ -156,7 +156,10 @@ export const kudosService = {
     };
   },
 
-  async giveKudos(kudos: KudosInsert): Promise<Kudos> {
+  async giveKudos(kudos: KudosInsert): Promise<{ 
+    kudos: Kudos; 
+    comboResult: { finalXp: number; bonusXp: number; multiplier: number } | null;
+  }> {
     const { data, error } = await supabase
       .from("kudos")
       .insert(kudos)
@@ -196,31 +199,42 @@ export const kudosService = {
       console.error("Failed to audit kudos:", e);
     }
 
-    // Notify the recipient
+    // Add XP to the recipient with combo multiplier
+    let comboResult: { finalXp: number; bonusXp: number; multiplier: number } | null = null;
     try {
+      // Register combo action for the recipient and apply multiplier
+      const result = await comboService.registerAction(kudos.to_user_id, xpValue);
+      comboResult = {
+        finalXp: result.finalXp,
+        bonusXp: result.bonusXp,
+        multiplier: result.combo?.current_multiplier || 1.0,
+      };
+      await profilesService.addXp(kudos.to_user_id, result.finalXp, `Kudos: ${badgeName}`);
+    } catch (e) {
+      console.error("Failed to add XP for kudos:", e);
+    }
+
+    // Notify the recipient with combo info
+    try {
+      const comboText = comboResult && comboResult.bonusXp > 0 
+        ? ` (+${comboResult.bonusXp} bônus combo!)`
+        : '';
+      
       await notificationsService.create({
         user_id: kudos.to_user_id,
         type: "kudos",
         title: `🎉 ${senderName} te reconheceu!`,
-        message: `Você recebeu: ${badgeName}`,
+        message: `Você recebeu: ${badgeName} +${comboResult?.finalXp || xpValue} XP${comboText}`,
         data: { 
           fromUserId: kudos.from_user_id,
           badgeId: kudos.badge_id,
           message: kudos.message,
-          xpValue,
+          xpValue: comboResult?.finalXp || xpValue,
+          bonusXp: comboResult?.bonusXp || 0,
         },
       });
     } catch (e) {
       console.error("Failed to create kudos notification:", e);
-    }
-
-    // Add XP to the recipient with combo multiplier
-    try {
-      // Register combo action for the recipient and apply multiplier
-      const comboResult = await comboService.registerAction(kudos.to_user_id, xpValue);
-      await profilesService.addXp(kudos.to_user_id, comboResult.finalXp, `Kudos: ${badgeName}`);
-    } catch (e) {
-      console.error("Failed to add XP for kudos:", e);
     }
 
     // Auto-update mission progress for kudos given
@@ -231,7 +245,7 @@ export const kudosService = {
       console.error("Failed to update kudos mission progress:", e);
     }
 
-    return data as Kudos;
+    return { kudos: data as Kudos, comboResult };
   },
 
   async deleteKudos(id: string): Promise<void> {

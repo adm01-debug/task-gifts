@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { questsService, type Quest, type QuestInsert, type QuestUpdate, type QuestStepInsert, type QuestStatus } from "@/services/questsService";
 import { useAuth } from "./useAuth";
+import { toast } from "sonner";
 
 export const questKeys = {
   all: ["quests"] as const,
@@ -216,6 +217,18 @@ export function useCompleteQuest() {
       queryClient.invalidateQueries({ queryKey: questKeys.assignments(data.assignment.quest_id) });
       queryClient.invalidateQueries({ queryKey: questKeys.userAssignments(data.assignment.user_id) });
       queryClient.invalidateQueries({ queryKey: questKeys.stats(data.assignment.quest_id) });
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['combo'] });
+      
+      if (data.quest && data.comboResult) {
+        const comboText = data.comboResult.bonusXp > 0 
+          ? ` (${data.comboResult.finalXp - data.comboResult.bonusXp} + ${data.comboResult.bonusXp} combo ${data.comboResult.multiplier}x)`
+          : '';
+        
+        toast.success(`🎉 Quest completada! +${data.comboResult.finalXp} XP${comboText}`, {
+          duration: 5000,
+        });
+      }
     },
   });
 }
