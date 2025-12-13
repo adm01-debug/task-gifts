@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { profilesService, type Profile, type ProfileUpdate } from "@/services/profilesService";
 import { useAuth } from "./useAuth";
+import { useSoundEffects } from "./useSoundEffects";
+import { useAchievementNotification } from "@/contexts/AchievementNotificationContext";
 
 export const profileKeys = {
   all: ["profiles"] as const,
@@ -66,6 +68,8 @@ export function useUpdateProfile() {
 export function useAddXp() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { playLevelUpSound, playXPSound } = useSoundEffects();
+  const { triggerLevelUp } = useAchievementNotification();
 
   return useMutation({
     mutationFn: ({ id, xpAmount, source }: { id: string; xpAmount: number; source?: string }) =>
@@ -74,6 +78,15 @@ export function useAddXp() {
       queryClient.setQueryData(profileKeys.detail(data.profile.id), data.profile);
       if (user?.id === data.profile.id) {
         queryClient.setQueryData(profileKeys.current(), data.profile);
+        
+        // Play XP sound
+        playXPSound();
+        
+        // Trigger level-up celebration if leveled up
+        if (data.leveledUp && data.newLevel) {
+          playLevelUpSound();
+          triggerLevelUp(data.newLevel);
+        }
       }
       queryClient.invalidateQueries({ queryKey: profileKeys.leaderboard(10) });
     },
