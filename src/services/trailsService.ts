@@ -193,7 +193,10 @@ export const trailsService = {
   },
 
   // Complete module
-  async completeModule(userId: string, moduleId: string, score?: number, moduleXpReward: number = 25): Promise<ModuleProgress> {
+  async completeModule(userId: string, moduleId: string, score?: number, moduleXpReward: number = 25): Promise<{
+    progress: ModuleProgress;
+    comboResult: { finalXp: number; bonusXp: number; multiplier: number };
+  }> {
     const { data, error } = await supabase
       .from("module_progress")
       .update({
@@ -208,9 +211,15 @@ export const trailsService = {
     if (error) throw error;
 
     // Apply combo multiplier to module XP reward
+    let comboResult = { finalXp: moduleXpReward, bonusXp: 0, multiplier: 1.0 };
     try {
-      const comboResult = await comboService.registerAction(userId, moduleXpReward);
-      await profilesService.addXp(userId, comboResult.finalXp, 'module_completed');
+      const result = await comboService.registerAction(userId, moduleXpReward);
+      comboResult = {
+        finalXp: result.finalXp,
+        bonusXp: result.bonusXp,
+        multiplier: result.combo?.current_multiplier || 1.0,
+      };
+      await profilesService.addXp(userId, result.finalXp, 'module_completed');
     } catch (e) {
       console.error("Failed to add XP for module completion:", e);
     }
@@ -223,7 +232,7 @@ export const trailsService = {
       console.error("Failed to update module mission progress:", e);
     }
 
-    return data as ModuleProgress;
+    return { progress: data as ModuleProgress, comboResult };
   },
 
   // Update enrollment progress

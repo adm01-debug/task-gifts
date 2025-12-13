@@ -100,11 +100,17 @@ export function useGiveKudos() {
 
   return useMutation({
     mutationFn: (kudos: KudosInsert) => kudosService.giveKudos(kudos),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: kudosKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['combo'] });
+      
+      const comboText = result.comboResult && result.comboResult.bonusXp > 0 
+        ? ` (+${result.comboResult.bonusXp} bônus combo!)`
+        : '';
+      
       toast({
         title: "Reconhecimento enviado! 🎉",
-        description: "Seu colega receberá uma notificação.",
+        description: `Seu colega receberá ${result.comboResult?.finalXp || 25} XP${comboText}`,
       });
     },
     onError: (error) => {

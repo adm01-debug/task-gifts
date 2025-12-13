@@ -63,14 +63,19 @@ export function useCheckIn() {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: attendanceKeys.all });
       queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['combo'] });
       
       if (result.isPunctual) {
+        const comboText = result.bonusXp > 0 
+          ? ` (${result.xpEarned - result.bonusXp} + ${result.bonusXp} combo ${result.comboMultiplier}x)`
+          : '';
+        
         if (result.streakMilestoneReached) {
-          toast.success(`🔥 Check-in pontual! Streak de ${result.newStreak} dias! +${result.xpEarned} XP`, {
+          toast.success(`🔥 Check-in pontual! Streak de ${result.newStreak} dias! +${result.xpEarned} XP${comboText}`, {
             duration: 5000,
           });
         } else {
-          toast.success(`✅ Check-in pontual! +${result.xpEarned} XP`, {
+          toast.success(`✅ Check-in pontual! +${result.xpEarned} XP${comboText}`, {
             duration: 3000,
           });
         }

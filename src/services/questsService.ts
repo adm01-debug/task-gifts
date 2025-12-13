@@ -200,7 +200,11 @@ export const questsService = {
     return data;
   },
 
-  async completeQuest(assignmentId: string): Promise<{ assignment: QuestAssignment; quest: Quest | null }> {
+  async completeQuest(assignmentId: string): Promise<{ 
+    assignment: QuestAssignment; 
+    quest: Quest | null;
+    comboResult: { finalXp: number; bonusXp: number; multiplier: number } | null;
+  }> {
     const { data, error } = await supabase
       .from("quest_assignments")
       .update({ completed_at: new Date().toISOString() })
@@ -212,6 +216,8 @@ export const questsService = {
 
     // Get quest details for notification and audit
     let quest: Quest | null = null;
+    let comboResult: { finalXp: number; bonusXp: number; multiplier: number } | null = null;
+    
     try {
       quest = await this.getById(data.quest_id);
       if (quest) {
@@ -219,8 +225,13 @@ export const questsService = {
         await auditService.logQuestCompleted(data.user_id, quest.id, quest.xp_reward, quest.coin_reward);
 
         // Apply combo multiplier to quest XP reward
-        const comboResult = await comboService.registerAction(data.user_id, quest.xp_reward);
-        await profilesService.addXp(data.user_id, comboResult.finalXp, `Quest: ${quest.title}`);
+        const result = await comboService.registerAction(data.user_id, quest.xp_reward);
+        comboResult = {
+          finalXp: result.finalXp,
+          bonusXp: result.bonusXp,
+          multiplier: result.combo?.current_multiplier || 1.0,
+        };
+        await profilesService.addXp(data.user_id, result.finalXp, `Quest: ${quest.title}`);
         
         // Add coins (no combo multiplier for coins)
         if (quest.coin_reward > 0) {
@@ -238,8 +249,8 @@ export const questsService = {
           data: { 
             questId: quest.id, 
             questTitle: quest.title,
-            xpReward: comboResult.finalXp,
-            bonusXp: comboResult.bonusXp,
+            xpReward: result.finalXp,
+            bonusXp: result.bonusXp,
             coinReward: quest.coin_reward
           },
         });
@@ -255,7 +266,7 @@ export const questsService = {
       console.error("Failed to process quest completion:", e);
     }
 
-    return { assignment: data, quest };
+    return { assignment: data, quest, comboResult };
   },
 
   // Stats

@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { trailsService, type LearningTrail, type TrailModule, type TrailEnrollment, type ModuleProgress } from "@/services/trailsService";
+import { trailsService, type LearningTrail, type TrailModule } from "@/services/trailsService";
 import { useAuth } from "./useAuth";
-import { profilesService } from "@/services/profilesService";
 import { toast } from "sonner";
 
 export const trailKeys = {
@@ -97,11 +96,8 @@ export function useCompleteModule() {
       totalModules: number;
       completedModules: number;
     }) => {
-      // Complete the module
-      const progress = await trailsService.completeModule(user!.id, moduleId, score);
-      
-      // Add XP for module completion
-      await profilesService.addXp(user!.id, xpReward, "module_completion");
+      // Complete the module with XP reward (combo is applied inside the service)
+      const result = await trailsService.completeModule(user!.id, moduleId, score, xpReward);
       
       // Calculate new progress percentage
       const newCompletedCount = completedModules + 1;
@@ -110,15 +106,20 @@ export function useCompleteModule() {
       // Update enrollment progress
       await trailsService.updateEnrollmentProgress(user!.id, trailId, progressPercent);
       
-      return { progress, progressPercent };
+      return { progress: result.progress, progressPercent, comboResult: result.comboResult };
     },
-    onSuccess: ({ progressPercent }) => {
+    onSuccess: ({ progressPercent, comboResult }) => {
       queryClient.invalidateQueries({ queryKey: trailKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['combo'] });
+      
+      const comboText = comboResult.bonusXp > 0 
+        ? ` (${comboResult.finalXp - comboResult.bonusXp} + ${comboResult.bonusXp} combo ${comboResult.multiplier}x)`
+        : '';
       
       if (progressPercent >= 100) {
-        toast.success("🎉 Parabéns! Você completou a trilha!");
+        toast.success(`🎉 Parabéns! Você completou a trilha! +${comboResult.finalXp} XP${comboText}`);
       } else {
-        toast.success("Módulo concluído! +XP adicionado");
+        toast.success(`✅ Módulo concluído! +${comboResult.finalXp} XP${comboText}`);
       }
     },
     onError: () => {
