@@ -86,7 +86,7 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className={cn(
         "relative p-4 rounded-2xl border border-border bg-card overflow-hidden",
-        "hover:border-primary/30 transition-colors duration-300",
+        "card-interactive",
         colors.glow
       )}
     >
