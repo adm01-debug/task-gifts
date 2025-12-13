@@ -1,14 +1,35 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Volume2, VolumeX, Music, Play } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSoundSettings } from "@/contexts/SoundSettingsContext";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 
+const SOUND_OPTIONS = [
+  { value: "achievement", label: "🏆 Conquista", icon: "🏆" },
+  { value: "levelUp", label: "⬆️ Level Up", icon: "⬆️" },
+  { value: "coins", label: "💰 Moedas", icon: "💰" },
+  { value: "combo", label: "🔥 Combo", icon: "🔥" },
+  { value: "quest", label: "🎯 Quest", icon: "🎯" },
+  { value: "xp", label: "✨ XP", icon: "✨" },
+  { value: "click", label: "👆 Clique", icon: "👆" },
+];
+
 export const SoundSettingsCard = () => {
   const { settings, setEnabled, setVolume } = useSoundSettings();
-  const { playClickSound, playAchievementSound } = useSoundEffects();
+  const [selectedSound, setSelectedSound] = useState("achievement");
+  const { 
+    playClickSound, 
+    playAchievementSound, 
+    playLevelUpSound, 
+    playCoinsSound, 
+    playComboTierUpSound,
+    playQuestCompleteSound,
+    playXPSound 
+  } = useSoundEffects();
 
   const handleToggle = (enabled: boolean) => {
     setEnabled(enabled);
@@ -22,7 +43,16 @@ export const SoundSettingsCard = () => {
   };
 
   const handleTestSound = () => {
-    playAchievementSound();
+    switch (selectedSound) {
+      case "achievement": playAchievementSound(); break;
+      case "levelUp": playLevelUpSound(); break;
+      case "coins": playCoinsSound(); break;
+      case "combo": playComboTierUpSound(3); break;
+      case "quest": playQuestCompleteSound(); break;
+      case "xp": playXPSound(); break;
+      case "click": playClickSound(); break;
+      default: playAchievementSound();
+    }
   };
 
   return (
@@ -76,6 +106,18 @@ export const SoundSettingsCard = () => {
               <span className="font-medium">{Math.round(settings.volume * 100)}%</span>
             </div>
             <div className="flex items-center gap-3">
+              <Select value={selectedSound} onValueChange={setSelectedSound}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SOUND_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Slider
                 value={[settings.volume]}
                 onValueChange={handleVolumeChange}
@@ -91,7 +133,6 @@ export const SoundSettingsCard = () => {
                 className="shrink-0 gap-1.5"
               >
                 <Play className="w-3.5 h-3.5" />
-                Testar
               </Button>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
