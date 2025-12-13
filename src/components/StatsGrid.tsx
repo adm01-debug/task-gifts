@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, Variants } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Zap, Flame, Trophy, Target, TrendingUp, Users, Clock, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentProfile } from "@/hooks/useProfiles";
@@ -342,10 +343,12 @@ const quickActionItemVariants: Variants = {
 
 // Additional component for quick actions
 export const QuickActions = () => {
+  const navigate = useNavigate();
+  
   const actions = [
-    { icon: Target, label: "Nova Quest", color: "primary" },
-    { icon: Users, label: "Desafio", color: "secondary" },
-    { icon: Clock, label: "Evento", color: "accent" },
+    { icon: Target, label: "Nova Quest", color: "primary", onClick: () => navigate("/quest-builder") },
+    { icon: Users, label: "Desafio", color: "secondary", onClick: () => navigate("/duelos") },
+    { icon: Clock, label: "Evento", color: "accent", onClick: () => navigate("/trails") },
   ];
 
   return (
@@ -365,6 +368,7 @@ export const QuickActions = () => {
             transition: { duration: 0.2 } 
           }}
           whileTap={{ scale: 0.95 }}
+          onClick={action.onClick}
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-xl border border-border",
             "bg-gradient-to-r hover:border-primary/30 transition-all duration-200",
