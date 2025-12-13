@@ -686,6 +686,62 @@ export type Database = {
           },
         ]
       }
+      shop_promotions: {
+        Row: {
+          created_at: string
+          current_claims: number
+          description: string | null
+          discount_coins: number | null
+          discount_percent: number | null
+          ends_at: string
+          id: string
+          is_active: boolean
+          max_claims: number | null
+          reward_id: string
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_claims?: number
+          description?: string | null
+          discount_coins?: number | null
+          discount_percent?: number | null
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          max_claims?: number | null
+          reward_id: string
+          starts_at?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_claims?: number
+          description?: string | null
+          discount_coins?: number | null
+          discount_percent?: number | null
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          max_claims?: number | null
+          reward_id?: string
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_promotions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "shop_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_purchases: {
         Row: {
           created_at: string
