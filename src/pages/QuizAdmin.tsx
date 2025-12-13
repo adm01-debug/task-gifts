@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, ArrowLeft, Trash2, Edit2, Eye, EyeOff, 
   Sparkles, Trophy, HelpCircle, CheckCircle2, XCircle,
-  Filter, Search
+  Filter, Search, Wand2
 } from "lucide-react";
+import AIQuestionGenerator from "@/components/quiz/AIQuestionGenerator";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,6 +102,7 @@ function QuizAdminContent() {
   const [form, setForm] = useState<QuestionForm>(emptyForm);
   const [filterType, setFilterType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
 
   const { data: questions, isLoading } = useQuizQuestions();
   const { data: editQuestion } = useQuizQuestion(editingId || '');
@@ -256,12 +258,36 @@ function QuizAdminContent() {
                 Gerencie as perguntas dos quizzes
               </p>
             </div>
-            <Button onClick={handleOpenCreate} className="gap-2">
-              <Plus className="w-4 h-4" />
-              Nova Pergunta
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant={showAIGenerator ? "default" : "outline"} 
+                onClick={() => setShowAIGenerator(!showAIGenerator)} 
+                className="gap-2"
+              >
+                <Wand2 className="w-4 h-4" />
+                Gerar com IA
+              </Button>
+              <Button onClick={handleOpenCreate} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Nova Pergunta
+              </Button>
+            </div>
           </div>
         </motion.div>
+
+        {/* AI Generator Panel */}
+        <AnimatePresence>
+          {showAIGenerator && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-6 overflow-hidden"
+            >
+              <AIQuestionGenerator onQuestionsGenerated={() => setShowAIGenerator(false)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Filters */}
         <motion.div
