@@ -4,9 +4,11 @@ import { Sparkles, Trophy, Gamepad2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MagicCardQuiz, QuizQuestion } from "@/components/quiz/MagicCardQuiz";
 import { MillionaireQuiz, MillionaireQuestion } from "@/components/quiz/MillionaireQuiz";
+import { QuizDailyRanking } from "@/components/quiz/QuizDailyRanking";
+import { useSaveQuizScore } from "@/hooks/useQuizScores";
+import { toast } from "sonner";
 
 // Sample questions for demo - in production these would come from the database
 const sampleMagicQuestions: QuizQuestion[] = [
@@ -173,17 +175,35 @@ export default function DailyQuiz() {
     magic: false,
     millionaire: false,
   });
+  const saveScore = useSaveQuizScore();
 
   const handleMagicComplete = (score: number, totalPoints: number, correctAnswers: number) => {
-    console.log("Magic Quiz completed:", { score, totalPoints, correctAnswers });
-    setCompletedToday(prev => ({ ...prev, magic: true }));
-    // Here you would save progress to database and award XP
+    saveScore.mutate({
+      quiz_type: 'magic_cards',
+      score,
+      correct_answers: correctAnswers,
+      total_questions: sampleMagicQuestions.length,
+      streak_bonus: score - (correctAnswers * 100),
+    }, {
+      onSuccess: () => {
+        toast.success("Pontuação salva no ranking!");
+        setCompletedToday(prev => ({ ...prev, magic: true }));
+      },
+    });
   };
 
   const handleMillionaireComplete = (level: number, prize: number) => {
-    console.log("Millionaire Quiz completed:", { level, prize });
-    setCompletedToday(prev => ({ ...prev, millionaire: true }));
-    // Here you would save progress to database and award XP
+    saveScore.mutate({
+      quiz_type: 'millionaire',
+      score: prize,
+      correct_answers: level,
+      total_questions: sampleMillionaireQuestions.length,
+    }, {
+      onSuccess: () => {
+        toast.success("Pontuação salva no ranking!");
+        setCompletedToday(prev => ({ ...prev, millionaire: true }));
+      },
+    });
   };
 
   return (
@@ -216,98 +236,109 @@ export default function DailyQuiz() {
         </motion.div>
 
         {!activeQuiz ? (
-          /* Quiz Selection */
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid md:grid-cols-2 gap-6"
-          >
-            {/* Magic Cards Quiz */}
-            <Card 
-              className="overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-purple-500/10 hover:border-primary/40 transition-all cursor-pointer group"
-              onClick={() => setActiveQuiz("magic")}
+          /* Quiz Selection + Ranking */
+          <div className="grid lg:grid-cols-3 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="lg:col-span-2 grid md:grid-cols-2 gap-6"
             >
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-xl bg-primary/20 group-hover:scale-110 transition-transform">
-                    <Sparkles className="w-8 h-8 text-primary" />
+              {/* Magic Cards Quiz */}
+              <Card 
+                className="overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-purple-500/10 hover:border-primary/40 transition-all cursor-pointer group"
+                onClick={() => setActiveQuiz("magic")}
+              >
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="p-3 rounded-xl bg-primary/20 group-hover:scale-110 transition-transform">
+                      <Sparkles className="w-8 h-8 text-primary" />
+                    </div>
+                    {completedToday.magic && (
+                      <span className="text-xs text-emerald-500 font-medium">✓ Concluído hoje</span>
+                    )}
                   </div>
-                  {completedToday.magic && (
-                    <span className="text-xs text-emerald-500 font-medium">✓ Concluído hoje</span>
-                  )}
-                </div>
-                <CardTitle className="text-2xl mt-4">Cartas Mágicas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Vire as cartas para revelar perguntas! Cada carta esconde um desafio com pontuação baseada na dificuldade.
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary" />
-                    Animações de flip interativas
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary" />
-                    Sistema de streak para bônus
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary" />
-                    Explicações após cada resposta
-                  </li>
-                </ul>
-                <div className="mt-6">
-                  <Button className="w-full gap-2 group-hover:bg-primary/90">
-                    <Sparkles className="w-4 h-4" />
-                    Jogar Cartas Mágicas
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  <CardTitle className="text-2xl mt-4">Cartas Mágicas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">
+                    Vire as cartas para revelar perguntas! Cada carta esconde um desafio com pontuação baseada na dificuldade.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-primary" />
+                      Animações de flip interativas
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-primary" />
+                      Sistema de streak para bônus
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-primary" />
+                      Explicações após cada resposta
+                    </li>
+                  </ul>
+                  <div className="mt-6">
+                    <Button className="w-full gap-2 group-hover:bg-primary/90">
+                      <Sparkles className="w-4 h-4" />
+                      Jogar Cartas Mágicas
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Millionaire Quiz */}
-            <Card 
-              className="overflow-hidden border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-orange-500/10 hover:border-amber-500/40 transition-all cursor-pointer group"
-              onClick={() => setActiveQuiz("millionaire")}
-            >
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-xl bg-amber-500/20 group-hover:scale-110 transition-transform">
-                    <Trophy className="w-8 h-8 text-amber-500" />
+              {/* Millionaire Quiz */}
+              <Card 
+                className="overflow-hidden border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-orange-500/10 hover:border-amber-500/40 transition-all cursor-pointer group"
+                onClick={() => setActiveQuiz("millionaire")}
+              >
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="p-3 rounded-xl bg-amber-500/20 group-hover:scale-110 transition-transform">
+                      <Trophy className="w-8 h-8 text-amber-500" />
+                    </div>
+                    {completedToday.millionaire && (
+                      <span className="text-xs text-emerald-500 font-medium">✓ Concluído hoje</span>
+                    )}
                   </div>
-                  {completedToday.millionaire && (
-                    <span className="text-xs text-emerald-500 font-medium">✓ Concluído hoje</span>
-                  )}
-                </div>
-                <CardTitle className="text-2xl mt-4">Show do Milhão</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Responda perguntas de dificuldade crescente e acumule pontos! Use suas ajudas com sabedoria.
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    Escada de prêmios progressiva
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    3 ajudas: 50/50, Plateia, Telefone
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    Timer e checkpoints de segurança
-                  </li>
-                </ul>
-                <div className="mt-6">
-                  <Button className="w-full gap-2 bg-amber-500 hover:bg-amber-600">
-                    <Trophy className="w-4 h-4" />
-                    Jogar Show do Milhão
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                  <CardTitle className="text-2xl mt-4">Show do Milhão</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">
+                    Responda perguntas de dificuldade crescente e acumule pontos! Use suas ajudas com sabedoria.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      Escada de prêmios progressiva
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      3 ajudas: 50/50, Plateia, Telefone
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      Timer e checkpoints de segurança
+                    </li>
+                  </ul>
+                  <div className="mt-6">
+                    <Button className="w-full gap-2 bg-amber-500 hover:bg-amber-600">
+                      <Trophy className="w-4 h-4" />
+                      Jogar Show do Milhão
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Daily Ranking */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <QuizDailyRanking />
+            </motion.div>
+          </div>
         ) : activeQuiz === "magic" ? (
           /* Magic Cards Game */
           <motion.div
