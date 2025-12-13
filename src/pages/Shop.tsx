@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, Package, Star, Target, ShoppingBag, History, Sparkles } from "lucide-react";
+import { Coins, Package, Star, Target, ShoppingBag, History, Sparkles, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { CelebrationEffect } from "@/components/CelebrationEffect";
 import { FlashSalesBanner } from "@/components/FlashSalesBanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,9 +20,11 @@ import { useShopRewards, useUserPurchases, usePurchaseReward } from "@/hooks/use
 import { useProfile } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { shopService, type ShopReward, type RewardCategory } from "@/services/shopService";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 function RewardCard({
   reward,
@@ -222,6 +225,7 @@ function PurchaseHistory() {
 }
 
 export default function Shop() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profile } = useProfile(user?.id ?? "");
   const { data: rewards, isLoading } = useShopRewards();
@@ -230,6 +234,7 @@ export default function Shop() {
   const [selectedReward, setSelectedReward] = useState<ShopReward | null>(null);
   const [activeCategory, setActiveCategory] = useState<"all" | RewardCategory>("all");
   const [celebration, setCelebration] = useState<{ active: boolean; type: "epic" | "legendary" } | null>(null);
+  const isScrolled = useScrollHeader(10);
 
   const triggerCelebration = useCallback((rarity: string) => {
     if (rarity === "legendary") {
@@ -278,21 +283,36 @@ export default function Shop() {
       )}
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 p-6 text-white">
-        <div className="max-w-6xl mx-auto">
+      <div 
+        className={cn(
+          "header-sticky bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 text-white",
+          isScrolled && "scrolled"
+        )}
+      >
+        <div className="max-w-6xl mx-auto p-6">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-between"
           >
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Sparkles className="w-6 h-6" />
-                Loja de Recompensas
-              </h1>
-              <p className="text-white/80 mt-1">
-                Troque suas moedas por produtos e benefícios exclusivos
-              </p>
+            <div className="flex items-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/")}
+                className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </motion.button>
+              <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  <Sparkles className="w-6 h-6" />
+                  Loja de Recompensas
+                </h1>
+                <p className="text-white/80 mt-1">
+                  Troque suas moedas por produtos e benefícios exclusivos
+                </p>
+              </div>
             </div>
 
             <motion.div

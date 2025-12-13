@@ -18,7 +18,9 @@ import { ProfileAvatarSection } from "@/components/ProfileAvatarSection";
 import { SoundSettingsCard } from "@/components/SoundSettingsCard";
 import { useAvatarConfig } from "@/hooks/useAvatar";
 import { useUserRank } from "@/hooks/useUserRank";
+import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface ProfileData {
   id: string;
@@ -66,6 +68,7 @@ const Profile = () => {
   const [avatarOpen, setAvatarOpen] = useState(false);
   const { data: rankData } = useUserRank();
   const { data: avatarConfig } = useAvatarConfig(user?.id);
+  const isScrolled = useScrollHeader(10);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -141,7 +144,12 @@ const Profile = () => {
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
+      <header 
+        className={cn(
+          "header-sticky border-b border-border",
+          isScrolled && "scrolled"
+        )}
+      >
         <div className="container max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
           <motion.button
             whileHover={{ scale: 1.05 }}

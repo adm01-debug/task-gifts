@@ -29,12 +29,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
+import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { QuestsList } from "@/components/manager/QuestsList";
 import { ChurnPredictionPanel } from "@/components/ChurnPredictionPanel";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
 import { TeamCompetencyDashboard } from "@/components/manager/TeamCompetencyDashboard";
 import { CompetencyAlertsPanel } from "@/components/CompetencyAlertsPanel";
 import { TeamCertificationsPanel } from "@/components/TeamCertificationsPanel";
+import { cn } from "@/lib/utils";
 
 // Types
 interface TeamMember {
@@ -355,6 +357,7 @@ export default function ManagerDashboard() {
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [teamMembers] = useState<TeamMember[]>(mockTeamMembers);
   const [departments] = useState<Department[]>(mockDepartments);
+  const isScrolled = useScrollHeader(10);
   
   const filteredMembers = selectedDepartment === "all" 
     ? teamMembers 
@@ -372,7 +375,10 @@ export default function ManagerDashboard() {
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50"
+        className={cn(
+          "header-sticky border-b border-border/50",
+          isScrolled && "scrolled"
+        )}
       >
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
