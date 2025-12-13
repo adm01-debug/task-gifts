@@ -1,73 +1,62 @@
 import { motion } from "framer-motion";
-import { Target, Clock, Zap, CheckCircle2, Circle, Flame, Gift, Star } from "lucide-react";
+import { Target, Clock, Zap, CheckCircle2, Circle, Flame, Star, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-
-interface Quest {
-  id: string;
-  title: string;
-  description: string;
-  xp: number;
-  coins?: number;
-  progress: number;
-  total: number;
-  type: "daily" | "weekly" | "special";
-  timeLeft?: string;
-  completed: boolean;
-}
-
-const quests: Quest[] = [
-  {
-    id: "1",
-    title: "Complete 3 tarefas",
-    description: "Finalize qualquer tipo de tarefa",
-    xp: 150,
-    coins: 50,
-    progress: 2,
-    total: 3,
-    type: "daily",
-    completed: false,
-  },
-  {
-    id: "2",
-    title: "Primeiro do dia",
-    description: "Complete uma tarefa antes das 10h",
-    xp: 100,
-    progress: 1,
-    total: 1,
-    type: "daily",
-    completed: true,
-  },
-  {
-    id: "3",
-    title: "Colaborador",
-    description: "Ajude 2 colegas com suas tarefas",
-    xp: 200,
-    coins: 75,
-    progress: 0,
-    total: 2,
-    type: "daily",
-    timeLeft: "8h",
-    completed: false,
-  },
-  {
-    id: "4",
-    title: "Evento Especial: Hackathon",
-    description: "Participe do hackathon de inovação",
-    xp: 500,
-    coins: 200,
-    progress: 0,
-    total: 1,
-    type: "special",
-    timeLeft: "2d 5h",
-    completed: false,
-  },
-];
+import { useAllMissions, useClaimMissionReward } from "@/hooks/useMissions";
+import { useCurrentProfile } from "@/hooks/useProfiles";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { MissionWithProgress } from "@/services/missionsService";
 
 export const DailyQuests = () => {
   const [hoveredQuest, setHoveredQuest] = useState<string | null>(null);
+  const { data: missions = [], isLoading } = useAllMissions();
+  const { data: profile } = useCurrentProfile();
+  const claimMutation = useClaimMissionReward();
 
-  const completedCount = quests.filter(q => q.completed).length;
+  // Filter only daily missions for this component
+  const dailyMissions = missions.filter(m => m.frequency === "daily");
+  
+  const completedCount = dailyMissions.filter(m => m.progress?.completed_at).length;
+  const claimableCount = dailyMissions.filter(m => m.progress?.completed_at && !m.progress?.claimed).length;
+
+  const handleClaim = (mission: MissionWithProgress) => {
+    if (mission.progress?.id) {
+      claimMutation.mutate(mission.progress.id);
+    }
+  };
+
+  // Calculate time left until midnight
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const hoursLeft = Math.floor((midnight.getTime() - now.getTime()) / (1000 * 60 * 60));
+
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card rounded-2xl border border-border overflow-hidden"
+      >
+        <div className="p-4 border-b border-border">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-2 w-full" />
+        </div>
+        <div className="p-4 space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="flex items-start gap-3">
+              <Skeleton className="w-5 h-5 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-1.5 w-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -85,12 +74,14 @@ export const DailyQuests = () => {
             </div>
             <div>
               <h3 className="font-bold">Quests Diárias</h3>
-              <p className="text-xs text-muted-foreground">{completedCount}/{quests.length} completas</p>
+              <p className="text-xs text-muted-foreground">
+                {completedCount}/{dailyMissions.length} completas
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-1 text-sm">
             <Clock className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Reset em 16h</span>
+            <span className="text-muted-foreground">Reset em {hoursLeft}h</span>
           </div>
         </div>
 
@@ -98,139 +89,166 @@ export const DailyQuests = () => {
         <div className="h-2 rounded-full bg-muted overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: `${(completedCount / quests.length) * 100}%` }}
+            animate={{ width: dailyMissions.length > 0 ? `${(completedCount / dailyMissions.length) * 100}%` : "0%" }}
             transition={{ duration: 0.8, delay: 0.3 }}
             className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
           />
         </div>
+
+        {/* Claimable rewards alert */}
+        {claimableCount > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-3 p-2 rounded-lg bg-success/10 border border-success/20 flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4 text-success" />
+            <span className="text-xs font-medium text-success">
+              {claimableCount} recompensa{claimableCount > 1 ? "s" : ""} para coletar!
+            </span>
+          </motion.div>
+        )}
       </div>
 
       {/* Quest List */}
       <div className="divide-y divide-border">
-        {quests.map((quest, i) => (
-          <motion.div
-            key={quest.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 + i * 0.1 }}
-            onMouseEnter={() => setHoveredQuest(quest.id)}
-            onMouseLeave={() => setHoveredQuest(null)}
-            className={cn(
-              "p-4 transition-all duration-200",
-              quest.completed ? "bg-success/5" : "hover:bg-muted/30",
-              quest.type === "special" && "bg-gradient-to-r from-accent/5 to-transparent"
-            )}
-          >
-            <div className="flex items-start gap-3">
-              {/* Status icon */}
-              <motion.div
-                animate={quest.completed ? { scale: [1, 1.2, 1] } : {}}
-                transition={{ duration: 0.3 }}
-                className="mt-0.5"
-              >
-                {quest.completed ? (
-                  <CheckCircle2 className="w-5 h-5 text-success" />
-                ) : (
-                  <Circle className={cn(
-                    "w-5 h-5",
-                    quest.type === "special" ? "text-accent" : "text-muted-foreground"
-                  )} />
-                )}
-              </motion.div>
+        {dailyMissions.length === 0 ? (
+          <div className="p-8 text-center">
+            <Target className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Nenhuma quest diária disponível</p>
+          </div>
+        ) : (
+          dailyMissions.map((mission, i) => {
+            const currentValue = mission.progress?.current_value || 0;
+            const isCompleted = !!mission.progress?.completed_at;
+            const isClaimed = !!mission.progress?.claimed;
+            const progressPercent = Math.min((currentValue / mission.target_value) * 100, 100);
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className={cn(
-                    "font-semibold text-sm",
-                    quest.completed && "line-through text-muted-foreground"
-                  )}>
-                    {quest.title}
-                  </h4>
-                  {quest.type === "special" && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-accent/20 text-accent">
-                      ESPECIAL
+            return (
+              <motion.div
+                key={mission.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.1 }}
+                onMouseEnter={() => setHoveredQuest(mission.id)}
+                onMouseLeave={() => setHoveredQuest(null)}
+                className={cn(
+                  "p-4 transition-all duration-200",
+                  isCompleted && !isClaimed ? "bg-success/5" : "hover:bg-muted/30",
+                  isClaimed && "opacity-60"
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  {/* Status icon */}
+                  <motion.div
+                    animate={isCompleted ? { scale: [1, 1.2, 1] } : {}}
+                    transition={{ duration: 0.3 }}
+                    className="mt-0.5"
+                  >
+                    {isCompleted ? (
+                      <CheckCircle2 className="w-5 h-5 text-success" />
+                    ) : (
+                      <Circle className="w-5 h-5 text-muted-foreground" />
+                    )}
+                  </motion.div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg">{mission.icon}</span>
+                      <h4 className={cn(
+                        "font-semibold text-sm",
+                        isClaimed && "line-through text-muted-foreground"
+                      )}>
+                        {mission.title}
+                      </h4>
+                    </div>
+                    {mission.description && (
+                      <p className="text-xs text-muted-foreground mb-2">{mission.description}</p>
+                    )}
+
+                    {/* Progress */}
+                    {!isClaimed && (
+                      <div className="mb-2">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-muted-foreground">Progresso</span>
+                          <span className="font-medium">{currentValue}/{mission.target_value}</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progressPercent}%` }}
+                            transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
+                            className={cn(
+                              "h-full rounded-full",
+                              isCompleted
+                                ? "bg-gradient-to-r from-success to-emerald-400"
+                                : "bg-gradient-to-r from-secondary to-primary"
+                            )}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Rewards */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1">
+                        <Zap className="w-3.5 h-3.5 text-xp" />
+                        <span className="text-xs font-semibold text-xp">+{mission.xp_reward} XP</span>
+                      </div>
+                      {mission.coin_reward > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 text-coins coin-shine" />
+                          <span className="text-xs font-semibold text-coins">+{mission.coin_reward}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Claim button for completed */}
+                  {isCompleted && !isClaimed && (
+                    <motion.button
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleClaim(mission)}
+                      disabled={claimMutation.isPending}
+                      className="px-3 py-1.5 rounded-lg bg-success text-success-foreground text-xs font-bold disabled:opacity-50"
+                    >
+                      {claimMutation.isPending ? "..." : "Resgatar"}
+                    </motion.button>
+                  )}
+
+                  {isClaimed && (
+                    <span className="px-2 py-1 rounded-lg bg-muted text-muted-foreground text-xs">
+                      Coletado ✓
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground mb-2">{quest.description}</p>
-
-                {/* Progress */}
-                {!quest.completed && (
-                  <div className="mb-2">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-muted-foreground">Progresso</span>
-                      <span className="font-medium">{quest.progress}/{quest.total}</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(quest.progress / quest.total) * 100}%` }}
-                        transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
-                        className={cn(
-                          "h-full rounded-full",
-                          quest.type === "special" 
-                            ? "bg-gradient-to-r from-accent to-primary" 
-                            : "bg-gradient-to-r from-secondary to-primary"
-                        )}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Rewards */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    <Zap className="w-3.5 h-3.5 text-xp" />
-                    <span className="text-xs font-semibold text-xp">+{quest.xp} XP</span>
-                  </div>
-                  {quest.coins && (
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3.5 h-3.5 text-coins coin-shine" />
-                      <span className="text-xs font-semibold text-coins">+{quest.coins}</span>
-                    </div>
-                  )}
-                  {quest.timeLeft && !quest.completed && (
-                    <div className="flex items-center gap-1 ml-auto">
-                      <Clock className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">{quest.timeLeft}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Claim button for completed */}
-              {quest.completed && (
-                <motion.button
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-3 py-1.5 rounded-lg bg-success text-success-foreground text-xs font-bold"
-                >
-                  Resgatar
-                </motion.button>
-              )}
-            </div>
-          </motion.div>
-        ))}
+              </motion.div>
+            );
+          })
+        )}
       </div>
 
       {/* Streak Bonus */}
-      <div className="p-4 border-t border-border bg-gradient-to-r from-streak/5 to-transparent">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-streak streak-fire" />
-            <div>
-              <p className="font-semibold text-sm">Streak Bonus Ativo!</p>
-              <p className="text-xs text-muted-foreground">+25% XP em todas as quests</p>
+      {profile && profile.streak > 0 && (
+        <div className="p-4 border-t border-border bg-gradient-to-r from-streak/5 to-transparent">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Flame className="w-5 h-5 text-streak streak-fire" />
+              <div>
+                <p className="font-semibold text-sm">Streak Bonus Ativo!</p>
+                <p className="text-xs text-muted-foreground">+25% XP em todas as quests</p>
+              </div>
+            </div>
+            <div className="px-3 py-1 rounded-full bg-streak/20 text-streak font-bold text-sm">
+              {profile.streak} dias 🔥
             </div>
           </div>
-          <div className="px-3 py-1 rounded-full bg-streak/20 text-streak font-bold text-sm">
-            12 dias 🔥
-          </div>
         </div>
-      </div>
+      )}
     </motion.div>
   );
 };
