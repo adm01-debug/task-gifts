@@ -1,12 +1,28 @@
 import { motion } from "framer-motion";
 import { Sparkles, Star, Zap } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 interface AnimatedLevelIndicatorProps {
   level: number;
   className?: string;
+  playSound?: boolean;
 }
 
-export const AnimatedLevelIndicator = ({ level, className = "" }: AnimatedLevelIndicatorProps) => {
+export const AnimatedLevelIndicator = ({ level, className = "", playSound = false }: AnimatedLevelIndicatorProps) => {
+  const { playLevelUpSound } = useSoundEffects();
+  const hasPlayedSound = useRef(false);
+
+  useEffect(() => {
+    if (playSound && level > 0 && !hasPlayedSound.current) {
+      hasPlayedSound.current = true;
+      const timer = setTimeout(() => {
+        playLevelUpSound();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [playSound, level, playLevelUpSound]);
+
   if (level <= 0) return null;
 
   // Higher levels get more particles

@@ -1,11 +1,27 @@
 import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 interface AnimatedFireIndicatorProps {
   streakDays: number;
   className?: string;
+  playSound?: boolean;
 }
 
-export const AnimatedFireIndicator = ({ streakDays, className = "" }: AnimatedFireIndicatorProps) => {
+export const AnimatedFireIndicator = ({ streakDays, className = "", playSound = false }: AnimatedFireIndicatorProps) => {
+  const { playComboTierUpSound } = useSoundEffects();
+  const hasPlayedSound = useRef(false);
+
+  useEffect(() => {
+    if (playSound && streakDays > 0 && !hasPlayedSound.current) {
+      hasPlayedSound.current = true;
+      const timer = setTimeout(() => {
+        playComboTierUpSound(Math.min(Math.ceil(streakDays / 3), 4));
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [playSound, streakDays, playComboTierUpSound]);
+
   if (streakDays <= 0) return null;
 
   // More flames for higher streaks

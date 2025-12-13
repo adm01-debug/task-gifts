@@ -122,17 +122,17 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
 
       {/* Level indicator for XP card */}
       {levelIndicator !== undefined && levelIndicator > 0 && (
-        <AnimatedLevelIndicator level={levelIndicator} />
+        <AnimatedLevelIndicator level={levelIndicator} playSound={true} />
       )}
 
       {/* Fire indicator for streak */}
       {fireIndicator !== undefined && fireIndicator > 0 && (
-        <AnimatedFireIndicator streakDays={fireIndicator} />
+        <AnimatedFireIndicator streakDays={fireIndicator} playSound={true} />
       )}
 
       {/* Trophy indicator for top 3 ranking */}
       {trophyIndicator !== undefined && trophyIndicator >= 1 && trophyIndicator <= 3 && (
-        <AnimatedTrophyIndicator rank={trophyIndicator} />
+        <AnimatedTrophyIndicator rank={trophyIndicator} playSound={true} />
       )}
 
       {/* Coins indicator for quests card */}
