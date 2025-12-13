@@ -1,0 +1,310 @@
+import { supabase } from "@/integrations/supabase/client";
+import { auditService } from "./auditService";
+
+export interface LearningTrail {
+  id: string;
+  title: string;
+  description: string | null;
+  icon: string;
+  department_id: string | null;
+  estimated_hours: number;
+  xp_reward: number;
+  coin_reward: number;
+  badge_name: string | null;
+  badge_icon: string | null;
+  status: "draft" | "published" | "archived";
+  order_index: number;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TrailModule {
+  id: string;
+  trail_id: string;
+  title: string;
+  description: string | null;
+  content_type: "video" | "text" | "quiz" | "flashcard" | "infographic" | "simulation" | "checklist";
+  content: Record<string, unknown>;
+  video_url: string | null;
+  xp_reward: number;
+  duration_minutes: number;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TrailEnrollment {
+  id: string;
+  user_id: string;
+  trail_id: string;
+  started_at: string;
+  completed_at: string | null;
+  progress_percent: number;
+}
+
+export interface ModuleProgress {
+  id: string;
+  user_id: string;
+  module_id: string;
+  started_at: string;
+  completed_at: string | null;
+  score: number | null;
+  attempts: number;
+}
+
+export interface TrailWithModules extends LearningTrail {
+  modules: TrailModule[];
+  enrollment?: TrailEnrollment;
+  moduleProgress?: ModuleProgress[];
+}
+
+export const trailsService = {
+  // Get all published trails
+  async getPublishedTrails(): Promise<LearningTrail[]> {
+    const { data, error } = await supabase
+      .from("learning_trails")
+      .select("*")
+      .eq("status", "published")
+      .order("order_index");
+
+    if (error) throw error;
+    return (data || []) as LearningTrail[];
+  },
+
+  // Get trails by department
+  async getTrailsByDepartment(departmentId: string): Promise<LearningTrail[]> {
+    const { data, error } = await supabase
+      .from("learning_trails")
+      .select("*")
+      .eq("department_id", departmentId)
+      .eq("status", "published")
+      .order("order_index");
+
+    if (error) throw error;
+    return (data || []) as LearningTrail[];
+  },
+
+  // Get trail with modules
+  async getTrailWithModules(trailId: string): Promise<TrailWithModules | null> {
+    const { data: trail, error: trailError } = await supabase
+      .from("learning_trails")
+      .select("*")
+      .eq("id", trailId)
+      .maybeSingle();
+
+    if (trailError) throw trailError;
+    if (!trail) return null;
+
+    const { data: modules, error: modulesError } = await supabase
+      .from("trail_modules")
+      .select("*")
+      .eq("trail_id", trailId)
+      .order("order_index");
+
+    if (modulesError) throw modulesError;
+
+    return {
+      ...(trail as LearningTrail),
+      modules: (modules || []) as TrailModule[],
+    };
+  },
+
+  // Get user enrollments
+  async getUserEnrollments(userId: string): Promise<TrailEnrollment[]> {
+    const { data, error } = await supabase
+      .from("trail_enrollments")
+      .select("*")
+      .eq("user_id", userId);
+
+    if (error) throw error;
+    return (data || []) as TrailEnrollment[];
+  },
+
+  // Enroll user in trail
+  async enrollInTrail(userId: string, trailId: string): Promise<TrailEnrollment> {
+    const { data, error } = await supabase
+      .from("trail_enrollments")
+      .insert({ user_id: userId, trail_id: trailId })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    await auditService.log({
+      user_id: userId,
+      action: "quest_assigned",
+      entity_type: "trail_enrollment",
+      entity_id: data.id,
+      new_data: { trail_id: trailId },
+      metadata: { type: "learning_trail" },
+    });
+
+    return data as TrailEnrollment;
+  },
+
+  // Get module progress for user
+  async getUserModuleProgress(userId: string, moduleIds: string[]): Promise<ModuleProgress[]> {
+    if (moduleIds.length === 0) return [];
+
+    const { data, error } = await supabase
+      .from("module_progress")
+      .select("*")
+      .eq("user_id", userId)
+      .in("module_id", moduleIds);
+
+    if (error) throw error;
+    return (data || []) as ModuleProgress[];
+  },
+
+  // Start module
+  async startModule(userId: string, moduleId: string): Promise<ModuleProgress> {
+    const { data: existing } = await supabase
+      .from("module_progress")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("module_id", moduleId)
+      .maybeSingle();
+
+    if (existing) {
+      // Update attempts
+      const { data, error } = await supabase
+        .from("module_progress")
+        .update({ attempts: (existing as ModuleProgress).attempts + 1 })
+        .eq("id", existing.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as ModuleProgress;
+    }
+
+    const { data, error } = await supabase
+      .from("module_progress")
+      .insert({ user_id: userId, module_id: moduleId, attempts: 1 })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as ModuleProgress;
+  },
+
+  // Complete module
+  async completeModule(userId: string, moduleId: string, score?: number): Promise<ModuleProgress> {
+    const { data, error } = await supabase
+      .from("module_progress")
+      .update({
+        completed_at: new Date().toISOString(),
+        score: score ?? null,
+      })
+      .eq("user_id", userId)
+      .eq("module_id", moduleId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as ModuleProgress;
+  },
+
+  // Update enrollment progress
+  async updateEnrollmentProgress(userId: string, trailId: string, progressPercent: number): Promise<TrailEnrollment> {
+    const updates: Partial<TrailEnrollment> = { progress_percent: progressPercent };
+    
+    if (progressPercent >= 100) {
+      updates.completed_at = new Date().toISOString();
+    }
+
+    const { data, error } = await supabase
+      .from("trail_enrollments")
+      .update(updates)
+      .eq("user_id", userId)
+      .eq("trail_id", trailId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    if (progressPercent >= 100) {
+      await auditService.log({
+        user_id: userId,
+        action: "quest_completed",
+        entity_type: "trail_enrollment",
+        entity_id: data.id,
+        new_data: { trail_id: trailId, progress: 100 },
+        metadata: { type: "learning_trail" },
+      });
+    }
+
+    return data as TrailEnrollment;
+  },
+
+  // Create trail (for managers/admins)
+  async createTrail(trail: Partial<LearningTrail>): Promise<LearningTrail> {
+    const { data, error } = await supabase
+      .from("learning_trails")
+      .insert(trail as any)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as LearningTrail;
+  },
+
+  // Create module
+  async createModule(module: Partial<TrailModule>): Promise<TrailModule> {
+    const { data, error } = await supabase
+      .from("trail_modules")
+      .insert(module as any)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as TrailModule;
+  },
+
+  // Update trail
+  async updateTrail(id: string, updates: Partial<LearningTrail>): Promise<LearningTrail> {
+    const { data, error } = await supabase
+      .from("learning_trails")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as LearningTrail;
+  },
+
+  // Update module
+  async updateModule(id: string, updates: Partial<TrailModule>): Promise<TrailModule> {
+    const { data, error } = await supabase
+      .from("trail_modules")
+      .update(updates as any)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as TrailModule;
+  },
+
+  // Delete module
+  async deleteModule(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("trail_modules")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+  },
+
+  // Delete trail
+  async deleteTrail(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("learning_trails")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+  },
+};
