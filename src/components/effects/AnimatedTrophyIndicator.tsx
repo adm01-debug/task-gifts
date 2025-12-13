@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import { Trophy, Crown, Star } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 interface AnimatedTrophyIndicatorProps {
   rank: number;
   className?: string;
+  playSound?: boolean;
 }
 
 const rankColors = {
@@ -30,7 +33,26 @@ const rankColors = {
   },
 };
 
-export const AnimatedTrophyIndicator = ({ rank, className = "" }: AnimatedTrophyIndicatorProps) => {
+export const AnimatedTrophyIndicator = ({ rank, className = "", playSound = false }: AnimatedTrophyIndicatorProps) => {
+  const { playLegendaryCelebrationSound, playEpicCelebrationSound, playAchievementSound } = useSoundEffects();
+  const hasPlayedSound = useRef(false);
+
+  useEffect(() => {
+    if (playSound && rank >= 1 && rank <= 3 && !hasPlayedSound.current) {
+      hasPlayedSound.current = true;
+      const timer = setTimeout(() => {
+        if (rank === 1) {
+          playLegendaryCelebrationSound();
+        } else if (rank === 2) {
+          playEpicCelebrationSound();
+        } else {
+          playAchievementSound();
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [playSound, rank, playLegendaryCelebrationSound, playEpicCelebrationSound, playAchievementSound]);
+
   if (rank < 1 || rank > 3) return null;
 
   const colors = rankColors[rank as 1 | 2 | 3];
