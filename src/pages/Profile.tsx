@@ -8,6 +8,9 @@ import {
   Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart, Wand2, GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRecentAuditLogs } from "@/hooks/useAudit";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { ProfileKudosSection } from "@/components/ProfileKudosSection";
 import { RankingBadge } from "@/components/RankingBadge";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
@@ -43,6 +46,130 @@ const rarityColors = {
   rare: "from-secondary/30 to-secondary/10 border-secondary/50",
   epic: "from-accent/30 to-accent/10 border-accent/50",
   legendary: "from-gold/30 to-gold/10 border-gold/50 shadow-[0_0_20px_hsl(var(--gold)/0.3)]",
+};
+
+// Activity icon and color mapping based on audit action
+const activityConfig: Record<string, { icon: React.ElementType; color: string; label: string }> = {
+  xp_gained: { icon: Zap, color: "success", label: "Ganhou XP" },
+  level_up: { icon: TrendingUp, color: "primary", label: "Subiu de nível" },
+  quest_completed: { icon: Target, color: "secondary", label: "Completou quest" },
+  achievement_unlocked: { icon: Trophy, color: "warning", label: "Desbloqueou conquista" },
+  kudos_received: { icon: Heart, color: "accent", label: "Recebeu kudos" },
+  kudos_given: { icon: Heart, color: "primary", label: "Enviou kudos" },
+  streak_updated: { icon: Flame, color: "primary", label: "Streak atualizado" },
+  coins_earned: { icon: Star, color: "warning", label: "Ganhou moedas" },
+  coins_spent: { icon: Star, color: "muted", label: "Gastou moedas" },
+};
+
+// ProfileActivityTimeline component using real audit data
+const ProfileActivityTimeline = ({ userId }: { userId?: string }) => {
+  const { data: auditLogs = [], isLoading } = useRecentAuditLogs(10);
+  
+  // Filter logs for this user only
+  const userLogs = auditLogs.filter(log => log.user_id === userId);
+
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-2xl border border-border p-6">
+        <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+          <TrendingUp className="w-5 h-5 text-secondary" />
+          Atividade Recente
+        </h3>
+        <div className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (userLogs.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-card rounded-2xl border border-border p-6"
+      >
+        <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+          <TrendingUp className="w-5 h-5 text-secondary" />
+          Atividade Recente
+        </h3>
+        <p className="text-center text-muted-foreground py-4">
+          Nenhuma atividade registrada ainda. Complete quests, ganhe XP e desbloqueie conquistas!
+        </p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 }}
+      className="bg-card rounded-2xl border border-border p-6"
+    >
+      <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+        <TrendingUp className="w-5 h-5 text-secondary" />
+        Atividade Recente
+      </h3>
+
+      <div className="space-y-4">
+        {userLogs.slice(0, 5).map((log, i) => {
+          const config = activityConfig[log.action] || { 
+            icon: Target, 
+            color: "muted", 
+            label: log.action.replace(/_/g, ' ') 
+          };
+          const Icon = config.icon;
+          const metadata = log.metadata as { xp_amount?: number; description?: string } | null;
+          const newData = log.new_data as { xp_amount?: number; level?: number; coins?: number } | null;
+          
+          // Extract XP from metadata or new_data
+          const xpAmount = metadata?.xp_amount || newData?.xp_amount || 0;
+          
+          // Build activity text
+          let activityText = config.label;
+          if (log.entity_type && log.entity_type !== 'profile') {
+            activityText += ` (${log.entity_type})`;
+          }
+
+          const colorClasses: Record<string, string> = {
+            success: "bg-success/20 text-success",
+            primary: "bg-primary/20 text-primary",
+            secondary: "bg-secondary/20 text-secondary",
+            warning: "bg-warning/20 text-warning",
+            accent: "bg-accent/20 text-accent",
+            muted: "bg-muted text-muted-foreground",
+          };
+
+          return (
+            <motion.div
+              key={log.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 + i * 0.1 }}
+              className="flex items-center gap-4"
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorClasses[config.color] || colorClasses.muted}`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm">{activityText}</p>
+                <p className="text-xs text-muted-foreground">
+                  {formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: ptBR })}
+                </p>
+              </div>
+              {xpAmount > 0 && (
+                <span className="text-sm font-semibold text-xp">+{xpAmount} XP</span>
+              )}
+            </motion.div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
 };
 
 const Profile = () => {
@@ -346,51 +473,7 @@ const Profile = () => {
         {user?.id && <ProfileKudosSection userId={user.id} />}
 
         {/* Activity Timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-card rounded-2xl border border-border p-6"
-        >
-          <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-secondary" />
-            Atividade Recente
-          </h3>
-
-          <div className="space-y-4">
-            {[
-              { icon: Target, text: "Completou 'Daily Standup'", xp: 50, time: "2h atrás", color: "secondary" },
-              { icon: Trophy, text: "Subiu para #4 no ranking", xp: 0, time: "5h atrás", color: "warning" },
-              { icon: Award, text: "Desbloqueou 'Top 10'", xp: 100, time: "1 dia atrás", color: "accent" },
-              { icon: Users, text: "Participou do desafio Sprint", xp: 200, time: "2 dias atrás", color: "primary" },
-            ].map((activity, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.1 }}
-                className="flex items-center gap-4"
-              >
-                <div className={`
-                  w-10 h-10 rounded-xl flex items-center justify-center
-                  ${activity.color === "secondary" ? "bg-secondary/20 text-secondary" : ""}
-                  ${activity.color === "warning" ? "bg-warning/20 text-warning" : ""}
-                  ${activity.color === "accent" ? "bg-accent/20 text-accent" : ""}
-                  ${activity.color === "primary" ? "bg-primary/20 text-primary" : ""}
-                `}>
-                  <activity.icon className="w-5 h-5" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{activity.text}</p>
-                  <p className="text-xs text-muted-foreground">{activity.time}</p>
-                </div>
-                {activity.xp > 0 && (
-                  <span className="text-sm font-semibold text-xp">+{activity.xp} XP</span>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        <ProfileActivityTimeline userId={user?.id} />
 
         {/* Member Since */}
         <motion.div

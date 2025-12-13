@@ -21,6 +21,13 @@ export const LiveLeaderboard = () => {
   const { user } = useAuth();
   const { data: profiles = [], isLoading } = useLeaderboard(10);
 
+  // Calculate trend based on streak and recent activity
+  const calculateTrend = (streak: number, questsCompleted: number): "up" | "down" | "same" => {
+    if (streak >= 3) return "up"; // Active user with streak
+    if (streak === 0 && questsCompleted === 0) return "down"; // Inactive user
+    return "same"; // Moderate activity
+  };
+
   // Transform profiles to leaderboard format
   const players: LeaderboardPlayer[] = profiles.map((profile, index) => ({
     rank: index + 1,
@@ -29,7 +36,7 @@ export const LiveLeaderboard = () => {
     xp: profile.xp,
     level: profile.level,
     streak: profile.streak,
-    trend: "same" as const, // TODO: implement trend tracking
+    trend: calculateTrend(profile.streak, profile.quests_completed),
     isCurrentUser: profile.id === user?.id,
   }));
 
