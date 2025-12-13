@@ -43,6 +43,7 @@ interface StatCardProps {
   color: "primary" | "secondary" | "success" | "warning" | "accent";
   delay?: number;
   isLoading?: boolean;
+  pulse?: "primary" | "warning" | "success";
 }
 
 const colorClasses = {
@@ -73,7 +74,13 @@ const colorClasses = {
   },
 };
 
-const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading }: StatCardProps) => {
+const pulseClasses = {
+  primary: "card-pulse-subtle",
+  warning: "card-pulse-warning",
+  success: "card-pulse-success",
+};
+
+const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse }: StatCardProps) => {
   const colors = colorClasses[color];
 
   if (isLoading) {
@@ -87,7 +94,8 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
       className={cn(
         "relative p-4 rounded-2xl border border-border bg-card overflow-hidden",
         "card-interactive",
-        colors.glow
+        colors.glow,
+        pulse && pulseClasses[pulse]
       )}
     >
       {/* Gradient background */}
@@ -165,6 +173,7 @@ export const StatsGrid = () => {
       changeType: "neutral",
       color: "primary",
       isLoading,
+      pulse: profile?.streak && profile.streak >= 3 ? "primary" : undefined,
     },
     {
       icon: Trophy,
@@ -174,6 +183,7 @@ export const StatsGrid = () => {
       changeType: "positive",
       color: "warning",
       isLoading,
+      pulse: rankData?.rank && rankData.rank <= 10 ? "warning" : undefined,
     },
     {
       icon: Target,
