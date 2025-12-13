@@ -28,7 +28,7 @@ const navItems: NavItem[] = [
   { icon: Trophy, label: "Leaderboard" },
   { icon: Users, label: "Equipes" },
   { icon: ClipboardList, label: "Gestor", path: "/manager" },
-  { icon: Gift, label: "Recompensas", badge: 2 },
+  { icon: Gift, label: "Loja", path: "/loja", badge: 2 },
   { icon: BarChart3, label: "Relatórios", path: "/reports" },
   { icon: Activity, label: "Analytics", path: "/analytics" },
   { icon: Shield, label: "Auditoria", path: "/audit" },
