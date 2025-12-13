@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { shopService, type RewardCategory, type ShopReward, type PurchaseStatus } from "@/services/shopService";
+import {
+  shopService,
+  type RewardCategory,
+  type ShopReward,
+  type PurchaseStatus,
+  type ShopPromotion,
+} from "@/services/shopService";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
@@ -136,6 +142,72 @@ export function useUpdatePurchaseStatus() {
     },
     onError: (error: any) => {
       toast.error(error.message || "Erro ao atualizar status");
+    },
+  });
+}
+
+// ========== PROMOTIONS HOOKS ==========
+
+export function useActivePromotions() {
+  return useQuery({
+    queryKey: [...shopKeys.all, "promotions", "active"],
+    queryFn: () => shopService.getActivePromotions(),
+    staleTime: 30000,
+    refetchInterval: 60000, // Refresh every minute for countdown accuracy
+  });
+}
+
+export function useAdminPromotions() {
+  return useQuery({
+    queryKey: [...shopKeys.all, "promotions", "admin"],
+    queryFn: () => shopService.getAllPromotionsAdmin(),
+    staleTime: 30000,
+  });
+}
+
+export function useCreatePromotion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (promotion: Omit<ShopPromotion, "id" | "created_at" | "current_claims" | "reward">) =>
+      shopService.createPromotion(promotion),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: shopKeys.all });
+      toast.success("Promoção criada com sucesso!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao criar promoção");
+    },
+  });
+}
+
+export function useUpdatePromotion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Omit<ShopPromotion, "id" | "created_at" | "reward">> }) =>
+      shopService.updatePromotion(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: shopKeys.all });
+      toast.success("Promoção atualizada!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao atualizar promoção");
+    },
+  });
+}
+
+export function useDeletePromotion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => shopService.deletePromotion(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: shopKeys.all });
+      toast.success("Promoção removida!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao remover promoção");
     },
   });
 }

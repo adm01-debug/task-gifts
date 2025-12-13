@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Coins, Package, Star, Target, ShoppingBag, History, Sparkles } from "lucide-react";
 import { CelebrationEffect } from "@/components/CelebrationEffect";
+import { FlashSalesBanner } from "@/components/FlashSalesBanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -321,6 +322,12 @@ export default function Shop() {
           </TabsList>
 
           <TabsContent value="shop" className="space-y-6">
+            {/* Flash Sales */}
+            <FlashSalesBanner onPurchase={(rewardId) => {
+              const reward = rewards?.find(r => r.id === rewardId);
+              if (reward) handlePurchase(reward);
+            }} />
+
             {/* Category filters */}
             <div className="flex flex-wrap gap-2">
               <Button

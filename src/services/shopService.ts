@@ -7,6 +7,22 @@ export type RewardCategory = "product" | "benefit" | "experience";
 export type RewardRarity = "common" | "rare" | "epic" | "legendary";
 export type PurchaseStatus = "pending" | "approved" | "delivered" | "cancelled";
 
+export interface ShopPromotion {
+  id: string;
+  reward_id: string;
+  title: string;
+  description: string | null;
+  discount_percent: number | null;
+  discount_coins: number | null;
+  starts_at: string;
+  ends_at: string;
+  is_active: boolean;
+  max_claims: number | null;
+  current_claims: number;
+  created_at: string;
+  reward?: ShopReward;
+}
+
 export interface ShopReward {
   id: string;
   name: string;
@@ -331,5 +347,94 @@ export const shopService = {
         console.error("Failed to notify user:", e);
       }
     }
+  },
+
+  // ========== PROMOTIONS FUNCTIONS ==========
+
+  // Get active promotions
+  async getActivePromotions(): Promise<ShopPromotion[]> {
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from("shop_promotions")
+      .select("*, reward:shop_rewards(*)")
+      .eq("is_active", true)
+      .lte("starts_at", now)
+      .gt("ends_at", now)
+      .order("ends_at", { ascending: true });
+
+    if (error) throw error;
+    return (data || []).map((p: any) => ({
+      ...p,
+      reward: p.reward as ShopReward,
+    })) as ShopPromotion[];
+  },
+
+  // Get all promotions (admin)
+  async getAllPromotionsAdmin(): Promise<ShopPromotion[]> {
+    const { data, error } = await supabase
+      .from("shop_promotions")
+      .select("*, reward:shop_rewards(*)")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map((p: any) => ({
+      ...p,
+      reward: p.reward as ShopReward,
+    })) as ShopPromotion[];
+  },
+
+  // Create promotion
+  async createPromotion(
+    promotion: Omit<ShopPromotion, "id" | "created_at" | "current_claims" | "reward">
+  ): Promise<ShopPromotion> {
+    const { data, error } = await supabase
+      .from("shop_promotions")
+      .insert(promotion)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as ShopPromotion;
+  },
+
+  // Update promotion
+  async updatePromotion(
+    id: string,
+    updates: Partial<Omit<ShopPromotion, "id" | "created_at" | "reward">>
+  ): Promise<ShopPromotion> {
+    const { data, error } = await supabase
+      .from("shop_promotions")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as ShopPromotion;
+  },
+
+  // Delete promotion
+  async deletePromotion(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("shop_promotions")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+  },
+
+  // Calculate discounted price
+  getDiscountedPrice(
+    originalPrice: number,
+    discountPercent: number | null,
+    discountCoins: number | null
+  ): number {
+    if (discountCoins) {
+      return Math.max(0, originalPrice - discountCoins);
+    }
+    if (discountPercent) {
+      return Math.round(originalPrice * (1 - discountPercent / 100));
+    }
+    return originalPrice;
   },
 };
