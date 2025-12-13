@@ -46,7 +46,7 @@ function MissionCard({
       whileHover={{ scale: 1.01 }}
       className={`relative ${isClaimed ? "opacity-60" : ""}`}
     >
-      <Card className={`overflow-hidden transition-all duration-300 ${
+      <Card className={`overflow-hidden transition-all duration-300 card-shimmer ${
         isCompleted && !isClaimed 
           ? "border-emerald-500/50 bg-gradient-to-r from-emerald-500/10 to-transparent" 
           : "border-border/50 hover:border-primary/30"

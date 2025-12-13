@@ -36,7 +36,7 @@ export const TeamChallenges = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-2xl border border-border overflow-hidden"
+        className="bg-card rounded-2xl border border-border overflow-hidden card-shimmer"
       >
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -59,7 +59,7 @@ export const TeamChallenges = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="bg-card rounded-2xl border border-border overflow-hidden"
+      className="bg-card rounded-2xl border border-border overflow-hidden card-interactive"
     >
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
