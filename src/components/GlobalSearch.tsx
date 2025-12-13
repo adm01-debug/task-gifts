@@ -75,9 +75,32 @@ function clearRecentSearches(): RecentSearch[] {
   return [];
 }
 
+// Highlight matching text in search results
+function HighlightText({ text, query }: { text: string; query: string }) {
+  if (!query.trim()) return <>{text}</>;
+  
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const parts = text.split(regex);
+  
+  return (
+    <>
+      {parts.map((part, i) => 
+        regex.test(part) ? (
+          <mark key={i} className="bg-primary/30 text-foreground rounded px-0.5">
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
+
 export function GlobalSearch({ trigger }: GlobalSearchProps) {
   const [open, setOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
@@ -96,10 +119,11 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
     }
   }, [open]);
 
-  // Reset filters when dialog closes
+  // Reset filters and search when dialog closes
   useEffect(() => {
     if (!open) {
       setShowFilters(false);
+      setSearchQuery("");
     }
   }, [open]);
 
@@ -275,7 +299,6 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
       case "action": return <Zap className="w-3 h-3" />;
     }
   };
-  };
 
   return (
     <>
@@ -298,7 +321,12 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
 
       <CommandDialog open={open} onOpenChange={setOpen}>
         <div className="flex items-center border-b border-border">
-          <CommandInput placeholder="Buscar trilhas, quests, usuários..." className="flex-1" />
+          <CommandInput 
+            placeholder="Buscar trilhas, quests, usuários..." 
+            className="flex-1" 
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+          />
           <Button
             variant="ghost"
             size="sm"
@@ -523,7 +551,9 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
                       <span className="text-sm">{trail.icon || "📚"}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{trail.title}</p>
+                      <p className="font-medium truncate">
+                        <HighlightText text={trail.title} query={searchQuery} />
+                      </p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         {trail.estimated_hours && (
                           <span className="flex items-center gap-1">
@@ -561,7 +591,9 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
                       <span className="text-sm">{quest.icon || "🎯"}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{quest.title}</p>
+                      <p className="font-medium truncate">
+                        <HighlightText text={quest.title} query={searchQuery} />
+                      </p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Badge variant="secondary" className={cn("text-[10px] px-1.5 py-0", getDifficultyColor(quest.difficulty))}>
                           {quest.difficulty}
@@ -596,7 +628,9 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{profile.display_name || profile.email}</p>
+                    <p className="font-medium truncate">
+                      <HighlightText text={profile.display_name || profile.email || "Usuário"} query={searchQuery} />
+                    </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Award className="w-3 h-3" />
