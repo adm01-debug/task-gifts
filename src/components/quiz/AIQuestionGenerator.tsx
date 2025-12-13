@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 interface GeneratedQuestion {
   question: string;
   difficulty: string;
+  category: string;
   explanation: string;
   options: Array<{ text: string; is_correct: boolean }>;
 }
@@ -76,6 +77,7 @@ export default function AIQuestionGenerator({ onQuestionsGenerated }: AIQuestion
           quiz_type: quizType,
           difficulty: q.difficulty as "easy" | "medium" | "hard",
           explanation: q.explanation,
+          category: q.category || undefined,
           points: q.difficulty === "hard" ? 300 : q.difficulty === "medium" ? 200 : 100,
           options: q.options.map((opt, idx) => ({
             text: opt.text,
@@ -216,7 +218,14 @@ export default function AIQuestionGenerator({ onQuestionsGenerated }: AIQuestion
                     className="p-4 rounded-lg border bg-card"
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <p className="font-medium text-sm">{q.question}</p>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{q.question}</p>
+                        {q.category && (
+                          <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full mt-1 inline-block">
+                            {q.category}
+                          </span>
+                        )}
+                      </div>
                       <span className={`
                         text-xs px-2 py-0.5 rounded-full shrink-0
                         ${q.difficulty === 'easy' ? 'bg-green-500/20 text-green-500' : ''}

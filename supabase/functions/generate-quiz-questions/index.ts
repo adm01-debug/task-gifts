@@ -93,7 +93,8 @@ serve(async (req) => {
 
     const systemPrompt = `Você é um especialista em criar perguntas de quiz educacionais para treinamento corporativo.
 Crie perguntas baseadas EXCLUSIVAMENTE no conteúdo fornecido. Não invente informações.
-As perguntas devem testar o conhecimento prático e aplicável do conteúdo.`;
+As perguntas devem testar o conhecimento prático e aplicável do conteúdo.
+Categorize cada pergunta de acordo com o tema principal abordado.`;
 
     const userPrompt = `Baseado no seguinte conteúdo de treinamento, gere ${questionCount} perguntas de quiz:
 
@@ -105,6 +106,7 @@ Regras:
 3. ${difficultyDistribution}
 4. Inclua uma breve explicação para cada resposta correta
 5. As perguntas devem ser relevantes para o trabalho prático
+6. Atribua uma CATEGORIA para cada pergunta baseada no tema (ex: "Processos", "Produtos", "Técnicas", "Ferramentas", "Segurança", "Atendimento", "Qualidade", etc.)
 
 Retorne APENAS um JSON válido no seguinte formato:
 {
@@ -112,6 +114,7 @@ Retorne APENAS um JSON válido no seguinte formato:
     {
       "question": "Texto da pergunta",
       "difficulty": "easy|medium|hard",
+      "category": "Nome da Categoria",
       "explanation": "Explicação da resposta correta",
       "options": [
         { "text": "Opção A", "is_correct": false },
