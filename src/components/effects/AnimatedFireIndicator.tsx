@@ -1,0 +1,159 @@
+import { motion } from "framer-motion";
+
+interface AnimatedFireIndicatorProps {
+  streakDays: number;
+  className?: string;
+}
+
+export const AnimatedFireIndicator = ({ streakDays, className = "" }: AnimatedFireIndicatorProps) => {
+  if (streakDays <= 0) return null;
+
+  // More flames for higher streaks
+  const flameCount = Math.min(Math.ceil(streakDays / 3), 5);
+  const intensity = Math.min(streakDays / 10, 1);
+
+  return (
+    <div className={`absolute -top-1 -right-1 flex items-center ${className}`}>
+      {/* Fire glow effect */}
+      <motion.div
+        className="absolute inset-0 rounded-full blur-md"
+        style={{
+          background: `radial-gradient(circle, hsl(var(--primary) / ${0.4 + intensity * 0.3}) 0%, transparent 70%)`,
+        }}
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.6, 1, 0.6],
+        }}
+        transition={{
+          duration: 1.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Main fire container */}
+      <div className="relative flex items-end justify-center">
+        {/* Multiple flame layers */}
+        {Array.from({ length: flameCount }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute"
+            style={{
+              left: `${(i - flameCount / 2) * 4}px`,
+              zIndex: flameCount - i,
+            }}
+            animate={{
+              y: [0, -2, 0],
+              scaleY: [1, 1.1, 1],
+              rotate: [i % 2 === 0 ? -5 : 5, i % 2 === 0 ? 5 : -5, i % 2 === 0 ? -5 : 5],
+            }}
+            transition={{
+              duration: 0.4 + i * 0.1,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.1,
+            }}
+          >
+            <svg
+              width={12 + i * 2}
+              height={16 + i * 2}
+              viewBox="0 0 24 32"
+              fill="none"
+              className="drop-shadow-lg"
+            >
+              {/* Outer flame */}
+              <motion.path
+                d="M12 2C12 2 4 12 4 20C4 24.4183 7.58172 28 12 28C16.4183 28 20 24.4183 20 20C20 12 12 2 12 2Z"
+                fill={`hsl(${25 + i * 10}, ${80 + intensity * 20}%, ${50 + i * 5}%)`}
+                animate={{
+                  d: [
+                    "M12 2C12 2 4 12 4 20C4 24.4183 7.58172 28 12 28C16.4183 28 20 24.4183 20 20C20 12 12 2 12 2Z",
+                    "M12 4C12 4 5 12 5 19C5 23.4183 8.08172 27 12 27C15.9183 27 19 23.4183 19 19C19 12 12 4 12 4Z",
+                    "M12 2C12 2 4 12 4 20C4 24.4183 7.58172 28 12 28C16.4183 28 20 24.4183 20 20C20 12 12 2 12 2Z",
+                  ],
+                }}
+                transition={{
+                  duration: 0.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              {/* Inner flame */}
+              <motion.path
+                d="M12 10C12 10 8 16 8 20C8 22.2091 9.79086 24 12 24C14.2091 24 16 22.2091 16 20C16 16 12 10 12 10Z"
+                fill={`hsl(${45 + i * 5}, 100%, ${65 + i * 3}%)`}
+                animate={{
+                  opacity: [0.8, 1, 0.8],
+                }}
+                transition={{
+                  duration: 0.3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              {/* Core flame */}
+              <motion.ellipse
+                cx="12"
+                cy="21"
+                rx="2"
+                ry="3"
+                fill="hsl(60, 100%, 80%)"
+                animate={{
+                  ry: [3, 4, 3],
+                  opacity: [0.9, 1, 0.9],
+                }}
+                transition={{
+                  duration: 0.25,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </svg>
+          </motion.div>
+        ))}
+
+        {/* Spark particles */}
+        {streakDays >= 5 && (
+          <>
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={`spark-${i}`}
+                className="absolute w-1 h-1 rounded-full bg-warning"
+                style={{
+                  left: `${-4 + i * 8}px`,
+                }}
+                animate={{
+                  y: [0, -20, -30],
+                  x: [(i - 1) * 2, (i - 1) * 6, (i - 1) * 10],
+                  opacity: [1, 0.8, 0],
+                  scale: [1, 0.8, 0.3],
+                }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  delay: i * 0.3,
+                  ease: "easeOut",
+                }}
+              />
+            ))}
+          </>
+        )}
+      </div>
+
+      {/* Streak counter badge */}
+      <motion.div
+        className="relative ml-1 bg-gradient-to-r from-primary to-warning text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg"
+        animate={{
+          scale: [1, 1.05, 1],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      >
+        🔥 {streakDays}
+      </motion.div>
+    </div>
+  );
+};
