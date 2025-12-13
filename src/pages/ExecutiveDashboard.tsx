@@ -44,22 +44,29 @@ import { ptBR } from "date-fns/locale";
 import { useExecutiveMetrics, useMonthlyTrends, useDepartmentMetrics } from "@/hooks/useExecutiveMetrics";
 import { useQueryClient } from "@tanstack/react-query";
 
-// Calculate derived metrics with fallback mock data for metrics not in DB
+// Calculate derived metrics from real database values
 const calculateFinancialMetrics = (metrics: any) => {
-  const baseROI = metrics ? Math.min(300, 100 + (metrics.totalXpEarned / 100) + (metrics.totalQuestsCompleted * 5)) : 150;
+  // ROI calculated from real engagement metrics
+  const engagementScore = metrics ? (metrics.totalXpEarned / 100) + (metrics.totalQuestsCompleted * 5) + (metrics.totalKudos * 2) : 0;
+  const baseROI = metrics ? Math.min(300, 100 + engagementScore) : 0;
+  
+  // Calculate cost savings based on training completion and retention indicators
+  const trainingSavings = metrics ? Math.round((metrics.trainingCompletionRate || 0) * 500) : 0;
+  const retentionSavings = metrics ? Math.round((metrics.punctualityRate || 0) * 300) : 0;
+  
   return {
-    roiGamification: { value: Math.round(baseROI), target: 200, trend: 12 },
-    costPerHire: { value: 1150, target: 1200, trend: -8 },
-    turnoverCostSaved: { value: 62500, target: 50000, trend: 25 },
-    revenuePerEmployee: { value: 18500, target: 17000, trend: 9 },
-    hrOperationalCost: { value: 125, target: 160, trend: -22 }
+    roiGamification: { value: Math.round(baseROI), target: 200, trend: metrics ? Math.round((baseROI - 100) / 10) : 0 },
+    costPerHire: { value: null, target: 1200, trend: null }, // Requires external HR system integration
+    turnoverCostSaved: { value: trainingSavings + retentionSavings, target: 50000, trend: null },
+    revenuePerEmployee: { value: null, target: 17000, trend: null }, // Requires financial system integration
+    hrOperationalCost: { value: null, target: 160, trend: null } // Requires HR system integration
   };
 };
 
 const calculatePeopleMetrics = (metrics: any) => {
   return {
-    enps: { value: 58, target: 50, promoters: 65, passives: 25, detractors: 10 },
-    turnover: { value: 8.5, target: 10, previousYear: 18 },
+    enps: { value: null, target: 50, promoters: null, passives: null, detractors: null }, // Requires eNPS survey integration
+    turnover: { value: null, target: 10, previousYear: null }, // Requires HR system integration
     gameAdoption: { 
       value: metrics?.wau || 0, 
       target: 90 
@@ -89,7 +96,7 @@ const calculateOperationalMetrics = (metrics: any) => {
       value: metrics?.punctualityRate || 0, 
       target: 95 
     },
-    absenteeism: { value: 2.1, target: 3 },
+    absenteeism: { value: null, target: 3 }, // Requires HR attendance system integration
     trainingCompletion: { 
       value: metrics?.trainingCompletionRate || 0, 
       target: 95 
@@ -107,11 +114,15 @@ const calculateOperationalMetrics = (metrics: any) => {
   };
 };
 
-const enpsDistribution = [
-  { name: 'Promotores', value: 65, color: 'hsl(var(--success))' },
-  { name: 'Passivos', value: 25, color: 'hsl(var(--warning))' },
-  { name: 'Detratores', value: 10, color: 'hsl(var(--destructive))' }
-];
+// eNPS distribution would come from survey integration - not available yet
+const getEnpsDistribution = (peopleMetrics: any) => {
+  if (peopleMetrics.enps.promoters === null) return null;
+  return [
+    { name: 'Promotores', value: peopleMetrics.enps.promoters, color: 'hsl(var(--success))' },
+    { name: 'Passivos', value: peopleMetrics.enps.passives, color: 'hsl(var(--warning))' },
+    { name: 'Detratores', value: peopleMetrics.enps.detractors, color: 'hsl(var(--destructive))' }
+  ];
+};
 
 const ExecutiveDashboard = () => {
   const navigate = useNavigate();
@@ -142,20 +153,23 @@ const ExecutiveDashboard = () => {
     loading = false
   }: {
     title: string;
-    value: number;
+    value: number | null;
     target: number;
     unit?: string;
     prefix?: string;
-    trend?: number;
+    trend?: number | null;
     icon: React.ElementType;
     description?: string;
     inverse?: boolean;
     loading?: boolean;
   }) => {
-    const isOnTarget = inverse ? value <= target : value >= target;
-    const progress = inverse 
-      ? Math.min(100, (target / Math.max(value, 0.1)) * 100)
-      : Math.min(100, (value / Math.max(target, 1)) * 100);
+    const hasValue = value !== null;
+    const isOnTarget = hasValue && (inverse ? value <= target : value >= target);
+    const progress = hasValue 
+      ? (inverse 
+        ? Math.min(100, (target / Math.max(value, 0.1)) * 100)
+        : Math.min(100, (value / Math.max(target, 1)) * 100))
+      : 0;
 
     if (loading) {
       return (
@@ -179,10 +193,10 @@ const ExecutiveDashboard = () => {
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm h-full">
           <CardContent className="pt-6">
             <div className="flex items-start justify-between mb-4">
-              <div className={`p-2 rounded-lg ${isOnTarget ? 'bg-success/10' : 'bg-warning/10'}`}>
-                <Icon className={`w-5 h-5 ${isOnTarget ? 'text-success' : 'text-warning'}`} />
+              <div className={`p-2 rounded-lg ${hasValue ? (isOnTarget ? 'bg-success/10' : 'bg-warning/10') : 'bg-muted/30'}`}>
+                <Icon className={`w-5 h-5 ${hasValue ? (isOnTarget ? 'text-success' : 'text-warning') : 'text-muted-foreground'}`} />
               </div>
-              {trend !== undefined && (
+              {trend !== undefined && trend !== null && (
                 <Badge 
                   variant="outline" 
                   className={trend >= 0 
@@ -197,11 +211,15 @@ const ExecutiveDashboard = () => {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">{title}</p>
-              <p className="text-3xl font-bold">
-                {prefix}{typeof value === 'number' && value >= 1000 
-                  ? value.toLocaleString('pt-BR') 
-                  : value}{unit}
-              </p>
+              {hasValue ? (
+                <p className="text-3xl font-bold">
+                  {prefix}{typeof value === 'number' && value >= 1000 
+                    ? value.toLocaleString('pt-BR') 
+                    : value}{unit}
+                </p>
+              ) : (
+                <p className="text-lg text-muted-foreground/70 italic">Não disponível</p>
+              )}
               {description && (
                 <p className="text-xs text-muted-foreground">{description}</p>
               )}
@@ -209,9 +227,13 @@ const ExecutiveDashboard = () => {
             <div className="mt-4 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Meta: {prefix}{target}{unit}</span>
-                <span className={isOnTarget ? 'text-success' : 'text-warning'}>
-                  {isOnTarget ? '✓ Atingida' : 'Em progresso'}
-                </span>
+                {hasValue ? (
+                  <span className={isOnTarget ? 'text-success' : 'text-warning'}>
+                    {isOnTarget ? '✓ Atingida' : 'Em progresso'}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground/60">Requer integração</span>
+                )}
               </div>
               <Progress value={progress} className="h-1.5" />
             </div>
@@ -429,36 +451,47 @@ const ExecutiveDashboard = () => {
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Employee Net Promoter Score</p>
-                        <p className="text-5xl font-bold text-primary">+{peopleMetrics.enps.value}</p>
+                        {peopleMetrics.enps.value !== null ? (
+                          <p className="text-5xl font-bold text-primary">+{peopleMetrics.enps.value}</p>
+                        ) : (
+                          <p className="text-xl text-muted-foreground">Requer integração eNPS Survey</p>
+                        )}
                       </div>
                     </div>
-                    <Badge className="bg-success/20 text-success border-success/40">
-                      Meta: {peopleMetrics.enps.target} ✓
+                    <Badge className="bg-muted text-muted-foreground border-muted">
+                      Meta: {peopleMetrics.enps.target}
                     </Badge>
                   </div>
-                  <div className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={enpsDistribution}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {enpsDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Legend 
-                          verticalAlign="middle" 
-                          align="right"
-                          layout="vertical"
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
+                  <div className="h-[200px] flex items-center justify-center">
+                    {getEnpsDistribution(peopleMetrics) ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={getEnpsDistribution(peopleMetrics)!}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            {getEnpsDistribution(peopleMetrics)!.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Legend 
+                            verticalAlign="middle" 
+                            align="right"
+                            layout="vertical"
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="text-center text-muted-foreground">
+                        <p className="text-sm">Dados eNPS não disponíveis</p>
+                        <p className="text-xs mt-1">Integrar sistema de pesquisa de satisfação</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
