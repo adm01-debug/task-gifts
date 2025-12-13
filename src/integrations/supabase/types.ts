@@ -993,6 +993,45 @@ export type Database = {
           },
         ]
       }
+      user_combos: {
+        Row: {
+          actions_count: number
+          combo_date: string
+          created_at: string | null
+          current_multiplier: number
+          id: string
+          last_action_at: string | null
+          max_multiplier_reached: number
+          total_bonus_xp: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          actions_count?: number
+          combo_date?: string
+          created_at?: string | null
+          current_multiplier?: number
+          id?: string
+          last_action_at?: string | null
+          max_multiplier_reached?: number
+          total_bonus_xp?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          actions_count?: number
+          combo_date?: string
+          created_at?: string | null
+          current_multiplier?: number
+          id?: string
+          last_action_at?: string | null
+          max_multiplier_reached?: number
+          total_bonus_xp?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_mission_progress: {
         Row: {
           claimed: boolean | null
