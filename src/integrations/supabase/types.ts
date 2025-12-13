@@ -14,6 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendance_records: {
+        Row: {
+          check_in: string
+          check_out: string | null
+          created_at: string
+          id: string
+          is_punctual: boolean
+          late_minutes: number | null
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          check_in?: string
+          check_out?: string | null
+          created_at?: string
+          id?: string
+          is_punctual?: boolean
+          late_minutes?: number | null
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          check_in?: string
+          check_out?: string | null
+          created_at?: string
+          id?: string
+          is_punctual?: boolean
+          late_minutes?: number | null
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      attendance_settings: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          id: string
+          streak_milestone: number
+          tolerance_minutes: number
+          updated_at: string
+          work_end_time: string
+          work_start_time: string
+          xp_punctual_checkin: number
+          xp_streak_bonus: number
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          streak_milestone?: number
+          tolerance_minutes?: number
+          updated_at?: string
+          work_end_time?: string
+          work_start_time?: string
+          xp_punctual_checkin?: number
+          xp_streak_bonus?: number
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          streak_milestone?: number
+          tolerance_minutes?: number
+          updated_at?: string
+          work_end_time?: string
+          work_start_time?: string
+          xp_punctual_checkin?: number
+          xp_streak_bonus?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_settings_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_streaks: {
+        Row: {
+          best_streak: number
+          current_streak: number
+          id: string
+          last_punctual_date: string | null
+          total_punctual_days: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_streak?: number
+          current_streak?: number
+          id?: string
+          last_punctual_date?: string | null
+          total_punctual_days?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_streak?: number
+          current_streak?: number
+          id?: string
+          last_punctual_date?: string | null
+          total_punctual_days?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]

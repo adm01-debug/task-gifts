@@ -16,6 +16,7 @@ import { PeerRecognition } from "@/components/PeerRecognition";
 import { KudosRanking } from "@/components/KudosRanking";
 import DepartmentMissions from "@/components/DepartmentMissions";
 import DepartmentRankings from "@/components/DepartmentRankings";
+import { AttendanceModule } from "@/components/AttendanceModule";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -239,8 +240,9 @@ const Index = () => {
               <TeamChallenges />
             </div>
 
-            {/* Right Column - Rankings, Leaderboard, Kudos, Analytics & Rewards */}
+            {/* Right Column - Attendance, Rankings, Leaderboard, Kudos, Analytics & Rewards */}
             <div className="space-y-4 md:space-y-6">
+              <AttendanceModule />
               <DepartmentRankings />
               <LiveLeaderboard />
               <KudosRanking />
