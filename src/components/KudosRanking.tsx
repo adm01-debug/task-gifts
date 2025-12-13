@@ -4,6 +4,7 @@ import { Heart, Crown, Medal, TrendingUp, Award } from "lucide-react";
 import { useRecentKudos, useKudosBadges } from "@/hooks/useKudos";
 import { useProfiles } from "@/hooks/useProfiles";
 import { subMonths, isAfter } from "date-fns";
+import { Skeleton, SkeletonRankingList } from "@/components/ui/skeleton";
 
 interface RankedUser {
   userId: string;
@@ -137,10 +138,20 @@ export const KudosRanking = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-2xl border border-border p-6"
+        className="bg-card rounded-2xl border border-border overflow-hidden"
       >
-        <div className="flex items-center justify-center h-40">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        {/* Header */}
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Skeleton variant="shimmer" shape="square" className="w-8 h-8 rounded-lg" />
+            <div className="space-y-1">
+              <Skeleton variant="shimmer" className="h-4 w-32" />
+              <Skeleton variant="default" className="h-3 w-40" />
+            </div>
+          </div>
+        </div>
+        <div className="p-4">
+          <SkeletonRankingList count={5} />
         </div>
       </motion.div>
     );

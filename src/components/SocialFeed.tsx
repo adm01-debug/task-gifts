@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonActivityList } from "@/components/ui/skeleton";
 import { useSocialFeed } from "@/hooks/useSocialFeed";
 import { useCommentsCounts } from "@/hooks/useActivityComments";
 import { useActivityReactions } from "@/hooks/useActivityReactions";
@@ -42,17 +42,7 @@ export function SocialFeed({ limit = 30, compact = false, className }: SocialFee
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex items-start gap-3">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/4" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <SkeletonActivityList count={5} />
         </CardContent>
       </Card>
     );
