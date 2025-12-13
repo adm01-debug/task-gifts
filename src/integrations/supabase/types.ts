@@ -304,6 +304,69 @@ export type Database = {
         }
         Relationships: []
       }
+      certifications: {
+        Row: {
+          category: string
+          coin_reward: number
+          created_at: string
+          department_id: string | null
+          description: string | null
+          icon: string
+          id: string
+          is_mandatory: boolean
+          name: string
+          trail_id: string | null
+          updated_at: string
+          validity_months: number | null
+          xp_reward: number
+        }
+        Insert: {
+          category?: string
+          coin_reward?: number
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          icon?: string
+          id?: string
+          is_mandatory?: boolean
+          name: string
+          trail_id?: string | null
+          updated_at?: string
+          validity_months?: number | null
+          xp_reward?: number
+        }
+        Update: {
+          category?: string
+          coin_reward?: number
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          icon?: string
+          id?: string
+          is_mandatory?: boolean
+          name?: string
+          trail_id?: string | null
+          updated_at?: string
+          validity_months?: number | null
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certifications_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_quests: {
         Row: {
           coin_reward: number
@@ -1587,6 +1650,59 @@ export type Database = {
           },
         ]
       }
+      user_certifications: {
+        Row: {
+          certification_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          issued_at: string
+          issued_by: string | null
+          notes: string | null
+          renewal_count: number
+          renewed_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          certification_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          notes?: string | null
+          renewal_count?: number
+          renewed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          certification_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          notes?: string | null
+          renewal_count?: number
+          renewed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_certifications_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "certifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_combos: {
         Row: {
           actions_count: number
@@ -1805,6 +1921,7 @@ export type Database = {
         Args: { _department_id: string; _user_id: string }
         Returns: boolean
       }
+      update_certification_statuses: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "manager" | "employee"

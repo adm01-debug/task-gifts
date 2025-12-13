@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, Trophy, Zap, Flame, Star, Target, Users, Calendar,
-  Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart, Wand2
+  Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart, Wand2, GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProfileKudosSection } from "@/components/ProfileKudosSection";
 import { RankingBadge } from "@/components/RankingBadge";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
+import { CertificationsPanel } from "@/components/CertificationsPanel";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { AvatarPreview } from "@/components/AvatarPreview";
 import { ProfileAvatarSection } from "@/components/ProfileAvatarSection";
@@ -317,6 +318,9 @@ const Profile = () => {
             ))}
           </div>
         </motion.div>
+
+        {/* Certifications Panel */}
+        <CertificationsPanel />
 
         {/* Competency Radar */}
         {user?.id && <CompetencyRadar userId={user.id} />}
