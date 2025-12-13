@@ -256,6 +256,54 @@ export type Database = {
         }
         Relationships: []
       }
+      avatar_items: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          is_active: boolean
+          name: string
+          preview_color: string | null
+          price_coins: number | null
+          rarity: string
+          unlock_achievement_key: string | null
+          unlock_requirement: number | null
+          unlock_type: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          preview_color?: string | null
+          price_coins?: number | null
+          rarity?: string
+          unlock_achievement_key?: string | null
+          unlock_requirement?: number | null
+          unlock_type?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          preview_color?: string | null
+          price_coins?: number | null
+          rarity?: string
+          unlock_achievement_key?: string | null
+          unlock_requirement?: number | null
+          unlock_type?: string
+        }
+        Relationships: []
+      }
       custom_quests: {
         Row: {
           coin_reward: number
@@ -1437,6 +1485,104 @@ export type Database = {
             columns: ["achievement_id"]
             isOneToOne: false
             referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_avatar_config: {
+        Row: {
+          id: string
+          selected_accessory: string | null
+          selected_background: string | null
+          selected_badge_style: string | null
+          selected_effect: string | null
+          selected_frame: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          selected_accessory?: string | null
+          selected_background?: string | null
+          selected_badge_style?: string | null
+          selected_effect?: string | null
+          selected_frame?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          selected_accessory?: string | null
+          selected_background?: string | null
+          selected_badge_style?: string | null
+          selected_effect?: string | null
+          selected_frame?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_avatar_config_selected_accessory_fkey"
+            columns: ["selected_accessory"]
+            isOneToOne: false
+            referencedRelation: "avatar_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_avatar_config_selected_background_fkey"
+            columns: ["selected_background"]
+            isOneToOne: false
+            referencedRelation: "avatar_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_avatar_config_selected_badge_style_fkey"
+            columns: ["selected_badge_style"]
+            isOneToOne: false
+            referencedRelation: "avatar_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_avatar_config_selected_effect_fkey"
+            columns: ["selected_effect"]
+            isOneToOne: false
+            referencedRelation: "avatar_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_avatar_config_selected_frame_fkey"
+            columns: ["selected_frame"]
+            isOneToOne: false
+            referencedRelation: "avatar_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_avatar_items: {
+        Row: {
+          id: string
+          item_id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          item_id: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          item_id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_avatar_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_items"
             referencedColumns: ["id"]
           },
         ]
