@@ -73,12 +73,11 @@ export const kudosService = {
 
   // Kudos
   async getRecentKudos(limit = 20): Promise<KudosWithDetails[]> {
+    // First, get kudos with badge join only
     const { data, error } = await supabase
       .from("kudos")
       .select(`
         *,
-        from_profile:profiles!kudos_from_user_id_fkey(id, display_name, avatar_url),
-        to_profile:profiles!kudos_to_user_id_fkey(id, display_name, avatar_url),
         badge:kudos_badges(*)
       `)
       .eq("is_public", true)
@@ -86,25 +85,34 @@ export const kudosService = {
       .limit(limit);
     
     if (error) {
-      // Fallback without joins if FK not set up
-      console.error("Error fetching kudos with joins:", error);
-      const { data: simpleData, error: simpleError } = await supabase
-        .from("kudos")
-        .select("*")
-        .eq("is_public", true)
-        .order("created_at", { ascending: false })
-        .limit(limit);
-      
-      if (simpleError) throw simpleError;
-      return (simpleData ?? []).map(k => ({
-        ...k,
-        from_profile: null,
-        to_profile: null,
-        badge: null,
-      })) as KudosWithDetails[];
+      console.error("Error fetching kudos:", error);
+      throw error;
     }
-    
-    return (data ?? []) as unknown as KudosWithDetails[];
+
+    // Get all unique user IDs
+    const userIds = new Set<string>();
+    (data ?? []).forEach(k => {
+      userIds.add(k.from_user_id);
+      userIds.add(k.to_user_id);
+    });
+
+    // Fetch profiles for these users
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url")
+      .in("id", Array.from(userIds));
+
+    const profilesMap = new Map(
+      (profiles ?? []).map(p => [p.id, p])
+    );
+
+    // Map kudos with profile data
+    return (data ?? []).map(k => ({
+      ...k,
+      from_profile: profilesMap.get(k.from_user_id) || null,
+      to_profile: profilesMap.get(k.to_user_id) || null,
+      badge: k.badge || null,
+    })) as unknown as KudosWithDetails[];
   },
 
   async getKudosReceived(userId: string): Promise<KudosWithDetails[]> {

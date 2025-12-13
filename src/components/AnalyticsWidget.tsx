@@ -1,24 +1,8 @@
 import { motion } from "framer-motion";
 import { TrendingUp, Users, Target, Zap, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-
-const engagementData = [
-  { day: "Seg", xp: 2400, quests: 12 },
-  { day: "Ter", xp: 1398, quests: 8 },
-  { day: "Qua", xp: 3800, quests: 18 },
-  { day: "Qui", xp: 3908, quests: 22 },
-  { day: "Sex", xp: 4800, quests: 28 },
-  { day: "Sab", xp: 3800, quests: 15 },
-  { day: "Dom", xp: 4300, quests: 20 },
-];
-
-const teamData = [
-  { team: "Eng", score: 8500 },
-  { team: "Design", score: 7200 },
-  { team: "Product", score: 6800 },
-  { team: "Marketing", score: 5400 },
-  { team: "Sales", score: 4900 },
-];
+import { useLeaderboard } from "@/hooks/useProfiles";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -37,12 +21,65 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export const AnalyticsWidget = () => {
+  const { data: profiles = [], isLoading: profilesLoading } = useLeaderboard(50);
+
+  const isLoading = profilesLoading;
+
+  // Calculate real metrics from profiles
+  const totalUsers = profiles.length;
+  const activeUsers = profiles.filter(p => p.xp > 0).length;
+  const totalXp = profiles.reduce((sum, p) => sum + p.xp, 0);
+  const totalQuests = profiles.reduce((sum, p) => sum + p.quests_completed, 0);
+  const engagementRate = totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0;
+  const avgQuestsPerUser = totalUsers > 0 ? Math.round(totalQuests / totalUsers) : 0;
+
+  // Build XP data from top users
+  const topUsers = profiles.slice(0, 7);
+  const engagementData = topUsers.map((p, i) => ({
+    day: p.display_name?.substring(0, 3) || `U${i + 1}`,
+    xp: p.xp,
+    quests: p.quests_completed,
+  }));
+
+  // Group users by level ranges for team data
+  const levelGroups = [
+    { team: "Lv 1-5", score: profiles.filter(p => p.level >= 1 && p.level <= 5).reduce((s, p) => s + p.xp, 0) },
+    { team: "Lv 6-10", score: profiles.filter(p => p.level >= 6 && p.level <= 10).reduce((s, p) => s + p.xp, 0) },
+    { team: "Lv 11-20", score: profiles.filter(p => p.level >= 11 && p.level <= 20).reduce((s, p) => s + p.xp, 0) },
+    { team: "Lv 21-50", score: profiles.filter(p => p.level >= 21 && p.level <= 50).reduce((s, p) => s + p.xp, 0) },
+    { team: "Lv 50+", score: profiles.filter(p => p.level > 50).reduce((s, p) => s + p.xp, 0) },
+  ].filter(g => g.score > 0);
+
   const metrics = [
-    { label: "Usuários Ativos", value: "2,847", change: "+12%", positive: true, icon: Users },
-    { label: "Taxa de Engajamento", value: "78%", change: "+5%", positive: true, icon: TrendingUp },
-    { label: "Quests/Dia", value: "156", change: "-3%", positive: false, icon: Target },
-    { label: "XP Distribuído", value: "45.2K", change: "+18%", positive: true, icon: Zap },
+    { label: "Usuários Ativos", value: activeUsers.toString(), change: totalUsers > 0 ? `${totalUsers} total` : "0", positive: true, icon: Users },
+    { label: "Taxa de Engajamento", value: `${engagementRate}%`, change: activeUsers > 0 ? "+ativo" : "-", positive: engagementRate > 50, icon: TrendingUp },
+    { label: "Quests/Usuário", value: avgQuestsPerUser.toString(), change: `${totalQuests} total`, positive: avgQuestsPerUser > 0, icon: Target },
+    { label: "XP Distribuído", value: totalXp >= 1000 ? `${(totalXp / 1000).toFixed(1)}K` : totalXp.toString(), change: "+acumulado", positive: true, icon: Zap },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-8 h-8 rounded-lg" />
+            <div>
+              <Skeleton className="w-24 h-5 mb-1" />
+              <Skeleton className="w-16 h-3" />
+            </div>
+          </div>
+        </div>
+        <div className="p-4 grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-20 rounded-xl" />
+          ))}
+        </div>
+        <div className="p-4">
+          <Skeleton className="h-32" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -60,7 +97,7 @@ export const AnalyticsWidget = () => {
             </div>
             <div>
               <h3 className="font-bold">Analytics</h3>
-              <p className="text-xs text-muted-foreground">Última semana</p>
+              <p className="text-xs text-muted-foreground">Dados em tempo real</p>
             </div>
           </div>
           <motion.button
@@ -98,64 +135,68 @@ export const AnalyticsWidget = () => {
       </div>
 
       {/* Chart */}
-      <div className="p-4">
-        <p className="text-sm font-medium mb-3">XP Ganho por Dia</p>
-        <div className="h-32">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={engagementData}>
-              <defs>
-                <linearGradient id="xpGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <XAxis 
-                dataKey="day" 
-                axisLine={false} 
-                tickLine={false}
-                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-              />
-              <YAxis hide />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="xp"
-                stroke="hsl(var(--success))"
-                strokeWidth={2}
-                fill="url(#xpGradient)"
-                name="XP"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+      {engagementData.length > 0 && (
+        <div className="p-4">
+          <p className="text-sm font-medium mb-3">Top Usuários por XP</p>
+          <div className="h-32">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={engagementData}>
+                <defs>
+                  <linearGradient id="xpGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <XAxis 
+                  dataKey="day" 
+                  axisLine={false} 
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                />
+                <YAxis hide />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="xp"
+                  stroke="hsl(var(--success))"
+                  strokeWidth={2}
+                  fill="url(#xpGradient)"
+                  name="XP"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Team Performance */}
-      <div className="p-4 border-t border-border">
-        <p className="text-sm font-medium mb-3">Performance por Equipe</p>
-        <div className="h-24">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={teamData} layout="vertical">
-              <XAxis type="number" hide />
-              <YAxis 
-                type="category" 
-                dataKey="team" 
-                axisLine={false} 
-                tickLine={false}
-                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                width={50}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar
-                dataKey="score"
-                fill="hsl(var(--secondary))"
-                radius={[0, 4, 4, 0]}
-                name="Score"
-              />
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Level Distribution */}
+      {levelGroups.length > 0 && (
+        <div className="p-4 border-t border-border">
+          <p className="text-sm font-medium mb-3">XP por Nível</p>
+          <div className="h-24">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={levelGroups} layout="vertical">
+                <XAxis type="number" hide />
+                <YAxis 
+                  type="category" 
+                  dataKey="team" 
+                  axisLine={false} 
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  width={50}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar
+                  dataKey="score"
+                  fill="hsl(var(--secondary))"
+                  radius={[0, 4, 4, 0]}
+                  name="XP Total"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      </div>
+      )}
     </motion.div>
   );
 };
