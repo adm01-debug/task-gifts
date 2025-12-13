@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   RadarChart,
   PolarGrid,
@@ -13,7 +13,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   Cell,
 } from "recharts";
 import {
@@ -25,6 +24,11 @@ import {
   ChevronDown,
   ChevronUp,
   BookOpen,
+  Sparkles,
+  Loader2,
+  X,
+  Clock,
+  Star,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +40,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useQuery } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { competencyService, CompetencyData } from "@/services/competencyService";
 
@@ -64,8 +75,28 @@ const getCompetencyColor = (area: string) => {
   return COMPETENCY_COLORS[area as keyof typeof COMPETENCY_COLORS] || "hsl(var(--muted-foreground))";
 };
 
+interface TrailRecommendation {
+  trailId: string;
+  title: string;
+  reason: string;
+  priority: "alta" | "média" | "baixa";
+  skillGap: string;
+}
+
+interface RecommendationsResponse {
+  recommendations: TrailRecommendation[];
+  analysis: {
+    strengths: string[];
+    gaps: string[];
+    nextSteps: string;
+  };
+}
+
 export function TeamCompetencyDashboard() {
   const [expandedMembers, setExpandedMembers] = useState<Set<string>>(new Set());
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [selectedMemberForRecs, setSelectedMemberForRecs] = useState<TeamMemberCompetency | null>(null);
+  const [recommendations, setRecommendations] = useState<RecommendationsResponse | null>(null);
 
   // Fetch team members
   const { data: teamMembers, isLoading: loadingMembers } = useQuery({
@@ -112,6 +143,57 @@ export function TeamCompetencyDashboard() {
     },
     enabled: !!teamMembers?.length,
   });
+
+  // Mutation for fetching recommendations
+  const recommendationsMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trail-recommendations`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error("Limite de requisições excedido. Tente novamente mais tarde.");
+        }
+        if (response.status === 402) {
+          throw new Error("Créditos insuficientes. Adicione mais créditos.");
+        }
+        throw new Error("Erro ao buscar recomendações");
+      }
+
+      return response.json() as Promise<RecommendationsResponse>;
+    },
+    onSuccess: (data) => {
+      setRecommendations(data);
+      setShowRecommendations(true);
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Erro ao buscar recomendações");
+    },
+  });
+
+  const handleGetRecommendations = (member: TeamMemberCompetency) => {
+    setSelectedMemberForRecs(member);
+    setRecommendations(null);
+    recommendationsMutation.mutate(member.userId);
+  };
+
+  const handleGetTeamRecommendations = () => {
+    // Get member with most gaps
+    if (!teamCompetencies?.length) return;
+    const memberWithMostGaps = [...teamCompetencies].sort((a, b) => b.gaps.length - a.gaps.length)[0];
+    if (memberWithMostGaps) {
+      handleGetRecommendations(memberWithMostGaps);
+    }
+  };
 
   // Calculate team-wide stats
   const teamStats = useMemo(() => {
@@ -372,9 +454,19 @@ export function TeamCompetencyDashboard() {
                   ))}
                 </div>
               </div>
-              <Button variant="outline" size="sm" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
-                <BookOpen className="w-4 h-4 mr-2" />
-                Sugerir Trilhas
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                onClick={handleGetTeamRecommendations}
+                disabled={recommendationsMutation.isPending}
+              >
+                {recommendationsMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                Sugerir Trilhas IA
               </Button>
             </div>
           </Card>
@@ -512,6 +604,27 @@ export function TeamCompetencyDashboard() {
                                 </div>
                               </div>
                             )}
+
+                            {/* Recommend Button */}
+                            {member.gaps.length > 0 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="mt-3 border-primary/30 text-primary hover:bg-primary/10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleGetRecommendations(member);
+                                }}
+                                disabled={recommendationsMutation.isPending}
+                              >
+                                {recommendationsMutation.isPending && selectedMemberForRecs?.userId === member.userId ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <Sparkles className="w-4 h-4 mr-2" />
+                                )}
+                                Recomendar Trilhas
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -522,6 +635,118 @@ export function TeamCompetencyDashboard() {
             ))}
         </div>
       </Card>
+
+      {/* Recommendations Modal */}
+      <Dialog open={showRecommendations} onOpenChange={setShowRecommendations}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              Recomendações de Trilhas para {selectedMemberForRecs?.displayName}
+            </DialogTitle>
+          </DialogHeader>
+
+          {recommendationsMutation.isPending ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-4">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-muted-foreground">Analisando perfil e gerando recomendações...</p>
+            </div>
+          ) : recommendations ? (
+            <div className="space-y-6">
+              {/* Analysis Summary */}
+              {recommendations.analysis && (
+                <Card className="p-4 bg-muted/30 border-border/50">
+                  <h4 className="font-semibold text-foreground mb-3">Análise do Perfil</h4>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {recommendations.analysis.strengths?.length > 0 && (
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3 text-green-400" />
+                          Pontos Fortes
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {recommendations.analysis.strengths.map((s, i) => (
+                            <Badge key={i} variant="outline" className="text-xs border-green-500/30 text-green-400">
+                              {s}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {recommendations.analysis.gaps?.length > 0 && (
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3 text-amber-400" />
+                          Gaps Identificados
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {recommendations.analysis.gaps.map((g, i) => (
+                            <Badge key={i} variant="outline" className="text-xs border-amber-500/30 text-amber-400">
+                              {g}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {recommendations.analysis.nextSteps && (
+                    <p className="text-sm text-muted-foreground mt-3 pt-3 border-t border-border/30">
+                      <strong>Próximos passos:</strong> {recommendations.analysis.nextSteps}
+                    </p>
+                  )}
+                </Card>
+              )}
+
+              {/* Trail Recommendations */}
+              <div>
+                <h4 className="font-semibold text-foreground mb-3">Trilhas Recomendadas</h4>
+                <div className="space-y-3">
+                  <AnimatePresence mode="popLayout">
+                    {recommendations.recommendations?.map((rec, index) => (
+                      <motion.div
+                        key={rec.trailId || index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <Card className="p-4 bg-card/50 border-border/50 hover:border-primary/30 transition-colors">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <BookOpen className="w-4 h-4 text-primary" />
+                                <h5 className="font-medium text-foreground">{rec.title}</h5>
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs ${
+                                    rec.priority === "alta"
+                                      ? "border-red-500/30 text-red-400"
+                                      : rec.priority === "média"
+                                      ? "border-amber-500/30 text-amber-400"
+                                      : "border-green-500/30 text-green-400"
+                                  }`}
+                                >
+                                  {rec.priority}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{rec.reason}</p>
+                              {rec.skillGap && (
+                                <div className="flex items-center gap-1 mt-2">
+                                  <Target className="w-3 h-3 text-primary" />
+                                  <span className="text-xs text-primary">Desenvolve: {rec.skillGap}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
