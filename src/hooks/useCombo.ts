@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { comboService, COMBO_TIERS } from "@/services/comboService";
+import { achievementsService } from "@/services/achievementsService";
 import { useSoundEffects } from "./useSoundEffects";
 import { toast } from "sonner";
 
@@ -41,7 +41,7 @@ export function useTodayCombo() {
 export function useRegisterComboAction() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { playComboTierUpSound, playComboActionSound } = useSoundEffects();
+  const { playComboTierUpSound, playComboActionSound, playAchievementSound } = useSoundEffects();
 
   return useMutation({
     mutationFn: async (baseXp: number) => {
@@ -70,6 +70,22 @@ export function useRegisterComboAction() {
         toast.success(`🔥 COMBO ${tier.label}!`, {
           description: `Multiplicador x${tier.multiplier} ativo! +${result.bonusXp} XP bônus`,
         });
+
+        // Check combo achievements
+        if (user?.id) {
+          achievementsService.checkComboAchievements(user.id, result.combo.current_multiplier)
+            .then((achievement) => {
+              if (achievement) {
+                queryClient.invalidateQueries({ queryKey: ["achievements"] });
+                queryClient.invalidateQueries({ queryKey: ["profiles"] });
+                playAchievementSound();
+                toast.success(`🏆 ${achievement.name}`, {
+                  description: `${achievement.description} (+${achievement.xp_reward} XP, +${achievement.coin_reward} moedas)`,
+                  duration: 6000,
+                });
+              }
+            });
+        }
       } else if (result.bonusXp > 0 && result.combo) {
         // Play combo action sound
         playComboActionSound(result.combo.current_multiplier);
