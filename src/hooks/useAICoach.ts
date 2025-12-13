@@ -1,8 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "./useAuth";
 import { useCurrentProfile } from "./useProfiles";
 import { useCompetencies } from "./useCompetencies";
 import { usePublishedTrails, useUserEnrollments } from "./useTrails";
+import { aiCoachService } from "@/services/aiCoachService";
 
 interface Message {
   role: "user" | "assistant";
@@ -14,6 +15,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach`;
 export function useAICoach() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const { data: profile } = useCurrentProfile();
@@ -21,13 +23,35 @@ export function useAICoach() {
   const { data: trails } = usePublishedTrails();
   const { data: enrollments } = useUserEnrollments();
 
+  // Load chat history on mount
+  useEffect(() => {
+    if (!user?.id) {
+      setIsLoadingHistory(false);
+      return;
+    }
+
+    const loadHistory = async () => {
+      setIsLoadingHistory(true);
+      const history = await aiCoachService.getMessages(user.id);
+      if (history.length > 0) {
+        setMessages(history.map(m => ({ role: m.role, content: m.content })));
+      }
+      setIsLoadingHistory(false);
+    };
+
+    loadHistory();
+  }, [user?.id]);
+
   const sendMessage = useCallback(async (input: string) => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !user?.id) return;
 
     const userMsg: Message = { role: "user", content: input };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
     setError(null);
+
+    // Save user message to database
+    aiCoachService.saveMessage(user.id, "user", input);
 
     let assistantSoFar = "";
 
@@ -144,6 +168,11 @@ export function useAICoach() {
           } catch { /* ignore */ }
         }
       }
+
+      // Save assistant response to database after streaming completes
+      if (assistantSoFar && user?.id) {
+        aiCoachService.saveMessage(user.id, "assistant", assistantSoFar);
+      }
     } catch (e) {
       console.error("AI Coach error:", e);
       setError(e instanceof Error ? e.message : "Erro ao enviar mensagem");
@@ -152,16 +181,20 @@ export function useAICoach() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, profile, competencies, trails, enrollments]);
+  }, [messages, isLoading, profile, competencies, trails, enrollments, user?.id]);
 
-  const clearMessages = useCallback(() => {
+  const clearMessages = useCallback(async () => {
+    if (user?.id) {
+      await aiCoachService.clearHistory(user.id);
+    }
     setMessages([]);
     setError(null);
-  }, []);
+  }, [user?.id]);
 
   return {
     messages,
     isLoading,
+    isLoadingHistory,
     error,
     sendMessage,
     clearMessages,
