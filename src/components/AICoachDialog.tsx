@@ -257,14 +257,40 @@ export function AICoachDialog({ trigger }: AICoachDialogProps = {}) {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex gap-3"
                   >
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center flex-shrink-0">
+                    <motion.div 
+                      className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center flex-shrink-0"
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    >
                       <Bot className="w-3.5 h-3.5 text-white" />
-                    </div>
+                    </motion.div>
                     <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
-                      <div className="flex gap-1">
-                        <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <div className="flex items-center gap-1.5">
+                        {[0, 1, 2].map((i) => (
+                          <motion.span
+                            key={i}
+                            className="w-2 h-2 bg-gradient-to-br from-accent to-primary rounded-full"
+                            animate={{
+                              y: [0, -6, 0],
+                              opacity: [0.5, 1, 0.5],
+                              scale: [0.9, 1.1, 0.9],
+                            }}
+                            transition={{
+                              duration: 0.8,
+                              repeat: Infinity,
+                              delay: i * 0.15,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        ))}
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          transition={{ delay: 0.5 }}
+                          className="text-xs text-muted-foreground ml-2"
+                        >
+                          Pensando...
+                        </motion.span>
                       </div>
                     </div>
                   </motion.div>
