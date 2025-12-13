@@ -205,6 +205,16 @@ export default {
           "0%, 100%": { borderColor: "hsl(var(--border))" },
           "50%": { borderColor: "hsl(var(--primary) / 0.5)" },
         },
+        // Phase 3 - Micro-interaction keyframes
+        "wiggle": {
+          "0%, 100%": { transform: "rotate(-3deg)" },
+          "50%": { transform: "rotate(3deg)" },
+        },
+        "pop": {
+          "0%": { transform: "scale(0.95)", opacity: "0" },
+          "50%": { transform: "scale(1.02)" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -224,6 +234,11 @@ export default {
         "shimmer-slide": "shimmer-slide 1.5s ease-in-out",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         "border-glow": "border-glow 2s ease-in-out infinite",
+        // Phase 3 - Micro-interactions
+        "spin-slow": "spin 2s linear infinite",
+        "ping-slow": "ping 2s cubic-bezier(0, 0, 0.2, 1) infinite",
+        "wiggle": "wiggle 0.3s ease-in-out",
+        "pop": "pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
       },
       transitionDuration: {
         '400': '400ms',
