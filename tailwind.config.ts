@@ -105,6 +105,17 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      spacing: {
+        'card': 'var(--spacing-card)',
+        'card-sm': 'var(--spacing-card-sm)',
+        'card-lg': 'var(--spacing-card-lg)',
+        'section': 'var(--spacing-section)',
+        'section-lg': 'var(--spacing-section-lg)',
+      },
+      gap: {
+        'card': 'var(--spacing-card)',
+        'section': 'var(--spacing-section)',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

@@ -8,20 +8,39 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "shadow-sm hover:shadow-md border-border",
+        // Base variants
+        default: "shadow-sm border-border",
+        
+        // Hierarchy variants - NEW
+        subtle: "shadow-xs border-border/60 bg-card/80",
+        prominent: "shadow-lg border-border bg-gradient-to-b from-card to-card/95",
+        featured: "shadow-xl border-primary/20 bg-gradient-to-br from-card via-card to-primary/5",
+        
+        // Interactive variants
         elevated: "shadow-md hover:shadow-lg hover:-translate-y-0.5 border-border",
-        interactive: "shadow-md hover:shadow-glow-primary hover:border-primary/40 cursor-pointer hover:-translate-y-1 border-border card-interactive",
+        interactive: "shadow-md hover:shadow-glow-primary hover:border-primary/40 cursor-pointer hover:-translate-y-1 border-border",
+        
+        // Special effects
         glass: "bg-card/85 backdrop-blur-xl border-border/50 shadow-lg",
         ghost: "border-transparent shadow-none bg-transparent hover:bg-muted/50",
         outline: "border-2 shadow-none hover:border-primary/50 bg-transparent hover:bg-card/50",
-        premium: "bg-gradient-to-br from-card via-card to-muted/30 border-primary/20 shadow-glow-primary card-glow",
-        stat: "shadow-sm hover:shadow-md hover:-translate-y-1 border-border relative overflow-hidden card-shimmer",
-        shimmer: "shadow-sm border-border card-shimmer hover:border-primary/30",
-        glow: "shadow-sm border-border card-glow",
+        premium: "bg-gradient-to-br from-card via-card to-muted/30 border-primary/20 shadow-glow-primary",
+        
+        // Stats and data
+        stat: "shadow-sm hover:shadow-md hover:-translate-y-1 border-border relative overflow-hidden",
+        shimmer: "shadow-sm border-border hover:border-primary/30",
+        glow: "shadow-sm border-border animate-border-glow",
+      },
+      size: {
+        default: "",
+        sm: "p-4",
+        md: "p-6",
+        lg: "p-8",
       },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   }
 );
@@ -31,21 +50,30 @@ export interface CardProps
     VariantProps<typeof cardVariants> {}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, ...props }, ref) => (
+  ({ className, variant, size, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(cardVariants({ variant, className }))}
+      className={cn(cardVariants({ variant, size, className }))}
       {...props}
     />
   )
 );
 Card.displayName = "Card";
 
-const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex flex-col space-y-1.5 p-6", className)} {...props} />
-  ),
-);
+const CardHeader = React.forwardRef<
+  HTMLDivElement, 
+  React.HTMLAttributes<HTMLDivElement> & { compact?: boolean }
+>(({ className, compact, ...props }, ref) => (
+  <div 
+    ref={ref} 
+    className={cn(
+      "flex flex-col space-y-1.5",
+      compact ? "p-4" : "p-6",
+      className
+    )} 
+    {...props} 
+  />
+));
 CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
@@ -69,16 +97,35 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
 );
 CardDescription.displayName = "CardDescription";
 
-const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />,
-);
+const CardContent = React.forwardRef<
+  HTMLDivElement, 
+  React.HTMLAttributes<HTMLDivElement> & { compact?: boolean }
+>(({ className, compact, ...props }, ref) => (
+  <div 
+    ref={ref} 
+    className={cn(
+      compact ? "p-4 pt-0" : "p-6 pt-0", 
+      className
+    )} 
+    {...props} 
+  />
+));
 CardContent.displayName = "CardContent";
 
-const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex items-center p-6 pt-0", className)} {...props} />
-  ),
-);
+const CardFooter = React.forwardRef<
+  HTMLDivElement, 
+  React.HTMLAttributes<HTMLDivElement> & { compact?: boolean }
+>(({ className, compact, ...props }, ref) => (
+  <div 
+    ref={ref} 
+    className={cn(
+      "flex items-center",
+      compact ? "p-4 pt-0" : "p-6 pt-0", 
+      className
+    )} 
+    {...props} 
+  />
+));
 CardFooter.displayName = "CardFooter";
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent, cardVariants };
