@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, ArrowLeft, Trash2, Edit2, Eye, EyeOff, 
   Sparkles, Trophy, HelpCircle, CheckCircle2, XCircle,
-  Filter, Search, Wand2
+  Filter, Search, Wand2, BarChart3
 } from "lucide-react";
 import AIQuestionGenerator from "@/components/quiz/AIQuestionGenerator";
+import QuizCategoryStats from "@/components/quiz/QuizCategoryStats";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -104,6 +105,7 @@ function QuizAdminContent() {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   const { data: questions, isLoading } = useQuizQuestions();
   const { data: editQuestion } = useQuizQuestion(editingId || '');
@@ -265,8 +267,16 @@ function QuizAdminContent() {
             </div>
             <div className="flex gap-2">
               <Button 
+                variant={showStats ? "default" : "outline"} 
+                onClick={() => { setShowStats(!showStats); setShowAIGenerator(false); }} 
+                className="gap-2"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Estatísticas
+              </Button>
+              <Button 
                 variant={showAIGenerator ? "default" : "outline"} 
-                onClick={() => setShowAIGenerator(!showAIGenerator)} 
+                onClick={() => { setShowAIGenerator(!showAIGenerator); setShowStats(false); }} 
                 className="gap-2"
               >
                 <Wand2 className="w-4 h-4" />
@@ -290,6 +300,20 @@ function QuizAdminContent() {
               className="mb-6 overflow-hidden"
             >
               <AIQuestionGenerator onQuestionsGenerated={() => setShowAIGenerator(false)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Stats Panel */}
+        <AnimatePresence>
+          {showStats && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-6 overflow-hidden"
+            >
+              <QuizCategoryStats />
             </motion.div>
           )}
         </AnimatePresence>

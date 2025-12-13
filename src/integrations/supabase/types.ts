@@ -1151,6 +1151,51 @@ export type Database = {
           },
         ]
       }
+      quiz_answers: {
+        Row: {
+          created_at: string
+          id: string
+          is_correct: boolean
+          question_id: string
+          selected_option_id: string | null
+          time_spent_ms: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_correct: boolean
+          question_id: string
+          selected_option_id?: string | null
+          time_spent_ms?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          question_id?: string
+          selected_option_id?: string | null
+          time_spent_ms?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_answers_selected_option_id_fkey"
+            columns: ["selected_option_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_options"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_options: {
         Row: {
           created_at: string
@@ -2073,6 +2118,17 @@ export type Database = {
       get_department_metrics: { Args: never; Returns: Json }
       get_executive_metrics: { Args: never; Returns: Json }
       get_monthly_trends: { Args: never; Returns: Json }
+      get_quiz_category_stats: {
+        Args: never
+        Returns: {
+          accuracy_rate: number
+          avg_time_ms: number
+          category: string
+          correct_answers: number
+          question_count: number
+          total_answers: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
