@@ -8,3 +8,6 @@ verify_jwt = true
 
 [functions.competency-alerts]
 verify_jwt = true
+
+[functions.generate-quiz-questions]
+verify_jwt = true
