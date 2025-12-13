@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { notificationsService } from "./notificationsService";
 import { profilesService } from "./profilesService";
 import { auditService } from "./auditService";
+import { missionsService } from "./missionsService";
 
 export interface KudosBadge {
   id: string;
@@ -217,6 +218,14 @@ export const kudosService = {
       await profilesService.addXp(kudos.to_user_id, xpValue, `Kudos: ${badgeName}`);
     } catch (e) {
       console.error("Failed to add XP for kudos:", e);
+    }
+
+    // Auto-update mission progress for kudos given
+    try {
+      await missionsService.incrementByMetricKey(kudos.from_user_id, 'kudos_given', 1);
+      await missionsService.incrementByMetricKey(kudos.to_user_id, 'kudos_received', 1);
+    } catch (e) {
+      console.error("Failed to update kudos mission progress:", e);
     }
 
     return data as Kudos;

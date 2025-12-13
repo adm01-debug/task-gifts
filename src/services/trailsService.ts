@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { auditService } from "./auditService";
+import { missionsService } from "./missionsService";
 
 export interface LearningTrail {
   id: string;
@@ -203,6 +204,15 @@ export const trailsService = {
       .single();
 
     if (error) throw error;
+
+    // Auto-update mission progress for module completion
+    try {
+      await missionsService.incrementByMetricKey(userId, 'module_completed', 1);
+      await missionsService.incrementByMetricKey(userId, 'training_completed', 1);
+    } catch (e) {
+      console.error("Failed to update module mission progress:", e);
+    }
+
     return data as ModuleProgress;
   },
 
@@ -233,6 +243,13 @@ export const trailsService = {
         new_data: { trail_id: trailId, progress: 100 },
         metadata: { type: "learning_trail" },
       });
+
+      // Auto-update mission progress for trail completion
+      try {
+        await missionsService.incrementByMetricKey(userId, 'trail_completed', 1);
+      } catch (e) {
+        console.error("Failed to update trail mission progress:", e);
+      }
     }
 
     return data as TrailEnrollment;

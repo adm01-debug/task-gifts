@@ -250,4 +250,27 @@ export const missionsService = {
     if (error) throw error;
     return (data || []) as DepartmentRanking[];
   },
+
+  // Increment progress for all missions matching a metric key
+  async incrementByMetricKey(userId: string, metricKey: string, increment: number = 1): Promise<void> {
+    try {
+      // Get all active missions that match this metric key
+      const { data: missions, error } = await supabase
+        .from("department_missions")
+        .select("*")
+        .eq("is_active", true)
+        .eq("metric_key", metricKey);
+
+      if (error) throw error;
+      if (!missions || missions.length === 0) return;
+
+      // Update progress for each matching mission
+      for (const mission of missions) {
+        await this.getOrCreateProgress(userId, mission as DepartmentMission);
+        await this.updateProgress(userId, mission.id, increment);
+      }
+    } catch (e) {
+      console.error(`Failed to update mission progress for metric ${metricKey}:`, e);
+    }
+  },
 };

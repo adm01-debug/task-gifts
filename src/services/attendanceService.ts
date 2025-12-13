@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { auditService } from "./auditService";
 import { profilesService } from "./profilesService";
 import { notificationsService } from "./notificationsService";
+import { missionsService } from "./missionsService";
 
 export interface AttendanceRecord {
   id: string;
@@ -222,6 +223,10 @@ export const attendanceService = {
       if (xpEarned > 0) {
         await profilesService.addXp(userId, xpEarned, 'punctual_checkin');
       }
+
+      // Auto-update mission progress for punctual check-in
+      await missionsService.incrementByMetricKey(userId, 'punctual_checkin', 1);
+      await missionsService.incrementByMetricKey(userId, 'daily_checkin', 1);
 
       // Send notification for milestone
       if (streakMilestoneReached) {
