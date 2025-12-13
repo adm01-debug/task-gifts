@@ -124,16 +124,16 @@ const Auth = () => {
                 <Gift className="w-7 h-7 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Task Gifts</h1>
+                <h1 className="text-2xl font-display font-bold">Task Gifts</h1>
                 <p className="text-sm text-muted-foreground">Gamify your work</p>
               </div>
             </div>
 
-            <h2 className="text-4xl font-bold mb-4">
+            <h2 className="text-display-lg mb-4">
               Transforme trabalho em{" "}
               <span className="gradient-text">diversão</span>
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               Complete quests diárias, suba de nível, desbloqueie recompensas e 
               compita com sua equipe. Produtividade nunca foi tão divertida.
             </p>
