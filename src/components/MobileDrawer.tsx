@@ -21,12 +21,12 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: Home, label: "Dashboard", path: "/" },
   { icon: MessageSquare, label: "Feed Social", path: "/feed" },
+  { icon: Trophy, label: "Conquistas", path: "/conquistas" },
   { icon: Clock, label: "Ponto", path: "/ponto" },
   { icon: LineChart, label: "Executivo", path: "/executivo" },
   { icon: BookOpen, label: "Trilhas", path: "/trails" },
   { icon: Target, label: "Quests", badge: 3 },
   { icon: PlusCircle, label: "Criar Quest", path: "/quest-builder" },
-  { icon: Trophy, label: "Leaderboard" },
   { icon: Users, label: "Equipes" },
   { icon: ClipboardList, label: "Gestor", path: "/manager" },
   { icon: Gift, label: "Loja", path: "/loja", badge: 2 },
