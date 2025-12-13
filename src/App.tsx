@@ -23,6 +23,7 @@ import ShopAdmin from "./pages/ShopAdmin";
 import SocialFeed from "./pages/SocialFeed";
 import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
+import PersonalStats from "./pages/PersonalStats";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="/executivo" element={<ExecutiveDashboard />} />
               <Route path="/feed" element={<SocialFeed />} />
               <Route path="/conquistas" element={<Achievements />} />
+              <Route path="/estatisticas" element={<PersonalStats />} />
               <Route path="/loja" element={<Shop />} />
               <Route
                 path="/loja/admin"
