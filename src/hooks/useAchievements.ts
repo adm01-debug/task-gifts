@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
 import { achievementsService } from "@/services/achievementsService";
-import { toast } from "sonner";
 import { useSoundEffects } from "./useSoundEffects";
+import { useAchievementNotification, iconFromDbIcon } from "@/contexts/AchievementNotificationContext";
 
 export function useAllAchievements() {
   return useQuery({
@@ -25,6 +25,7 @@ export function useUnlockAchievement() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { playAchievementSound } = useSoundEffects();
+  const { showAchievementNotification } = useAchievementNotification();
 
   return useMutation({
     mutationFn: (achievementKey: string) =>
@@ -36,9 +37,14 @@ export function useUnlockAchievement() {
         
         playAchievementSound();
         
-        toast.success(`🏆 ${result.achievement.name}`, {
-          description: `${result.achievement.description} (+${result.achievement.xp_reward} XP, +${result.achievement.coin_reward} moedas)`,
-          duration: 5000,
+        showAchievementNotification({
+          id: result.achievement.id,
+          title: result.achievement.name,
+          description: result.achievement.description || "",
+          icon: iconFromDbIcon(result.achievement.icon),
+          xp: result.achievement.xp_reward,
+          coins: result.achievement.coin_reward,
+          rarity: result.achievement.rarity as "common" | "rare" | "epic" | "legendary",
         });
       }
     },
@@ -49,6 +55,7 @@ export function useCheckComboAchievements() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { playAchievementSound } = useSoundEffects();
+  const { showAchievementNotification } = useAchievementNotification();
 
   return useMutation({
     mutationFn: (multiplier: number) =>
@@ -60,9 +67,14 @@ export function useCheckComboAchievements() {
         
         playAchievementSound();
         
-        toast.success(`🏆 Conquista: ${achievement.name}`, {
-          description: `${achievement.description} (+${achievement.xp_reward} XP, +${achievement.coin_reward} moedas)`,
-          duration: 6000,
+        showAchievementNotification({
+          id: achievement.id,
+          title: achievement.name,
+          description: achievement.description || "",
+          icon: iconFromDbIcon(achievement.icon),
+          xp: achievement.xp_reward,
+          coins: achievement.coin_reward,
+          rarity: achievement.rarity as "common" | "rare" | "epic" | "legendary",
         });
       }
     },
