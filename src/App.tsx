@@ -25,6 +25,7 @@ import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 import PersonalStats from "./pages/PersonalStats";
 import SeasonalEventDetail from "./pages/SeasonalEventDetail";
+import Mentorship from "./pages/Mentorship";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/estatisticas" element={<PersonalStats />} />
               <Route path="/loja" element={<Shop />} />
               <Route path="/eventos/:eventId" element={<SeasonalEventDetail />} />
+              <Route path="/mentoria" element={<Mentorship />} />
               <Route
                 path="/loja/admin"
                 element={
