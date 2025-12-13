@@ -27,6 +27,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserRank } from "@/hooks/useUserRank";
+import { useRankChangeNotifier } from "@/hooks/useRankChangeNotifier";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -39,6 +40,9 @@ const Index = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { data: rankData } = useUserRank();
+  
+  // Track rank changes and notify user
+  useRankChangeNotifier();
 
   // Redirect to auth if not logged in
   useEffect(() => {
