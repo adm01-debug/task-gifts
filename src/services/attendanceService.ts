@@ -4,6 +4,7 @@ import { profilesService } from "./profilesService";
 import { notificationsService } from "./notificationsService";
 import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
+import { achievementsService } from "./achievementsService";
 
 export interface AttendanceRecord {
   id: string;
@@ -238,6 +239,13 @@ export const attendanceService = {
       // Auto-update mission progress for punctual check-in
       await missionsService.incrementByMetricKey(userId, 'punctual_checkin', 1);
       await missionsService.incrementByMetricKey(userId, 'daily_checkin', 1);
+
+      // Check for streak achievements
+      try {
+        await achievementsService.checkStreakAchievements(userId, newStreak);
+      } catch (e) {
+        console.error("Failed to check streak achievements:", e);
+      }
 
       // Send notification for milestone
       if (streakMilestoneReached) {

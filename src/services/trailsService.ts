@@ -3,6 +3,7 @@ import { auditService } from "./auditService";
 import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
 import { profilesService } from "./profilesService";
+import { achievementsService } from "./achievementsService";
 
 export interface LearningTrail {
   id: string;
@@ -268,6 +269,13 @@ export const trailsService = {
         await missionsService.incrementByMetricKey(userId, 'trail_completed', 1);
       } catch (e) {
         console.error("Failed to update trail mission progress:", e);
+      }
+
+      // Check for trail achievements
+      try {
+        await achievementsService.checkTrailAchievements(userId);
+      } catch (e) {
+        console.error("Failed to check trail achievements:", e);
       }
     }
 

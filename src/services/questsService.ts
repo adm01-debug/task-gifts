@@ -5,6 +5,7 @@ import { auditService } from "./auditService";
 import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
 import { profilesService } from "./profilesService";
+import { achievementsService } from "./achievementsService";
 
 export type Quest = Tables<"custom_quests">;
 export type QuestInsert = TablesInsert<"custom_quests">;
@@ -260,6 +261,13 @@ export const questsService = {
           await missionsService.incrementByMetricKey(data.user_id, 'quest_completed', 1);
         } catch (e) {
           console.error("Failed to update quest mission progress:", e);
+        }
+
+        // Check for quest achievements
+        try {
+          await achievementsService.checkQuestAchievements(data.user_id);
+        } catch (e) {
+          console.error("Failed to check quest achievements:", e);
         }
       }
     } catch (e) {
