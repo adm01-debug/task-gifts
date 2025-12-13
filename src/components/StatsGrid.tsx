@@ -6,6 +6,7 @@ import { useUserRank } from "@/hooks/useUserRank";
 import { SkeletonStatCard } from "@/components/ui/skeleton";
 import { AnimatedFireIndicator } from "@/components/effects/AnimatedFireIndicator";
 import { AnimatedTrophyIndicator } from "@/components/effects/AnimatedTrophyIndicator";
+import { AnimatedLevelIndicator } from "@/components/effects/AnimatedLevelIndicator";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -48,6 +49,7 @@ interface StatCardProps {
   pulse?: "primary" | "warning" | "success";
   fireIndicator?: number;
   trophyIndicator?: number;
+  levelIndicator?: number;
 }
 
 const colorClasses = {
@@ -84,7 +86,7 @@ const pulseClasses = {
   success: "card-pulse-success",
 };
 
-const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator, trophyIndicator }: StatCardProps) => {
+const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator, trophyIndicator, levelIndicator }: StatCardProps) => {
   const colors = colorClasses[color];
 
   if (isLoading) {
@@ -102,6 +104,11 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
         pulse && pulseClasses[pulse]
       )}
     >
+      {/* Level indicator for XP card */}
+      {levelIndicator !== undefined && levelIndicator > 0 && (
+        <AnimatedLevelIndicator level={levelIndicator} />
+      )}
+
       {/* Fire indicator for streak */}
       {fireIndicator !== undefined && fireIndicator > 0 && (
         <AnimatedFireIndicator streakDays={fireIndicator} />
@@ -178,6 +185,7 @@ export const StatsGrid = () => {
       changeType: "positive",
       color: "success",
       isLoading,
+      levelIndicator: profile?.level || 0,
     },
     {
       icon: Flame,
