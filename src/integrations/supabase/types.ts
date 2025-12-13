@@ -587,6 +587,174 @@ export type Database = {
           },
         ]
       }
+      mentorship_mission_progress: {
+        Row: {
+          apprentice_completed_at: string | null
+          completed_by_apprentice: boolean
+          completed_by_mentor: boolean
+          created_at: string
+          id: string
+          mentor_completed_at: string | null
+          mission_id: string
+          pair_id: string
+          rewards_claimed: boolean
+          updated_at: string
+        }
+        Insert: {
+          apprentice_completed_at?: string | null
+          completed_by_apprentice?: boolean
+          completed_by_mentor?: boolean
+          created_at?: string
+          id?: string
+          mentor_completed_at?: string | null
+          mission_id: string
+          pair_id: string
+          rewards_claimed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          apprentice_completed_at?: string | null
+          completed_by_apprentice?: boolean
+          completed_by_mentor?: boolean
+          created_at?: string
+          id?: string
+          mentor_completed_at?: string | null
+          mission_id?: string
+          pair_id?: string
+          rewards_claimed?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_mission_progress_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mentorship_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentorship_mission_progress_pair_id_fkey"
+            columns: ["pair_id"]
+            isOneToOne: false
+            referencedRelation: "mentorship_pairs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentorship_missions: {
+        Row: {
+          coin_reward: number
+          created_at: string
+          description: string | null
+          difficulty: string
+          icon: string
+          id: string
+          is_active: boolean
+          mission_type: string
+          order_index: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          mission_type?: string
+          order_index?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          mission_type?: string
+          order_index?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      mentorship_pairs: {
+        Row: {
+          apprentice_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          mentor_id: string
+          started_at: string | null
+          status: string
+          total_missions_completed: number
+          total_xp_earned: number
+          updated_at: string
+        }
+        Insert: {
+          apprentice_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mentor_id: string
+          started_at?: string | null
+          status?: string
+          total_missions_completed?: number
+          total_xp_earned?: number
+          updated_at?: string
+        }
+        Update: {
+          apprentice_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          started_at?: string | null
+          status?: string
+          total_missions_completed?: number
+          total_xp_earned?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mentorship_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          request_type: string
+          requester_id: string
+          responded_at: string | null
+          status: string
+          target_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          request_type: string
+          requester_id: string
+          responded_at?: string | null
+          status?: string
+          target_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          request_type?: string
+          requester_id?: string
+          responded_at?: string | null
+          status?: string
+          target_id?: string | null
+        }
+        Relationships: []
+      }
       module_progress: {
         Row: {
           attempts: number | null
