@@ -33,19 +33,65 @@ IMPORTANTE SOBRE RECOMENDAÇÕES DE TRILHAS:
 
 Responda sempre em português brasileiro, de forma amigável e motivadora. Seja conciso mas útil.`;
 
+const SUGGESTIONS_PROMPT = `Com base na conversa anterior, gere exatamente 3 sugestões de follow-up curtas e relevantes que o usuário pode perguntar a seguir.
+
+REGRAS:
+- Cada sugestão deve ter NO MÁXIMO 6 palavras
+- As sugestões devem ser naturais e contextuais
+- Varie entre perguntas sobre: próximos passos, aprofundamento do tema, ou tópicos relacionados
+- NÃO use aspas ou numeração
+
+Responda APENAS com as 3 sugestões, uma por linha, sem formatação adicional.`;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, userContext } = await req.json();
+    const { messages, userContext, generateSuggestions } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // If this is a suggestions request
+    if (generateSuggestions) {
+      const suggestionsResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            { role: "system", content: SUGGESTIONS_PROMPT },
+            ...messages.slice(-4), // Last 4 messages for context
+          ],
+          stream: false,
+        }),
+      });
+
+      if (!suggestionsResponse.ok) {
+        console.error("Failed to generate suggestions");
+        return new Response(JSON.stringify({ suggestions: [] }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const suggestionsData = await suggestionsResponse.json();
+      const suggestionsText = suggestionsData.choices?.[0]?.message?.content || "";
+      const suggestions = suggestionsText
+        .split("\n")
+        .map((s: string) => s.trim())
+        .filter((s: string) => s.length > 0 && s.length <= 50)
+        .slice(0, 3);
+
+      return new Response(JSON.stringify({ suggestions }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Build context-aware system prompt

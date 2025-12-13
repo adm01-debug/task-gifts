@@ -14,6 +14,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach`;
 
 export function useAICoach() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +43,32 @@ export function useAICoach() {
     loadHistory();
   }, [user?.id]);
 
+  // Generate follow-up suggestions after assistant response
+  const generateSuggestions = useCallback(async (conversationMessages: Message[]) => {
+    if (conversationMessages.length < 2) return;
+    
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ 
+          messages: conversationMessages,
+          generateSuggestions: true,
+        }),
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        setSuggestions(data.suggestions || []);
+      }
+    } catch (e) {
+      console.error("Failed to generate suggestions:", e);
+    }
+  }, []);
+
   const sendMessage = useCallback(async (input: string) => {
     if (!input.trim() || isLoading || !user?.id) return;
 
@@ -49,6 +76,7 @@ export function useAICoach() {
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
     setError(null);
+    setSuggestions([]); // Clear suggestions when sending new message
 
     // Save user message to database
     aiCoachService.saveMessage(user.id, "user", input);
@@ -172,6 +200,10 @@ export function useAICoach() {
       // Save assistant response to database after streaming completes
       if (assistantSoFar && user?.id) {
         aiCoachService.saveMessage(user.id, "assistant", assistantSoFar);
+        
+        // Generate follow-up suggestions
+        const finalMessages: Message[] = [...messages, userMsg, { role: "assistant", content: assistantSoFar }];
+        generateSuggestions(finalMessages);
       }
     } catch (e) {
       console.error("AI Coach error:", e);
@@ -181,18 +213,20 @@ export function useAICoach() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, profile, competencies, trails, enrollments, user?.id]);
+  }, [messages, isLoading, profile, competencies, trails, enrollments, user?.id, generateSuggestions]);
 
   const clearMessages = useCallback(async () => {
     if (user?.id) {
       await aiCoachService.clearHistory(user.id);
     }
     setMessages([]);
+    setSuggestions([]);
     setError(null);
   }, [user?.id]);
 
   return {
     messages,
+    suggestions,
     isLoading,
     isLoadingHistory,
     error,

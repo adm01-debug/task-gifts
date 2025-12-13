@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Lightbulb } from "lucide-react";
 import { Sparkles, Send, X, Trash2, Bot, User, Loader2, BookOpen, Clock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -71,7 +72,7 @@ interface AICoachDialogProps {
 export function AICoachDialog({ trigger }: AICoachDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const { messages, isLoading, error, sendMessage, clearMessages } = useAICoach();
+  const { messages, suggestions, isLoading, error, sendMessage, clearMessages } = useAICoach();
   const { data: trails } = usePublishedTrails();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -292,6 +293,36 @@ export function AICoachDialog({ trigger }: AICoachDialogProps = {}) {
                           Pensando...
                         </motion.span>
                       </div>
+                    </div>
+                  </motion.div>
+                )}
+                {/* Follow-up suggestions */}
+                {!isLoading && suggestions.length > 0 && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="flex flex-col gap-2 pt-2"
+                  >
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Lightbulb className="w-3 h-3" />
+                      <span>Sugestões:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {suggestions.map((suggestion, idx) => (
+                        <motion.button
+                          key={idx}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.4 + idx * 0.1 }}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => sendMessage(suggestion)}
+                          className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20 hover:border-accent/40 text-foreground transition-colors"
+                        >
+                          {suggestion}
+                        </motion.button>
+                      ))}
                     </div>
                   </motion.div>
                 )}
