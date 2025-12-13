@@ -1151,6 +1151,94 @@ export type Database = {
           },
         ]
       }
+      quiz_options: {
+        Row: {
+          created_at: string
+          id: string
+          is_correct: boolean
+          order_index: number
+          question_id: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          order_index?: number
+          question_id: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          order_index?: number
+          question_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_questions: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string
+          department_id: string | null
+          difficulty: string
+          explanation: string | null
+          id: string
+          is_active: boolean
+          points: number
+          question: string
+          quiz_type: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by: string
+          department_id?: string | null
+          difficulty?: string
+          explanation?: string | null
+          id?: string
+          is_active?: boolean
+          points?: number
+          question: string
+          quiz_type?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          difficulty?: string
+          explanation?: string | null
+          id?: string
+          is_active?: boolean
+          points?: number
+          question?: string
+          quiz_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_scores: {
         Row: {
           correct_answers: number
