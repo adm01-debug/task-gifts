@@ -157,4 +157,32 @@ export const notificationsService = {
       data: { amount, source },
     });
   },
+
+  async notifyCompetencyGap(userId: string, gaps: { area: string; value: number; icon: string }[]): Promise<Notification> {
+    const gapAreas = gaps.map(g => `${g.icon} ${g.area}`).join(', ');
+    return this.create({
+      user_id: userId,
+      type: "competency_gap",
+      title: "⚠️ Gaps de Competência Detectados",
+      message: `Áreas que precisam de atenção: ${gapAreas}`,
+      data: { gaps },
+    });
+  },
+
+  async notifyDevelopmentTip(userId: string, area: string, icon: string, recommendation: string): Promise<Notification> {
+    return this.create({
+      user_id: userId,
+      type: "development_tip",
+      title: "💡 Dica de Desenvolvimento",
+      message: `Desenvolva sua competência em ${icon} ${area}`,
+      data: { area, recommendation },
+    });
+  },
+
+  async triggerCompetencyAnalysis(userId: string): Promise<void> {
+    const { supabase } = await import("@/integrations/supabase/client");
+    await supabase.functions.invoke('competency-alerts', {
+      body: { userId }
+    });
+  },
 };

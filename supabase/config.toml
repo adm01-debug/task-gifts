@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.churn-prediction]
 verify_jwt = true
+
+[functions.competency-alerts]
+verify_jwt = true
