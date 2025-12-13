@@ -1,5 +1,7 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Coins } from "lucide-react";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 interface AnimatedCoinsIndicatorProps {
   coins: number;
@@ -7,6 +9,25 @@ interface AnimatedCoinsIndicatorProps {
 }
 
 export const AnimatedCoinsIndicator = ({ coins, className = "" }: AnimatedCoinsIndicatorProps) => {
+  const { playCoinsSound, playRichCoinsSound } = useSoundEffects();
+  const hasPlayedSound = useRef(false);
+
+  // Play sound on first render
+  useEffect(() => {
+    if (coins >= 100 && !hasPlayedSound.current) {
+      hasPlayedSound.current = true;
+      // Small delay to let the visual appear first
+      const timer = setTimeout(() => {
+        if (coins >= 500) {
+          playRichCoinsSound();
+        } else {
+          playCoinsSound();
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [coins, playCoinsSound, playRichCoinsSound]);
+
   if (coins < 100) return null;
 
   // More coins = more particles
