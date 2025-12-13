@@ -3,6 +3,8 @@ import type { Tables, TablesInsert, TablesUpdate, Enums } from "@/integrations/s
 import { notificationsService } from "./notificationsService";
 import { auditService } from "./auditService";
 import { missionsService } from "./missionsService";
+import { comboService } from "./comboService";
+import { profilesService } from "./profilesService";
 
 export type Quest = Tables<"custom_quests">;
 export type QuestInsert = TablesInsert<"custom_quests">;
@@ -216,6 +218,18 @@ export const questsService = {
         // Audit quest completion
         await auditService.logQuestCompleted(data.user_id, quest.id, quest.xp_reward, quest.coin_reward);
 
+        // Apply combo multiplier to quest XP reward
+        const comboResult = await comboService.registerAction(data.user_id, quest.xp_reward);
+        await profilesService.addXp(data.user_id, comboResult.finalXp, `Quest: ${quest.title}`);
+        
+        // Add coins (no combo multiplier for coins)
+        if (quest.coin_reward > 0) {
+          await profilesService.addCoins(data.user_id, quest.coin_reward);
+        }
+        
+        // Increment quests completed counter
+        await profilesService.incrementQuestsCompleted(data.user_id);
+
         await notificationsService.create({
           user_id: data.user_id,
           type: "quest_complete",
@@ -224,7 +238,8 @@ export const questsService = {
           data: { 
             questId: quest.id, 
             questTitle: quest.title,
-            xpReward: quest.xp_reward,
+            xpReward: comboResult.finalXp,
+            bonusXp: comboResult.bonusXp,
             coinReward: quest.coin_reward
           },
         });
@@ -237,7 +252,7 @@ export const questsService = {
         }
       }
     } catch (e) {
-      console.error("Failed to create quest completion notification:", e);
+      console.error("Failed to process quest completion:", e);
     }
 
     return { assignment: data, quest };

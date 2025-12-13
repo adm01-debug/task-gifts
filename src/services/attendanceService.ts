@@ -3,6 +3,7 @@ import { auditService } from "./auditService";
 import { profilesService } from "./profilesService";
 import { notificationsService } from "./notificationsService";
 import { missionsService } from "./missionsService";
+import { comboService } from "./comboService";
 
 export interface AttendanceRecord {
   id: string;
@@ -41,9 +42,11 @@ export interface CheckInResult {
   isPunctual: boolean;
   lateMinutes: number;
   xpEarned: number;
+  bonusXp: number;
   streakUpdated: boolean;
   newStreak: number;
   streakMilestoneReached: boolean;
+  comboMultiplier: number;
 }
 
 export const attendanceService = {
@@ -166,6 +169,8 @@ export const attendanceService = {
     if (error) throw error;
 
     let xpEarned = 0;
+    let bonusXp = 0;
+    let comboMultiplier = 1.0;
     let streakUpdated = false;
     let newStreak = 0;
     let streakMilestoneReached = false;
@@ -213,14 +218,20 @@ export const attendanceService = {
       newStreak = newCurrentStreak;
 
       // Award XP for punctual check-in
-      xpEarned = settings.xp_punctual_checkin;
+      let baseXp = settings.xp_punctual_checkin;
       
       // Bonus XP for milestone
       if (streakMilestoneReached) {
-        xpEarned += settings.xp_streak_bonus;
+        baseXp += settings.xp_streak_bonus;
       }
 
-      if (xpEarned > 0) {
+      // Apply combo multiplier
+      if (baseXp > 0) {
+        const comboResult = await comboService.registerAction(userId, baseXp);
+        xpEarned = comboResult.finalXp;
+        bonusXp = comboResult.bonusXp;
+        comboMultiplier = comboResult.combo?.current_multiplier || 1.0;
+        
         await profilesService.addXp(userId, xpEarned, 'punctual_checkin');
       }
 
@@ -270,9 +281,11 @@ export const attendanceService = {
       isPunctual,
       lateMinutes,
       xpEarned,
+      bonusXp,
       streakUpdated,
       newStreak,
-      streakMilestoneReached
+      streakMilestoneReached,
+      comboMultiplier
     };
   },
 

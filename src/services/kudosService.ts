@@ -3,6 +3,7 @@ import { notificationsService } from "./notificationsService";
 import { profilesService } from "./profilesService";
 import { auditService } from "./auditService";
 import { missionsService } from "./missionsService";
+import { comboService } from "./comboService";
 
 export interface KudosBadge {
   id: string;
@@ -213,9 +214,11 @@ export const kudosService = {
       console.error("Failed to create kudos notification:", e);
     }
 
-    // Add XP to the recipient
+    // Add XP to the recipient with combo multiplier
     try {
-      await profilesService.addXp(kudos.to_user_id, xpValue, `Kudos: ${badgeName}`);
+      // Register combo action for the recipient and apply multiplier
+      const comboResult = await comboService.registerAction(kudos.to_user_id, xpValue);
+      await profilesService.addXp(kudos.to_user_id, comboResult.finalXp, `Kudos: ${badgeName}`);
     } catch (e) {
       console.error("Failed to add XP for kudos:", e);
     }
