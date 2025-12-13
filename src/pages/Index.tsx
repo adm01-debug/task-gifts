@@ -22,9 +22,11 @@ import { ComboIndicator } from "@/components/ComboIndicator";
 import { ComboHistory } from "@/components/ComboHistory";
 import { WeeklyPerformanceComparison } from "@/components/WeeklyPerformanceComparison";
 import { SocialFeed } from "@/components/SocialFeed";
+import { RankingBadge } from "@/components/RankingBadge";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserRank } from "@/hooks/useUserRank";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -36,6 +38,7 @@ const Index = () => {
   const { playAchievementSound, playLevelUpSound } = useSoundEffects();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { data: rankData } = useUserRank();
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -160,7 +163,12 @@ const Index = () => {
               </motion.button>
 
               {/* User Menu */}
-              <div className="relative">
+              <div className="relative flex items-center gap-2">
+                {/* Ranking Badge */}
+                {rankData?.rank && (
+                  <RankingBadge rank={rankData.rank} size="sm" />
+                )}
+                
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
