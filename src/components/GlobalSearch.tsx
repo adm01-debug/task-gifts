@@ -112,6 +112,14 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
   const { data: profiles } = useProfiles();
   const { data: departments } = useDepartments();
 
+  const hasActiveFilters = categoryFilter !== "all" || difficultyFilter !== "all" || selectedDepartments.length > 0;
+
+  const clearFilters = useCallback(() => {
+    setCategoryFilter("all");
+    setDifficultyFilter("all");
+    setSelectedDepartments([]);
+  }, []);
+
   // Load recent searches on mount and when dialog opens
   useEffect(() => {
     if (open) {
@@ -127,18 +135,67 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
     }
   }, [open]);
 
-  // Keyboard shortcut ⌘K / Ctrl+K
+  // Keyboard shortcuts
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      // ⌘K / Ctrl+K to open search
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((open) => !open);
+      }
+      
+      // Only handle filter shortcuts when dialog is open
+      if (!open) return;
+      
+      // F to toggle filters panel
+      if (e.key === "f" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        // Only if not typing in input
+        if (document.activeElement?.tagName !== "INPUT") {
+          e.preventDefault();
+          setShowFilters(prev => !prev);
+        }
+      }
+      
+      // Number keys 1-4 for category filter (when filters visible)
+      if (showFilters && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const categoryMap: Record<string, CategoryFilter> = {
+          "1": "all",
+          "2": "trails", 
+          "3": "quests",
+          "4": "users",
+        };
+        if (categoryMap[e.key]) {
+          e.preventDefault();
+          setCategoryFilter(categoryMap[e.key]);
+        }
+        
+        // Shift + 1-5 for difficulty filter
+        if (e.shiftKey) {
+          const difficultyMap: Record<string, DifficultyFilter> = {
+            "!": "all", // Shift+1
+            "@": "easy", // Shift+2
+            "#": "medium", // Shift+3
+            "$": "hard", // Shift+4
+            "%": "expert", // Shift+5
+          };
+          if (difficultyMap[e.key]) {
+            e.preventDefault();
+            setDifficultyFilter(difficultyMap[e.key]);
+          }
+        }
+      }
+      
+      // Escape to clear filters (if filters active) or close
+      if (e.key === "Escape" && hasActiveFilters) {
+        e.preventDefault();
+        e.stopPropagation();
+        clearFilters();
       }
     };
 
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [open, showFilters, hasActiveFilters]);
 
   const handleSelect = useCallback((type: string, id: string, label: string, icon: string) => {
     // Save to recent searches
@@ -212,13 +269,6 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
     );
   };
 
-  const clearFilters = () => {
-    setCategoryFilter("all");
-    setDifficultyFilter("all");
-    setSelectedDepartments([]);
-  };
-
-  const hasActiveFilters = categoryFilter !== "all" || difficultyFilter !== "all" || selectedDepartments.length > 0;
 
   // Filtered data
   const filteredTrails = useMemo(() => {
@@ -338,6 +388,9 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
           >
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline text-xs">Filtros</span>
+            <kbd className="hidden sm:inline-flex h-4 select-none items-center rounded border bg-muted px-1 font-mono text-[10px] font-medium text-muted-foreground ml-1">
+              F
+            </kbd>
             {hasActiveFilters && (
               <Badge variant="secondary" className="h-4 w-4 p-0 flex items-center justify-center text-[10px]">
                 {(categoryFilter !== "all" ? 1 : 0) + (difficultyFilter !== "all" ? 1 : 0) + (selectedDepartments.length > 0 ? 1 : 0)}
@@ -368,13 +421,17 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
                   <DropdownMenuContent align="start">
                     <DropdownMenuLabel className="text-xs">Categoria</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {(["all", "trails", "quests", "users"] as CategoryFilter[]).map((cat) => (
+                    {(["all", "trails", "quests", "users"] as CategoryFilter[]).map((cat, index) => (
                       <DropdownMenuCheckboxItem
                         key={cat}
                         checked={categoryFilter === cat}
                         onCheckedChange={() => setCategoryFilter(cat)}
+                        className="flex items-center justify-between"
                       >
-                        {getCategoryLabel(cat)}
+                        <span>{getCategoryLabel(cat)}</span>
+                        <kbd className="ml-2 h-4 select-none items-center rounded border bg-muted px-1 font-mono text-[10px] font-medium text-muted-foreground">
+                          {index + 1}
+                        </kbd>
                       </DropdownMenuCheckboxItem>
                     ))}
                   </DropdownMenuContent>
