@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Coins, Package, Star, Target, ShoppingBag, History, Sparkles } from "lucide-react";
+import { CelebrationEffect } from "@/components/CelebrationEffect";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -225,6 +226,13 @@ export default function Shop() {
   const purchaseMutation = usePurchaseReward();
   const [selectedReward, setSelectedReward] = useState<ShopReward | null>(null);
   const [activeCategory, setActiveCategory] = useState<"all" | RewardCategory>("all");
+  const [celebration, setCelebration] = useState<{ active: boolean; type: "epic" | "legendary" } | null>(null);
+
+  const triggerCelebration = useCallback((rarity: string) => {
+    if (rarity === "legendary" || rarity === "epic") {
+      setCelebration({ active: true, type: rarity as "epic" | "legendary" });
+    }
+  }, []);
 
   const userCoins = profile?.coins ?? 0;
 
@@ -239,16 +247,29 @@ export default function Shop() {
 
   const confirmPurchase = () => {
     if (!selectedReward) return;
+    const rewardRarity = selectedReward.rarity;
     purchaseMutation.mutate(
       { rewardId: selectedReward.id },
       {
-        onSuccess: () => setSelectedReward(null),
+        onSuccess: () => {
+          setSelectedReward(null);
+          triggerCelebration(rewardRarity);
+        },
       }
     );
   };
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      {/* Celebration Effect */}
+      {celebration && (
+        <CelebrationEffect
+          isActive={celebration.active}
+          type={celebration.type}
+          onComplete={() => setCelebration(null)}
+        />
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 p-6 text-white">
         <div className="max-w-6xl mx-auto">
