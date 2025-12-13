@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate, Enums } from "@/integrations/supabase/types";
 import { notificationsService } from "./notificationsService";
 import { auditService } from "./auditService";
+import { missionsService } from "./missionsService";
 
 export type Quest = Tables<"custom_quests">;
 export type QuestInsert = TablesInsert<"custom_quests">;
@@ -227,6 +228,13 @@ export const questsService = {
             coinReward: quest.coin_reward
           },
         });
+
+        // Auto-update mission progress for quest completion
+        try {
+          await missionsService.incrementByMetricKey(data.user_id, 'quest_completed', 1);
+        } catch (e) {
+          console.error("Failed to update quest mission progress:", e);
+        }
       }
     } catch (e) {
       console.error("Failed to create quest completion notification:", e);
