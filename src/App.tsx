@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AchievementNotificationProvider } from "@/contexts/AchievementNotificationContext";
+import { SoundSettingsProvider } from "@/contexts/SoundSettingsContext";
 import { ThemeProvider } from "@/hooks/useTheme";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -35,11 +36,12 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <AuthProvider>
-        <AchievementNotificationProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
+      <SoundSettingsProvider>
+        <AuthProvider>
+          <AchievementNotificationProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -77,7 +79,8 @@ const App = () => (
           </TooltipProvider>
         </AchievementNotificationProvider>
       </AuthProvider>
-    </ThemeProvider>
+    </SoundSettingsProvider>
+  </ThemeProvider>
   </QueryClientProvider>
 );
 
