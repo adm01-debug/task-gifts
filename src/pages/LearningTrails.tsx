@@ -16,7 +16,9 @@ import { useDepartments } from "@/hooks/useDepartments";
 import { useAuth } from "@/hooks/useAuth";
 import { useCertifications } from "@/hooks/useCertifications";
 import { TrailRecommendations } from "@/components/TrailRecommendations";
+import { TrailDependencyTree } from "@/components/TrailDependencyTree";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { LearningTrail, TrailEnrollment } from "@/services/trailsService";
 
 const statusConfig = {
@@ -394,6 +396,16 @@ export default function LearningTrails() {
           className="mb-8"
         >
           <TrailRecommendations />
+        </motion.div>
+
+        {/* Dependency Tree */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="mb-8"
+        >
+          <TrailDependencyTree />
         </motion.div>
 
         {/* Filters and Tabs */}
