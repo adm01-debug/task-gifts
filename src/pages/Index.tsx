@@ -68,24 +68,6 @@ const Index = () => {
     navigate("/auth");
   };
 
-  const triggerDemoAchievement = () => {
-    playAchievementSound();
-    showAchievement({
-      id: Date.now().toString(),
-      title: "Primeiro Passo!",
-      description: "Você explorou o dashboard",
-      icon: "trophy",
-      xp: 100,
-      rarity: "rare",
-    });
-  };
-
-  const triggerDemoLevelUp = () => {
-    playLevelUpSound();
-    triggerLevelUp(43);
-  };
-
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -237,26 +219,6 @@ const Index = () => {
           {/* Quick Actions */}
           <section className="flex flex-wrap items-center gap-2 md:gap-4">
             <QuickActions />
-            
-            {/* Demo buttons */}
-            <div className="flex gap-2 ml-auto flex-wrap justify-end">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={triggerDemoAchievement}
-                className="px-3 md:px-4 py-2 rounded-xl bg-secondary/20 text-secondary text-xs md:text-sm font-medium border border-secondary/30 hover:border-secondary/50 transition-colors"
-              >
-                🏆 Achievement
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={triggerDemoLevelUp}
-                className="px-3 md:px-4 py-2 rounded-xl bg-primary/20 text-primary text-xs md:text-sm font-medium border border-primary/30 hover:border-primary/50 transition-colors"
-              >
-                ⬆️ Level Up
-              </motion.button>
-            </div>
           </section>
 
           {/* Main Grid */}
