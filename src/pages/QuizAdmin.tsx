@@ -101,6 +101,7 @@ function QuizAdminContent() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<QuestionForm>(emptyForm);
   const [filterType, setFilterType] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAIGenerator, setShowAIGenerator] = useState(false);
 
@@ -112,10 +113,14 @@ function QuizAdminContent() {
   const deleteQuestion = useDeleteQuizQuestion();
   const toggleActive = useToggleQuizQuestionActive();
 
+  // Extract unique categories from questions
+  const categories = [...new Set(questions?.map(q => q.category).filter(Boolean) || [])].sort();
+
   const filteredQuestions = questions?.filter(q => {
     const matchesType = filterType === 'all' || q.quiz_type === filterType;
+    const matchesCategory = filterCategory === 'all' || q.category === filterCategory;
     const matchesSearch = q.question.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
+    return matchesType && matchesCategory && matchesSearch;
   }) || [];
 
   const handleOpenCreate = () => {
@@ -316,6 +321,21 @@ function QuizAdminContent() {
               <SelectItem value="millionaire">Show do Milhão</SelectItem>
             </SelectContent>
           </Select>
+          {categories.length > 0 && (
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas categorias</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat} value={cat as string}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </motion.div>
 
         {/* Questions List */}
