@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ProfileKudosSection } from "@/components/ProfileKudosSection";
 import { RankingBadge } from "@/components/RankingBadge";
+import { CompetencyRadar } from "@/components/CompetencyRadar";
 import { useUserRank } from "@/hooks/useUserRank";
 import { toast } from "sonner";
 
@@ -306,8 +307,12 @@ const Profile = () => {
           </div>
         </motion.div>
 
+        {/* Competency Radar */}
+        {user?.id && <CompetencyRadar userId={user.id} />}
+
         {/* Kudos Received Section */}
         {user?.id && <ProfileKudosSection userId={user.id} />}
+
         {/* Activity Timeline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
