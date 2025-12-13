@@ -882,6 +882,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_department_metrics: { Args: never; Returns: Json }
+      get_executive_metrics: { Args: never; Returns: Json }
+      get_monthly_trends: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

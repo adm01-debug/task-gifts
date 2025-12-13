@@ -9,13 +9,11 @@ import {
   Award,
   Clock,
   BookOpen,
-  Flame,
   BarChart3,
-  PieChart as PieChartIcon,
   Activity,
   Smile,
-  Frown,
-  Meh
+  RefreshCw,
+  Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   LineChart, 
   Line, 
@@ -38,57 +37,75 @@ import {
   Cell,
   AreaChart,
   Area,
-  RadialBarChart,
-  RadialBar,
   Legend
 } from "recharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useExecutiveMetrics, useMonthlyTrends, useDepartmentMetrics } from "@/hooks/useExecutiveMetrics";
+import { useQueryClient } from "@tanstack/react-query";
 
-// Mock data for executive metrics
-const financialMetrics = {
-  roiGamification: { value: 245, target: 200, trend: 12 },
-  costPerHire: { value: 1150, target: 1200, trend: -8 },
-  turnoverCostSaved: { value: 62500, target: 50000, trend: 25 },
-  revenuePerEmployee: { value: 18500, target: 17000, trend: 9 },
-  hrOperationalCost: { value: 125, target: 160, trend: -22 }
+// Calculate derived metrics with fallback mock data for metrics not in DB
+const calculateFinancialMetrics = (metrics: any) => {
+  const baseROI = metrics ? Math.min(300, 100 + (metrics.totalXpEarned / 100) + (metrics.totalQuestsCompleted * 5)) : 150;
+  return {
+    roiGamification: { value: Math.round(baseROI), target: 200, trend: 12 },
+    costPerHire: { value: 1150, target: 1200, trend: -8 },
+    turnoverCostSaved: { value: 62500, target: 50000, trend: 25 },
+    revenuePerEmployee: { value: 18500, target: 17000, trend: 9 },
+    hrOperationalCost: { value: 125, target: 160, trend: -22 }
+  };
 };
 
-const peopleMetrics = {
-  enps: { value: 58, target: 50, promoters: 65, passives: 25, detractors: 10 },
-  turnover: { value: 8.5, target: 10, previousYear: 18 },
-  gameAdoption: { value: 87, target: 80 },
-  level5Plus: { value: 24, target: 20 },
-  dau: { value: 73, target: 70 },
-  wau: { value: 91, target: 90 }
+const calculatePeopleMetrics = (metrics: any) => {
+  return {
+    enps: { value: 58, target: 50, promoters: 65, passives: 25, detractors: 10 },
+    turnover: { value: 8.5, target: 10, previousYear: 18 },
+    gameAdoption: { 
+      value: metrics?.wau || 0, 
+      target: 90 
+    },
+    level5Plus: { 
+      value: metrics?.level5PlusRate || 0, 
+      target: 20 
+    },
+    dau: { 
+      value: metrics?.dau || 0, 
+      target: 70 
+    },
+    wau: { 
+      value: metrics?.wau || 0, 
+      target: 90 
+    },
+    totalUsers: metrics?.totalUsers || 0,
+    activeUsersToday: metrics?.activeUsersToday || 0,
+    activeUsersWeek: metrics?.activeUsersWeek || 0,
+    totalKudos: metrics?.totalKudos || 0
+  };
 };
 
-const operationalMetrics = {
-  punctualCheckin: { value: 94, target: 95 },
-  absenteeism: { value: 2.1, target: 3 },
-  trainingCompletion: { value: 92, target: 95 },
-  avgTrainingHours: { value: 18.5, target: 20 },
-  certifications: { value: 35, target: 30 }
+const calculateOperationalMetrics = (metrics: any) => {
+  return {
+    punctualCheckin: { 
+      value: metrics?.punctualityRate || 0, 
+      target: 95 
+    },
+    absenteeism: { value: 2.1, target: 3 },
+    trainingCompletion: { 
+      value: metrics?.trainingCompletionRate || 0, 
+      target: 95 
+    },
+    avgTrainingHours: { 
+      value: metrics?.avgTrainingHours || 0, 
+      target: 20 
+    },
+    certifications: { 
+      value: metrics?.completedTrails || 0, 
+      target: 30 
+    },
+    totalQuestsCompleted: metrics?.totalQuestsCompleted || 0,
+    totalXpEarned: metrics?.totalXpEarned || 0
+  };
 };
-
-// Trend data for charts
-const monthlyTrendData = [
-  { month: 'Jul', roi: 180, enps: 42, adoption: 65, turnover: 14 },
-  { month: 'Ago', roi: 195, enps: 45, adoption: 72, turnover: 12 },
-  { month: 'Set', roi: 210, enps: 48, adoption: 78, turnover: 11 },
-  { month: 'Out', roi: 225, enps: 52, adoption: 82, turnover: 9.5 },
-  { month: 'Nov', roi: 235, enps: 55, adoption: 85, turnover: 9 },
-  { month: 'Dez', roi: 245, enps: 58, adoption: 87, turnover: 8.5 }
-];
-
-const departmentPerformance = [
-  { name: 'Comercial', score: 92, employees: 12 },
-  { name: 'Artes', score: 88, employees: 8 },
-  { name: 'Gravação', score: 95, employees: 15 },
-  { name: 'Expedição', score: 85, employees: 10 },
-  { name: 'Compras', score: 90, employees: 6 },
-  { name: 'Financeiro', score: 87, employees: 5 }
-];
 
 const enpsDistribution = [
   { name: 'Promotores', value: 65, color: 'hsl(var(--success))' },
@@ -98,6 +115,19 @@ const enpsDistribution = [
 
 const ExecutiveDashboard = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  
+  const { data: metrics, isLoading: metricsLoading, refetch: refetchMetrics } = useExecutiveMetrics();
+  const { data: trends, isLoading: trendsLoading } = useMonthlyTrends();
+  const { data: departments, isLoading: departmentsLoading } = useDepartmentMetrics();
+
+  const financialMetrics = calculateFinancialMetrics(metrics);
+  const peopleMetrics = calculatePeopleMetrics(metrics);
+  const operationalMetrics = calculateOperationalMetrics(metrics);
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['executive'] });
+  };
 
   const MetricCard = ({ 
     title, 
@@ -108,7 +138,8 @@ const ExecutiveDashboard = () => {
     trend,
     icon: Icon,
     description,
-    inverse = false
+    inverse = false,
+    loading = false
   }: {
     title: string;
     value: number;
@@ -119,11 +150,25 @@ const ExecutiveDashboard = () => {
     icon: React.ElementType;
     description?: string;
     inverse?: boolean;
+    loading?: boolean;
   }) => {
     const isOnTarget = inverse ? value <= target : value >= target;
     const progress = inverse 
-      ? Math.min(100, (target / value) * 100)
-      : Math.min(100, (value / target) * 100);
+      ? Math.min(100, (target / Math.max(value, 0.1)) * 100)
+      : Math.min(100, (value / Math.max(target, 1)) * 100);
+
+    if (loading) {
+      return (
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm h-full">
+          <CardContent className="pt-6 space-y-4">
+            <Skeleton className="h-10 w-10 rounded-lg" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-2 w-full" />
+          </CardContent>
+        </Card>
+      );
+    }
 
     return (
       <motion.div
@@ -176,6 +221,23 @@ const ExecutiveDashboard = () => {
     );
   };
 
+  // Format trend data for charts
+  const chartTrendData = trends?.map(t => ({
+    month: t.month,
+    adoption: t.adoption,
+    punctuality: t.punctualityRate,
+    training: t.trainingRate,
+    xp: Math.round(t.totalXp / 100),
+    users: t.totalUsers
+  })) || [];
+
+  // Format department data for chart
+  const departmentChartData = departments?.map(d => ({
+    name: d.name,
+    score: d.score || Math.round(d.avgLevel * 10 + d.punctualityRate * 0.5),
+    employees: d.employeeCount
+  })) || [];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -193,14 +255,52 @@ const ExecutiveDashboard = () => {
                 </p>
               </div>
             </div>
-            <Badge variant="outline" className="text-xs">
-              Atualizado: {format(new Date(), "dd/MM HH:mm")}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={metricsLoading}>
+                {metricsLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
+                Atualizar
+              </Button>
+              <Badge variant="outline" className="text-xs">
+                {format(new Date(), "dd/MM HH:mm")}
+              </Badge>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* Quick Stats Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="border-border/50 bg-primary/5">
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">Total Colaboradores</p>
+              <p className="text-2xl font-bold">{metricsLoading ? '-' : peopleMetrics.totalUsers}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50 bg-success/5">
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">Ativos Hoje</p>
+              <p className="text-2xl font-bold text-success">{metricsLoading ? '-' : peopleMetrics.activeUsersToday}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50 bg-xp/5">
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">Total XP Ganho</p>
+              <p className="text-2xl font-bold text-xp">{metricsLoading ? '-' : operationalMetrics.totalXpEarned.toLocaleString('pt-BR')}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50 bg-accent/5">
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">Kudos Dados</p>
+              <p className="text-2xl font-bold">{metricsLoading ? '-' : peopleMetrics.totalKudos}</p>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Tabs for different perspectives */}
         <Tabs defaultValue="financial" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
@@ -233,6 +333,7 @@ const ExecutiveDashboard = () => {
                 trend={financialMetrics.roiGamification.trend}
                 icon={TrendingUp}
                 description="Retorno sobre investimento"
+                loading={metricsLoading}
               />
               <MetricCard
                 title="Custo por Contratação"
@@ -242,6 +343,7 @@ const ExecutiveDashboard = () => {
                 trend={financialMetrics.costPerHire.trend}
                 icon={DollarSign}
                 inverse
+                loading={metricsLoading}
               />
               <MetricCard
                 title="Custo Turnover Evitado"
@@ -251,56 +353,72 @@ const ExecutiveDashboard = () => {
                 trend={financialMetrics.turnoverCostSaved.trend}
                 icon={Award}
                 description="Economia anual estimada"
+                loading={metricsLoading}
               />
             </div>
 
-            {/* ROI Trend Chart */}
+            {/* Trend Chart */}
             <Card className="border-border/50 bg-card/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-primary" />
-                  Evolução do ROI de Gamificação
+                  Evolução do Engajamento
                 </CardTitle>
-                <CardDescription>Últimos 6 meses</CardDescription>
+                <CardDescription>Últimos 6 meses - dados reais</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={monthlyTrendData}>
-                      <defs>
-                        <linearGradient id="roiGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `${v}%`} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
-                        }}
-                        formatter={(value: number) => [`${value}%`, 'ROI']}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="roi" 
-                        stroke="hsl(var(--primary))" 
-                        strokeWidth={3}
-                        fill="url(#roiGradient)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+                {trendsLoading ? (
+                  <div className="h-[300px] flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartTrendData}>
+                        <defs>
+                          <linearGradient id="xpGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--card))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Legend />
+                        <Area 
+                          type="monotone" 
+                          dataKey="xp" 
+                          name="XP (x100)"
+                          stroke="hsl(var(--primary))" 
+                          strokeWidth={2}
+                          fill="url(#xpGradient)"
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="users" 
+                          name="Usuários"
+                          stroke="hsl(var(--success))" 
+                          strokeWidth={2}
+                          dot={{ r: 3 }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* People Perspective */}
           <TabsContent value="people" className="space-y-6">
-            {/* eNPS Highlight Card */}
+            {/* eNPS Card */}
             <Card className="border-border/50 bg-gradient-to-br from-primary/5 to-accent/5">
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -314,18 +432,9 @@ const ExecutiveDashboard = () => {
                         <p className="text-5xl font-bold text-primary">+{peopleMetrics.enps.value}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <Badge className="bg-success/20 text-success border-success/40">
-                        Meta: {peopleMetrics.enps.target} ✓
-                      </Badge>
-                      <span className="text-muted-foreground">
-                        Zona de Qualidade
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      O eNPS mede a lealdade e satisfação dos colaboradores. 
-                      Valores acima de 50 são considerados excelentes.
-                    </p>
+                    <Badge className="bg-success/20 text-success border-success/40">
+                      Meta: {peopleMetrics.enps.target} ✓
+                    </Badge>
                   </div>
                   <div className="h-[200px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -347,11 +456,6 @@ const ExecutiveDashboard = () => {
                           verticalAlign="middle" 
                           align="right"
                           layout="vertical"
-                          formatter={(value, entry: any) => (
-                            <span className="text-sm text-foreground">
-                              {value}: {entry.payload.value}%
-                            </span>
-                          )}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -371,18 +475,20 @@ const ExecutiveDashboard = () => {
                 inverse
               />
               <MetricCard
-                title="Adesão ao Game"
-                value={peopleMetrics.gameAdoption.value}
-                target={peopleMetrics.gameAdoption.target}
+                title="Adesão Semanal (WAU)"
+                value={peopleMetrics.wau.value}
+                target={peopleMetrics.wau.target}
                 unit="%"
                 icon={Target}
+                loading={metricsLoading}
               />
               <MetricCard
-                title="DAU (Usuários Ativos)"
+                title="Ativos Hoje (DAU)"
                 value={peopleMetrics.dau.value}
                 target={peopleMetrics.dau.target}
                 unit="%"
                 icon={Activity}
+                loading={metricsLoading}
               />
               <MetricCard
                 title="Nível 5+ (Especialistas)"
@@ -390,56 +496,9 @@ const ExecutiveDashboard = () => {
                 target={peopleMetrics.level5Plus.target}
                 unit="%"
                 icon={Award}
+                loading={metricsLoading}
               />
             </div>
-
-            {/* Turnover & Adoption Trend */}
-            <Card className="border-border/50 bg-card/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingDown className="w-5 h-5 text-success" />
-                  Evolução Turnover vs Adesão
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={monthlyTrendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis yAxisId="left" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Legend />
-                      <Line 
-                        yAxisId="left"
-                        type="monotone" 
-                        dataKey="turnover" 
-                        name="Turnover %"
-                        stroke="hsl(var(--destructive))" 
-                        strokeWidth={2}
-                        dot={{ r: 4 }}
-                      />
-                      <Line 
-                        yAxisId="right"
-                        type="monotone" 
-                        dataKey="adoption" 
-                        name="Adesão %"
-                        stroke="hsl(var(--success))" 
-                        strokeWidth={2}
-                        dot={{ r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           {/* Operational Perspective */}
@@ -451,6 +510,7 @@ const ExecutiveDashboard = () => {
                 target={operationalMetrics.punctualCheckin.target}
                 unit="%"
                 icon={Clock}
+                loading={metricsLoading}
               />
               <MetricCard
                 title="Taxa de Absenteísmo"
@@ -466,6 +526,7 @@ const ExecutiveDashboard = () => {
                 target={operationalMetrics.trainingCompletion.target}
                 unit="%"
                 icon={BookOpen}
+                loading={metricsLoading}
               />
             </div>
 
@@ -476,37 +537,47 @@ const ExecutiveDashboard = () => {
                   <BarChart3 className="w-5 h-5 text-primary" />
                   Performance por Departamento
                 </CardTitle>
-                <CardDescription>Score de engajamento e produtividade</CardDescription>
+                <CardDescription>Score de engajamento - dados reais</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={departmentPerformance} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis type="number" domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={80} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
-                        }}
-                        formatter={(value: number, name: string, props: any) => [
-                          `${value}% (${props.payload.employees} colaboradores)`,
-                          'Score'
-                        ]}
-                      />
-                      <Bar dataKey="score" radius={[0, 4, 4, 0]}>
-                        {departmentPerformance.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={entry.score >= 90 ? 'hsl(var(--success))' : entry.score >= 85 ? 'hsl(var(--primary))' : 'hsl(var(--warning))'}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                {departmentsLoading ? (
+                  <div className="h-[300px] flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : departmentChartData.length > 0 ? (
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={departmentChartData} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis type="number" domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                        <YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={80} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--card))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '8px'
+                          }}
+                          formatter={(value: number, name: string, props: any) => [
+                            `${value} pts (${props.payload.employees} colaboradores)`,
+                            'Score'
+                          ]}
+                        />
+                        <Bar dataKey="score" radius={[0, 4, 4, 0]}>
+                          {departmentChartData.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={entry.score >= 70 ? 'hsl(var(--success))' : entry.score >= 50 ? 'hsl(var(--primary))' : 'hsl(var(--warning))'}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                    Nenhum departamento cadastrado
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -521,65 +592,23 @@ const ExecutiveDashboard = () => {
                 unit="h"
                 icon={Clock}
                 description="Média anual por pessoa"
+                loading={metricsLoading}
               />
               <MetricCard
-                title="Colaboradores Certificados"
+                title="Trilhas Concluídas"
                 value={operationalMetrics.certifications.value}
                 target={operationalMetrics.certifications.target}
-                unit="%"
                 icon={Award}
+                loading={metricsLoading}
               />
               <MetricCard
-                title="Conclusão Obrigatórios"
-                value={operationalMetrics.trainingCompletion.value}
-                target={operationalMetrics.trainingCompletion.target}
-                unit="%"
-                icon={BookOpen}
+                title="Quests Completadas"
+                value={operationalMetrics.totalQuestsCompleted}
+                target={100}
+                icon={Target}
+                loading={metricsLoading}
               />
             </div>
-
-            {/* eNPS Trend */}
-            <Card className="border-border/50 bg-card/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Smile className="w-5 h-5 text-primary" />
-                  Evolução do eNPS
-                </CardTitle>
-                <CardDescription>Satisfação dos colaboradores ao longo do tempo</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={monthlyTrendData}>
-                      <defs>
-                        <linearGradient id="enpsGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} domain={[0, 100]} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
-                        }}
-                        formatter={(value: number) => [`+${value}`, 'eNPS']}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="enps" 
-                        stroke="hsl(var(--success))" 
-                        strokeWidth={3}
-                        fill="url(#enpsGradient)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* OKR Summary */}
             <Card className="border-primary/20 bg-primary/5">
@@ -595,10 +624,10 @@ const ExecutiveDashboard = () => {
                     <h4 className="font-semibold text-sm">Objetivos Atingidos</h4>
                     <div className="space-y-2">
                       {[
-                        { label: 'ROI Gamificação > 200%', done: true },
-                        { label: 'eNPS > 50', done: true },
-                        { label: 'Turnover < 10%', done: true },
-                        { label: 'Adesão Game > 80%', done: true }
+                        { label: 'ROI Gamificação > 200%', done: financialMetrics.roiGamification.value >= 200 },
+                        { label: 'eNPS > 50', done: peopleMetrics.enps.value >= 50 },
+                        { label: 'Turnover < 10%', done: peopleMetrics.turnover.value < 10 },
+                        { label: 'Adesão Game > 80%', done: peopleMetrics.gameAdoption.value >= 80 }
                       ].map((okr, i) => (
                         <div key={i} className="flex items-center gap-2 text-sm">
                           <div className={`w-5 h-5 rounded-full flex items-center justify-center ${okr.done ? 'bg-success/20 text-success' : 'bg-muted'}`}>
@@ -613,14 +642,16 @@ const ExecutiveDashboard = () => {
                     <h4 className="font-semibold text-sm">Em Progresso</h4>
                     <div className="space-y-2">
                       {[
-                        { label: 'Check-in pontual > 95%', progress: 94 },
-                        { label: 'Conclusão treinamentos > 95%', progress: 92 },
-                        { label: 'Horas capacitação > 20h', progress: 93 }
+                        { label: 'Check-in pontual > 95%', progress: operationalMetrics.punctualCheckin.value },
+                        { label: 'Conclusão treinamentos > 95%', progress: operationalMetrics.trainingCompletion.value },
+                        { label: 'Horas capacitação > 20h', progress: Math.min(100, (operationalMetrics.avgTrainingHours.value / 20) * 100) }
                       ].map((okr, i) => (
                         <div key={i} className="space-y-1">
                           <div className="flex items-center justify-between text-sm">
                             <span>{okr.label}</span>
-                            <span className="text-warning font-medium">{okr.progress}%</span>
+                            <span className={okr.progress >= 95 ? 'text-success' : 'text-warning'} >
+                              {okr.progress.toFixed(0)}%
+                            </span>
                           </div>
                           <Progress value={okr.progress} className="h-1.5" />
                         </div>
