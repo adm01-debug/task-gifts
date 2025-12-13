@@ -216,6 +216,106 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_trails: {
+        Row: {
+          badge_icon: string | null
+          badge_name: string | null
+          coin_reward: number | null
+          created_at: string | null
+          created_by: string
+          department_id: string | null
+          description: string | null
+          estimated_hours: number | null
+          icon: string | null
+          id: string
+          order_index: number | null
+          status: Database["public"]["Enums"]["trail_status"] | null
+          title: string
+          updated_at: string | null
+          xp_reward: number | null
+        }
+        Insert: {
+          badge_icon?: string | null
+          badge_name?: string | null
+          coin_reward?: number | null
+          created_at?: string | null
+          created_by: string
+          department_id?: string | null
+          description?: string | null
+          estimated_hours?: number | null
+          icon?: string | null
+          id?: string
+          order_index?: number | null
+          status?: Database["public"]["Enums"]["trail_status"] | null
+          title: string
+          updated_at?: string | null
+          xp_reward?: number | null
+        }
+        Update: {
+          badge_icon?: string | null
+          badge_name?: string | null
+          coin_reward?: number | null
+          created_at?: string | null
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          estimated_hours?: number | null
+          icon?: string | null
+          id?: string
+          order_index?: number | null
+          status?: Database["public"]["Enums"]["trail_status"] | null
+          title?: string
+          updated_at?: string | null
+          xp_reward?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_trails_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_progress: {
+        Row: {
+          attempts: number | null
+          completed_at: string | null
+          id: string
+          module_id: string
+          score: number | null
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attempts?: number | null
+          completed_at?: string | null
+          id?: string
+          module_id: string
+          score?: number | null
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attempts?: number | null
+          completed_at?: string | null
+          id?: string
+          module_id?: string
+          score?: number | null
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "trail_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -399,6 +499,100 @@ export type Database = {
           },
         ]
       }
+      trail_enrollments: {
+        Row: {
+          completed_at: string | null
+          id: string
+          progress_percent: number | null
+          started_at: string | null
+          trail_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          progress_percent?: number | null
+          started_at?: string | null
+          trail_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          progress_percent?: number | null
+          started_at?: string | null
+          trail_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_enrollments_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trail_modules: {
+        Row: {
+          content: Json | null
+          content_type:
+            | Database["public"]["Enums"]["module_content_type"]
+            | null
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          order_index: number | null
+          title: string
+          trail_id: string
+          updated_at: string | null
+          video_url: string | null
+          xp_reward: number | null
+        }
+        Insert: {
+          content?: Json | null
+          content_type?:
+            | Database["public"]["Enums"]["module_content_type"]
+            | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          order_index?: number | null
+          title: string
+          trail_id: string
+          updated_at?: string | null
+          video_url?: string | null
+          xp_reward?: number | null
+        }
+        Update: {
+          content?: Json | null
+          content_type?:
+            | Database["public"]["Enums"]["module_content_type"]
+            | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          order_index?: number | null
+          title?: string
+          trail_id?: string
+          updated_at?: string | null
+          video_url?: string | null
+          xp_reward?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_modules_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -462,8 +656,17 @@ export type Database = {
         | "team_member_removed"
         | "role_assigned"
         | "role_removed"
+      module_content_type:
+        | "video"
+        | "text"
+        | "quiz"
+        | "flashcard"
+        | "infographic"
+        | "simulation"
+        | "checklist"
       quest_difficulty: "easy" | "medium" | "hard" | "expert"
       quest_status: "draft" | "active" | "archived"
+      trail_status: "draft" | "published" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -616,8 +819,18 @@ export const Constants = {
         "role_assigned",
         "role_removed",
       ],
+      module_content_type: [
+        "video",
+        "text",
+        "quiz",
+        "flashcard",
+        "infographic",
+        "simulation",
+        "checklist",
+      ],
       quest_difficulty: ["easy", "medium", "hard", "expert"],
       quest_status: ["draft", "active", "archived"],
+      trail_status: ["draft", "published", "archived"],
     },
   },
 } as const
