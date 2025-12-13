@@ -20,6 +20,7 @@ import { AttendanceModule } from "@/components/AttendanceModule";
 import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
 import { ComboIndicator } from "@/components/ComboIndicator";
 import { ComboHistory } from "@/components/ComboHistory";
+import { WeeklyPerformanceComparison } from "@/components/WeeklyPerformanceComparison";
 import { SocialFeed } from "@/components/SocialFeed";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -255,6 +256,7 @@ const Index = () => {
             <div className="space-y-4 md:space-y-6">
               <ComboIndicator variant="full" />
               <ComboHistory />
+              <WeeklyPerformanceComparison />
               <AttendanceModule />
               <DepartmentRankings />
               <LiveLeaderboard />
