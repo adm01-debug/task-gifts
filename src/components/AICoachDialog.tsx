@@ -64,7 +64,11 @@ function TrailCard({ trail, onNavigate }: TrailCardProps) {
   );
 }
 
-export function AICoachDialog() {
+interface AICoachDialogProps {
+  trigger?: React.ReactNode;
+}
+
+export function AICoachDialog({ trigger }: AICoachDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const { messages, isLoading, error, sendMessage, clearMessages } = useAICoach();
@@ -152,14 +156,16 @@ export function AICoachDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-accent/20 to-primary/20 border border-accent/30 hover:border-accent/50 transition-colors"
-        >
-          <Sparkles className="w-4 h-4 text-accent" />
-          <span className="text-sm font-medium">AI Coach</span>
-        </motion.button>
+        {trigger || (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-accent/20 to-primary/20 border border-accent/30 hover:border-accent/50 transition-colors"
+          >
+            <Sparkles className="w-4 h-4 text-accent" />
+            <span className="text-sm font-medium">AI Coach</span>
+          </motion.button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] h-[600px] flex flex-col p-0 gap-0">
         <DialogHeader className="px-4 py-3 border-b border-border flex-shrink-0">
