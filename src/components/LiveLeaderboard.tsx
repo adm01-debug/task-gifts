@@ -112,7 +112,7 @@ export const LiveLeaderboard = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-card rounded-2xl border border-border overflow-hidden card-interactive"
+      className="rounded-2xl overflow-hidden shadow-lg border-border bg-gradient-to-b from-card to-card/95"
     >
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">

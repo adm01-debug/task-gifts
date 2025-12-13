@@ -59,7 +59,7 @@ export const TeamChallenges = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="bg-card rounded-2xl border border-border overflow-hidden card-interactive"
+      className="rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-0.5 border border-border transition-all duration-300"
     >
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">

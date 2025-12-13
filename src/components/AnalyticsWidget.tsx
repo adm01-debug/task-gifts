@@ -86,7 +86,7 @@ export const AnalyticsWidget = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      className="bg-card rounded-2xl border border-border overflow-hidden"
+      className="rounded-2xl overflow-hidden shadow-xs border-border/60 bg-card/80"
     >
       {/* Header */}
       <div className="p-4 border-b border-border">

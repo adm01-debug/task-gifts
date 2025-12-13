@@ -153,7 +153,7 @@ export default function DepartmentMissions() {
 
   if (isLoading) {
     return (
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+      <Card variant="glass" className="border-border/50">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -175,7 +175,7 @@ export default function DepartmentMissions() {
   }
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+    <Card variant="glass" className="border-border/50">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

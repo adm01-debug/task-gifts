@@ -34,7 +34,7 @@ export function SocialFeed({ limit = 30, compact = false, className }: SocialFee
 
   if (isLoading) {
     return (
-      <Card className={cn("h-full", className)}>
+      <Card variant="default" className={cn("h-full", className)}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Activity className="h-5 w-5 text-primary" />
@@ -50,7 +50,7 @@ export function SocialFeed({ limit = 30, compact = false, className }: SocialFee
 
   if (activities.length === 0) {
     return (
-      <Card className={cn("h-full", className)}>
+      <Card variant="default" className={cn("h-full", className)}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Activity className="h-5 w-5 text-primary" />
@@ -71,7 +71,7 @@ export function SocialFeed({ limit = 30, compact = false, className }: SocialFee
   }
 
   return (
-    <Card className={cn("h-full", className)}>
+    <Card variant="elevated" className={cn("h-full", className)}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Activity className="h-5 w-5 text-primary" />
