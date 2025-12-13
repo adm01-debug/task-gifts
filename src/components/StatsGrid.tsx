@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { Zap, Flame, Trophy, Target, TrendingUp, Users, Clock, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,8 +9,10 @@ import { AnimatedFireIndicator } from "@/components/effects/AnimatedFireIndicato
 import { AnimatedTrophyIndicator } from "@/components/effects/AnimatedTrophyIndicator";
 import { AnimatedLevelIndicator } from "@/components/effects/AnimatedLevelIndicator";
 import { AnimatedCoinsIndicator } from "@/components/effects/AnimatedCoinsIndicator";
+import { AnimatedXPParticles } from "@/components/effects/AnimatedXPParticles";
 import { MiniConfetti } from "@/components/effects/MiniConfetti";
 import { useFirstTimeIndicator } from "@/hooks/useFirstTimeIndicator";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -55,6 +57,7 @@ interface StatCardProps {
   trophyIndicator?: number;
   levelIndicator?: number;
   coinsIndicator?: number;
+  xpParticles?: { active: boolean; gained: number };
 }
 
 const colorClasses = {
@@ -91,7 +94,7 @@ const pulseClasses = {
   success: "card-pulse-success",
 };
 
-const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator, trophyIndicator, levelIndicator, coinsIndicator }: StatCardProps) => {
+const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator, trophyIndicator, levelIndicator, coinsIndicator, xpParticles }: StatCardProps) => {
   const colors = colorClasses[color];
 
   if (isLoading) {
@@ -109,6 +112,14 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
         pulse && pulseClasses[pulse]
       )}
     >
+      {/* XP Particles effect */}
+      {xpParticles && (
+        <AnimatedXPParticles 
+          isActive={xpParticles.active} 
+          xpGained={xpParticles.gained}
+        />
+      )}
+
       {/* Level indicator for XP card */}
       {levelIndicator !== undefined && levelIndicator > 0 && (
         <AnimatedLevelIndicator level={levelIndicator} />
@@ -184,8 +195,33 @@ export const StatsGrid = () => {
   const { data: profile, isLoading: profileLoading } = useCurrentProfile();
   const { data: rankData, isLoading: rankLoading } = useUserRank();
   const { checkAndTrigger, celebrationType, clearCelebration } = useFirstTimeIndicator();
+  const { playXPSound } = useSoundEffects();
 
   const isLoading = profileLoading || rankLoading;
+
+  // Track XP changes for real-time particles
+  const previousXP = useRef<number | null>(null);
+  const [xpParticlesState, setXpParticlesState] = useState({ active: false, gained: 0 });
+
+  // Detect XP changes
+  useEffect(() => {
+    if (!isLoading && profile?.xp !== undefined) {
+      if (previousXP.current !== null && profile.xp > previousXP.current) {
+        const gained = profile.xp - previousXP.current;
+        setXpParticlesState({ active: true, gained });
+        playXPSound();
+        
+        // Reset after animation
+        const timer = setTimeout(() => {
+          setXpParticlesState({ active: false, gained: 0 });
+        }, 2000);
+        
+        previousXP.current = profile.xp;
+        return () => clearTimeout(timer);
+      }
+      previousXP.current = profile.xp;
+    }
+  }, [profile?.xp, isLoading, playXPSound]);
 
   // Check for first-time indicators when data loads
   useEffect(() => {
@@ -215,6 +251,7 @@ export const StatsGrid = () => {
       color: "success",
       isLoading,
       levelIndicator: profile?.level || 0,
+      xpParticles: xpParticlesState,
     },
     {
       icon: Flame,
