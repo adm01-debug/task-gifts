@@ -3,7 +3,7 @@ import { Zap, Flame, Trophy, Target, TrendingUp, Users, Clock, ArrowUpRight } fr
 import { cn } from "@/lib/utils";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useUserRank } from "@/hooks/useUserRank";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonStatCard } from "@/components/ui/skeleton";
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -48,18 +48,7 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
   const colors = colorClasses[color];
 
   if (isLoading) {
-    return (
-      <div className="relative p-4 rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="relative z-10">
-          <div className="flex items-start justify-between mb-3">
-            <Skeleton className="w-10 h-10 rounded-xl" />
-            <Skeleton className="w-16 h-5 rounded-full" />
-          </div>
-          <Skeleton className="w-20 h-4 mb-2" />
-          <Skeleton className="w-24 h-8" />
-        </div>
-      </div>
-    );
+    return <SkeletonStatCard />;
   }
 
   return (

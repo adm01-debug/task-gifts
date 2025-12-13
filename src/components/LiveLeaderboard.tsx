@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Trophy, Crown, Medal, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useLeaderboard } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonLeaderboard } from "@/components/ui/skeleton";
 
 interface LeaderboardPlayer {
   rank: number;
@@ -65,24 +65,17 @@ export const LiveLeaderboard = () => {
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Skeleton className="w-8 h-8 rounded-lg" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold/20 to-gold/5 flex items-center justify-center">
+              <Trophy className="w-4 h-4 text-gold" />
+            </div>
             <div>
-              <Skeleton className="w-24 h-5 mb-1" />
-              <Skeleton className="w-16 h-3" />
+              <h3 className="font-bold">Leaderboard</h3>
+              <p className="text-xs text-muted-foreground">Esta semana</p>
             </div>
           </div>
         </div>
-        <div className="p-4 space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center gap-3">
-              <Skeleton className="w-10 h-10 rounded-full" />
-              <div className="flex-1">
-                <Skeleton className="w-24 h-4 mb-1" />
-                <Skeleton className="w-16 h-3" />
-              </div>
-              <Skeleton className="w-16 h-4" />
-            </div>
-          ))}
+        <div className="p-4">
+          <SkeletonLeaderboard items={5} />
         </div>
       </div>
     );
