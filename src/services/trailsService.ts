@@ -58,6 +58,13 @@ export interface ModuleProgress {
   attempts: number;
 }
 
+export interface TrailPrerequisite {
+  id: string;
+  trail_id: string;
+  prerequisite_trail_id: string;
+  created_at: string;
+}
+
 export interface TrailWithModules extends LearningTrail {
   modules: TrailModule[];
   enrollment?: TrailEnrollment;
@@ -366,5 +373,85 @@ export const trailsService = {
       .eq("id", id);
 
     if (error) throw error;
+  },
+
+  // Get all prerequisites
+  async getPrerequisites(): Promise<TrailPrerequisite[]> {
+    const { data, error } = await supabase
+      .from("trail_prerequisites")
+      .select("*");
+
+    if (error) throw error;
+    return (data || []) as TrailPrerequisite[];
+  },
+
+  // Get prerequisites for a specific trail
+  async getTrailPrerequisites(trailId: string): Promise<TrailPrerequisite[]> {
+    const { data, error } = await supabase
+      .from("trail_prerequisites")
+      .select("*")
+      .eq("trail_id", trailId);
+
+    if (error) throw error;
+    return (data || []) as TrailPrerequisite[];
+  },
+
+  // Add prerequisite
+  async addPrerequisite(trailId: string, prerequisiteTrailId: string): Promise<TrailPrerequisite> {
+    const { data, error } = await supabase
+      .from("trail_prerequisites")
+      .insert({ trail_id: trailId, prerequisite_trail_id: prerequisiteTrailId })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as TrailPrerequisite;
+  },
+
+  // Remove prerequisite
+  async removePrerequisite(trailId: string, prerequisiteTrailId: string): Promise<void> {
+    const { error } = await supabase
+      .from("trail_prerequisites")
+      .delete()
+      .eq("trail_id", trailId)
+      .eq("prerequisite_trail_id", prerequisiteTrailId);
+
+    if (error) throw error;
+  },
+
+  // Check if user has completed all prerequisites for a trail
+  async checkPrerequisitesCompleted(userId: string, trailId: string): Promise<{
+    completed: boolean;
+    missingPrerequisites: string[];
+  }> {
+    // Get all prerequisites for this trail
+    const { data: prerequisites, error: prereqError } = await supabase
+      .from("trail_prerequisites")
+      .select("prerequisite_trail_id")
+      .eq("trail_id", trailId);
+
+    if (prereqError) throw prereqError;
+    if (!prerequisites || prerequisites.length === 0) {
+      return { completed: true, missingPrerequisites: [] };
+    }
+
+    // Get user's completed enrollments
+    const { data: completedEnrollments, error: enrollError } = await supabase
+      .from("trail_enrollments")
+      .select("trail_id")
+      .eq("user_id", userId)
+      .not("completed_at", "is", null);
+
+    if (enrollError) throw enrollError;
+
+    const completedTrailIds = new Set((completedEnrollments || []).map(e => e.trail_id));
+    const missingPrerequisites = prerequisites
+      .filter(p => !completedTrailIds.has(p.prerequisite_trail_id))
+      .map(p => p.prerequisite_trail_id);
+
+    return {
+      completed: missingPrerequisites.length === 0,
+      missingPrerequisites,
+    };
   },
 };

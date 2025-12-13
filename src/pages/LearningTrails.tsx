@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
   BookOpen, Clock, Star, Trophy, Users, Play, 
-  CheckCircle2, Lock, ChevronRight, Sparkles, Filter, Award
+  CheckCircle2, Lock, ChevronRight, Sparkles, Filter, Award, Link2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { usePublishedTrails, useUserEnrollments, useEnrollInTrail } from "@/hooks/useTrails";
+import { usePublishedTrails, useUserEnrollments, useEnrollInTrail, useTrailPrerequisites } from "@/hooks/useTrails";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAuth } from "@/hooks/useAuth";
 import { useCertifications } from "@/hooks/useCertifications";
@@ -23,6 +23,7 @@ const statusConfig = {
   not_started: { label: "Iniciar", color: "bg-primary", icon: Play },
   in_progress: { label: "Continuar", color: "bg-amber-500", icon: ChevronRight },
   completed: { label: "Concluído", color: "bg-emerald-500", icon: CheckCircle2 },
+  locked: { label: "Bloqueado", color: "bg-muted", icon: Lock },
 };
 
 function TrailCard({ 
@@ -30,6 +31,8 @@ function TrailCard({
   enrollment,
   hasCertification,
   certificationName,
+  isLocked,
+  missingPrerequisiteNames,
   onEnroll,
   onContinue,
 }: { 
@@ -37,14 +40,18 @@ function TrailCard({
   enrollment?: TrailEnrollment;
   hasCertification?: boolean;
   certificationName?: string;
+  isLocked?: boolean;
+  missingPrerequisiteNames?: string[];
   onEnroll: () => void;
   onContinue: () => void;
 }) {
-  const status = enrollment
-    ? enrollment.completed_at 
-      ? "completed" 
-      : "in_progress"
-    : "not_started";
+  const status = isLocked
+    ? "locked"
+    : enrollment
+      ? enrollment.completed_at 
+        ? "completed" 
+        : "in_progress"
+      : "not_started";
   
   const config = statusConfig[status];
   const Icon = config.icon;
@@ -54,16 +61,27 @@ function TrailCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: isLocked ? 0 : -4 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className={`overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300 h-full flex flex-col ${hasCertification ? 'ring-1 ring-amber-500/30' : ''}`}>
+      <Card className={`overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 h-full flex flex-col ${
+        isLocked 
+          ? 'opacity-60 grayscale-[30%]' 
+          : hasCertification 
+            ? 'ring-1 ring-amber-500/30 hover:border-primary/30' 
+            : 'hover:border-primary/30'
+      }`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="text-4xl">{trail.icon}</div>
-                {hasCertification && (
+                <div className={`text-4xl ${isLocked ? 'opacity-50' : ''}`}>{trail.icon}</div>
+                {isLocked && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-muted-foreground rounded-full flex items-center justify-center shadow-lg">
+                    <Lock className="w-3 h-3 text-background" />
+                  </div>
+                )}
+                {hasCertification && !isLocked && (
                   <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center shadow-lg">
                     <Award className="w-3 h-3 text-white" />
                   </div>
@@ -117,6 +135,24 @@ function TrailCard({
             )}
           </div>
 
+          {/* Show missing prerequisites if locked */}
+          {isLocked && missingPrerequisiteNames && missingPrerequisiteNames.length > 0 && (
+            <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <Link2 className="h-4 w-4" />
+                <span className="font-medium">Pré-requisitos:</span>
+              </div>
+              <ul className="space-y-1">
+                {missingPrerequisiteNames.map((name, idx) => (
+                  <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Lock className="h-3 w-3" />
+                    <span>{name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {enrollment && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -127,14 +163,33 @@ function TrailCard({
             </div>
           )}
 
-          <Button
-            className={`w-full gap-2 ${status === "completed" ? "bg-emerald-500 hover:bg-emerald-600" : ""}`}
-            onClick={enrollment ? onContinue : onEnroll}
-            disabled={status === "completed"}
-          >
-            <Icon className="h-4 w-4" />
-            {config.label}
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button
+                    className={`w-full gap-2 ${
+                      status === "completed" 
+                        ? "bg-emerald-500 hover:bg-emerald-600" 
+                        : status === "locked"
+                          ? "bg-muted text-muted-foreground cursor-not-allowed"
+                          : ""
+                    }`}
+                    onClick={isLocked ? undefined : (enrollment ? onContinue : onEnroll)}
+                    disabled={status === "completed" || isLocked}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {config.label}
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              {isLocked && (
+                <TooltipContent>
+                  <p>Complete os pré-requisitos para desbloquear</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </CardContent>
       </Card>
     </motion.div>
@@ -151,6 +206,7 @@ export default function LearningTrails() {
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useUserEnrollments();
   const { data: departments = [] } = useDepartments();
   const { data: certifications = [] } = useCertifications();
+  const { data: prerequisites = [] } = useTrailPrerequisites();
   const enrollMutation = useEnrollInTrail();
 
   // Create map of trail IDs to certifications
@@ -159,6 +215,45 @@ export default function LearningTrails() {
       .filter(cert => cert.trail_id)
       .map(cert => [cert.trail_id, cert])
   );
+
+  // Create map of trail IDs to their prerequisite trail IDs
+  const trailPrerequisiteMap = useMemo(() => {
+    const map = new Map<string, string[]>();
+    prerequisites.forEach(prereq => {
+      const existing = map.get(prereq.trail_id) || [];
+      existing.push(prereq.prerequisite_trail_id);
+      map.set(prereq.trail_id, existing);
+    });
+    return map;
+  }, [prerequisites]);
+
+  // Create trail ID to trail name map
+  const trailNameMap = useMemo(() => {
+    return new Map(trails.map(t => [t.id, t.title]));
+  }, [trails]);
+
+  // Completed trail IDs
+  const completedTrailIds = useMemo(() => {
+    return new Set(
+      enrollments
+        .filter(e => e.completed_at)
+        .map(e => e.trail_id)
+    );
+  }, [enrollments]);
+
+  // Check if trail is locked (missing prerequisites)
+  const getLockedInfo = (trailId: string): { isLocked: boolean; missingNames: string[] } => {
+    const prereqIds = trailPrerequisiteMap.get(trailId) || [];
+    if (prereqIds.length === 0) return { isLocked: false, missingNames: [] };
+
+    const missingIds = prereqIds.filter(id => !completedTrailIds.has(id));
+    const missingNames = missingIds.map(id => trailNameMap.get(id) || "Trilha desconhecida");
+    
+    return {
+      isLocked: missingIds.length > 0,
+      missingNames,
+    };
+  };
 
   const isLoading = trailsLoading || enrollmentsLoading;
 
@@ -355,23 +450,28 @@ export default function LearningTrails() {
               exit={{ opacity: 0 }}
               className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
             >
-              {filteredTrails.map((trail, index) => (
-                <motion.div
-                  key={trail.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <TrailCard
-                    trail={trail}
-                    enrollment={enrollmentMap.get(trail.id)}
-                    hasCertification={trailCertificationMap.has(trail.id)}
-                    certificationName={trailCertificationMap.get(trail.id)?.name}
-                    onEnroll={() => handleEnroll(trail.id)}
-                    onContinue={() => handleContinue(trail.id)}
-                  />
-                </motion.div>
-              ))}
+              {filteredTrails.map((trail, index) => {
+                const lockedInfo = getLockedInfo(trail.id);
+                return (
+                  <motion.div
+                    key={trail.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <TrailCard
+                      trail={trail}
+                      enrollment={enrollmentMap.get(trail.id)}
+                      hasCertification={trailCertificationMap.has(trail.id)}
+                      certificationName={trailCertificationMap.get(trail.id)?.name}
+                      isLocked={lockedInfo.isLocked}
+                      missingPrerequisiteNames={lockedInfo.missingNames}
+                      onEnroll={() => handleEnroll(trail.id)}
+                      onContinue={() => handleContinue(trail.id)}
+                    />
+                  </motion.div>
+                );
+              })}
             </motion.div>
           )}
         </AnimatePresence>
