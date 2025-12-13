@@ -5,6 +5,7 @@ import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useUserRank } from "@/hooks/useUserRank";
 import { SkeletonStatCard } from "@/components/ui/skeleton";
 import { AnimatedFireIndicator } from "@/components/effects/AnimatedFireIndicator";
+import { AnimatedTrophyIndicator } from "@/components/effects/AnimatedTrophyIndicator";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -46,6 +47,7 @@ interface StatCardProps {
   isLoading?: boolean;
   pulse?: "primary" | "warning" | "success";
   fireIndicator?: number;
+  trophyIndicator?: number;
 }
 
 const colorClasses = {
@@ -82,7 +84,7 @@ const pulseClasses = {
   success: "card-pulse-success",
 };
 
-const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator }: StatCardProps) => {
+const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator, trophyIndicator }: StatCardProps) => {
   const colors = colorClasses[color];
 
   if (isLoading) {
@@ -103,6 +105,11 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
       {/* Fire indicator for streak */}
       {fireIndicator !== undefined && fireIndicator > 0 && (
         <AnimatedFireIndicator streakDays={fireIndicator} />
+      )}
+
+      {/* Trophy indicator for top 3 ranking */}
+      {trophyIndicator !== undefined && trophyIndicator >= 1 && trophyIndicator <= 3 && (
+        <AnimatedTrophyIndicator rank={trophyIndicator} />
       )}
 
       {/* Gradient background */}
@@ -192,6 +199,7 @@ export const StatsGrid = () => {
       color: "warning",
       isLoading,
       pulse: rankData?.rank && rankData.rank <= 10 ? "warning" : undefined,
+      trophyIndicator: rankData?.rank || undefined,
     },
     {
       icon: Target,
