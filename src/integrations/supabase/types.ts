@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string
+          coin_reward: number
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          key: string
+          name: string
+          rarity: string
+          xp_reward: number
+        }
+        Insert: {
+          category?: string
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          key: string
+          name: string
+          rarity?: string
+          xp_reward?: number
+        }
+        Update: {
+          category?: string
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          key?: string
+          name?: string
+          rarity?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       attendance_records: {
         Row: {
           check_in: string
@@ -989,6 +1028,35 @@ export type Database = {
             columns: ["trail_id"]
             isOneToOne: false
             referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
             referencedColumns: ["id"]
           },
         ]
