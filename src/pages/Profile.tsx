@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProfileKudosSection } from "@/components/ProfileKudosSection";
+import { RankingBadge } from "@/components/RankingBadge";
+import { useUserRank } from "@/hooks/useUserRank";
 import { toast } from "sonner";
 
 interface ProfileData {
@@ -54,6 +56,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const { data: rankData } = useUserRank();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -163,6 +166,12 @@ const Profile = () => {
                 <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-card border-4 border-background flex items-center justify-center">
                   <span className="text-sm font-bold text-primary">{profile?.level || 1}</span>
                 </div>
+                {/* Ranking Badge */}
+                {rankData?.rank && (
+                  <div className="absolute -top-2 -left-2">
+                    <RankingBadge rank={rankData.rank} size="md" />
+                  </div>
+                )}
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   className="absolute inset-0 rounded-full bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
