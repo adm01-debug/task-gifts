@@ -200,6 +200,36 @@ export const StatsGrid = () => {
   );
 };
 
+// Quick Actions variants
+const quickActionsContainerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.4,
+    },
+  },
+};
+
+const quickActionItemVariants: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: 15,
+    scale: 0.9,
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 25,
+    },
+  },
+};
+
 // Additional component for quick actions
 export const QuickActions = () => {
   const actions = [
@@ -210,15 +240,20 @@ export const QuickActions = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
+      variants={quickActionsContainerVariants}
+      initial="hidden"
+      animate="visible"
       className="flex gap-2"
     >
-      {actions.map((action) => (
+      {actions.map((action, index) => (
         <motion.button
           key={action.label}
-          whileHover={{ scale: 1.05 }}
+          variants={quickActionItemVariants}
+          whileHover={{ 
+            scale: 1.05, 
+            y: -2,
+            transition: { duration: 0.2 } 
+          }}
           whileTap={{ scale: 0.95 }}
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-xl border border-border",
@@ -228,14 +263,26 @@ export const QuickActions = () => {
             action.color === "accent" && "from-accent/10 to-transparent"
           )}
         >
-          <action.icon className={cn(
-            "w-4 h-4",
-            action.color === "primary" && "text-primary",
-            action.color === "secondary" && "text-secondary",
-            action.color === "accent" && "text-accent"
-          )} />
+          <motion.div
+            initial={{ rotate: -90, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            transition={{ delay: 0.5 + index * 0.1, type: "spring", stiffness: 200 }}
+          >
+            <action.icon className={cn(
+              "w-4 h-4",
+              action.color === "primary" && "text-primary",
+              action.color === "secondary" && "text-secondary",
+              action.color === "accent" && "text-accent"
+            )} />
+          </motion.div>
           <span className="text-sm font-medium">{action.label}</span>
-          <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
+          <motion.div
+            initial={{ x: -5, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.6 + index * 0.1 }}
+          >
+            <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
+          </motion.div>
         </motion.button>
       ))}
     </motion.div>
