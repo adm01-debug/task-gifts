@@ -18,6 +18,7 @@ import DepartmentMissions from "@/components/DepartmentMissions";
 import DepartmentRankings from "@/components/DepartmentRankings";
 import { AttendanceModule } from "@/components/AttendanceModule";
 import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
+import { ComboIndicator } from "@/components/ComboIndicator";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -142,6 +143,9 @@ const Index = () => {
               {/* Notifications */}
               <NotificationCenter />
 
+              {/* Combo Indicator */}
+              <ComboIndicator variant="compact" />
+
               {/* AI Assistant */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -244,8 +248,9 @@ const Index = () => {
               <TeamChallenges />
             </div>
 
-            {/* Right Column - Attendance, Rankings, Leaderboard, Kudos, Analytics & Rewards */}
+            {/* Right Column - Combo, Attendance, Rankings, Leaderboard, Kudos, Analytics & Rewards */}
             <div className="space-y-4 md:space-y-6">
+              <ComboIndicator variant="full" />
               <AttendanceModule />
               <DepartmentRankings />
               <LiveLeaderboard />
