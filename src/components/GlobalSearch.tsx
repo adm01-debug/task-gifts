@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, BookOpen, Target, User, Zap, Clock, Award, Command, Filter, X, ChevronDown } from "lucide-react";
+import { Search, BookOpen, Target, User, Zap, Clock, Award, Command, Filter, X, ChevronDown, History, Trash2 } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -35,18 +35,66 @@ interface GlobalSearchProps {
 type CategoryFilter = "all" | "trails" | "quests" | "users";
 type DifficultyFilter = "all" | "easy" | "medium" | "hard" | "expert";
 
+interface RecentSearch {
+  id: string;
+  type: "trail" | "quest" | "user" | "action";
+  label: string;
+  icon: string;
+  timestamp: number;
+}
+
+const RECENT_SEARCHES_KEY = "global-search-history";
+const MAX_RECENT_SEARCHES = 5;
+
+function getRecentSearches(): RecentSearch[] {
+  try {
+    const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentSearch(search: Omit<RecentSearch, "timestamp">) {
+  const searches = getRecentSearches();
+  const filtered = searches.filter(s => !(s.id === search.id && s.type === search.type));
+  const updated = [{ ...search, timestamp: Date.now() }, ...filtered].slice(0, MAX_RECENT_SEARCHES);
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+  return updated;
+}
+
+function removeRecentSearch(id: string, type: string): RecentSearch[] {
+  const searches = getRecentSearches();
+  const updated = searches.filter(s => !(s.id === id && s.type === type));
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+  return updated;
+}
+
+function clearRecentSearches(): RecentSearch[] {
+  localStorage.removeItem(RECENT_SEARCHES_KEY);
+  return [];
+}
+
 export function GlobalSearch({ trigger }: GlobalSearchProps) {
   const [open, setOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
   
   const navigate = useNavigate();
   const { data: trails } = usePublishedTrails();
   const { data: quests } = useQuests();
   const { data: profiles } = useProfiles();
   const { data: departments } = useDepartments();
+
+  // Load recent searches on mount and when dialog opens
+  useEffect(() => {
+    if (open) {
+      setRecentSearches(getRecentSearches());
+    }
+  }, [open]);
 
   // Reset filters when dialog closes
   useEffect(() => {
@@ -68,7 +116,10 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const handleSelect = useCallback((type: string, id: string) => {
+  const handleSelect = useCallback((type: string, id: string, label: string, icon: string) => {
+    // Save to recent searches
+    setRecentSearches(saveRecentSearch({ id, type: type as RecentSearch["type"], label, icon }));
+    
     setOpen(false);
     switch (type) {
       case "trail":
@@ -80,10 +131,54 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
       case "user":
         navigate(`/profile`);
         break;
+      case "action":
+        // Actions handle their own navigation
+        break;
       default:
         break;
     }
   }, [navigate]);
+
+  const handleRecentSelect = useCallback((recent: RecentSearch) => {
+    // Update timestamp
+    setRecentSearches(saveRecentSearch({ id: recent.id, type: recent.type, label: recent.label, icon: recent.icon }));
+    
+    setOpen(false);
+    switch (recent.type) {
+      case "trail":
+        navigate(`/trails/${recent.id}`);
+        break;
+      case "quest":
+        navigate("/manager");
+        break;
+      case "user":
+        navigate(`/profile`);
+        break;
+      case "action":
+        // Map action IDs to routes
+        const actionRoutes: Record<string, string> = {
+          dashboard: "/",
+          trails: "/trails",
+          quiz: "/quiz",
+          shop: "/shop",
+          achievements: "/achievements",
+          profile: "/profile",
+        };
+        if (actionRoutes[recent.id]) {
+          navigate(actionRoutes[recent.id]);
+        }
+        break;
+    }
+  }, [navigate]);
+
+  const handleRemoveRecent = useCallback((e: React.MouseEvent, id: string, type: string) => {
+    e.stopPropagation();
+    setRecentSearches(removeRecentSearch(id, type));
+  }, []);
+
+  const handleClearAllRecent = useCallback(() => {
+    setRecentSearches(clearRecentSearches());
+  }, []);
 
   const toggleDepartment = (deptId: string) => {
     setSelectedDepartments(prev => 
@@ -129,13 +224,19 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
   }, [quests, difficultyFilter, selectedDepartments]);
 
   const quickActions = [
-    { label: "Dashboard", icon: "🏠", action: () => { setOpen(false); navigate("/"); } },
-    { label: "Trilhas de Aprendizado", icon: "📚", action: () => { setOpen(false); navigate("/trails"); } },
-    { label: "Quiz Diário", icon: "🎯", action: () => { setOpen(false); navigate("/quiz"); } },
-    { label: "Loja de Recompensas", icon: "🛍️", action: () => { setOpen(false); navigate("/shop"); } },
-    { label: "Conquistas", icon: "🏆", action: () => { setOpen(false); navigate("/achievements"); } },
-    { label: "Perfil", icon: "👤", action: () => { setOpen(false); navigate("/profile"); } },
+    { id: "dashboard", label: "Dashboard", icon: "🏠", route: "/" },
+    { id: "trails", label: "Trilhas de Aprendizado", icon: "📚", route: "/trails" },
+    { id: "quiz", label: "Quiz Diário", icon: "🎯", route: "/quiz" },
+    { id: "shop", label: "Loja de Recompensas", icon: "🛍️", route: "/shop" },
+    { id: "achievements", label: "Conquistas", icon: "🏆", route: "/achievements" },
+    { id: "profile", label: "Perfil", icon: "👤", route: "/profile" },
   ];
+
+  const handleQuickAction = (action: typeof quickActions[0]) => {
+    setRecentSearches(saveRecentSearch({ id: action.id, type: "action", label: action.label, icon: action.icon }));
+    setOpen(false);
+    navigate(action.route);
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -164,6 +265,16 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
       case "quests": return "Quests";
       case "users": return "Usuários";
     }
+  };
+
+  const getTypeIcon = (type: RecentSearch["type"]) => {
+    switch (type) {
+      case "trail": return <BookOpen className="w-3 h-3" />;
+      case "quest": return <Target className="w-3 h-3" />;
+      case "user": return <User className="w-3 h-3" />;
+      case "action": return <Zap className="w-3 h-3" />;
+    }
+  };
   };
 
   return (
@@ -329,6 +440,56 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
             </div>
           </CommandEmpty>
 
+          {/* Recent Searches */}
+          {recentSearches.length > 0 && categoryFilter === "all" && (
+            <>
+              <CommandGroup heading={
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <History className="w-3 h-3" />
+                    Buscas Recentes
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearAllRecent}
+                    className="h-5 px-1.5 text-[10px] text-muted-foreground hover:text-foreground"
+                  >
+                    Limpar tudo
+                  </Button>
+                </div>
+              }>
+                {recentSearches.map((recent) => (
+                  <CommandItem
+                    key={`${recent.type}-${recent.id}`}
+                    onSelect={() => handleRecentSelect(recent)}
+                    className="flex items-center gap-3 cursor-pointer group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center">
+                      <span className="text-sm">{recent.icon}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{recent.label}</p>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        {getTypeIcon(recent.type)}
+                        <span className="capitalize">{recent.type === "action" ? "Ação rápida" : recent.type}</span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleRemoveRecent(e, recent.id, recent.type)}
+                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              <CommandSeparator />
+            </>
+          )}
+
           {/* Quick Actions - only show when no category filter or 'all' */}
           {categoryFilter === "all" && (
             <>
@@ -336,7 +497,7 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
                 {quickActions.map((action) => (
                   <CommandItem
                     key={action.label}
-                    onSelect={action.action}
+                    onSelect={() => handleQuickAction(action)}
                     className="flex items-center gap-3 cursor-pointer"
                   >
                     <span className="text-lg">{action.icon}</span>
@@ -355,7 +516,7 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
                 {filteredTrails.slice(0, 8).map((trail) => (
                   <CommandItem
                     key={trail.id}
-                    onSelect={() => handleSelect("trail", trail.id)}
+                    onSelect={() => handleSelect("trail", trail.id, trail.title, trail.icon || "📚")}
                     className="flex items-center gap-3 cursor-pointer"
                   >
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -393,7 +554,7 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
                 {filteredQuests.slice(0, 8).map((quest) => (
                   <CommandItem
                     key={quest.id}
-                    onSelect={() => handleSelect("quest", quest.id)}
+                    onSelect={() => handleSelect("quest", quest.id, quest.title, quest.icon || "🎯")}
                     className="flex items-center gap-3 cursor-pointer"
                   >
                     <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
@@ -425,7 +586,7 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
               {profiles.slice(0, 8).map((profile) => (
                 <CommandItem
                   key={profile.id}
-                  onSelect={() => handleSelect("user", profile.id)}
+                  onSelect={() => handleSelect("user", profile.id, profile.display_name || profile.email || "Usuário", "👤")}
                   className="flex items-center gap-3 cursor-pointer"
                 >
                   <Avatar className="w-8 h-8">
