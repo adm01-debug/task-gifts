@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion, Variants } from "framer-motion";
 import { Zap, Flame, Trophy, Target, TrendingUp, Users, Clock, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -7,6 +8,8 @@ import { SkeletonStatCard } from "@/components/ui/skeleton";
 import { AnimatedFireIndicator } from "@/components/effects/AnimatedFireIndicator";
 import { AnimatedTrophyIndicator } from "@/components/effects/AnimatedTrophyIndicator";
 import { AnimatedLevelIndicator } from "@/components/effects/AnimatedLevelIndicator";
+import { MiniConfetti } from "@/components/effects/MiniConfetti";
+import { useFirstTimeIndicator } from "@/hooks/useFirstTimeIndicator";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -173,8 +176,27 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
 export const StatsGrid = () => {
   const { data: profile, isLoading: profileLoading } = useCurrentProfile();
   const { data: rankData, isLoading: rankLoading } = useUserRank();
+  const { checkAndTrigger, celebrationType, clearCelebration } = useFirstTimeIndicator();
 
   const isLoading = profileLoading || rankLoading;
+
+  // Check for first-time indicators when data loads
+  useEffect(() => {
+    if (!isLoading && profile) {
+      if (profile.level && profile.level > 0) {
+        checkAndTrigger("level", profile.level);
+      }
+      if (profile.streak && profile.streak > 0) {
+        checkAndTrigger("streak", profile.streak);
+      }
+    }
+  }, [profile, isLoading, checkAndTrigger]);
+
+  useEffect(() => {
+    if (!isLoading && rankData?.rank && rankData.rank >= 1 && rankData.rank <= 3) {
+      checkAndTrigger("trophy", rankData.rank);
+    }
+  }, [rankData, isLoading, checkAndTrigger]);
 
   const stats: StatCardProps[] = [
     {
@@ -221,16 +243,25 @@ export const StatsGrid = () => {
   ];
 
   return (
-    <motion.div 
-      className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {stats.map((stat, i) => (
-        <StatCard key={stat.label} {...stat} delay={i * 0.1} />
-      ))}
-    </motion.div>
+    <>
+      {/* Celebration confetti for first-time indicators */}
+      <MiniConfetti
+        isActive={celebrationType !== null}
+        type={celebrationType || "level"}
+        onComplete={clearCelebration}
+      />
+
+      <motion.div 
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {stats.map((stat, i) => (
+          <StatCard key={stat.label} {...stat} delay={i * 0.1} />
+        ))}
+      </motion.div>
+    </>
   );
 };
 
