@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useUserRank } from "@/hooks/useUserRank";
 import { SkeletonStatCard } from "@/components/ui/skeleton";
+import { AnimatedFireIndicator } from "@/components/effects/AnimatedFireIndicator";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -44,6 +45,7 @@ interface StatCardProps {
   delay?: number;
   isLoading?: boolean;
   pulse?: "primary" | "warning" | "success";
+  fireIndicator?: number;
 }
 
 const colorClasses = {
@@ -80,7 +82,7 @@ const pulseClasses = {
   success: "card-pulse-success",
 };
 
-const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse }: StatCardProps) => {
+const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator }: StatCardProps) => {
   const colors = colorClasses[color];
 
   if (isLoading) {
@@ -98,6 +100,11 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
         pulse && pulseClasses[pulse]
       )}
     >
+      {/* Fire indicator for streak */}
+      {fireIndicator !== undefined && fireIndicator > 0 && (
+        <AnimatedFireIndicator streakDays={fireIndicator} />
+      )}
+
       {/* Gradient background */}
       <div className={cn(
         "absolute inset-0 bg-gradient-to-br opacity-50",
@@ -174,6 +181,7 @@ export const StatsGrid = () => {
       color: "primary",
       isLoading,
       pulse: profile?.streak && profile.streak >= 3 ? "primary" : undefined,
+      fireIndicator: profile?.streak || 0,
     },
     {
       icon: Trophy,
