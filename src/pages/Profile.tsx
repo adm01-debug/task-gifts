@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, Trophy, Zap, Flame, Star, Target, Users, Calendar,
-  Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart
+  Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart, Wand2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProfileKudosSection } from "@/components/ProfileKudosSection";
 import { RankingBadge } from "@/components/RankingBadge";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
+import { AvatarCustomizer } from "@/components/AvatarCustomizer";
+import { useAvatarConfig } from "@/hooks/useAvatar";
 import { useUserRank } from "@/hooks/useUserRank";
 import { toast } from "sonner";
 
@@ -57,7 +59,9 @@ const Profile = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [avatarOpen, setAvatarOpen] = useState(false);
   const { data: rankData } = useUserRank();
+  const { data: avatarConfig } = useAvatarConfig(user?.id);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -160,7 +164,8 @@ const Profile = () => {
               <div className="relative group">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="w-28 h-28 rounded-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center text-4xl font-bold shadow-2xl"
+                  className="w-28 h-28 rounded-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center text-4xl font-bold shadow-2xl cursor-pointer"
+                  onClick={() => setAvatarOpen(true)}
                 >
                   {profile?.display_name?.charAt(0).toUpperCase() || "?"}
                 </motion.div>
@@ -175,9 +180,11 @@ const Profile = () => {
                 )}
                 <motion.button
                   whileHover={{ scale: 1.1 }}
-                  className="absolute inset-0 rounded-full bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                  onClick={() => setAvatarOpen(true)}
+                  className="absolute inset-0 rounded-full bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
                 >
-                  <Camera className="w-6 h-6" />
+                  <Wand2 className="w-5 h-5" />
+                  <span className="text-sm font-medium">Personalizar</span>
                 </motion.button>
               </div>
 
@@ -371,6 +378,19 @@ const Profile = () => {
           Membro desde {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }) : 'recentemente'}
         </motion.div>
       </main>
+
+      {/* Avatar Customizer Modal */}
+      {user && profile && (
+        <AvatarCustomizer
+          userId={user.id}
+          userLevel={profile.level}
+          userStreak={profile.streak}
+          userCoins={profile.coins}
+          displayName={profile.display_name || "Jogador"}
+          open={avatarOpen}
+          onClose={() => setAvatarOpen(false)}
+        />
+      )}
     </div>
   );
 };
