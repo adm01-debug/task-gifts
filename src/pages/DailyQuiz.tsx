@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Trophy, Gamepad2, ArrowLeft } from "lucide-react";
+import { Sparkles, Trophy, Gamepad2, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,165 +8,56 @@ import { MagicCardQuiz, QuizQuestion } from "@/components/quiz/MagicCardQuiz";
 import { MillionaireQuiz, MillionaireQuestion } from "@/components/quiz/MillionaireQuiz";
 import { QuizDailyRanking } from "@/components/quiz/QuizDailyRanking";
 import { useSaveQuizScore } from "@/hooks/useQuizScores";
+import { useQuizQuestionsWithOptions } from "@/hooks/useQuizQuestions";
+import { QuizQuestion as DbQuizQuestion } from "@/services/quizQuestionsService";
 import { toast } from "sonner";
 
-// Sample questions for demo - in production these would come from the database
-const sampleMagicQuestions: QuizQuestion[] = [
-  {
-    id: "1",
-    question: "Qual é o prazo padrão para orçamentos na Promo Brindes?",
-    options: [
-      { id: "a", text: "24 horas", isCorrect: false },
-      { id: "b", text: "48 horas", isCorrect: true },
-      { id: "c", text: "72 horas", isCorrect: false },
-    ],
-    explanation: "O prazo padrão para orçamentos é de 48 horas, garantindo qualidade e precisão.",
-    points: 100,
-  },
-  {
-    id: "2",
-    question: "Quantas técnicas de gravação a Promo Brindes domina?",
-    options: [
-      { id: "a", text: "4 técnicas", isCorrect: false },
-      { id: "b", text: "6 técnicas", isCorrect: false },
-      { id: "c", text: "8 técnicas", isCorrect: true },
-    ],
-    explanation: "Dominamos 8 técnicas: Silk Screen, Laser, Bordado, DTF, Tampografia, Sublimação, UV e Transfer.",
-    points: 150,
-  },
-  {
-    id: "3",
-    question: "Qual sistema usamos para gestão de clientes?",
-    options: [
-      { id: "a", text: "Bitrix24", isCorrect: true },
-      { id: "b", text: "Salesforce", isCorrect: false },
-      { id: "c", text: "HubSpot", isCorrect: false },
-    ],
-    explanation: "O Bitrix24 é nossa plataforma principal de CRM e gestão de processos.",
-    points: 100,
-  },
-  {
-    id: "4",
-    question: "Há quantos anos a Promo Brindes está no mercado?",
-    options: [
-      { id: "a", text: "8 anos", isCorrect: false },
-      { id: "b", text: "11 anos", isCorrect: true },
-      { id: "c", text: "15 anos", isCorrect: false },
-    ],
-    explanation: "São 11 anos de experiência no mercado de brindes corporativos!",
-    points: 100,
-  },
-  {
-    id: "5",
-    question: "Qual é a média de pedidos por mês na empresa?",
-    options: [
-      { id: "a", text: "~150 pedidos", isCorrect: false },
-      { id: "b", text: "~300 pedidos", isCorrect: true },
-      { id: "c", text: "~500 pedidos", isCorrect: false },
-    ],
-    explanation: "Processamos aproximadamente 300 pedidos por mês, mantendo alta qualidade.",
-    points: 150,
-  },
-];
+// Transform database questions to MagicCardQuiz format
+function transformToMagicQuestions(dbQuestions: DbQuizQuestion[]): QuizQuestion[] {
+  return dbQuestions.map(q => ({
+    id: q.id,
+    question: q.question,
+    options: (q.options || []).map(opt => ({
+      id: opt.id,
+      text: opt.text,
+      isCorrect: opt.is_correct,
+    })),
+    explanation: q.explanation || undefined,
+    points: q.points,
+  }));
+}
 
-const sampleMillionaireQuestions: MillionaireQuestion[] = [
-  {
-    id: "m1",
-    question: "Qual é o primeiro passo ao receber uma solicitação de orçamento?",
-    options: [
-      { id: "a", text: "Enviar preço imediatamente", isCorrect: false },
-      { id: "b", text: "Verificar disponibilidade do produto", isCorrect: false },
-      { id: "c", text: "Entender a necessidade do cliente", isCorrect: true },
-      { id: "d", text: "Encaminhar para o financeiro", isCorrect: false },
-    ],
-    difficulty: "easy",
-    explanation: "Sempre começamos entendendo a necessidade real do cliente antes de qualquer ação.",
-  },
-  {
-    id: "m2",
-    question: "Qual técnica de gravação é mais indicada para tecidos?",
-    options: [
-      { id: "a", text: "Laser", isCorrect: false },
-      { id: "b", text: "Bordado ou DTF", isCorrect: true },
-      { id: "c", text: "Tampografia", isCorrect: false },
-      { id: "d", text: "Sublimação apenas", isCorrect: false },
-    ],
-    difficulty: "easy",
-    explanation: "Bordado e DTF são as técnicas mais adequadas para tecidos, oferecendo durabilidade.",
-  },
-  {
-    id: "m3",
-    question: "Quantos departamentos a Promo Brindes possui?",
-    options: [
-      { id: "a", text: "8 departamentos", isCorrect: false },
-      { id: "b", text: "10 departamentos", isCorrect: false },
-      { id: "c", text: "12 departamentos", isCorrect: false },
-      { id: "d", text: "14 departamentos", isCorrect: true },
-    ],
-    difficulty: "medium",
-    explanation: "São 14 departamentos trabalhando em sintonia para entregar excelência.",
-  },
-  {
-    id: "m4",
-    question: "Qual é o diferencial competitivo da Promo Brindes?",
-    options: [
-      { id: "a", text: "Menor preço do mercado", isCorrect: false },
-      { id: "b", text: "Cumprimento de prazos para eventos", isCorrect: true },
-      { id: "c", text: "Maior variedade de produtos", isCorrect: false },
-      { id: "d", text: "Frete grátis", isCorrect: false },
-    ],
-    difficulty: "medium",
-    explanation: "Nosso diferencial é nunca deixar o cliente na mão em datas importantes!",
-  },
-  {
-    id: "m5",
-    question: "O que significa a sigla SKU no contexto do estoque?",
-    options: [
-      { id: "a", text: "Stock Keeping Unit", isCorrect: true },
-      { id: "b", text: "Standard Kit Utility", isCorrect: false },
-      { id: "c", text: "Sistema de Controle Único", isCorrect: false },
-      { id: "d", text: "Serviço de Qualidade Unificado", isCorrect: false },
-    ],
-    difficulty: "medium",
-    explanation: "SKU (Stock Keeping Unit) é o código único de identificação de cada produto.",
-  },
-  {
-    id: "m6",
-    question: "Em qual cidade fica a produção da Promo Brindes?",
-    options: [
-      { id: "a", text: "Goiânia", isCorrect: false },
-      { id: "b", text: "São Paulo", isCorrect: true },
-      { id: "c", text: "Rio de Janeiro", isCorrect: false },
-      { id: "d", text: "Brasília", isCorrect: false },
-    ],
-    difficulty: "easy",
-    explanation: "A produção fica em São Paulo e o administrativo em Goiás.",
-  },
-  {
-    id: "m7",
-    question: "Qual é o prazo mínimo recomendado para pedidos com gravação especial?",
-    options: [
-      { id: "a", text: "3 dias úteis", isCorrect: false },
-      { id: "b", text: "5 dias úteis", isCorrect: false },
-      { id: "c", text: "7 dias úteis", isCorrect: true },
-      { id: "d", text: "10 dias úteis", isCorrect: false },
-    ],
-    difficulty: "hard",
-    explanation: "Para gravações especiais, 7 dias úteis garantem qualidade e revisão adequada.",
-  },
-  {
-    id: "m8",
-    question: "Qual setor é responsável pela aprovação final de artes?",
-    options: [
-      { id: "a", text: "Comercial", isCorrect: false },
-      { id: "b", text: "Artes", isCorrect: true },
-      { id: "c", text: "Gravação", isCorrect: false },
-      { id: "d", text: "Expedição", isCorrect: false },
-    ],
-    difficulty: "easy",
-    explanation: "O setor de Artes é responsável por criar, revisar e aprovar todas as artes.",
-  },
-];
+// Transform database questions to MillionaireQuiz format
+function transformToMillionaireQuestions(dbQuestions: DbQuizQuestion[]): MillionaireQuestion[] {
+  // Sort by difficulty: easy -> medium -> hard
+  const difficultyOrder = { easy: 0, medium: 1, hard: 2 };
+  const sorted = [...dbQuestions].sort((a, b) => 
+    (difficultyOrder[a.difficulty as keyof typeof difficultyOrder] || 0) - 
+    (difficultyOrder[b.difficulty as keyof typeof difficultyOrder] || 0)
+  );
+
+  return sorted.map(q => ({
+    id: q.id,
+    question: q.question,
+    options: (q.options || []).map(opt => ({
+      id: opt.id,
+      text: opt.text,
+      isCorrect: opt.is_correct,
+    })),
+    difficulty: (q.difficulty as "easy" | "medium" | "hard") || "easy",
+    explanation: q.explanation || undefined,
+  }));
+}
+
+// Shuffle array helper
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 export default function DailyQuiz() {
   const navigate = useNavigate();
@@ -177,12 +68,36 @@ export default function DailyQuiz() {
   });
   const saveScore = useSaveQuizScore();
 
+  // Fetch questions from database
+  const { data: magicDbQuestions, isLoading: loadingMagic } = useQuizQuestionsWithOptions({
+    quiz_type: 'magic_cards',
+    is_active: true,
+    limit: 10,
+  });
+
+  const { data: millionaireDbQuestions, isLoading: loadingMillionaire } = useQuizQuestionsWithOptions({
+    quiz_type: 'millionaire',
+    is_active: true,
+    limit: 15,
+  });
+
+  // Transform and shuffle questions
+  const magicQuestions = useMemo(() => {
+    if (!magicDbQuestions?.length) return [];
+    return shuffleArray(transformToMagicQuestions(magicDbQuestions)).slice(0, 5);
+  }, [magicDbQuestions]);
+
+  const millionaireQuestions = useMemo(() => {
+    if (!millionaireDbQuestions?.length) return [];
+    return transformToMillionaireQuestions(millionaireDbQuestions).slice(0, 8);
+  }, [millionaireDbQuestions]);
+
   const handleMagicComplete = (score: number, totalPoints: number, correctAnswers: number) => {
     saveScore.mutate({
       quiz_type: 'magic_cards',
       score,
       correct_answers: correctAnswers,
-      total_questions: sampleMagicQuestions.length,
+      total_questions: magicQuestions.length,
       streak_bonus: score - (correctAnswers * 100),
     }, {
       onSuccess: () => {
@@ -197,7 +112,7 @@ export default function DailyQuiz() {
       quiz_type: 'millionaire',
       score: prize,
       correct_answers: level,
-      total_questions: sampleMillionaireQuestions.length,
+      total_questions: millionaireQuestions.length,
     }, {
       onSuccess: () => {
         toast.success("Pontuação salva no ranking!");
@@ -205,6 +120,10 @@ export default function DailyQuiz() {
       },
     });
   };
+
+  const isLoading = loadingMagic || loadingMillionaire;
+  const hasMagicQuestions = magicQuestions.length >= 3;
+  const hasMillionaireQuestions = millionaireQuestions.length >= 5;
 
   return (
     <div className="min-h-screen bg-background">
@@ -235,7 +154,11 @@ export default function DailyQuiz() {
           </p>
         </motion.div>
 
-        {!activeQuiz ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : !activeQuiz ? (
           /* Quiz Selection + Ranking */
           <div className="grid lg:grid-cols-3 gap-6">
             <motion.div
@@ -245,16 +168,26 @@ export default function DailyQuiz() {
             >
               {/* Magic Cards Quiz */}
               <Card 
-                className="overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-purple-500/10 hover:border-primary/40 transition-all cursor-pointer group"
-                onClick={() => setActiveQuiz("magic")}
+                className={`overflow-hidden border-2 transition-all ${
+                  hasMagicQuestions 
+                    ? "border-primary/20 bg-gradient-to-br from-primary/10 to-purple-500/10 hover:border-primary/40 cursor-pointer group"
+                    : "border-muted bg-muted/30 opacity-60"
+                }`}
+                onClick={() => hasMagicQuestions && setActiveQuiz("magic")}
               >
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <div className="p-3 rounded-xl bg-primary/20 group-hover:scale-110 transition-transform">
-                      <Sparkles className="w-8 h-8 text-primary" />
+                    <div className={`p-3 rounded-xl ${hasMagicQuestions ? 'bg-primary/20 group-hover:scale-110' : 'bg-muted'} transition-transform`}>
+                      <Sparkles className={`w-8 h-8 ${hasMagicQuestions ? 'text-primary' : 'text-muted-foreground'}`} />
                     </div>
                     {completedToday.magic && (
                       <span className="text-xs text-emerald-500 font-medium">✓ Concluído hoje</span>
+                    )}
+                    {!hasMagicQuestions && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        Sem perguntas
+                      </span>
                     )}
                   </div>
                   <CardTitle className="text-2xl mt-4">Cartas Mágicas</CardTitle>
@@ -278,9 +211,12 @@ export default function DailyQuiz() {
                     </li>
                   </ul>
                   <div className="mt-6">
-                    <Button className="w-full gap-2 group-hover:bg-primary/90">
+                    <Button 
+                      className="w-full gap-2" 
+                      disabled={!hasMagicQuestions}
+                    >
                       <Sparkles className="w-4 h-4" />
-                      Jogar Cartas Mágicas
+                      {hasMagicQuestions ? 'Jogar Cartas Mágicas' : 'Cadastre perguntas'}
                     </Button>
                   </div>
                 </CardContent>
@@ -288,16 +224,26 @@ export default function DailyQuiz() {
 
               {/* Millionaire Quiz */}
               <Card 
-                className="overflow-hidden border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-orange-500/10 hover:border-amber-500/40 transition-all cursor-pointer group"
-                onClick={() => setActiveQuiz("millionaire")}
+                className={`overflow-hidden border-2 transition-all ${
+                  hasMillionaireQuestions 
+                    ? "border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-orange-500/10 hover:border-amber-500/40 cursor-pointer group"
+                    : "border-muted bg-muted/30 opacity-60"
+                }`}
+                onClick={() => hasMillionaireQuestions && setActiveQuiz("millionaire")}
               >
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <div className="p-3 rounded-xl bg-amber-500/20 group-hover:scale-110 transition-transform">
-                      <Trophy className="w-8 h-8 text-amber-500" />
+                    <div className={`p-3 rounded-xl ${hasMillionaireQuestions ? 'bg-amber-500/20 group-hover:scale-110' : 'bg-muted'} transition-transform`}>
+                      <Trophy className={`w-8 h-8 ${hasMillionaireQuestions ? 'text-amber-500' : 'text-muted-foreground'}`} />
                     </div>
                     {completedToday.millionaire && (
                       <span className="text-xs text-emerald-500 font-medium">✓ Concluído hoje</span>
+                    )}
+                    {!hasMillionaireQuestions && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        Sem perguntas
+                      </span>
                     )}
                   </div>
                   <CardTitle className="text-2xl mt-4">Show do Milhão</CardTitle>
@@ -321,9 +267,12 @@ export default function DailyQuiz() {
                     </li>
                   </ul>
                   <div className="mt-6">
-                    <Button className="w-full gap-2 bg-amber-500 hover:bg-amber-600">
+                    <Button 
+                      className="w-full gap-2 bg-amber-500 hover:bg-amber-600" 
+                      disabled={!hasMillionaireQuestions}
+                    >
                       <Trophy className="w-4 h-4" />
-                      Jogar Show do Milhão
+                      {hasMillionaireQuestions ? 'Jogar Show do Milhão' : 'Cadastre perguntas'}
                     </Button>
                   </div>
                 </CardContent>
@@ -346,7 +295,7 @@ export default function DailyQuiz() {
             animate={{ opacity: 1, scale: 1 }}
           >
             <MagicCardQuiz 
-              questions={sampleMagicQuestions} 
+              questions={magicQuestions} 
               title="Quiz Diário - Cartas Mágicas"
               onComplete={handleMagicComplete}
             />
@@ -358,7 +307,7 @@ export default function DailyQuiz() {
             animate={{ opacity: 1, scale: 1 }}
           >
             <MillionaireQuiz 
-              questions={sampleMillionaireQuestions}
+              questions={millionaireQuestions}
               title="Show do Milhão - Promo Brindes"
               onComplete={handleMillionaireComplete}
             />
