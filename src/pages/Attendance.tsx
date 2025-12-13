@@ -32,6 +32,7 @@ import {
   useCheckOut,
   useAttendanceSettings
 } from "@/hooks/useAttendance";
+import { AttendanceCalendar } from "@/components/AttendanceCalendar";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWeekend } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState, useMemo } from "react";
@@ -45,9 +46,7 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  Cell,
-  PieChart,
-  Pie
+  Cell
 } from "recharts";
 
 const Attendance = () => {
@@ -363,6 +362,9 @@ const Attendance = () => {
           </motion.div>
         </div>
 
+        {/* Calendar View */}
+        <AttendanceCalendar records={recentRecords || []} />
+
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Weekly Trend Chart */}
@@ -450,7 +452,6 @@ const Attendance = () => {
                         'Check-in'
                       ]}
                     />
-                    {/* Reference line for target time */}
                     <Bar dataKey="time" radius={[4, 4, 0, 0]}>
                       {checkInTimesData.map((entry, index) => (
                         <Cell 
