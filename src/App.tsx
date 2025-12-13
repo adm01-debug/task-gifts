@@ -28,6 +28,7 @@ import PersonalStats from "./pages/PersonalStats";
 import SeasonalEventDetail from "./pages/SeasonalEventDetail";
 import Mentorship from "./pages/Mentorship";
 import Duels from "./pages/Duels";
+import DailyQuiz from "./pages/DailyQuiz";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
                 <Route path="/eventos/:eventId" element={<SeasonalEventDetail />} />
                 <Route path="/mentoria" element={<Mentorship />} />
                 <Route path="/duelos" element={<Duels />} />
+                <Route path="/quiz" element={<DailyQuiz />} />
                 <Route
                   path="/loja/admin"
                   element={
