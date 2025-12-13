@@ -328,6 +328,108 @@ export type Database = {
         }
         Relationships: []
       }
+      bitrix24_sync_mappings: {
+        Row: {
+          bitrix_entity_type: string
+          bitrix_id: string
+          created_at: string
+          entity_type: string
+          id: string
+          last_synced_at: string | null
+          local_id: string
+          metadata: Json | null
+          sync_status: string
+          updated_at: string
+        }
+        Insert: {
+          bitrix_entity_type: string
+          bitrix_id: string
+          created_at?: string
+          entity_type: string
+          id?: string
+          last_synced_at?: string | null
+          local_id: string
+          metadata?: Json | null
+          sync_status?: string
+          updated_at?: string
+        }
+        Update: {
+          bitrix_entity_type?: string
+          bitrix_id?: string
+          created_at?: string
+          entity_type?: string
+          id?: string
+          last_synced_at?: string | null
+          local_id?: string
+          metadata?: Json | null
+          sync_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bitrix24_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          domain: string
+          expires_at: string
+          id: string
+          member_id: string | null
+          refresh_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          domain: string
+          expires_at: string
+          id?: string
+          member_id?: string | null
+          refresh_token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          domain?: string
+          expires_at?: string
+          id?: string
+          member_id?: string | null
+          refresh_token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bitrix24_webhook_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          event_type: string
+          id: string
+          payload: Json
+          processed: boolean
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          payload: Json
+          processed?: boolean
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed?: boolean
+        }
+        Relationships: []
+      }
       certifications: {
         Row: {
           category: string
