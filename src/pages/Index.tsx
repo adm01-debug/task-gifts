@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, LogOut, User } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AICoachDialog } from "@/components/AICoachDialog";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileDrawer } from "@/components/MobileDrawer";
 import { StatsGrid, QuickActions } from "@/components/StatsGrid";
@@ -160,6 +161,9 @@ const Index = () => {
 
               {/* Combo Indicator */}
               <ComboIndicator variant="compact" />
+
+              {/* AI Coach */}
+              <AICoachDialog />
 
               {/* User Menu */}
               <div className="relative flex items-center gap-2">
