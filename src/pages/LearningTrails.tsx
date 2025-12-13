@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { usePublishedTrails, useUserEnrollments, useEnrollInTrail } from "@/hooks/useTrails";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAuth } from "@/hooks/useAuth";
+import { TrailRecommendations } from "@/components/TrailRecommendations";
 import type { LearningTrail, TrailEnrollment } from "@/services/trailsService";
 
 const statusConfig = {
@@ -252,6 +253,16 @@ export default function LearningTrails() {
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* AI Recommendations */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-8"
+        >
+          <TrailRecommendations />
         </motion.div>
 
         {/* Filters and Tabs */}
