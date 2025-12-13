@@ -33,7 +33,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserRank } from "@/hooks/useUserRank";
 import { useRankChangeNotifier } from "@/hooks/useRankChangeNotifier";
 import { useCompetencyAlerts } from "@/hooks/useCompetencyAlerts";
+import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -45,7 +47,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { data: rankData } = useUserRank();
-  
+  const isScrolled = useScrollHeader(10);
   // Track rank changes and notify user
   useRankChangeNotifier();
   
@@ -119,8 +121,13 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        {/* Top Header */}
-        <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
+        {/* Top Header with Progressive Shadow */}
+        <header 
+          className={cn(
+            "header-sticky border-b border-border",
+            isScrolled && "scrolled"
+          )}
+        >
           <div className="flex items-center justify-between px-4 md:px-6 py-4">
             <div className="flex items-center gap-3 md:gap-4">
               <motion.button
