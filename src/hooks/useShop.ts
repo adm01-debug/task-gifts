@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { shopService, type RewardCategory } from "@/services/shopService";
+import { shopService, type RewardCategory, type ShopReward, type PurchaseStatus } from "@/services/shopService";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
@@ -9,6 +9,8 @@ export const shopKeys = {
   rewardsByCategory: (category: RewardCategory) =>
     [...shopKeys.rewards(), category] as const,
   purchases: (userId: string) => [...shopKeys.all, "purchases", userId] as const,
+  adminRewards: () => [...shopKeys.all, "admin", "rewards"] as const,
+  adminPurchases: () => [...shopKeys.all, "admin", "purchases"] as const,
 };
 
 export function useShopRewards() {
@@ -52,6 +54,88 @@ export function usePurchaseReward() {
     },
     onError: (error: any) => {
       toast.error(error.message || "Erro ao resgatar recompensa");
+    },
+  });
+}
+
+// ========== ADMIN HOOKS ==========
+
+export function useAdminRewards() {
+  return useQuery({
+    queryKey: shopKeys.adminRewards(),
+    queryFn: () => shopService.getAllRewardsAdmin(),
+    staleTime: 30000,
+  });
+}
+
+export function useAdminPurchases() {
+  return useQuery({
+    queryKey: shopKeys.adminPurchases(),
+    queryFn: () => shopService.getAllPurchasesAdmin(),
+    staleTime: 30000,
+  });
+}
+
+export function useCreateReward() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (reward: Omit<ShopReward, "id" | "created_at">) =>
+      shopService.createReward(reward),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: shopKeys.all });
+      toast.success("Recompensa criada com sucesso!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao criar recompensa");
+    },
+  });
+}
+
+export function useUpdateReward() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Omit<ShopReward, "id" | "created_at">> }) =>
+      shopService.updateReward(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: shopKeys.all });
+      toast.success("Recompensa atualizada!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao atualizar recompensa");
+    },
+  });
+}
+
+export function useDeleteReward() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => shopService.deleteReward(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: shopKeys.all });
+      toast.success("Recompensa removida!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao remover recompensa");
+    },
+  });
+}
+
+export function useUpdatePurchaseStatus() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: ({ purchaseId, status, notes }: { purchaseId: string; status: PurchaseStatus; notes?: string }) =>
+      shopService.updatePurchaseStatus(purchaseId, status, user!.id, notes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: shopKeys.all });
+      toast.success("Status do pedido atualizado!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao atualizar status");
     },
   });
 }

@@ -17,6 +17,7 @@ import TrailDetail from "./pages/TrailDetail";
 import Attendance from "./pages/Attendance";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import Shop from "./pages/Shop";
+import ShopAdmin from "./pages/ShopAdmin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/ponto" element={<Attendance />} />
             <Route path="/executivo" element={<ExecutiveDashboard />} />
             <Route path="/loja" element={<Shop />} />
+            <Route path="/loja/admin" element={<ShopAdmin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

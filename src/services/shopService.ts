@@ -216,4 +216,120 @@ export const shopService = {
     };
     return configs[category];
   },
+
+  // ========== ADMIN FUNCTIONS ==========
+
+  // Get all rewards (including inactive) - admin only
+  async getAllRewardsAdmin(): Promise<ShopReward[]> {
+    const { data, error } = await supabase
+      .from("shop_rewards")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data || []) as ShopReward[];
+  },
+
+  // Create a new reward
+  async createReward(
+    reward: Omit<ShopReward, "id" | "created_at">
+  ): Promise<ShopReward> {
+    const { data, error } = await supabase
+      .from("shop_rewards")
+      .insert(reward)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as ShopReward;
+  },
+
+  // Update a reward
+  async updateReward(
+    id: string,
+    updates: Partial<Omit<ShopReward, "id" | "created_at">>
+  ): Promise<ShopReward> {
+    const { data, error } = await supabase
+      .from("shop_rewards")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as ShopReward;
+  },
+
+  // Delete a reward
+  async deleteReward(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("shop_rewards")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+  },
+
+  // Get all purchases (admin) with user profiles
+  async getAllPurchasesAdmin(): Promise<(ShopPurchase & { profile?: { display_name: string; email: string } })[]> {
+    const { data, error } = await supabase
+      .from("shop_purchases")
+      .select("*, reward:shop_rewards(*), profile:profiles(display_name, email)")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map((p: any) => ({
+      ...p,
+      reward: p.reward as ShopReward,
+      profile: p.profile,
+    }));
+  },
+
+  // Update purchase status
+  async updatePurchaseStatus(
+    purchaseId: string,
+    status: PurchaseStatus,
+    processedBy: string,
+    notes?: string
+  ): Promise<void> {
+    const { error } = await supabase
+      .from("shop_purchases")
+      .update({
+        status,
+        processed_by: processedBy,
+        processed_at: new Date().toISOString(),
+        notes: notes || null,
+      })
+      .eq("id", purchaseId);
+
+    if (error) throw error;
+
+    // Get purchase details for notification
+    const { data: purchase } = await supabase
+      .from("shop_purchases")
+      .select("user_id, reward:shop_rewards(name)")
+      .eq("id", purchaseId)
+      .single();
+
+    if (purchase) {
+      const statusLabels: Record<PurchaseStatus, string> = {
+        pending: "Pendente",
+        approved: "Aprovado",
+        delivered: "Entregue",
+        cancelled: "Cancelado",
+      };
+
+      try {
+        await notificationsService.create({
+          user_id: purchase.user_id,
+          type: "info",
+          title: "📦 Atualização do Pedido",
+          message: `Seu pedido de "${(purchase.reward as any)?.name}" foi atualizado para: ${statusLabels[status]}`,
+          data: { purchase_id: purchaseId, status },
+        });
+      } catch (e) {
+        console.error("Failed to notify user:", e);
+      }
+    }
+  },
 };

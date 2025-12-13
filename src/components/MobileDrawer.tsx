@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle, Shield, Activity, BookOpen, Clock, LineChart } from "lucide-react";
+import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle, Shield, Activity, BookOpen, Clock, LineChart, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,7 @@ const navItems: NavItem[] = [
   { icon: Users, label: "Equipes" },
   { icon: ClipboardList, label: "Gestor", path: "/manager" },
   { icon: Gift, label: "Loja", path: "/loja", badge: 2 },
+  { icon: ShoppingBag, label: "Admin Loja", path: "/loja/admin" },
   { icon: BarChart3, label: "Relatórios", path: "/reports" },
   { icon: Activity, label: "Analytics", path: "/analytics" },
   { icon: Shield, label: "Auditoria", path: "/audit" },
