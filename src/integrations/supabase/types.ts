@@ -568,6 +568,42 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_progress: {
+        Row: {
+          completed_at: string | null
+          completed_steps: string[] | null
+          created_at: string | null
+          current_step: number
+          id: string
+          rewards_claimed: string[] | null
+          started_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_steps?: string[] | null
+          created_at?: string | null
+          current_step?: number
+          id?: string
+          rewards_claimed?: string[] | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_steps?: string[] | null
+          created_at?: string | null
+          current_step?: number
+          id?: string
+          rewards_claimed?: string[] | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

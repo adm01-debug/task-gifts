@@ -17,6 +17,7 @@ import { KudosRanking } from "@/components/KudosRanking";
 import DepartmentMissions from "@/components/DepartmentMissions";
 import DepartmentRankings from "@/components/DepartmentRankings";
 import { AttendanceModule } from "@/components/AttendanceModule";
+import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
 import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -200,6 +201,9 @@ const Index = () => {
 
         {/* Dashboard Content */}
         <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+          {/* Onboarding Widget */}
+          <OnboardingWidget />
+
           {/* Stats Grid */}
           <section>
             <StatsGrid />
