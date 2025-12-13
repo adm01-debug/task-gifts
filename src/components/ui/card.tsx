@@ -10,12 +10,14 @@ const cardVariants = cva(
       variant: {
         default: "shadow-sm hover:shadow-md border-border",
         elevated: "shadow-md hover:shadow-lg hover:-translate-y-0.5 border-border",
-        interactive: "shadow-md hover:shadow-glow-primary hover:border-primary/40 cursor-pointer hover:-translate-y-1 border-border",
+        interactive: "shadow-md hover:shadow-glow-primary hover:border-primary/40 cursor-pointer hover:-translate-y-1 border-border card-interactive",
         glass: "bg-card/85 backdrop-blur-xl border-border/50 shadow-lg",
         ghost: "border-transparent shadow-none bg-transparent hover:bg-muted/50",
         outline: "border-2 shadow-none hover:border-primary/50 bg-transparent hover:bg-card/50",
-        premium: "bg-gradient-to-br from-card via-card to-muted/30 border-primary/20 shadow-glow-primary",
-        stat: "shadow-sm hover:shadow-md hover:-translate-y-1 border-border relative overflow-hidden",
+        premium: "bg-gradient-to-br from-card via-card to-muted/30 border-primary/20 shadow-glow-primary card-glow",
+        stat: "shadow-sm hover:shadow-md hover:-translate-y-1 border-border relative overflow-hidden card-shimmer",
+        shimmer: "shadow-sm border-border card-shimmer hover:border-primary/30",
+        glow: "shadow-sm border-border card-glow",
       },
     },
     defaultVariants: {
