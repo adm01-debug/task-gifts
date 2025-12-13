@@ -285,15 +285,34 @@
     color: hsl(var(--foreground));
   }
 
-  /* Enhanced focus states for accessibility - Maior contraste */
+  /* Enhanced focus states for accessibility - PHASE 3 UPGRADE */
   :focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-    transition: box-shadow 0.15s ease;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)), 0 0 12px hsl(var(--ring) / 0.25);
+    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Focus visible for buttons - Extra glow */
+  button:focus-visible,
+  [role="button"]:focus-visible {
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)), 0 0 16px hsl(var(--ring) / 0.3);
+  }
+
+  /* Focus visible for inputs - Subtle lift */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)), 0 4px 12px hsl(var(--ring) / 0.15);
   }
 
   /* Links default styling */
   a {
     @apply text-primary hover:text-primary/85 transition-colors;
+  }
+
+  a:focus-visible {
+    @apply rounded-sm;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
   }
 
   /* Input labels - Melhor contraste */
@@ -437,6 +456,172 @@
     @apply bg-card border-primary/20 rounded-xl;
     box-shadow: var(--shadow-xl);
     background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card)) 90%, hsl(var(--primary) / 0.05) 100%);
+  }
+
+  /* ========================================
+     PHASE 3: MICRO-INTERACTIONS
+     ======================================== */
+
+  /* State transition utilities */
+  .transition-state {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .transition-state-slow {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .transition-state-fast {
+    @apply transition-all duration-150 ease-out;
+  }
+
+  /* Interactive hover effects */
+  .hover-lift {
+    @apply transition-transform duration-200;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  .hover-lift-lg {
+    @apply transition-transform duration-200;
+  }
+  .hover-lift-lg:hover {
+    transform: translateY(-4px);
+  }
+
+  .hover-glow {
+    @apply transition-shadow duration-200;
+  }
+  .hover-glow:hover {
+    box-shadow: var(--shadow-glow-primary);
+  }
+
+  /* Press/Active state feedback */
+  .press-scale {
+    @apply transition-transform duration-100;
+  }
+  .press-scale:active {
+    transform: scale(0.97);
+  }
+
+  /* Loading skeleton pulse */
+  .skeleton-pulse {
+    @apply bg-muted animate-pulse rounded;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Focus ring animation */
+  .focus-ring-animated:focus-visible {
+    animation: focus-ring-pulse 0.3s ease-out;
+  }
+
+  @keyframes focus-ring-pulse {
+    0% { 
+      box-shadow: 0 0 0 0 hsl(var(--ring) / 0.5);
+    }
+    50% { 
+      box-shadow: 0 0 0 6px hsl(var(--ring) / 0.25);
+    }
+    100% { 
+      box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+    }
+  }
+
+  /* Fade in/out for state changes */
+  .state-fade-in {
+    animation: state-fade-in 0.2s ease-out;
+  }
+
+  @keyframes state-fade-in {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Slide in from different directions */
+  .slide-in-from-top {
+    animation: slide-in-top 0.3s ease-out;
+  }
+
+  .slide-in-from-bottom {
+    animation: slide-in-bottom 0.3s ease-out;
+  }
+
+  .slide-in-from-left {
+    animation: slide-in-left 0.3s ease-out;
+  }
+
+  .slide-in-from-right {
+    animation: slide-in-right 0.3s ease-out;
+  }
+
+  @keyframes slide-in-top {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slide-in-bottom {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slide-in-left {
+    0% { opacity: 0; transform: translateX(-10px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes slide-in-right {
+    0% { opacity: 0; transform: translateX(10px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Success/Error state flash */
+  .flash-success {
+    animation: flash-success 0.4s ease-out;
+  }
+
+  .flash-error {
+    animation: flash-error 0.4s ease-out;
+  }
+
+  @keyframes flash-success {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: hsl(var(--success) / 0.15); }
+  }
+
+  @keyframes flash-error {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: hsl(var(--destructive) / 0.15); }
+  }
+
+  /* Ripple effect base */
+  .ripple-container {
+    @apply relative overflow-hidden;
+  }
+
+  /* Bounce effect for attention */
+  .bounce-attention {
+    animation: bounce-attention 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  @keyframes bounce-attention {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.1); }
+    50% { transform: scale(0.95); }
+    70% { transform: scale(1.05); }
+    100% { transform: scale(1); }
   }
 }
 
