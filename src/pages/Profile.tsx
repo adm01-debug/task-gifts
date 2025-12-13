@@ -15,6 +15,7 @@ import { CertificationsPanel } from "@/components/CertificationsPanel";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { AvatarPreview } from "@/components/AvatarPreview";
 import { ProfileAvatarSection } from "@/components/ProfileAvatarSection";
+import { SoundSettingsCard } from "@/components/SoundSettingsCard";
 import { useAvatarConfig } from "@/hooks/useAvatar";
 import { useUserRank } from "@/hooks/useUserRank";
 import { toast } from "sonner";
@@ -321,6 +322,9 @@ const Profile = () => {
 
         {/* Certifications Panel */}
         <CertificationsPanel />
+
+        {/* Sound Settings */}
+        <SoundSettingsCard />
 
         {/* Competency Radar */}
         {user?.id && <CompetencyRadar userId={user.id} />}

@@ -1,4 +1,22 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useContext } from "react";
+import { createContext } from "react";
+
+// Sound settings context - used to check if sounds are enabled
+// We use a simple approach to avoid circular dependencies
+const STORAGE_KEY = "sound_settings";
+
+const getSoundSettings = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return { enabled: parsed.enabled ?? true, volume: parsed.volume ?? 0.7 };
+    }
+  } catch (e) {
+    // Ignore errors
+  }
+  return { enabled: true, volume: 0.7 };
+};
 
 // Audio context for sound generation
 const createAudioContext = (): AudioContext | null => {
@@ -16,11 +34,23 @@ export const useSoundEffects = () => {
     return audioContextRef.current;
   }, []);
 
+  const isSoundEnabled = useCallback(() => {
+    const settings = getSoundSettings();
+    return settings.enabled;
+  }, []);
+
+  const getVolume = useCallback(() => {
+    const settings = getSoundSettings();
+    return settings.volume;
+  }, []);
+
   // Achievement unlock sound - triumphant fanfare
   const playAchievementSound = useCallback(() => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     // Create multiple oscillators for a rich sound
@@ -37,19 +67,21 @@ export const useSoundEffects = () => {
       osc.type = "sine";
       
       gain.gain.setValueAtTime(0, now + i * 0.08);
-      gain.gain.linearRampToValueAtTime(0.15, now + i * 0.08 + 0.05);
+      gain.gain.linearRampToValueAtTime(0.15 * volume, now + i * 0.08 + 0.05);
       gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
       
       osc.start(now + i * 0.08);
       osc.stop(now + i * 0.08 + 0.5);
     });
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // Level up sound - epic ascending fanfare
   const playLevelUpSound = useCallback(() => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     // Sweep effect
@@ -63,8 +95,8 @@ export const useSoundEffects = () => {
     sweep.frequency.exponentialRampToValueAtTime(800, now + 0.3);
     sweep.frequency.exponentialRampToValueAtTime(1200, now + 0.5);
     
-    sweepGain.gain.setValueAtTime(0.1, now);
-    sweepGain.gain.linearRampToValueAtTime(0.2, now + 0.2);
+    sweepGain.gain.setValueAtTime(0.1 * volume, now);
+    sweepGain.gain.linearRampToValueAtTime(0.2 * volume, now + 0.2);
     sweepGain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
     
     sweep.start(now);
@@ -84,19 +116,21 @@ export const useSoundEffects = () => {
       osc.type = "triangle";
       
       gain.gain.setValueAtTime(0, now + 0.3);
-      gain.gain.linearRampToValueAtTime(0.12, now + 0.35);
+      gain.gain.linearRampToValueAtTime(0.12 * volume, now + 0.35);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
       
       osc.start(now + 0.3);
       osc.stop(now + 1.3);
     });
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // XP gain sound - quick positive blip
   const playXPSound = useCallback(() => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     const osc = ctx.createOscillator();
@@ -109,18 +143,20 @@ export const useSoundEffects = () => {
     osc.frequency.setValueAtTime(880, now);
     osc.frequency.exponentialRampToValueAtTime(1320, now + 0.1);
     
-    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.setValueAtTime(0.1 * volume, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
     
     osc.start(now);
     osc.stop(now + 0.2);
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // Click/tap sound
   const playClickSound = useCallback(() => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     const osc = ctx.createOscillator();
@@ -132,18 +168,20 @@ export const useSoundEffects = () => {
     osc.type = "sine";
     osc.frequency.setValueAtTime(600, now);
     
-    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.setValueAtTime(0.08 * volume, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
     
     osc.start(now);
     osc.stop(now + 0.1);
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // Quest complete sound
   const playQuestCompleteSound = useCallback(() => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     const notes = [440, 554.37, 659.25]; // A4, C#5, E5 (A major)
@@ -159,19 +197,21 @@ export const useSoundEffects = () => {
       osc.frequency.setValueAtTime(freq, now + i * 0.1);
       
       gain.gain.setValueAtTime(0, now + i * 0.1);
-      gain.gain.linearRampToValueAtTime(0.12, now + i * 0.1 + 0.03);
+      gain.gain.linearRampToValueAtTime(0.12 * volume, now + i * 0.1 + 0.03);
       gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
       
       osc.start(now + i * 0.1);
       osc.stop(now + i * 0.1 + 0.4);
     });
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // Epic reward celebration - magical shimmer with chimes
   const playEpicCelebrationSound = useCallback(() => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     // Magical shimmer sweep
@@ -232,13 +272,15 @@ export const useSoundEffects = () => {
       sparkle.start(now + 0.3 + i * 0.08);
       sparkle.stop(now + 0.5 + i * 0.08);
     }
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // Legendary reward celebration - epic fanfare with golden shimmer
   const playLegendaryCelebrationSound = useCallback(() => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     // Grand opening sweep (brass-like)
@@ -327,13 +369,15 @@ export const useSoundEffects = () => {
       sparkle.start(now + 0.8 + i * 0.1);
       sparkle.stop(now + 1.0 + i * 0.1);
     }
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // Combo tier up sound - escalating power-up
   const playComboTierUpSound = useCallback((tier: number) => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     // Base frequencies increase with tier
@@ -416,13 +460,15 @@ export const useSoundEffects = () => {
         osc.stop(now + 1.3);
       });
     }
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // Combo action sound - quick positive feedback
   const playComboActionSound = useCallback((multiplier: number) => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     // Higher pitch for higher multiplier
@@ -461,13 +507,15 @@ export const useSoundEffects = () => {
       blip.start(now + 0.1);
       blip.stop(now + 0.2);
     }
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // Coins/money sound - jingling coins effect
   const playCoinsSound = useCallback(() => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     // Multiple coin hits
@@ -534,13 +582,15 @@ export const useSoundEffects = () => {
     
     drop.start(now + 0.3);
     drop.stop(now + 0.7);
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   // Rich coins sound - for wealthy users (500+ coins)
   const playRichCoinsSound = useCallback(() => {
+    if (!isSoundEnabled()) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    const volume = getVolume();
     const now = ctx.currentTime;
     
     // Cascade of coins
@@ -629,7 +679,7 @@ export const useSoundEffects = () => {
       sparkle.start(now + 0.5 + i * 0.1);
       sparkle.stop(now + 0.7 + i * 0.1);
     }
-  }, [getAudioContext]);
+  }, [getAudioContext, isSoundEnabled, getVolume]);
 
   return {
     playAchievementSound,
