@@ -1165,6 +1165,60 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_challenges: {
+        Row: {
+          challenger_id: string
+          challenger_xp_gained: number
+          challenger_xp_start: number
+          coin_reward: number
+          created_at: string
+          id: string
+          opponent_id: string
+          opponent_xp_gained: number
+          opponent_xp_start: number
+          status: string
+          updated_at: string
+          week_end: string
+          week_start: string
+          winner_id: string | null
+          xp_reward: number
+        }
+        Insert: {
+          challenger_id: string
+          challenger_xp_gained?: number
+          challenger_xp_start?: number
+          coin_reward?: number
+          created_at?: string
+          id?: string
+          opponent_id: string
+          opponent_xp_gained?: number
+          opponent_xp_start?: number
+          status?: string
+          updated_at?: string
+          week_end?: string
+          week_start?: string
+          winner_id?: string | null
+          xp_reward?: number
+        }
+        Update: {
+          challenger_id?: string
+          challenger_xp_gained?: number
+          challenger_xp_start?: number
+          coin_reward?: number
+          created_at?: string
+          id?: string
+          opponent_id?: string
+          opponent_xp_gained?: number
+          opponent_xp_start?: number
+          status?: string
+          updated_at?: string
+          week_end?: string
+          week_start?: string
+          winner_id?: string | null
+          xp_reward?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
