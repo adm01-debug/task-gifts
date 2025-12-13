@@ -463,6 +463,174 @@ export const useSoundEffects = () => {
     }
   }, [getAudioContext]);
 
+  // Coins/money sound - jingling coins effect
+  const playCoinsSound = useCallback(() => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    
+    // Multiple coin hits
+    for (let i = 0; i < 5; i++) {
+      const coin = ctx.createOscillator();
+      const coinGain = ctx.createGain();
+      const coinFilter = ctx.createBiquadFilter();
+      
+      coin.connect(coinFilter);
+      coinFilter.connect(coinGain);
+      coinGain.connect(ctx.destination);
+      
+      // Metallic frequencies
+      const baseFreq = 2000 + Math.random() * 1500;
+      coin.frequency.setValueAtTime(baseFreq, now + i * 0.08);
+      coin.frequency.exponentialRampToValueAtTime(baseFreq * 0.7, now + i * 0.08 + 0.1);
+      coin.type = "sine";
+      
+      // High-pass filter for metallic sound
+      coinFilter.type = "highpass";
+      coinFilter.frequency.setValueAtTime(1500, now + i * 0.08);
+      coinFilter.Q.setValueAtTime(5, now + i * 0.08);
+      
+      coinGain.gain.setValueAtTime(0, now + i * 0.08);
+      coinGain.gain.linearRampToValueAtTime(0.1, now + i * 0.08 + 0.01);
+      coinGain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.15);
+      
+      coin.start(now + i * 0.08);
+      coin.stop(now + i * 0.08 + 0.2);
+    }
+
+    // Add shimmer overlay
+    const shimmer = ctx.createOscillator();
+    const shimmerGain = ctx.createGain();
+    
+    shimmer.connect(shimmerGain);
+    shimmerGain.connect(ctx.destination);
+    
+    shimmer.type = "sine";
+    shimmer.frequency.setValueAtTime(4000, now);
+    shimmer.frequency.exponentialRampToValueAtTime(6000, now + 0.2);
+    shimmer.frequency.exponentialRampToValueAtTime(3000, now + 0.4);
+    
+    shimmerGain.gain.setValueAtTime(0.03, now);
+    shimmerGain.gain.linearRampToValueAtTime(0.06, now + 0.15);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    
+    shimmer.start(now);
+    shimmer.stop(now + 0.6);
+
+    // Low coin drop sound
+    const drop = ctx.createOscillator();
+    const dropGain = ctx.createGain();
+    
+    drop.connect(dropGain);
+    dropGain.connect(ctx.destination);
+    
+    drop.type = "triangle";
+    drop.frequency.setValueAtTime(800, now + 0.3);
+    drop.frequency.exponentialRampToValueAtTime(400, now + 0.5);
+    
+    dropGain.gain.setValueAtTime(0.08, now + 0.3);
+    dropGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    
+    drop.start(now + 0.3);
+    drop.stop(now + 0.7);
+  }, [getAudioContext]);
+
+  // Rich coins sound - for wealthy users (500+ coins)
+  const playRichCoinsSound = useCallback(() => {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    
+    // Cascade of coins
+    for (let i = 0; i < 8; i++) {
+      const coin = ctx.createOscillator();
+      const coinGain = ctx.createGain();
+      const coinFilter = ctx.createBiquadFilter();
+      
+      coin.connect(coinFilter);
+      coinFilter.connect(coinGain);
+      coinGain.connect(ctx.destination);
+      
+      const baseFreq = 2500 + Math.random() * 2000;
+      coin.frequency.setValueAtTime(baseFreq, now + i * 0.06);
+      coin.frequency.exponentialRampToValueAtTime(baseFreq * 0.6, now + i * 0.06 + 0.12);
+      coin.type = "sine";
+      
+      coinFilter.type = "highpass";
+      coinFilter.frequency.setValueAtTime(2000, now + i * 0.06);
+      coinFilter.Q.setValueAtTime(8, now + i * 0.06);
+      
+      coinGain.gain.setValueAtTime(0, now + i * 0.06);
+      coinGain.gain.linearRampToValueAtTime(0.08, now + i * 0.06 + 0.01);
+      coinGain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.18);
+      
+      coin.start(now + i * 0.06);
+      coin.stop(now + i * 0.06 + 0.25);
+    }
+
+    // Golden shimmer sweep
+    const shimmer = ctx.createOscillator();
+    const shimmerGain = ctx.createGain();
+    
+    shimmer.connect(shimmerGain);
+    shimmerGain.connect(ctx.destination);
+    
+    shimmer.type = "sine";
+    shimmer.frequency.setValueAtTime(3000, now);
+    shimmer.frequency.exponentialRampToValueAtTime(8000, now + 0.3);
+    shimmer.frequency.exponentialRampToValueAtTime(5000, now + 0.6);
+    
+    shimmerGain.gain.setValueAtTime(0.04, now);
+    shimmerGain.gain.linearRampToValueAtTime(0.08, now + 0.2);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+    
+    shimmer.start(now);
+    shimmer.stop(now + 0.8);
+
+    // Treasure chest opening chord
+    const chordNotes = [523.25, 659.25, 783.99]; // C5, E5, G5
+    
+    chordNotes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.frequency.setValueAtTime(freq, now + 0.4);
+      osc.type = "triangle";
+      
+      gain.gain.setValueAtTime(0, now + 0.4);
+      gain.gain.linearRampToValueAtTime(0.1, now + 0.45);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1);
+      
+      osc.start(now + 0.4);
+      osc.stop(now + 1.1);
+    });
+
+    // Extra sparkles
+    for (let i = 0; i < 4; i++) {
+      const sparkle = ctx.createOscillator();
+      const sparkleGain = ctx.createGain();
+      
+      sparkle.connect(sparkleGain);
+      sparkleGain.connect(ctx.destination);
+      
+      const sparkleFreq = 4000 + Math.random() * 3000;
+      sparkle.frequency.setValueAtTime(sparkleFreq, now + 0.5 + i * 0.1);
+      sparkle.type = "sine";
+      
+      sparkleGain.gain.setValueAtTime(0, now + 0.5 + i * 0.1);
+      sparkleGain.gain.linearRampToValueAtTime(0.04, now + 0.52 + i * 0.1);
+      sparkleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.65 + i * 0.1);
+      
+      sparkle.start(now + 0.5 + i * 0.1);
+      sparkle.stop(now + 0.7 + i * 0.1);
+    }
+  }, [getAudioContext]);
+
   return {
     playAchievementSound,
     playLevelUpSound,
@@ -473,5 +641,7 @@ export const useSoundEffects = () => {
     playLegendaryCelebrationSound,
     playComboTierUpSound,
     playComboActionSound,
+    playCoinsSound,
+    playRichCoinsSound,
   };
 };
