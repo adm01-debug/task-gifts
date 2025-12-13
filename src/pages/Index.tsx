@@ -31,6 +31,7 @@ import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserRank } from "@/hooks/useUserRank";
 import { useRankChangeNotifier } from "@/hooks/useRankChangeNotifier";
+import { useCompetencyAlerts } from "@/hooks/useCompetencyAlerts";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -46,8 +47,10 @@ const Index = () => {
   
   // Track rank changes and notify user
   useRankChangeNotifier();
+  
+  // Auto-trigger competency analysis for alerts
+  useCompetencyAlerts();
 
-  // Redirect to auth if not logged in
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");

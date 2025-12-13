@@ -1,0 +1,96 @@
+import { useEffect, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+
+interface CompetencyAlert {
+  userId: string;
+  gaps: string[];
+  notificationsCreated: number;
+}
+
+interface CompetencyAlertResponse {
+  success: boolean;
+  analyzed: number;
+  results: CompetencyAlert[];
+}
+
+export function useCompetencyAlerts() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const triggerAnalysis = useMutation({
+    mutationFn: async (userId?: string) => {
+      const { data, error } = await supabase.functions.invoke<CompetencyAlertResponse>(
+        'competency-alerts',
+        { body: { userId: userId || user?.id } }
+      );
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data?.results?.[0]?.notificationsCreated && data.results[0].notificationsCreated > 0) {
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      }
+    },
+    onError: (error) => {
+      console.error('Competency alerts error:', error);
+    },
+  });
+
+  const triggerBatchAnalysis = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke<CompetencyAlertResponse>(
+        'competency-alerts',
+        { body: { checkAllUsers: true } }
+      );
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data) {
+        const totalNotifications = data.results.reduce(
+          (acc, r) => acc + r.notificationsCreated, 
+          0
+        );
+        if (totalNotifications > 0) {
+          toast.success(`${totalNotifications} alertas de competência enviados`);
+        }
+      }
+    },
+    onError: (error) => {
+      console.error('Batch competency alerts error:', error);
+      toast.error('Erro ao analisar competências');
+    },
+  });
+
+  // Auto-trigger analysis when user logs in (once per session)
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const sessionKey = `competency_analysis_${user.id}`;
+    const lastAnalysis = sessionStorage.getItem(sessionKey);
+    const now = Date.now();
+
+    // Only trigger once per session (or after 4 hours)
+    if (!lastAnalysis || now - parseInt(lastAnalysis) > 4 * 60 * 60 * 1000) {
+      // Delay to not block initial load
+      const timeout = setTimeout(() => {
+        triggerAnalysis.mutate(user.id);
+        sessionStorage.setItem(sessionKey, now.toString());
+      }, 5000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [user?.id]);
+
+  return {
+    triggerAnalysis: useCallback((userId?: string) => triggerAnalysis.mutate(userId), []),
+    triggerBatchAnalysis: useCallback(() => triggerBatchAnalysis.mutate(), []),
+    isAnalyzing: triggerAnalysis.isPending,
+    isBatchAnalyzing: triggerBatchAnalysis.isPending,
+  };
+}

@@ -1,6 +1,19 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Check, CheckCheck, Trash2, X, Trophy, Zap, Target, TrendingUp } from "lucide-react";
+import { 
+  Bell, 
+  Check, 
+  CheckCheck, 
+  Trash2, 
+  Trophy, 
+  Zap, 
+  Target, 
+  TrendingUp,
+  AlertTriangle,
+  Lightbulb,
+  Sparkles,
+  Brain,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,11 +30,15 @@ import { ptBR } from "date-fns/locale";
 import type { Notification } from "@/services/notificationsService";
 
 const notificationIcons: Record<string, React.ReactNode> = {
-  achievement: <Trophy className="w-4 h-4 text-gold" />,
-  level_up: <TrendingUp className="w-4 h-4 text-success" />,
-  xp: <Zap className="w-4 h-4 text-xp" />,
+  achievement: <Trophy className="w-4 h-4 text-amber-400" />,
+  level_up: <TrendingUp className="w-4 h-4 text-green-400" />,
+  xp: <Zap className="w-4 h-4 text-primary" />,
   quest: <Target className="w-4 h-4 text-primary" />,
-  leaderboard: <TrendingUp className="w-4 h-4 text-secondary" />,
+  leaderboard: <TrendingUp className="w-4 h-4 text-blue-400" />,
+  competency_gap: <AlertTriangle className="w-4 h-4 text-red-400" />,
+  development_tip: <Lightbulb className="w-4 h-4 text-yellow-400" />,
+  competency_celebration: <Sparkles className="w-4 h-4 text-green-400" />,
+  churn_risk: <Brain className="w-4 h-4 text-orange-400" />,
   info: <Bell className="w-4 h-4 text-muted-foreground" />,
 };
 
