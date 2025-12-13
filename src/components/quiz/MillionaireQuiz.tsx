@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Trophy, HelpCircle, Users, Phone, Percent, 
@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import confetti from "canvas-confetti";
+import { useRecordAnswer } from "@/hooks/useQuizStats";
 
 export interface MillionaireQuestion {
   id: string;
@@ -161,6 +162,8 @@ export function MillionaireQuiz({ questions, title = "Show do Milhão", onComple
   const [wonPrize, setWonPrize] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [isTimerPaused, setIsTimerPaused] = useState(false);
+  const questionStartTime = useRef<number>(Date.now());
+  const recordAnswer = useRecordAnswer();
   
   // Lifelines
   const [usedLifelines, setUsedLifelines] = useState({
@@ -178,6 +181,10 @@ export function MillionaireQuiz({ questions, title = "Show do Milhão", onComple
     ? PRIZE_LADDER[CHECKPOINTS.filter(cp => cp < currentLevel).pop()!]
     : 0;
 
+  // Reset timer when question changes
+  useEffect(() => {
+    questionStartTime.current = Date.now();
+  }, [currentLevel]);
   // Timer
   useEffect(() => {
     if (isRevealed || isGameOver || isTimerPaused || showAudience || showPhone) return;
@@ -206,7 +213,17 @@ export function MillionaireQuiz({ questions, title = "Show do Milhão", onComple
     if (!selectedOption) return;
     
     setIsRevealed(true);
-    const isCorrect = currentQuestion.options.find(o => o.id === selectedOption)?.isCorrect;
+    const selectedOpt = currentQuestion.options.find(o => o.id === selectedOption);
+    const isCorrect = selectedOpt?.isCorrect || false;
+    const timeSpent = Date.now() - questionStartTime.current;
+
+    // Record answer for statistics
+    recordAnswer.mutate({
+      question_id: currentQuestion.id,
+      selected_option_id: selectedOption,
+      is_correct: isCorrect,
+      time_spent_ms: timeSpent,
+    });
 
     if (isCorrect) {
       confetti({
