@@ -27,6 +27,7 @@ import NotFound from "./pages/NotFound";
 import PersonalStats from "./pages/PersonalStats";
 import SeasonalEventDetail from "./pages/SeasonalEventDetail";
 import Mentorship from "./pages/Mentorship";
+import Duels from "./pages/Duels";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
                 <Route path="/loja" element={<Shop />} />
                 <Route path="/eventos/:eventId" element={<SeasonalEventDetail />} />
                 <Route path="/mentoria" element={<Mentorship />} />
+                <Route path="/duelos" element={<Duels />} />
                 <Route
                   path="/loja/admin"
                   element={
