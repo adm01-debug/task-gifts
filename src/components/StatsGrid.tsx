@@ -8,6 +8,7 @@ import { SkeletonStatCard } from "@/components/ui/skeleton";
 import { AnimatedFireIndicator } from "@/components/effects/AnimatedFireIndicator";
 import { AnimatedTrophyIndicator } from "@/components/effects/AnimatedTrophyIndicator";
 import { AnimatedLevelIndicator } from "@/components/effects/AnimatedLevelIndicator";
+import { AnimatedCoinsIndicator } from "@/components/effects/AnimatedCoinsIndicator";
 import { MiniConfetti } from "@/components/effects/MiniConfetti";
 import { useFirstTimeIndicator } from "@/hooks/useFirstTimeIndicator";
 
@@ -53,6 +54,7 @@ interface StatCardProps {
   fireIndicator?: number;
   trophyIndicator?: number;
   levelIndicator?: number;
+  coinsIndicator?: number;
 }
 
 const colorClasses = {
@@ -89,7 +91,7 @@ const pulseClasses = {
   success: "card-pulse-success",
 };
 
-const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator, trophyIndicator, levelIndicator }: StatCardProps) => {
+const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator, trophyIndicator, levelIndicator, coinsIndicator }: StatCardProps) => {
   const colors = colorClasses[color];
 
   if (isLoading) {
@@ -120,6 +122,11 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
       {/* Trophy indicator for top 3 ranking */}
       {trophyIndicator !== undefined && trophyIndicator >= 1 && trophyIndicator <= 3 && (
         <AnimatedTrophyIndicator rank={trophyIndicator} />
+      )}
+
+      {/* Coins indicator for quests card */}
+      {coinsIndicator !== undefined && coinsIndicator >= 100 && (
+        <AnimatedCoinsIndicator coins={coinsIndicator} />
       )}
 
       {/* Gradient background */}
@@ -239,6 +246,7 @@ export const StatsGrid = () => {
       changeType: "positive",
       color: "secondary",
       isLoading,
+      coinsIndicator: profile?.coins || 0,
     },
   ];
 
