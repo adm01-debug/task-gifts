@@ -16,6 +16,7 @@ import LearningTrails from "./pages/LearningTrails";
 import TrailDetail from "./pages/TrailDetail";
 import Attendance from "./pages/Attendance";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/trails/:id" element={<TrailDetail />} />
             <Route path="/ponto" element={<Attendance />} />
             <Route path="/executivo" element={<ExecutiveDashboard />} />
+            <Route path="/loja" element={<Shop />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
