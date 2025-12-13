@@ -62,7 +62,7 @@ export const LiveLeaderboard = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border overflow-hidden card-shimmer">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold/20 to-gold/5 flex items-center justify-center">
@@ -86,7 +86,7 @@ export const LiveLeaderboard = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-2xl border border-border overflow-hidden"
+        className="bg-card rounded-2xl border border-border overflow-hidden card-shimmer"
       >
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export const LiveLeaderboard = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-card rounded-2xl border border-border overflow-hidden"
+      className="bg-card rounded-2xl border border-border overflow-hidden card-interactive"
     >
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
