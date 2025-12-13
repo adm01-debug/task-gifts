@@ -5,8 +5,86 @@
 @tailwind utilities;
 
 @layer base {
+  /* Light Mode - Clean Professional Theme */
   :root {
-    /* Task Gifts - Modern Gamification Theme */
+    --background: 0 0% 100%;
+    --foreground: 225 25% 10%;
+
+    --card: 0 0% 99%;
+    --card-foreground: 225 25% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 25% 10%;
+
+    /* Vibrant Orange/Coral Primary - Energetic */
+    --primary: 24 95% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Electric Blue Secondary */
+    --secondary: 210 100% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Success Green */
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning Yellow */
+    --warning: 45 100% 50%;
+    --warning-foreground: 225 25% 10%;
+
+    --muted: 220 15% 95%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 280 80% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 80% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 24 95% 50%;
+
+    --radius: 0.75rem;
+
+    /* XP/Level Colors */
+    --xp: 142 70% 45%;
+    --coins: 45 100% 50%;
+    --streak: 24 95% 50%;
+
+    /* Rank Colors */
+    --gold: 45 100% 50%;
+    --silver: 220 10% 65%;
+    --bronze: 25 60% 45%;
+
+    /* Glass & Effects */
+    --glass-bg: 220 15% 98% / 0.8;
+    --glass-border: 220 15% 85% / 0.5;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(24 95% 50%), hsl(340 80% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(210 100% 55%), hsl(280 80% 55%));
+    --gradient-success: linear-gradient(135deg, hsl(142 70% 45%), hsl(170 70% 40%));
+    --gradient-xp: linear-gradient(90deg, hsl(142 70% 45%), hsl(180 70% 45%));
+
+    /* Shadows */
+    --shadow-glow-primary: 0 4px 20px hsl(24 95% 50% / 0.2);
+    --shadow-glow-secondary: 0 4px 20px hsl(210 100% 55% / 0.2);
+    --shadow-glow-success: 0 4px 20px hsl(142 70% 45% / 0.2);
+
+    /* Sidebar */
+    --sidebar-background: 220 15% 97%;
+    --sidebar-foreground: 225 25% 15%;
+    --sidebar-primary: 24 95% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 93%;
+    --sidebar-accent-foreground: 225 25% 10%;
+    --sidebar-border: 220 15% 90%;
+    --sidebar-ring: 24 95% 50%;
+  }
+
+  /* Dark Mode - Gaming Theme */
+  .dark {
     --background: 225 25% 6%;
     --foreground: 0 0% 98%;
 
@@ -44,8 +122,6 @@
     --border: 225 20% 15%;
     --input: 225 20% 15%;
     --ring: 24 95% 55%;
-
-    --radius: 0.75rem;
 
     /* XP/Level Colors */
     --xp: 142 70% 50%;
