@@ -11,3 +11,15 @@ verify_jwt = true
 
 [functions.generate-quiz-questions]
 verify_jwt = true
+
+[functions.admin-alerts]
+verify_jwt = true
+
+[functions.bitrix24-oauth]
+verify_jwt = false
+
+[functions.bitrix24-api]
+verify_jwt = true
+
+[functions.bitrix24-webhook]
+verify_jwt = false

@@ -16,6 +16,7 @@ import {
   History,
   TrendingUp,
   AlertTriangle,
+  Link2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import { DepartmentsManager } from "@/components/admin/DepartmentsManager";
 import { AdminChangeHistory } from "@/components/admin/AdminChangeHistory";
 import { AdminMetricsDashboard } from "@/components/admin/AdminMetricsDashboard";
 import { AdminAlertsPanel } from "@/components/admin/AdminAlertsPanel";
+import { Bitrix24Integration } from "@/components/admin/Bitrix24Integration";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -214,6 +216,10 @@ function AdminPanelContent() {
               <History className="h-4 w-4" />
               Histórico
             </TabsTrigger>
+            <TabsTrigger value="bitrix24" className="gap-2">
+              <Link2 className="h-4 w-4" />
+              Bitrix24
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -315,6 +321,11 @@ function AdminPanelContent() {
           {/* History Tab */}
           <TabsContent value="history">
             <AdminChangeHistory />
+          </TabsContent>
+
+          {/* Bitrix24 Tab */}
+          <TabsContent value="bitrix24">
+            <Bitrix24Integration />
           </TabsContent>
         </Tabs>
       </main>
