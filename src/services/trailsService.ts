@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { auditService } from "./auditService";
 import { missionsService } from "./missionsService";
+import { comboService } from "./comboService";
+import { profilesService } from "./profilesService";
 
 export interface LearningTrail {
   id: string;
@@ -191,7 +193,7 @@ export const trailsService = {
   },
 
   // Complete module
-  async completeModule(userId: string, moduleId: string, score?: number): Promise<ModuleProgress> {
+  async completeModule(userId: string, moduleId: string, score?: number, moduleXpReward: number = 25): Promise<ModuleProgress> {
     const { data, error } = await supabase
       .from("module_progress")
       .update({
@@ -204,6 +206,14 @@ export const trailsService = {
       .single();
 
     if (error) throw error;
+
+    // Apply combo multiplier to module XP reward
+    try {
+      const comboResult = await comboService.registerAction(userId, moduleXpReward);
+      await profilesService.addXp(userId, comboResult.finalXp, 'module_completed');
+    } catch (e) {
+      console.error("Failed to add XP for module completion:", e);
+    }
 
     // Auto-update mission progress for module completion
     try {
