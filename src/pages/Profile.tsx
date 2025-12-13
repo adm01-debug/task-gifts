@@ -19,6 +19,8 @@ import { SoundSettingsCard } from "@/components/SoundSettingsCard";
 import { useAvatarConfig } from "@/hooks/useAvatar";
 import { useUserRank } from "@/hooks/useUserRank";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
+import { useAllAchievements, useUserAchievements } from "@/hooks/useAchievements";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -36,23 +38,6 @@ interface ProfileData {
   created_at: string;
 }
 
-interface Achievement {
-  id: string;
-  title: string;
-  icon: string;
-  rarity: "common" | "rare" | "epic" | "legendary";
-  unlocked: boolean;
-}
-
-const mockAchievements: Achievement[] = [
-  { id: "1", title: "Primeiro Login", icon: "🎮", rarity: "common", unlocked: true },
-  { id: "2", title: "Streak Master", icon: "🔥", rarity: "epic", unlocked: true },
-  { id: "3", title: "Top 10", icon: "🏆", rarity: "rare", unlocked: true },
-  { id: "4", title: "Quest Hunter", icon: "🎯", rarity: "common", unlocked: true },
-  { id: "5", title: "Colaborador", icon: "🤝", rarity: "rare", unlocked: false },
-  { id: "6", title: "Lendário", icon: "👑", rarity: "legendary", unlocked: false },
-];
-
 const rarityColors = {
   common: "from-muted-foreground/30 to-muted-foreground/10 border-muted-foreground/30",
   rare: "from-secondary/30 to-secondary/10 border-secondary/50",
@@ -68,6 +53,8 @@ const Profile = () => {
   const [avatarOpen, setAvatarOpen] = useState(false);
   const { data: rankData } = useUserRank();
   const { data: avatarConfig } = useAvatarConfig(user?.id);
+  const { data: allAchievements = [], isLoading: achievementsLoading } = useAllAchievements();
+  const { data: userAchievements = [] } = useUserAchievements();
   const isScrolled = useScrollHeader(10);
 
   useEffect(() => {
@@ -296,36 +283,54 @@ const Profile = () => {
               Conquistas
             </h3>
             <span className="text-sm text-muted-foreground">
-              {mockAchievements.filter(a => a.unlocked).length}/{mockAchievements.length}
+              {userAchievements.length}/{allAchievements.length}
             </span>
           </div>
 
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-            {mockAchievements.map((achievement, i) => (
-              <motion.div
-                key={achievement.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 + i * 0.05 }}
-                whileHover={achievement.unlocked ? { scale: 1.1, y: -4 } : {}}
-                className={`
-                  relative p-4 rounded-xl border text-center transition-all duration-200
-                  bg-gradient-to-b ${rarityColors[achievement.rarity]}
-                  ${!achievement.unlocked ? "opacity-40 grayscale" : ""}
-                `}
-              >
-                <span className="text-2xl">{achievement.icon}</span>
-                <p className="text-xs font-medium mt-2 truncate">{achievement.title}</p>
-                {!achievement.unlocked && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
-                      <span className="text-xs">🔒</span>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
+          {achievementsLoading ? (
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-24 rounded-xl" />
+              ))}
+            </div>
+          ) : allAchievements.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Trophy className="w-10 h-10 mx-auto mb-2 opacity-30" />
+              <p className="text-sm">Nenhuma conquista disponível</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+              {allAchievements.map((achievement, i) => {
+                const isUnlocked = userAchievements.some(ua => ua.achievement_id === achievement.id);
+                const rarity = (achievement.rarity || "common") as keyof typeof rarityColors;
+                
+                return (
+                  <motion.div
+                    key={achievement.id}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 + i * 0.05 }}
+                    whileHover={isUnlocked ? { scale: 1.1, y: -4 } : {}}
+                    className={`
+                      relative p-4 rounded-xl border text-center transition-all duration-200
+                      bg-gradient-to-b ${rarityColors[rarity] || rarityColors.common}
+                      ${!isUnlocked ? "opacity-40 grayscale" : ""}
+                    `}
+                  >
+                    <span className="text-2xl">{achievement.icon}</span>
+                    <p className="text-xs font-medium mt-2 truncate">{achievement.name}</p>
+                    {!isUnlocked && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
+                          <span className="text-xs">🔒</span>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </motion.div>
 
         {/* Certifications Panel */}

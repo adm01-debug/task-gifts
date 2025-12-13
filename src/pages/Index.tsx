@@ -142,7 +142,11 @@ const Index = () => {
               <div>
                 <h1 className="text-lg md:text-xl font-bold">Olá, {displayName}! 👋</h1>
                 <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
-                  Você está no <span className="text-primary font-semibold">#4</span> lugar. Continue assim!
+                  {rankData?.rank ? (
+                    <>Você está no <span className="text-primary font-semibold">#{rankData.rank}</span> lugar. Continue assim!</>
+                  ) : (
+                    <>Complete atividades para subir no ranking!</>
+                  )}
                 </p>
               </div>
             </div>

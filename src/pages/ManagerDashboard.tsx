@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, 
@@ -21,6 +21,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Select,
   SelectContent,
@@ -30,6 +31,8 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
+import { useProfiles } from "@/hooks/useProfiles";
+import { useDepartments } from "@/hooks/useDepartments";
 import { QuestsList } from "@/components/manager/QuestsList";
 import { ChurnPredictionPanel } from "@/components/ChurnPredictionPanel";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
@@ -37,6 +40,8 @@ import { TeamCompetencyDashboard } from "@/components/manager/TeamCompetencyDash
 import { CompetencyAlertsPanel } from "@/components/CompetencyAlertsPanel";
 import { TeamCertificationsPanel } from "@/components/TeamCertificationsPanel";
 import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 // Types
 interface TeamMember {
@@ -55,100 +60,25 @@ interface TeamMember {
   department: string;
 }
 
-interface Department {
-  id: string;
-  name: string;
-  color: string;
-  memberCount: number;
-  avgProgress: number;
-  completionRate: number;
-}
+// Helper to calculate XP needed for next level
+const calculateXpToNext = (level: number): number => {
+  return level * 500 + 500;
+};
 
-// Mock data for demonstration
-const mockTeamMembers: TeamMember[] = [
-  {
-    id: "1",
-    name: "Ana Silva",
-    avatar: "AS",
-    level: 12,
-    xp: 2400,
-    xpToNext: 3000,
-    questsCompleted: 45,
-    questsTotal: 50,
-    streak: 15,
-    lastActive: "Hoje",
-    trend: "up",
-    riskLevel: "low",
-    department: "Tecnologia"
-  },
-  {
-    id: "2",
-    name: "Carlos Santos",
-    avatar: "CS",
-    level: 8,
-    xp: 1200,
-    xpToNext: 2000,
-    questsCompleted: 28,
-    questsTotal: 50,
-    streak: 3,
-    lastActive: "Ontem",
-    trend: "same",
-    riskLevel: "medium",
-    department: "Tecnologia"
-  },
-  {
-    id: "3",
-    name: "Marina Costa",
-    avatar: "MC",
-    level: 15,
-    xp: 4800,
-    xpToNext: 5000,
-    questsCompleted: 48,
-    questsTotal: 50,
-    streak: 22,
-    lastActive: "Hoje",
-    trend: "up",
-    riskLevel: "low",
-    department: "Marketing"
-  },
-  {
-    id: "4",
-    name: "Pedro Oliveira",
-    avatar: "PO",
-    level: 5,
-    xp: 600,
-    xpToNext: 1000,
-    questsCompleted: 12,
-    questsTotal: 50,
-    streak: 0,
-    lastActive: "3 dias atrás",
-    trend: "down",
-    riskLevel: "high",
-    department: "Vendas"
-  },
-  {
-    id: "5",
-    name: "Julia Lima",
-    avatar: "JL",
-    level: 10,
-    xp: 1800,
-    xpToNext: 2500,
-    questsCompleted: 35,
-    questsTotal: 50,
-    streak: 8,
-    lastActive: "Hoje",
-    trend: "up",
-    riskLevel: "low",
-    department: "RH"
-  }
-];
+// Helper to calculate risk level based on streak and activity
+const calculateRiskLevel = (streak: number, updatedAt: string): "low" | "medium" | "high" => {
+  const daysSinceActive = Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+  if (daysSinceActive > 7 || streak === 0) return "high";
+  if (daysSinceActive > 3 || streak < 3) return "medium";
+  return "low";
+};
 
-const mockDepartments: Department[] = [
-  { id: "1", name: "Tecnologia", color: "#6366f1", memberCount: 12, avgProgress: 78, completionRate: 85 },
-  { id: "2", name: "Vendas", color: "#10b981", memberCount: 8, avgProgress: 62, completionRate: 70 },
-  { id: "3", name: "Marketing", color: "#f59e0b", memberCount: 6, avgProgress: 91, completionRate: 95 },
-  { id: "4", name: "RH", color: "#ec4899", memberCount: 4, avgProgress: 74, completionRate: 80 }
-];
+// Helper to calculate trend based on recent activity
+const calculateTrend = (streak: number, questsCompleted: number): "up" | "down" | "same" => {
+  if (streak >= 5 && questsCompleted > 10) return "up";
+  if (streak === 0) return "down";
+  return "same";
+};
 
 // Stat Card Component
 const StatCard = ({ 
@@ -269,48 +199,64 @@ const TeamMemberRow = ({ member, index }: { member: TeamMember; index: number })
   );
 };
 
-// Department Card Component
-const DepartmentCard = ({ department, index }: { department: Department; index: number }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ delay: index * 0.1, duration: 0.3 }}
-    whileHover={{ scale: 1.02, y: -2 }}
-  >
-    <Card 
-      className="p-4 bg-card/40 backdrop-blur-sm border-border/40 hover:border-primary/40 transition-all duration-300 cursor-pointer"
-      style={{ borderLeftColor: department.color, borderLeftWidth: 3 }}
+// Department Card Component  
+interface DepartmentData {
+  id: string;
+  name: string;
+  color: string | null;
+}
+
+const DepartmentCard = ({ department, members, index }: { department: DepartmentData; members: TeamMember[]; index: number }) => {
+  const deptMembers = members.filter(m => m.department === department.name);
+  const avgProgress = deptMembers.length > 0 
+    ? Math.round(deptMembers.reduce((acc, m) => acc + (m.questsCompleted / Math.max(m.questsTotal, 1)) * 100, 0) / deptMembers.length)
+    : 0;
+  const completionRate = deptMembers.length > 0
+    ? Math.round(deptMembers.filter(m => m.riskLevel === "low").length / deptMembers.length * 100)
+    : 0;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: index * 0.1, duration: 0.3 }}
+      whileHover={{ scale: 1.02, y: -2 }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="font-semibold text-foreground">{department.name}</h4>
-        <Badge 
-          variant="secondary" 
-          className="text-xs"
-          style={{ backgroundColor: `${department.color}20`, color: department.color }}
-        >
-          {department.memberCount} membros
-        </Badge>
-      </div>
-      
-      <div className="space-y-3">
-        <div>
-          <div className="flex justify-between text-xs mb-1">
-            <span className="text-muted-foreground">Progresso Médio</span>
-            <span className="text-foreground font-medium">{department.avgProgress}%</span>
-          </div>
-          <Progress value={department.avgProgress} className="h-2" />
+      <Card 
+        className="p-4 bg-card/40 backdrop-blur-sm border-border/40 hover:border-primary/40 transition-all duration-300 cursor-pointer"
+        style={{ borderLeftColor: department.color || "#6366f1", borderLeftWidth: 3 }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="font-semibold text-foreground">{department.name}</h4>
+          <Badge 
+            variant="secondary" 
+            className="text-xs"
+            style={{ backgroundColor: `${department.color || "#6366f1"}20`, color: department.color || "#6366f1" }}
+          >
+            {deptMembers.length} membros
+          </Badge>
         </div>
         
-        <div className="flex items-center justify-between pt-2 border-t border-border/30">
-          <span className="text-xs text-muted-foreground">Taxa de Conclusão</span>
-          <span className="text-sm font-bold" style={{ color: department.color }}>
-            {department.completionRate}%
-          </span>
+        <div className="space-y-3">
+          <div>
+            <div className="flex justify-between text-xs mb-1">
+              <span className="text-muted-foreground">Progresso Médio</span>
+              <span className="text-foreground font-medium">{avgProgress}%</span>
+            </div>
+            <Progress value={avgProgress} className="h-2" />
+          </div>
+          
+          <div className="flex items-center justify-between pt-2 border-t border-border/30">
+            <span className="text-xs text-muted-foreground">Taxa de Conclusão</span>
+            <span className="text-sm font-bold" style={{ color: department.color || "#6366f1" }}>
+              {completionRate}%
+            </span>
+          </div>
         </div>
-      </div>
-    </Card>
-  </motion.div>
-);
+      </Card>
+    </motion.div>
+  );
+};
 
 // At Risk Alert Component
 const AtRiskAlert = ({ members }: { members: TeamMember[] }) => {
@@ -355,18 +301,37 @@ export default function ManagerDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
-  const [teamMembers] = useState<TeamMember[]>(mockTeamMembers);
-  const [departments] = useState<Department[]>(mockDepartments);
+  const { data: profiles = [], isLoading: profilesLoading } = useProfiles();
+  const { data: departments = [], isLoading: departmentsLoading } = useDepartments();
   const isScrolled = useScrollHeader(10);
+  
+  // Transform profiles to TeamMember format
+  const teamMembers: TeamMember[] = useMemo(() => {
+    return profiles.map(profile => ({
+      id: profile.id,
+      name: profile.display_name || profile.email?.split("@")[0] || "Usuário",
+      avatar: (profile.display_name || profile.email || "U").substring(0, 2).toUpperCase(),
+      level: profile.level,
+      xp: profile.xp,
+      xpToNext: calculateXpToNext(profile.level),
+      questsCompleted: profile.quests_completed,
+      questsTotal: 50,
+      streak: profile.streak,
+      lastActive: formatDistanceToNow(new Date(profile.updated_at), { addSuffix: true, locale: ptBR }),
+      trend: calculateTrend(profile.streak, profile.quests_completed),
+      riskLevel: calculateRiskLevel(profile.streak, profile.updated_at),
+      department: "Geral",
+    }));
+  }, [profiles]);
   
   const filteredMembers = selectedDepartment === "all" 
     ? teamMembers 
     : teamMembers.filter(m => m.department === selectedDepartment);
   
   // Calculate stats
-  const totalMembers = teamMembers.length;
-  const avgCompletion = Math.round(teamMembers.reduce((acc, m) => acc + (m.questsCompleted / m.questsTotal) * 100, 0) / totalMembers);
-  const avgStreak = Math.round(teamMembers.reduce((acc, m) => acc + m.streak, 0) / totalMembers);
+  const totalMembers = teamMembers.length || 1;
+  const avgCompletion = teamMembers.length > 0 ? Math.round(teamMembers.reduce((acc, m) => acc + (m.questsCompleted / Math.max(m.questsTotal, 1)) * 100, 0) / totalMembers) : 0;
+  const avgStreak = teamMembers.length > 0 ? Math.round(teamMembers.reduce((acc, m) => acc + m.streak, 0) / totalMembers) : 0;
   const atRiskCount = teamMembers.filter(m => m.riskLevel === "high").length;
   
   return (
@@ -505,7 +470,7 @@ export default function ManagerDashboard() {
                 
                 <div className="space-y-3">
                   {departments.map((dept, index) => (
-                    <DepartmentCard key={dept.id} department={dept} index={index} />
+                    <DepartmentCard key={dept.id} department={dept} members={teamMembers} index={index} />
                   ))}
                 </div>
                 
