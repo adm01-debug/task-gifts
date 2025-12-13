@@ -196,3 +196,152 @@ export function useSetDepartmentManager() {
     },
   });
 }
+
+// ============ BULK ACTIONS ============
+
+// Bulk assign role to multiple users
+export function useBulkAssignRole() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userIds, role }: { userIds: string[]; role: AppRole }) => {
+      const results = await Promise.allSettled(
+        userIds.map(async (userId) => {
+          // Check if role already exists
+          const { data: existing } = await supabase
+            .from("user_roles")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("role", role)
+            .maybeSingle();
+
+          if (existing) {
+            return { userId, skipped: true };
+          }
+
+          const { data, error } = await supabase
+            .from("user_roles")
+            .insert({ user_id: userId, role })
+            .select()
+            .single();
+
+          if (error) throw error;
+          return { userId, data };
+        })
+      );
+
+      const successful = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.filter((r) => r.status === "rejected").length;
+
+      return { successful, failed, total: userIds.length };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminUsersKeys.roles() });
+      queryClient.invalidateQueries({ queryKey: ["user-roles"] });
+    },
+  });
+}
+
+// Bulk remove role from multiple users
+export function useBulkRemoveRole() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userIds, role }: { userIds: string[]; role: AppRole }) => {
+      const results = await Promise.allSettled(
+        userIds.map(async (userId) => {
+          const { error } = await supabase
+            .from("user_roles")
+            .delete()
+            .eq("user_id", userId)
+            .eq("role", role);
+
+          if (error) throw error;
+          return { userId };
+        })
+      );
+
+      const successful = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.filter((r) => r.status === "rejected").length;
+
+      return { successful, failed, total: userIds.length };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminUsersKeys.roles() });
+      queryClient.invalidateQueries({ queryKey: ["user-roles"] });
+    },
+  });
+}
+
+// Bulk assign users to department
+export function useBulkAssignDepartment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userIds, departmentId }: { userIds: string[]; departmentId: string }) => {
+      const results = await Promise.allSettled(
+        userIds.map(async (userId) => {
+          // Check if already member
+          const { data: existing } = await supabase
+            .from("team_members")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("department_id", departmentId)
+            .maybeSingle();
+
+          if (existing) {
+            return { userId, skipped: true };
+          }
+
+          const { data, error } = await supabase
+            .from("team_members")
+            .insert({ user_id: userId, department_id: departmentId, is_manager: false })
+            .select()
+            .single();
+
+          if (error) throw error;
+          return { userId, data };
+        })
+      );
+
+      const successful = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.filter((r) => r.status === "rejected").length;
+
+      return { successful, failed, total: userIds.length };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminUsersKeys.teamMembers() });
+      queryClient.invalidateQueries({ queryKey: ["departments"] });
+    },
+  });
+}
+
+// Bulk remove users from all departments
+export function useBulkRemoveFromDepartments() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userIds: string[]) => {
+      const results = await Promise.allSettled(
+        userIds.map(async (userId) => {
+          const { error } = await supabase
+            .from("team_members")
+            .delete()
+            .eq("user_id", userId);
+
+          if (error) throw error;
+          return { userId };
+        })
+      );
+
+      const successful = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.filter((r) => r.status === "rejected").length;
+
+      return { successful, failed, total: userIds.length };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminUsersKeys.teamMembers() });
+      queryClient.invalidateQueries({ queryKey: ["departments"] });
+    },
+  });
+}
