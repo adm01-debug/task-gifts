@@ -12,6 +12,8 @@ import QuestBuilder from "./pages/QuestBuilder";
 import EngagementReports from "./pages/EngagementReports";
 import AuditLogs from "./pages/AuditLogs";
 import RealTimeAnalytics from "./pages/RealTimeAnalytics";
+import LearningTrails from "./pages/LearningTrails";
+import TrailDetail from "./pages/TrailDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
             <Route path="/reports" element={<EngagementReports />} />
             <Route path="/audit" element={<AuditLogs />} />
             <Route path="/analytics" element={<RealTimeAnalytics />} />
+            <Route path="/trails" element={<LearningTrails />} />
+            <Route path="/trails/:id" element={<TrailDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
