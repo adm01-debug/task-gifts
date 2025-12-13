@@ -4,6 +4,7 @@ import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
 import { profilesService } from "./profilesService";
 import { achievementsService } from "./achievementsService";
+import { certificationsService } from "./certificationsService";
 
 export interface LearningTrail {
   id: string;
@@ -276,6 +277,21 @@ export const trailsService = {
         await achievementsService.checkTrailAchievements(userId);
       } catch (e) {
         console.error("Failed to check trail achievements:", e);
+      }
+
+      // Auto-issue certification if trail has linked certification
+      try {
+        const { data: linkedCert } = await supabase
+          .from('certifications')
+          .select('id')
+          .eq('trail_id', trailId)
+          .maybeSingle();
+
+        if (linkedCert) {
+          await certificationsService.issueCertification(userId, linkedCert.id);
+        }
+      } catch (e) {
+        console.error("Failed to issue trail certification:", e);
       }
     }
 
