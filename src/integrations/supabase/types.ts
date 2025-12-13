@@ -121,6 +121,115 @@ export type Database = {
           },
         ]
       }
+      department_missions: {
+        Row: {
+          coin_reward: number | null
+          created_at: string | null
+          department_id: string | null
+          description: string | null
+          frequency: Database["public"]["Enums"]["mission_frequency"] | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          metric_key: string
+          order_index: number | null
+          target_value: number | null
+          title: string
+          updated_at: string | null
+          xp_reward: number | null
+        }
+        Insert: {
+          coin_reward?: number | null
+          created_at?: string | null
+          department_id?: string | null
+          description?: string | null
+          frequency?: Database["public"]["Enums"]["mission_frequency"] | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          metric_key: string
+          order_index?: number | null
+          target_value?: number | null
+          title: string
+          updated_at?: string | null
+          xp_reward?: number | null
+        }
+        Update: {
+          coin_reward?: number | null
+          created_at?: string | null
+          department_id?: string | null
+          description?: string | null
+          frequency?: Database["public"]["Enums"]["mission_frequency"] | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          metric_key?: string
+          order_index?: number | null
+          target_value?: number | null
+          title?: string
+          updated_at?: string | null
+          xp_reward?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "department_missions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      department_rankings: {
+        Row: {
+          created_at: string | null
+          department_id: string
+          id: string
+          metrics: Json | null
+          period_end: string
+          period_start: string
+          period_type: string
+          rank_position: number | null
+          total_score: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          department_id: string
+          id?: string
+          metrics?: Json | null
+          period_end: string
+          period_start: string
+          period_type?: string
+          rank_position?: number | null
+          total_score?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          department_id?: string
+          id?: string
+          metrics?: Json | null
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          rank_position?: number | null
+          total_score?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "department_rankings_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           color: string | null
@@ -593,6 +702,50 @@ export type Database = {
           },
         ]
       }
+      user_mission_progress: {
+        Row: {
+          claimed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          current_value: number | null
+          id: string
+          mission_id: string
+          period_end: string
+          period_start: string
+          user_id: string
+        }
+        Insert: {
+          claimed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          mission_id: string
+          period_end: string
+          period_start: string
+          user_id: string
+        }
+        Update: {
+          claimed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          mission_id?: string
+          period_end?: string
+          period_start?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_mission_progress_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "department_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -656,6 +809,7 @@ export type Database = {
         | "team_member_removed"
         | "role_assigned"
         | "role_removed"
+      mission_frequency: "daily" | "weekly" | "monthly"
       module_content_type:
         | "video"
         | "text"
@@ -819,6 +973,7 @@ export const Constants = {
         "role_assigned",
         "role_removed",
       ],
+      mission_frequency: ["daily", "weekly", "monthly"],
       module_content_type: [
         "video",
         "text",
