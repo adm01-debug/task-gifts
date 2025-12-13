@@ -9,6 +9,7 @@ import { useKudosBadges, useRecentKudos, useGiveKudos } from "@/hooks/useKudos";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { SkeletonKudosList } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { KudosBadge } from "@/services/kudosService";
@@ -228,11 +229,8 @@ export const PeerRecognition = () => {
 
       {/* Recent Kudos */}
       <ScrollArea className="max-h-80">
-        {isLoading ? (
-          <div className="p-8 text-center">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs text-muted-foreground mt-2">Carregando...</p>
-          </div>
+      {isLoading ? (
+          <SkeletonKudosList count={5} className="p-0" />
         ) : recentKudos.length === 0 ? (
           <div className="p-8 text-center">
             <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />

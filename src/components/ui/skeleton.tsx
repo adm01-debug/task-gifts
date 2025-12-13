@@ -370,6 +370,114 @@ function SkeletonDuelList({ items = 2, className, ...props }: SkeletonProps & { 
   );
 }
 
+// Skeleton for Kudos item
+function SkeletonKudos({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("flex items-start gap-3 p-3", className)} {...props}>
+      {/* Overlapping avatars */}
+      <div className="flex -space-x-2">
+        <Skeleton variant="shimmer" shape="circle" className="w-8 h-8 border-2 border-card" />
+        <Skeleton variant="shimmer" shape="circle" className="w-8 h-8 border-2 border-card" />
+      </div>
+      {/* Content */}
+      <div className="flex-1 space-y-2">
+        <Skeleton variant="shimmer" className="h-3 w-32" />
+        <Skeleton variant="default" className="h-4 w-full" />
+        <Skeleton variant="default" className="h-3 w-20" />
+      </div>
+      {/* Badge */}
+      <Skeleton variant="glow" shape="square" className="w-8 h-8 rounded-lg" />
+    </div>
+  );
+}
+
+// List of kudos skeletons
+function SkeletonKudosList({ count = 5, className, ...props }: SkeletonProps & { count?: number }) {
+  return (
+    <div className={cn("divide-y divide-border", className)} {...props}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} style={{ animationDelay: `${i * 75}ms` }}>
+          <SkeletonKudos />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Skeleton for Ranking item
+function SkeletonRankingItem({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("flex items-center gap-3 p-3 rounded-xl border border-border", className)} {...props}>
+      {/* Rank */}
+      <Skeleton variant="glow" shape="circle" className="w-6 h-6" />
+      {/* Avatar */}
+      <Skeleton variant="shimmer" shape="circle" className="w-10 h-10" />
+      {/* Info */}
+      <div className="flex-1 space-y-1.5">
+        <Skeleton variant="shimmer" className="h-4 w-28" />
+        <Skeleton variant="default" className="h-3 w-20" />
+      </div>
+      {/* Count badge */}
+      <Skeleton variant="glow" shape="pill" className="w-10 h-6" />
+    </div>
+  );
+}
+
+// List of ranking skeletons
+function SkeletonRankingList({ count = 5, className, ...props }: SkeletonProps & { count?: number }) {
+  return (
+    <div className={cn("space-y-2", className)} {...props}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} style={{ animationDelay: `${i * 100}ms` }}>
+          <SkeletonRankingItem />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Skeleton for Social Feed activity
+function SkeletonActivity({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("flex items-start gap-3 py-3 px-2", className)} {...props}>
+      {/* Avatar with icon */}
+      <div className="relative">
+        <Skeleton variant="shimmer" shape="circle" className="w-10 h-10" />
+        <Skeleton variant="glow" shape="circle" className="absolute -bottom-1 -right-1 w-5 h-5" />
+      </div>
+      {/* Content */}
+      <div className="flex-1 space-y-2">
+        <div className="flex items-center gap-2">
+          <Skeleton variant="shimmer" className="h-4 w-24" />
+          <Skeleton variant="default" className="h-3 w-40" />
+        </div>
+        <Skeleton variant="default" className="h-3 w-20" />
+        {/* Reactions */}
+        <div className="flex items-center gap-2 mt-2">
+          <Skeleton variant="subtle" shape="pill" className="w-12 h-6" />
+          <Skeleton variant="subtle" shape="pill" className="w-12 h-6" />
+          <Skeleton variant="subtle" shape="pill" className="w-16 h-6" />
+        </div>
+      </div>
+      {/* XP Badge */}
+      <Skeleton variant="glow" shape="pill" className="w-16 h-6" />
+    </div>
+  );
+}
+
+// List of activity skeletons
+function SkeletonActivityList({ count = 5, className, ...props }: SkeletonProps & { count?: number }) {
+  return (
+    <div className={cn("space-y-1", className)} {...props}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} style={{ animationDelay: `${i * 75}ms` }}>
+          <SkeletonActivity />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export { 
   Skeleton,
   SkeletonText,
@@ -386,5 +494,11 @@ export {
   SkeletonQuestList,
   SkeletonDuel,
   SkeletonDuelList,
+  SkeletonKudos,
+  SkeletonKudosList,
+  SkeletonRankingItem,
+  SkeletonRankingList,
+  SkeletonActivity,
+  SkeletonActivityList,
   skeletonVariants,
 };
