@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { logger } from "@/services/loggingService";
 
 interface CompetencyAlert {
   userId: string;
@@ -35,8 +36,8 @@ export function useCompetencyAlerts() {
         queryClient.invalidateQueries({ queryKey: ['notifications'] });
       }
     },
-    onError: (error) => {
-      console.error('Competency alerts error:', error);
+    onError: (error: Error) => {
+      logger.apiError("Competency alerts error", error, "useCompetencyAlerts");
     },
   });
 
@@ -61,8 +62,8 @@ export function useCompetencyAlerts() {
         }
       }
     },
-    onError: (error) => {
-      console.error('Batch competency alerts error:', error);
+    onError: (error: Error) => {
+      logger.apiError("Batch competency alerts error", error, "useCompetencyAlerts");
       toast.error('Erro ao analisar competências');
     },
   });

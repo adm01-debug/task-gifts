@@ -6,6 +6,7 @@ import { profilesService } from "./profilesService";
 import { achievementsService } from "./achievementsService";
 import { certificationsService } from "./certificationsService";
 import { Json } from "@/integrations/supabase/types";
+import { logger } from "./loggingService";
 
 export interface LearningTrail {
   id: string;
@@ -259,7 +260,7 @@ export const trailsService = {
       };
       await profilesService.addXp(userId, result.finalXp, 'module_completed');
     } catch (e) {
-      console.error("Failed to add XP for module completion:", e);
+      logger.apiError("Failed to add XP for module completion", e, "trailsService");
     }
 
     // Auto-update mission progress for module completion
@@ -267,7 +268,7 @@ export const trailsService = {
       await missionsService.incrementByMetricKey(userId, 'module_completed', 1);
       await missionsService.incrementByMetricKey(userId, 'training_completed', 1);
     } catch (e) {
-      console.error("Failed to update module mission progress:", e);
+      logger.apiError("Failed to update module mission progress", e, "trailsService");
     }
 
     return { progress: data as ModuleProgress, comboResult };
@@ -305,14 +306,14 @@ export const trailsService = {
       try {
         await missionsService.incrementByMetricKey(userId, 'trail_completed', 1);
       } catch (e) {
-        console.error("Failed to update trail mission progress:", e);
+        logger.apiError("Failed to update trail mission progress", e, "trailsService");
       }
 
       // Check for trail achievements
       try {
         await achievementsService.checkTrailAchievements(userId);
       } catch (e) {
-        console.error("Failed to check trail achievements:", e);
+        logger.apiError("Failed to check trail achievements", e, "trailsService");
       }
 
       // Auto-issue certification if trail has linked certification
@@ -327,7 +328,7 @@ export const trailsService = {
           await certificationsService.issueCertification(userId, linkedCert.id);
         }
       } catch (e) {
-        console.error("Failed to issue trail certification:", e);
+        logger.apiError("Failed to issue trail certification", e, "trailsService");
       }
     }
 

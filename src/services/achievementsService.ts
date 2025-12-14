@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "./loggingService";
 
 export interface Achievement {
   id: string;
@@ -73,7 +74,7 @@ export const achievementsService = {
       .maybeSingle();
 
     if (achError || !achievement) {
-      console.error("Achievement not found:", achievementKey);
+      logger.warn(`Achievement not found: ${achievementKey}`, "achievementsService");
       return { success: false };
     }
 
@@ -86,7 +87,7 @@ export const achievementsService = {
       });
 
     if (insertError) {
-      console.error("Error unlocking achievement:", insertError);
+      logger.apiError("Error unlocking achievement", insertError, "achievementsService");
       return { success: false };
     }
 

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "./loggingService";
 
 export interface ExecutiveMetrics {
   totalUsers: number;
@@ -47,7 +48,7 @@ export const executiveService = {
     const { data, error } = await supabase.rpc('get_executive_metrics');
     
     if (error) {
-      console.error('Error fetching executive metrics:', error);
+      logger.apiError("Error fetching executive metrics", error, "executiveService");
       throw error;
     }
     
@@ -58,7 +59,7 @@ export const executiveService = {
     const { data, error } = await supabase.rpc('get_monthly_trends');
     
     if (error) {
-      console.error('Error fetching monthly trends:', error);
+      logger.apiError("Error fetching monthly trends", error, "executiveService");
       throw error;
     }
     
@@ -69,7 +70,7 @@ export const executiveService = {
     const { data, error } = await supabase.rpc('get_department_metrics');
     
     if (error) {
-      console.error('Error fetching department metrics:', error);
+      logger.apiError("Error fetching department metrics", error, "executiveService");
       throw error;
     }
     

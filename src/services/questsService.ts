@@ -7,6 +7,7 @@ import { comboService } from "./comboService";
 import { profilesService } from "./profilesService";
 import { achievementsService } from "./achievementsService";
 import { bitrix24SyncService } from "./bitrix24SyncService";
+import { logger } from "./loggingService";
 
 export type Quest = Tables<"custom_quests">;
 export type QuestInsert = TablesInsert<"custom_quests">;
@@ -71,7 +72,7 @@ export const questsService = {
     try {
       await auditService.logQuestCreated(quest.created_by, data.id, data.title);
     } catch (e) {
-      console.error("Failed to audit quest creation:", e);
+      logger.apiError("Failed to audit quest creation", e, "questsService");
     }
 
     return data;
@@ -188,7 +189,7 @@ export const questsService = {
         await notificationsService.notifyQuestAssigned(userId, quest.title, questId);
       }
     } catch (e) {
-      console.error("Failed to create quest assignment notification:", e);
+      logger.apiError("Failed to create quest assignment notification", e, "questsService");
     }
 
     return data;
@@ -267,25 +268,25 @@ export const questsService = {
         try {
           await missionsService.incrementByMetricKey(data.user_id, 'quest_completed', 1);
         } catch (e) {
-          console.error("Failed to update quest mission progress:", e);
+          logger.apiError("Failed to update quest mission progress", e, "questsService");
         }
 
         // Check for quest achievements
         try {
           await achievementsService.checkQuestAchievements(data.user_id);
         } catch (e) {
-          console.error("Failed to check quest achievements:", e);
+          logger.apiError("Failed to check quest achievements", e, "questsService");
         }
 
         // Sync with Bitrix24 - complete linked task if exists
         try {
           await bitrix24SyncService.syncQuestCompletion(quest.id);
         } catch (e) {
-          console.error("Failed to sync quest completion with Bitrix24:", e);
+          logger.apiError("Failed to sync quest completion with Bitrix24", e, "questsService");
         }
       }
     } catch (e) {
-      console.error("Failed to process quest completion:", e);
+      logger.apiError("Failed to process quest completion", e, "questsService");
     }
 
     return { assignment: data, quest, comboResult };

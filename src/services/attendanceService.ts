@@ -6,6 +6,7 @@ import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
 import { achievementsService } from "./achievementsService";
 import { bitrix24SyncService } from "./bitrix24SyncService";
+import { logger } from "./loggingService";
 
 export interface AttendanceRecord {
   id: string;
@@ -245,7 +246,7 @@ export const attendanceService = {
       try {
         await achievementsService.checkStreakAchievements(userId, newStreak);
       } catch (e) {
-        console.error("Failed to check streak achievements:", e);
+        logger.apiError("Failed to check streak achievements", e, "attendanceService");
       }
 
       // Send notification for milestone
@@ -289,7 +290,7 @@ export const attendanceService = {
     try {
       await bitrix24SyncService.syncCheckIn(userId);
     } catch (e) {
-      console.error("Failed to sync check-in with Bitrix24:", e);
+      logger.apiError("Failed to sync check-in with Bitrix24", e, "attendanceService");
     }
 
     return {
@@ -322,7 +323,7 @@ export const attendanceService = {
     try {
       await bitrix24SyncService.syncCheckOut(userId);
     } catch (e) {
-      console.error("Failed to sync check-out with Bitrix24:", e);
+      logger.apiError("Failed to sync check-out with Bitrix24", e, "attendanceService");
     }
 
     return data as AttendanceRecord;

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "./loggingService";
 
 export interface ChurnPrediction {
   userId: string;
@@ -32,7 +33,7 @@ export const churnPredictionService = {
     const { data, error } = await supabase.functions.invoke('churn-prediction');
 
     if (error) {
-      console.error('Error fetching churn predictions:', error);
+      logger.apiError("Error fetching churn predictions", error, "churnPredictionService");
       throw error;
     }
 

@@ -9,6 +9,7 @@ import {
   getTimemanStatus,
   type Bitrix24User 
 } from "./bitrix24Service";
+import { logger } from "./loggingService";
 
 export interface UserSyncResult {
   synced: number;
@@ -33,7 +34,7 @@ export const bitrix24SyncService = {
         .maybeSingle();
 
       if (error) {
-        console.error("Error checking Bitrix24 sync mapping:", error);
+        logger.apiError("Error checking Bitrix24 sync mapping", error, "bitrix24SyncService");
         return false;
       }
 
@@ -57,7 +58,7 @@ export const bitrix24SyncService = {
 
       return true;
     } catch (error) {
-      console.error("Failed to sync quest completion with Bitrix24:", error);
+      logger.apiError("Failed to sync quest completion with Bitrix24", error, "bitrix24SyncService");
       return false;
     }
   },
@@ -362,7 +363,7 @@ export const bitrix24SyncService = {
 
       return bitrixEventId;
     } catch (error) {
-      console.error("Failed to create event in Bitrix24:", error);
+      logger.apiError("Failed to create event in Bitrix24", error, "bitrix24SyncService");
       return null;
     }
   },
@@ -417,7 +418,7 @@ export const bitrix24SyncService = {
 
       return true;
     } catch (error) {
-      console.error("Failed to sync check-in with Bitrix24:", error);
+      logger.apiError("Failed to sync check-in with Bitrix24", error, "bitrix24SyncService");
       return false;
     }
   },
@@ -454,7 +455,7 @@ export const bitrix24SyncService = {
 
       return true;
     } catch (error) {
-      console.error("Failed to sync check-out with Bitrix24:", error);
+      logger.apiError("Failed to sync check-out with Bitrix24", error, "bitrix24SyncService");
       return false;
     }
   },
@@ -466,7 +467,7 @@ export const bitrix24SyncService = {
     try {
       return await getTimemanStatus();
     } catch (error) {
-      console.error("Failed to get Bitrix24 timeman status:", error);
+      logger.apiError("Failed to get Bitrix24 timeman status", error, "bitrix24SyncService");
       return null;
     }
   },
