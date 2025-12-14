@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AchievementNotificationProvider } from "@/contexts/AchievementNotificationContext";
 import { SoundSettingsProvider } from "@/contexts/SoundSettingsContext";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { lazy, Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -63,58 +64,60 @@ function PageLoader() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <SoundSettingsProvider>
-        <AuthProvider>
-          <AchievementNotificationProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                    <Route path="/manager" element={<ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>} />
-                    <Route path="/quest-builder" element={<ProtectedRoute requiredRole="manager"><QuestBuilder /></ProtectedRoute>} />
-                    <Route path="/reports" element={<ProtectedRoute requiredRole="manager"><EngagementReports /></ProtectedRoute>} />
-                    <Route path="/audit" element={<ProtectedRoute requiredRole="admin"><AuditLogs /></ProtectedRoute>} />
-                    <Route path="/analytics" element={<ProtectedRoute><RealTimeAnalytics /></ProtectedRoute>} />
-                    <Route path="/trails" element={<ProtectedRoute><LearningTrails /></ProtectedRoute>} />
-                    <Route path="/trails/:id" element={<ProtectedRoute><TrailDetail /></ProtectedRoute>} />
-                    <Route path="/ponto" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
-                    <Route path="/executivo" element={<ProtectedRoute requiredRole="admin"><ExecutiveDashboard /></ProtectedRoute>} />
-                    <Route path="/feed" element={<ProtectedRoute><SocialFeed /></ProtectedRoute>} />
-                    <Route path="/conquistas" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
-                    <Route path="/estatisticas" element={<ProtectedRoute><PersonalStats /></ProtectedRoute>} />
-                    <Route path="/loja" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
-                    <Route path="/eventos/:eventId" element={<ProtectedRoute><SeasonalEventDetail /></ProtectedRoute>} />
-                    <Route path="/mentoria" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
-                    <Route path="/duelos" element={<ProtectedRoute><Duels /></ProtectedRoute>} />
-                    <Route path="/quiz" element={<ProtectedRoute><DailyQuiz /></ProtectedRoute>} />
-                    <Route path="/quiz/admin" element={<ProtectedRoute requiredRole="manager"><QuizAdmin /></ProtectedRoute>} />
-                    <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
-                    <Route path="/bitrix24" element={<ProtectedRoute requiredRole="admin"><Bitrix24CRM /></ProtectedRoute>} />
-                    <Route
-                      path="/loja/admin"
-                      element={
-                        <ProtectedRoute requiredRole="admin">
-                          <ShopAdmin />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-              </BrowserRouter>
-            </TooltipProvider>
-          </AchievementNotificationProvider>
-        </AuthProvider>
-      </SoundSettingsProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <SoundSettingsProvider>
+          <AuthProvider>
+            <AchievementNotificationProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                      <Route path="/manager" element={<ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>} />
+                      <Route path="/quest-builder" element={<ProtectedRoute requiredRole="manager"><QuestBuilder /></ProtectedRoute>} />
+                      <Route path="/reports" element={<ProtectedRoute requiredRole="manager"><EngagementReports /></ProtectedRoute>} />
+                      <Route path="/audit" element={<ProtectedRoute requiredRole="admin"><AuditLogs /></ProtectedRoute>} />
+                      <Route path="/analytics" element={<ProtectedRoute><RealTimeAnalytics /></ProtectedRoute>} />
+                      <Route path="/trails" element={<ProtectedRoute><LearningTrails /></ProtectedRoute>} />
+                      <Route path="/trails/:id" element={<ProtectedRoute><TrailDetail /></ProtectedRoute>} />
+                      <Route path="/ponto" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+                      <Route path="/executivo" element={<ProtectedRoute requiredRole="admin"><ExecutiveDashboard /></ProtectedRoute>} />
+                      <Route path="/feed" element={<ProtectedRoute><SocialFeed /></ProtectedRoute>} />
+                      <Route path="/conquistas" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+                      <Route path="/estatisticas" element={<ProtectedRoute><PersonalStats /></ProtectedRoute>} />
+                      <Route path="/loja" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
+                      <Route path="/eventos/:eventId" element={<ProtectedRoute><SeasonalEventDetail /></ProtectedRoute>} />
+                      <Route path="/mentoria" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
+                      <Route path="/duelos" element={<ProtectedRoute><Duels /></ProtectedRoute>} />
+                      <Route path="/quiz" element={<ProtectedRoute><DailyQuiz /></ProtectedRoute>} />
+                      <Route path="/quiz/admin" element={<ProtectedRoute requiredRole="manager"><QuizAdmin /></ProtectedRoute>} />
+                      <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
+                      <Route path="/bitrix24" element={<ProtectedRoute requiredRole="admin"><Bitrix24CRM /></ProtectedRoute>} />
+                      <Route
+                        path="/loja/admin"
+                        element={
+                          <ProtectedRoute requiredRole="admin">
+                            <ShopAdmin />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                </BrowserRouter>
+              </TooltipProvider>
+            </AchievementNotificationProvider>
+          </AuthProvider>
+        </SoundSettingsProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

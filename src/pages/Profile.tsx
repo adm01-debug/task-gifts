@@ -19,6 +19,7 @@ import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { AvatarPreview } from "@/components/AvatarPreview";
 import { ProfileAvatarSection } from "@/components/ProfileAvatarSection";
 import { SoundSettingsCard } from "@/components/SoundSettingsCard";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { useAvatarConfig } from "@/hooks/useAvatar";
 import { useUserRank } from "@/hooks/useUserRank";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
@@ -465,6 +466,9 @@ const Profile = () => {
 
         {/* Sound Settings */}
         <SoundSettingsCard />
+
+        {/* Push Notifications */}
+        <PushNotificationToggle />
 
         {/* Competency Radar */}
         {user?.id && <CompetencyRadar userId={user.id} />}
