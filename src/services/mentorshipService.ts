@@ -195,7 +195,7 @@ export const mentorshipService = {
       .from('profiles')
       .select('xp, coins')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (profile) {
       await supabase
@@ -212,14 +212,14 @@ export const mentorshipService = {
       .from('mentorship_mission_progress')
       .select('pair_id')
       .eq('id', progressId)
-      .single();
+      .maybeSingle();
 
     if (progress) {
       const { data: pair } = await supabase
         .from('mentorship_pairs')
         .select('total_xp_earned, total_missions_completed')
         .eq('id', progress.pair_id)
-        .single();
+        .maybeSingle();
 
       if (pair) {
         await supabase
@@ -286,7 +286,7 @@ export const mentorshipService = {
       .from('mentorship_requests')
       .select('*')
       .eq('id', requestId)
-      .single();
+      .maybeSingle();
 
     if (!request) throw new Error('Request not found');
 
@@ -331,7 +331,7 @@ export const mentorshipService = {
       .from('profiles')
       .select('level')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     const minLevel = (userProfile?.level || 1) + 2;
 

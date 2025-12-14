@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Clock, Flame, Percent, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,7 +30,7 @@ function calculateTimeLeft(endDate: string): TimeLeft {
 }
 
 function CountdownTimer({ endDate }: { endDate: string }) {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft(endDate));
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calculateTimeLeft(endDate));
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,7 +40,10 @@ function CountdownTimer({ endDate }: { endDate: string }) {
     return () => clearInterval(timer);
   }, [endDate]);
 
-  const isUrgent = timeLeft.days === 0 && timeLeft.hours < 6;
+  const isUrgent = useMemo(() => 
+    timeLeft.days === 0 && timeLeft.hours < 6, 
+    [timeLeft.days, timeLeft.hours]
+  );
 
   return (
     <div className={`flex items-center gap-1 text-sm font-mono ${isUrgent ? "text-red-500" : "text-muted-foreground"}`}>
@@ -57,13 +60,13 @@ function CountdownTimer({ endDate }: { endDate: string }) {
   );
 }
 
-function PromotionCard({
-  promotion,
-  onPurchase,
-}: {
+interface PromotionCardProps {
   promotion: ShopPromotion;
   onPurchase: (rewardId: string, discountedPrice: number) => void;
-}) {
+}
+
+const PromotionCard = forwardRef<HTMLDivElement, PromotionCardProps>(
+  function PromotionCard({ promotion, onPurchase }, ref) {
   if (!promotion.reward) return null;
 
   const originalPrice = promotion.reward.price_coins;
@@ -84,6 +87,7 @@ function PromotionCard({
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="relative"
@@ -190,7 +194,7 @@ function PromotionCard({
       </Card>
     </motion.div>
   );
-}
+});
 
 interface FlashSalesBannerProps {
   onPurchase: (rewardId: string) => void;

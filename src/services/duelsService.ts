@@ -167,7 +167,7 @@ export const duelsService = {
       .from("direct_duels")
       .select("duration_hours, challenger_id, opponent_id")
       .eq("id", duelId)
-      .single();
+      .maybeSingle();
 
     if (!duel) throw new Error("Duel not found");
 
@@ -228,7 +228,7 @@ export const duelsService = {
       .from("direct_duels")
       .select("*")
       .eq("id", duelId)
-      .single();
+      .maybeSingle();
 
     if (!duel) return;
 
@@ -249,7 +249,7 @@ export const duelsService = {
       .from("direct_duels")
       .select("*")
       .eq("id", duelId)
-      .single();
+      .maybeSingle();
 
     if (!duel) throw new Error("Duel not found");
 

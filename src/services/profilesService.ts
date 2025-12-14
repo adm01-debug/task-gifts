@@ -13,7 +13,7 @@ export const profilesService = {
       .from("profiles")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
     return data;
