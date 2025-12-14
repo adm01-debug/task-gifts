@@ -26,7 +26,9 @@ import {
   useBitrix24WebhookLogs,
   useBitrix24SyncMappings,
   useSyncBitrix24Users,
-  useBitrix24UserMappings
+  useBitrix24UserMappings,
+  useSyncBitrix24Calendar,
+  useBitrix24CalendarMappings
 } from "@/hooks/useBitrix24";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -35,9 +37,11 @@ export const Bitrix24Integration = () => {
   const { data: status, isLoading: statusLoading, refetch: refetchStatus } = useBitrix24Status();
   const { mutate: connect, isPending: connecting } = useConnectBitrix24();
   const { mutate: syncUsers, isPending: syncingUsers } = useSyncBitrix24Users();
+  const { mutate: syncCalendar, isPending: syncingCalendar } = useSyncBitrix24Calendar();
   const { data: webhookLogs } = useBitrix24WebhookLogs(20);
   const { data: syncMappings } = useBitrix24SyncMappings();
-  const { data: userMappings, refetch: refetchUserMappings } = useBitrix24UserMappings();
+  const { data: userMappings } = useBitrix24UserMappings();
+  const { data: calendarMappings } = useBitrix24CalendarMappings();
   const [activeTab, setActiveTab] = useState("status");
 
   const getStatusBadge = () => {
@@ -160,7 +164,7 @@ export const Bitrix24Integration = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="status" className="gap-2">
             <Activity className="h-4 w-4" />
             Atividade
@@ -169,9 +173,13 @@ export const Bitrix24Integration = () => {
             <UserCheck className="h-4 w-4" />
             Colaboradores
           </TabsTrigger>
+          <TabsTrigger value="calendar" className="gap-2">
+            <Calendar className="h-4 w-4" />
+            Calendário
+          </TabsTrigger>
           <TabsTrigger value="sync" className="gap-2">
             <RefreshCw className="h-4 w-4" />
-            Sincronização
+            Mapeamentos
           </TabsTrigger>
           <TabsTrigger value="logs" className="gap-2">
             <FileText className="h-4 w-4" />
@@ -307,6 +315,100 @@ export const Bitrix24Integration = () => {
                     variant="outline"
                   >
                     {syncingUsers ? 'Sincronizando...' : 'Iniciar Sincronização'}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="calendar" className="mt-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Sincronização de Calendário</CardTitle>
+                  <CardDescription>Eventos sincronizados do Bitrix24</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => syncCalendar()} 
+                  disabled={syncingCalendar || !status?.connected}
+                  size="sm"
+                >
+                  {syncingCalendar ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Sincronizando...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Sincronizar Calendário
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {calendarMappings?.length ? (
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-2">
+                    {calendarMappings.map((mapping: any) => {
+                      const metadata = mapping.metadata as Record<string, any> || {};
+                      
+                      return (
+                        <div 
+                          key={mapping.id} 
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-full bg-purple-500/10">
+                              <Calendar className="h-4 w-4 text-purple-500" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">{metadata.name || `Evento ${mapping.bitrix_id}`}</p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {metadata.date_from && (
+                                  <span>
+                                    {format(new Date(metadata.date_from), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                                  </span>
+                                )}
+                                {metadata.date_to && (
+                                  <>
+                                    <span>→</span>
+                                    <span>
+                                      {format(new Date(metadata.date_to), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {metadata.type || 'Evento'}
+                            </Badge>
+                            {mapping.last_synced_at && (
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(mapping.last_synced_at), "dd/MM HH:mm")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p className="mb-4">Nenhum evento sincronizado</p>
+                  <Button 
+                    onClick={() => syncCalendar()} 
+                    disabled={syncingCalendar || !status?.connected}
+                    variant="outline"
+                  >
+                    {syncingCalendar ? 'Sincronizando...' : 'Sincronizar Calendário'}
                   </Button>
                 </div>
               )}
