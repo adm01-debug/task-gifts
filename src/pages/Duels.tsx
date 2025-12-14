@@ -32,12 +32,18 @@ const DuelCard = ({
   onAccept,
   onDecline,
   onCancel,
+  isAccepting = false,
+  isDeclining = false,
+  isCancelling = false,
 }: { 
   duel: DuelWithProfiles;
   userId: string;
   onAccept: () => void;
   onDecline: () => void;
   onCancel: () => void;
+  isAccepting?: boolean;
+  isDeclining?: boolean;
+  isCancelling?: boolean;
 }) => {
   const isChallenger = duel.challenger_id === userId;
   const opponent = isChallenger ? duel.opponent : duel.challenger;
@@ -56,6 +62,7 @@ const DuelCard = ({
   const getStatusColor = () => {
     switch (duel.status) {
       case 'pending': return 'bg-warning/20 text-warning border-warning/30';
+      case 'accepted': return 'bg-primary/20 text-primary border-primary/30';
       case 'active': return 'bg-success/20 text-success border-success/30';
       case 'completed': return 'bg-secondary/20 text-secondary border-secondary/30';
       case 'declined': return 'bg-destructive/20 text-destructive border-destructive/30';
@@ -67,6 +74,7 @@ const DuelCard = ({
   const getStatusLabel = () => {
     switch (duel.status) {
       case 'pending': return isChallenger ? 'Aguardando' : 'Desafio Recebido';
+      case 'accepted': return 'Iniciando...';
       case 'active': return 'Em Andamento';
       case 'completed': return duel.winner_id === userId ? 'Vitória!' : duel.winner_id ? 'Derrota' : 'Empate';
       case 'declined': return 'Recusado';
@@ -196,14 +204,20 @@ const DuelCard = ({
             <Button 
               onClick={onAccept} 
               className="flex-1 bg-success hover:bg-success/90"
+              disabled={isAccepting || isDeclining}
             >
-              <Check className="w-4 h-4 mr-2" />
-              Aceitar
+              {isAccepting ? (
+                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
+              ) : (
+                <Check className="w-4 h-4 mr-2" />
+              )}
+              {isAccepting ? "Aceitando..." : "Aceitar"}
             </Button>
             <Button 
               onClick={onDecline} 
               variant="outline" 
               className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+              disabled={isAccepting || isDeclining}
             >
               <X className="w-4 h-4 mr-2" />
               Recusar
@@ -216,8 +230,9 @@ const DuelCard = ({
             onClick={onCancel} 
             variant="outline" 
             className="w-full"
+            disabled={isCancelling}
           >
-            Cancelar Desafio
+            {isCancelling ? "Cancelando..." : "Cancelar Desafio"}
           </Button>
         )}
 
@@ -368,14 +383,21 @@ const Duels = () => {
   const handleConfirmAction = () => {
     if (!confirmDialog.duelId || !user) return;
     
+    const duelIdToRestore = confirmDialog.duelId;
+    const previousStatus = confirmDialog.type === "decline" ? "pending" : "pending";
+    
     if (confirmDialog.type === "decline") {
       declineDuel.mutate({ duelId: confirmDialog.duelId, userId: user.id }, {
         onSuccess: () => {
           showUndoToast({
             message: `Duelo com ${confirmDialog.opponentName} recusado`,
             onUndo: async () => {
-              // In a real scenario, you'd have a restore function
-              // For now, just show a message
+              // Restore duel to pending status
+              const { supabase } = await import("@/integrations/supabase/client");
+              await supabase
+                .from("direct_duels")
+                .update({ status: previousStatus })
+                .eq("id", duelIdToRestore);
             },
           });
         },
@@ -386,7 +408,12 @@ const Duels = () => {
           showUndoToast({
             message: `Duelo com ${confirmDialog.opponentName} cancelado`,
             onUndo: async () => {
-              // Restore would happen here
+              // Restore duel to pending status
+              const { supabase } = await import("@/integrations/supabase/client");
+              await supabase
+                .from("direct_duels")
+                .update({ status: previousStatus })
+                .eq("id", duelIdToRestore);
             },
           });
         },
@@ -402,12 +429,6 @@ const Duels = () => {
       label: "Novo Duelo",
       onClick: () => setDialogOpen(true),
       color: "primary" as const,
-    },
-    {
-      icon: Trophy,
-      label: "Ver Ranking",
-      onClick: () => navigate("/"),
-      color: "warning" as const,
     },
   ];
 
@@ -518,6 +539,9 @@ const Duels = () => {
                   onAccept={() => acceptDuel.mutate({ duelId: duel.id, userId: user!.id })}
                   onDecline={() => handleDeclineClick(duel.id, duel.challenger?.display_name || "Oponente")}
                   onCancel={() => handleCancelClick(duel.id, duel.opponent?.display_name || "Oponente")}
+                  isAccepting={acceptDuel.isPending}
+                  isDeclining={declineDuel.isPending}
+                  isCancelling={cancelDuel.isPending}
                 />
               ))}
             </div>
