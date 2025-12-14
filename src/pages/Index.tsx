@@ -9,15 +9,12 @@ import { StatsGrid, QuickActions } from "@/components/StatsGrid";
 import { AchievementContainer, useAchievements } from "@/components/AchievementSystem";
 import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
 import { SeasonalEventBanner } from "@/components/SeasonalEventBanner";
-import { DashboardHeader, DashboardLeftColumn, DashboardRightColumn } from "@/components/dashboard";
+import { DashboardHeader, DashboardLeftColumn, DashboardRightColumn, DashboardFooter } from "@/components/dashboard";
 
 // Hooks
 import { useIsMobileWithHydration } from "@/hooks/use-mobile";
 import { useListenToRankChanges } from "@/hooks/useListenToRankChanges";
 import { useCompetencyAlerts } from "@/hooks/useCompetencyAlerts";
-
-// Constants
-import { DASHBOARD_TEXTS } from "@/constants/texts";
 
 const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";
 
@@ -103,7 +100,7 @@ function Index() {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto" role="main" aria-label="Dashboard principal">
           {/* Top Header */}
           <DashboardHeader onMenuClick={handleMenuClick} />
 
@@ -116,12 +113,13 @@ function Index() {
             <OnboardingWidget />
 
             {/* Stats Grid */}
-            <section>
+            <section aria-labelledby="stats-heading">
+              <h2 id="stats-heading" className="sr-only">Estatísticas do usuário</h2>
               <StatsGrid />
             </section>
 
             {/* Quick Actions */}
-            <section className="flex flex-wrap items-center gap-2 md:gap-4">
+            <section className="flex flex-wrap items-center gap-2 md:gap-4" aria-label="Ações rápidas">
               <QuickActions />
             </section>
 
@@ -136,12 +134,7 @@ function Index() {
           </div>
 
           {/* Footer */}
-          <footer className="px-4 md:px-6 py-4 border-t border-border text-center">
-            <p className="text-sm text-muted-foreground">
-              {DASHBOARD_TEXTS.footer.madeWith} <span className="text-primary">♥</span> {DASHBOARD_TEXTS.footer.by} • 
-              <span className="gradient-text font-semibold ml-1">{DASHBOARD_TEXTS.footer.tagline}</span>
-            </p>
-          </footer>
+          <DashboardFooter />
         </main>
       </div>
     </PageTransition>
