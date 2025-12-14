@@ -1,6 +1,7 @@
 import { useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { 
   ArrowLeft, Swords, Trophy, Clock, Send, X, Check,
   Users, Zap, Crown, Target, Timer, Shield
@@ -22,6 +23,7 @@ import {
   useAcceptDuel,
   useDeclineDuel,
   useCancelDuel,
+  duelKeys,
 } from "@/hooks/useDuels";
 import { DuelWithProfiles } from "@/services/duelsService";
 import { formatDistanceToNow, differenceInSeconds, format } from "date-fns";
@@ -364,6 +366,7 @@ CreateDuelDialog.displayName = "CreateDuelDialog";
 
 const Duels = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, loading } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -409,7 +412,7 @@ const Duels = () => {
                 .from("direct_duels")
                 .update({ status: "pending" })
                 .eq("id", duelIdToRestore);
-              window.location.reload();
+              queryClient.invalidateQueries({ queryKey: duelKeys.all });
             },
           });
         },
@@ -426,7 +429,7 @@ const Duels = () => {
                 .from("direct_duels")
                 .update({ status: "pending" })
                 .eq("id", duelIdToRestore);
-              window.location.reload();
+              queryClient.invalidateQueries({ queryKey: duelKeys.all });
             },
           });
         },
