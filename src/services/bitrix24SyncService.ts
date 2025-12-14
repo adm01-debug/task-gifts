@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { completeTask, getBitrixUsers, type Bitrix24User } from "./bitrix24Service";
+import { completeTask, getBitrixUsers, getCalendarEvents, createCalendarEvent, type Bitrix24User } from "./bitrix24Service";
 
 export interface UserSyncResult {
   synced: number;
@@ -227,6 +227,148 @@ export const bitrix24SyncService = {
       .select("*")
       .eq("entity_type", "profile")
       .eq("bitrix_entity_type", "user")
+      .order("last_synced_at", { ascending: false });
+
+    if (error) return [];
+    return data;
+  },
+
+  /**
+   * Sync calendar events from Bitrix24
+   */
+  async syncCalendarFromBitrix(): Promise<{ synced: number; errors: string[] }> {
+    const result = { synced: 0, errors: [] as string[] };
+
+    try {
+      // Fetch events from Bitrix24
+      const bitrixEvents = await getCalendarEvents();
+      
+      if (!bitrixEvents || bitrixEvents.length === 0) {
+        return result;
+      }
+
+      // Get existing calendar mappings
+      const { data: existingMappings } = await supabase
+        .from("bitrix24_sync_mappings")
+        .select("*")
+        .eq("entity_type", "calendar_event")
+        .eq("bitrix_entity_type", "calendar");
+
+      const mappingsByBitrixId = new Map(
+        (existingMappings || []).map(m => [m.bitrix_id, m])
+      );
+
+      for (const event of bitrixEvents) {
+        try {
+          const existingMapping = mappingsByBitrixId.get(event.ID);
+
+          if (existingMapping) {
+            // Update existing mapping
+            await supabase
+              .from("bitrix24_sync_mappings")
+              .update({
+                last_synced_at: new Date().toISOString(),
+                metadata: {
+                  name: event.NAME,
+                  description: event.DESCRIPTION,
+                  date_from: event.DATE_FROM,
+                  date_to: event.DATE_TO,
+                  type: event.CAL_TYPE,
+                  owner_id: event.OWNER_ID
+                }
+              })
+              .eq("id", existingMapping.id);
+          } else {
+            // Create new mapping
+            await supabase
+              .from("bitrix24_sync_mappings")
+              .insert({
+                entity_type: "calendar_event",
+                local_id: event.ID, // Using Bitrix ID as local reference
+                bitrix_entity_type: "calendar",
+                bitrix_id: event.ID,
+                sync_status: "synced",
+                last_synced_at: new Date().toISOString(),
+                metadata: {
+                  name: event.NAME,
+                  description: event.DESCRIPTION,
+                  date_from: event.DATE_FROM,
+                  date_to: event.DATE_TO,
+                  type: event.CAL_TYPE,
+                  owner_id: event.OWNER_ID
+                }
+              });
+          }
+
+          result.synced++;
+        } catch (e) {
+          const errorMsg = e instanceof Error ? e.message : "Erro desconhecido";
+          result.errors.push(`Evento ${event.ID}: ${errorMsg}`);
+        }
+      }
+
+      return result;
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Erro desconhecido";
+      result.errors.push(`Erro geral: ${errorMsg}`);
+      return result;
+    }
+  },
+
+  /**
+   * Create event in Bitrix24 calendar
+   */
+  async createEventInBitrix(eventData: {
+    name: string;
+    description?: string;
+    dateFrom: string;
+    dateTo: string;
+    localEventId?: string;
+  }): Promise<string | null> {
+    try {
+      const bitrixEventId = await createCalendarEvent({
+        NAME: eventData.name,
+        DESCRIPTION: eventData.description || '',
+        DATE_FROM: eventData.dateFrom,
+        DATE_TO: eventData.dateTo,
+      });
+
+      if (eventData.localEventId && bitrixEventId) {
+        // Create sync mapping
+        await supabase
+          .from("bitrix24_sync_mappings")
+          .insert({
+            entity_type: "calendar_event",
+            local_id: eventData.localEventId,
+            bitrix_entity_type: "calendar",
+            bitrix_id: bitrixEventId,
+            sync_status: "synced",
+            last_synced_at: new Date().toISOString(),
+            metadata: {
+              name: eventData.name,
+              description: eventData.description,
+              date_from: eventData.dateFrom,
+              date_to: eventData.dateTo
+            }
+          });
+      }
+
+      return bitrixEventId;
+    } catch (error) {
+      console.error("Failed to create event in Bitrix24:", error);
+      return null;
+    }
+  },
+
+  /**
+   * Get all calendar mappings
+   */
+  async getAllCalendarMappings() {
+    const { data, error } = await supabase
+      .from("bitrix24_sync_mappings")
+      .select("*")
+      .eq("entity_type", "calendar_event")
+      .eq("bitrix_entity_type", "calendar")
       .order("last_synced_at", { ascending: false });
 
     if (error) return [];

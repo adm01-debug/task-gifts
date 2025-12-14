@@ -240,3 +240,50 @@ export const useBitrix24UserMappings = () => {
     queryFn: bitrix24SyncService.getAllUserMappings,
   });
 };
+
+// Sync calendar from Bitrix24
+export const useSyncBitrix24Calendar = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: bitrix24SyncService.syncCalendarFromBitrix,
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-sync-mappings'] });
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-calendar-mappings'] });
+      
+      if (result.errors.length > 0) {
+        toast.warning(`Sincronização parcial: ${result.synced} eventos, ${result.errors.length} erros`);
+      } else {
+        toast.success(`${result.synced} eventos do calendário sincronizados`);
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(`Erro na sincronização: ${error.message}`);
+    },
+  });
+};
+
+// Create event in Bitrix24
+export const useCreateBitrix24CalendarEvent = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: bitrix24SyncService.createEventInBitrix,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-calendar'] });
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-calendar-mappings'] });
+      toast.success('Evento criado no calendário Bitrix24');
+    },
+    onError: (error: Error) => {
+      toast.error(`Erro ao criar evento: ${error.message}`);
+    },
+  });
+};
+
+// Calendar sync mappings
+export const useBitrix24CalendarMappings = () => {
+  return useQuery({
+    queryKey: ['bitrix24-calendar-mappings'],
+    queryFn: bitrix24SyncService.getAllCalendarMappings,
+  });
+};
