@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as bitrix24Service from "@/services/bitrix24Service";
+import { bitrix24SyncService } from "@/services/bitrix24SyncService";
 import { toast } from "sonner";
 
 // Connection status
@@ -207,5 +208,35 @@ export const useConnectBitrix24 = () => {
     onError: (error: Error) => {
       toast.error(`Erro ao conectar: ${error.message}`);
     },
+  });
+};
+
+// Sync users
+export const useSyncBitrix24Users = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: bitrix24SyncService.syncUsers,
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-sync-mappings'] });
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-user-mappings'] });
+      
+      if (result.errors.length > 0) {
+        toast.warning(`Sincronização parcial: ${result.synced} usuários, ${result.errors.length} erros`);
+      } else {
+        toast.success(`${result.synced} usuários sincronizados (${result.created} novos, ${result.updated} atualizados)`);
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(`Erro na sincronização: ${error.message}`);
+    },
+  });
+};
+
+// User sync mappings
+export const useBitrix24UserMappings = () => {
+  return useQuery({
+    queryKey: ['bitrix24-user-mappings'],
+    queryFn: bitrix24SyncService.getAllUserMappings,
   });
 };
