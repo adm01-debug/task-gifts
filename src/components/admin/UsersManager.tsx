@@ -99,6 +99,7 @@ export function UsersManager() {
   const [selectedRole, setSelectedRole] = useState<AppRole>("employee");
   const [selectedDept, setSelectedDept] = useState<string>("");
   const [removeRoleConfirm, setRemoveRoleConfirm] = useState<{ userId: string; role: AppRole } | null>(null);
+  const [removingDeptMemberId, setRemovingDeptMemberId] = useState<string | null>(null);
   
   // Bulk action states
   const [bulkRoleDialog, setBulkRoleDialog] = useState(false);
@@ -214,11 +215,14 @@ export function UsersManager() {
   };
 
   const handleRemoveDepartmentMember = async (memberId: string) => {
+    setRemovingDeptMemberId(memberId);
     try {
       await removeDepartmentMember.mutateAsync(memberId);
       toast.success("Removido do departamento");
     } catch (error) {
       toast.error("Erro ao remover do departamento");
+    } finally {
+      setRemovingDeptMemberId(null);
     }
   };
 
@@ -530,8 +534,13 @@ export function UsersManager() {
                                 key={dept.id}
                                 onClick={() => handleRemoveDepartmentMember(dept.id)}
                                 className="text-destructive"
+                                disabled={removingDeptMemberId === dept.id}
                               >
-                                <Trash2 className="w-4 h-4 mr-2" />
+                                {removingDeptMemberId === dept.id ? (
+                                  <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                )}
                                 {dept.name}
                               </DropdownMenuItem>
                             ))}

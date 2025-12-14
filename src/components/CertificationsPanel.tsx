@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Award, Clock, AlertTriangle, CheckCircle, RefreshCw, Calendar, Shield } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,10 +36,12 @@ const categoryConfig: Record<string, { label: string; color: string }> = {
 
 function CertificationCard({ 
   userCert, 
-  onRenew 
+  onRenew,
+  isRenewing,
 }: { 
   userCert: UserCertification; 
   onRenew: (id: string) => void;
+  isRenewing?: boolean;
 }) {
   const cert = userCert.certification;
   if (!cert) return null;
@@ -134,9 +137,14 @@ function CertificationCard({
               className="mt-3"
               variant={isExpired ? "destructive" : "default"}
               onClick={() => onRenew(userCert.id)}
+              disabled={isRenewing}
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              {isExpired ? 'Renovar Agora' : 'Agendar Renovação'}
+              {isRenewing ? (
+                <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              {isRenewing ? 'Renovando...' : isExpired ? 'Renovar Agora' : 'Agendar Renovação'}
             </Button>
           )}
         </div>
@@ -192,11 +200,19 @@ function AvailableCertificationCard({ cert }: { cert: Certification }) {
 }
 
 export function CertificationsPanel() {
+  const [renewingId, setRenewingId] = useState<string | null>(null);
   const { data: userCertifications, isLoading: loadingUserCerts } = useUserCertifications();
   const { data: allCertifications, isLoading: loadingAllCerts } = useCertifications();
   const { data: expiringCerts } = useExpiringCertifications(30);
   const { data: expiredCerts } = useExpiredCertifications();
   const renewMutation = useRenewCertification();
+
+  const handleRenew = (id: string) => {
+    setRenewingId(id);
+    renewMutation.mutate(id, {
+      onSettled: () => setRenewingId(null),
+    });
+  };
 
   const activeCerts = userCertifications?.filter(c => c.status === 'active') || [];
   const pendingCerts = allCertifications?.filter(
@@ -307,7 +323,8 @@ export function CertificationsPanel() {
                 <CertificationCard 
                   key={cert.id} 
                   userCert={cert}
-                  onRenew={(id) => renewMutation.mutate(id)}
+                  onRenew={handleRenew}
+                  isRenewing={renewingId === cert.id}
                 />
               ))
             )}
@@ -326,14 +343,16 @@ export function CertificationsPanel() {
                   <CertificationCard 
                     key={cert.id} 
                     userCert={cert}
-                    onRenew={(id) => renewMutation.mutate(id)}
+                    onRenew={handleRenew}
+                    isRenewing={renewingId === cert.id}
                   />
                 ))}
                 {expiringCerts?.map(cert => (
                   <CertificationCard 
                     key={cert.id} 
                     userCert={cert}
-                    onRenew={(id) => renewMutation.mutate(id)}
+                    onRenew={handleRenew}
+                    isRenewing={renewingId === cert.id}
                   />
                 ))}
               </>
