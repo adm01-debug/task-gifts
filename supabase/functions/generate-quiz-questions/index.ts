@@ -77,7 +77,7 @@ serve(async (req) => {
       contentContext += '\n';
     }
 
-    console.log('Content context length:', contentContext.length);
+    // Content context built from trail and modules
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -193,7 +193,7 @@ Retorne APENAS um JSON válido no seguinte formato:
       );
     }
 
-    console.log('Generated questions:', parsedQuestions.questions?.length);
+    // Questions generated successfully
 
     return new Response(
       JSON.stringify({

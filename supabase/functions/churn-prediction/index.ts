@@ -247,7 +247,7 @@ Retorne apenas colaboradores com risco médio ou alto no formato JSON.`;
     }
 
     const aiData = await aiResponse.json();
-    console.log("AI Response:", JSON.stringify(aiData, null, 2));
+    // AI response processed successfully
 
     // Extract the tool call result
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];

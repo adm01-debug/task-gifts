@@ -81,15 +81,18 @@ export const competencyService = {
     });
 
     // 2. Resolução de Problemas (based on quest completions by difficulty)
-    const questsByDifficulty = {
+    const questsByDifficulty: Record<string, number> = {
       easy: 0,
       medium: 0,
       hard: 0,
       expert: 0
     };
     questAssignments?.forEach(q => {
-      const difficulty = (q.custom_quests as any)?.difficulty || 'easy';
-      questsByDifficulty[difficulty as keyof typeof questsByDifficulty]++;
+      const questData = q.custom_quests as { difficulty?: string } | null;
+      const difficulty = questData?.difficulty || 'easy';
+      if (difficulty in questsByDifficulty) {
+        questsByDifficulty[difficulty]++;
+      }
     });
     const problemSolvingValue = Math.min(100, 
       questsByDifficulty.easy * 5 + 
@@ -126,9 +129,10 @@ export const competencyService = {
     });
 
     // 5. Liderança (based on achievements and mentorship)
-    const leadershipAchievements = userAchievements?.filter(
-      a => (a.achievements as any)?.category === 'leadership' || (a.achievements as any)?.category === 'social'
-    ).length || 0;
+    const leadershipAchievements = userAchievements?.filter(a => {
+      const achievementData = a.achievements as { category?: string } | null;
+      return achievementData?.category === 'leadership' || achievementData?.category === 'social';
+    }).length || 0;
     const leadershipValue = Math.min(100, leadershipAchievements * 20 + (kudosReceived?.length || 0) * 5);
     competencies.push({
       area: "Liderança",
@@ -138,9 +142,10 @@ export const competencyService = {
     });
 
     // 6. Comunicação (based on content types completed - video, text presentations)
-    const communicationModules = moduleProgress?.filter(m => 
-      ['video', 'text', 'infographic'].includes((m.trail_modules as any)?.content_type)
-    ).length || 0;
+    const communicationModules = moduleProgress?.filter(m => {
+      const moduleData = m.trail_modules as { content_type?: string } | null;
+      return ['video', 'text', 'infographic'].includes(moduleData?.content_type || '');
+    }).length || 0;
     const communicationValue = Math.min(100, communicationModules * 12);
     competencies.push({
       area: "Comunicação",
