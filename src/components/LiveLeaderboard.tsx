@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Crown, Medal, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -24,28 +25,31 @@ export const LiveLeaderboard = () => {
   const { data: profiles = [], isLoading } = useLeaderboard(10);
 
   // Calculate trend based on streak and recent activity
-  const calculateTrend = (streak: number, questsCompleted: number): "up" | "down" | "same" => {
+  const calculateTrend = useCallback((streak: number, questsCompleted: number): "up" | "down" | "same" => {
     if (streak >= 3) return "up"; // Active user with streak
     if (streak === 0 && questsCompleted === 0) return "down"; // Inactive user
     return "same"; // Moderate activity
-  };
+  }, []);
 
   // Transform profiles to leaderboard format
-  const players: LeaderboardPlayer[] = profiles.map((profile, index) => ({
-    rank: index + 1,
-    name: profile.display_name || profile.email?.split("@")[0] || "Usuário",
-    avatar: (profile.display_name || profile.email || "U").substring(0, 2).toUpperCase(),
-    xp: profile.xp,
-    level: profile.level,
-    streak: profile.streak,
-    trend: calculateTrend(profile.streak, profile.quests_completed),
-    isCurrentUser: profile.id === user?.id,
-  }));
+  const players: LeaderboardPlayer[] = useMemo(() => 
+    profiles.map((profile, index) => ({
+      rank: index + 1,
+      name: profile.display_name || profile.email?.split("@")[0] || "Usuário",
+      avatar: (profile.display_name || profile.email || "U").substring(0, 2).toUpperCase(),
+      xp: profile.xp,
+      level: profile.level,
+      streak: profile.streak,
+      trend: calculateTrend(profile.streak, profile.quests_completed),
+      isCurrentUser: profile.id === user?.id,
+    })),
+    [profiles, user?.id, calculateTrend]
+  );
 
-  const topThree = players.slice(0, 3);
-  const restOfPlayers = players.slice(3);
+  const topThree = useMemo(() => players.slice(0, 3), [players]);
+  const restOfPlayers = useMemo(() => players.slice(3), [players]);
 
-  const getRankIcon = (rank: number) => {
+  const getRankIcon = useCallback((rank: number) => {
     switch (rank) {
       case 1:
         return <Crown className="w-5 h-5 text-gold" />;
@@ -56,9 +60,9 @@ export const LiveLeaderboard = () => {
       default:
         return <span className="text-sm font-bold text-muted-foreground">#{rank}</span>;
     }
-  };
+  }, []);
 
-  const getTrendIcon = (trend: string) => {
+  const getTrendIcon = useCallback((trend: string) => {
     switch (trend) {
       case "up":
         return <TrendingUp className="w-4 h-4 text-success" />;
@@ -67,7 +71,11 @@ export const LiveLeaderboard = () => {
       default:
         return <Minus className="w-4 h-4 text-muted-foreground" />;
     }
-  };
+  }, []);
+
+  const handleViewRanking = useCallback(() => {
+    navigate("/estatisticas");
+  }, [navigate]);
 
   if (isLoading) {
     return (
@@ -243,7 +251,7 @@ export const LiveLeaderboard = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => navigate("/estatisticas")}
+          onClick={handleViewRanking}
           className="w-full py-2 rounded-lg bg-muted/50 hover:bg-muted text-sm font-medium transition-colors"
         >
           Ver ranking completo

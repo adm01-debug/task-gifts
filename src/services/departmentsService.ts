@@ -26,7 +26,7 @@ export const departmentsService = {
       .from("departments")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
     return data;
@@ -37,7 +37,7 @@ export const departmentsService = {
       .from("departments")
       .select("*, team_members(*)")
       .eq("id", id)
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
     return data;

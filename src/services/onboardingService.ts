@@ -171,7 +171,7 @@ export const onboardingService = {
       .from("profiles")
       .select("xp, coins")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     if (profile) {
       await supabase
