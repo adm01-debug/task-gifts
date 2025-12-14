@@ -110,8 +110,7 @@ export function useGiveKudos() {
         description: `Seu colega receberá ${result.comboResult?.finalXp || 25} XP${comboText}`,
       });
     },
-    onError: (error) => {
-      console.error("Failed to give kudos:", error);
+    onError: () => {
       toast({
         title: "Erro ao enviar reconhecimento",
         description: "Tente novamente mais tarde.",

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Filter, Calendar, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useKudosReceived, useKudosBadges, useKudosCount } from "@/hooks/useKudos";
 import { useProfiles } from "@/hooks/useProfiles";
@@ -140,7 +141,7 @@ export const ProfileKudosSection = ({ userId }: ProfileKudosSectionProps) => {
               <SelectValue placeholder="Badge" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os badges</SelectItem>
+              <AllSelectItem label="Todos os badges" />
               {badges.map((badge) => (
                 <SelectItem key={badge.id} value={badge.id}>
                   <span className="flex items-center gap-2">
@@ -159,7 +160,7 @@ export const ProfileKudosSection = ({ userId }: ProfileKudosSectionProps) => {
               <SelectValue placeholder="Período" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todo período</SelectItem>
+              <AllSelectItem label="Todo período" />
               <SelectItem value="week">Última semana</SelectItem>
               <SelectItem value="month">Último mês</SelectItem>
               <SelectItem value="quarter">Últimos 3 meses</SelectItem>

@@ -18,7 +18,6 @@ export const aiCoachService = {
       .limit(limit);
 
     if (error) {
-      console.error("Error fetching AI coach messages:", error);
       return [];
     }
 
@@ -33,7 +32,6 @@ export const aiCoachService = {
       .single();
 
     if (error) {
-      console.error("Error saving AI coach message:", error);
       return null;
     }
 
@@ -47,7 +45,6 @@ export const aiCoachService = {
       .eq("user_id", userId);
 
     if (error) {
-      console.error("Error clearing AI coach history:", error);
       return false;
     }
 

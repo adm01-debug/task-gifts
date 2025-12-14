@@ -201,7 +201,7 @@ async function processTaskEvent(supabase: any, eventType: string, data: any) {
     .select('*')
     .eq('bitrix_id', taskId.toString())
     .eq('bitrix_entity_type', 'task')
-    .single();
+    .maybeSingle();
 
   if (mapping && action === 'completed') {
     // Auto-complete the linked quest assignment
@@ -210,7 +210,7 @@ async function processTaskEvent(supabase: any, eventType: string, data: any) {
       .select('*')
       .eq('id', mapping.local_id)
       .is('completed_at', null)
-      .single();
+      .maybeSingle();
 
     if (assignment) {
       await supabase
@@ -223,7 +223,7 @@ async function processTaskEvent(supabase: any, eventType: string, data: any) {
         .from('custom_quests')
         .select('xp_reward, coin_reward')
         .eq('id', assignment.quest_id)
-        .single();
+        .maybeSingle();
 
       if (quest) {
         await supabase.rpc('add_user_xp', { 

@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import { usePublishedTrails, useUserEnrollments, useEnrollInTrail, useTrailPrerequisites } from "@/hooks/useTrails";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAuth } from "@/hooks/useAuth";
@@ -450,7 +451,7 @@ export default function LearningTrails() {
               <SelectValue placeholder="Departamento" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os Departamentos</SelectItem>
+              <AllSelectItem label="Todos os Departamentos" />
               {departments.map(dept => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.name}

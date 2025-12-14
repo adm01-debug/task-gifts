@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import {
   Popover,
   PopoverContent,
@@ -185,7 +186,7 @@ export function AdminChangeHistory() {
                 <SelectValue placeholder="Filtrar ação" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas as ações</SelectItem>
+                <AllSelectItem label="Todas as ações" />
                 {adminActions.map((action) => (
                   <SelectItem key={action} value={action}>
                     {actionConfig[action]?.label || action}

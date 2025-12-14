@@ -198,10 +198,12 @@ export const missionsService = {
       .maybeSingle();
 
     if (!progress) throw new Error("Progress not found");
-    if ((progress as any).claimed) throw new Error("Already claimed");
-    if (!(progress as any).completed_at) throw new Error("Mission not completed");
+    
+    const typedProgress = progress as { claimed?: boolean; completed_at?: string; mission?: DepartmentMission };
+    if (typedProgress.claimed) throw new Error("Already claimed");
+    if (!typedProgress.completed_at) throw new Error("Mission not completed");
 
-    const mission = (progress as any).mission as DepartmentMission;
+    const mission = typedProgress.mission as DepartmentMission;
 
     // Mark as claimed
     await supabase

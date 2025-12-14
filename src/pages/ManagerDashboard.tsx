@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import { useAuth } from "@/hooks/useAuth";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { useProfiles } from "@/hooks/useProfiles";
@@ -368,7 +369,7 @@ export default function ManagerDashboard() {
                   <SelectValue placeholder="Departamento" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
+                  <AllSelectItem />
                   {departments.map(dept => (
                     <SelectItem key={dept.id} value={dept.name}>{dept.name}</SelectItem>
                   ))}

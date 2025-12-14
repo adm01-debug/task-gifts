@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import { SkeletonMissionList } from "@/components/ui/skeleton";
 import { useDepartmentMissions, useClaimMissionReward } from "@/hooks/useMissions";
 import { useDepartments } from "@/hooks/useDepartments";
@@ -205,7 +206,7 @@ export default function DepartmentMissions() {
               <SelectValue placeholder="Departamento" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos / Geral</SelectItem>
+              <AllSelectItem label="Todos / Geral" />
               {departments.map(dept => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.name}
@@ -244,7 +245,7 @@ export default function DepartmentMissions() {
       </CardHeader>
 
       <CardContent>
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "daily" | "weekly" | "monthly")}>
           <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="daily" className="gap-1">
               <Clock className="h-4 w-4" />
