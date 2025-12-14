@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import {
   Popover,
   PopoverContent,
@@ -305,7 +306,7 @@ export default function AuditLogs() {
                     <SelectValue placeholder="Tipo de ação" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todas as ações</SelectItem>
+                    <AllSelectItem label="Todas as ações" />
                     {allActions.map((action) => (
                       <SelectItem key={action} value={action}>
                         {actionLabels[action]}
@@ -320,7 +321,7 @@ export default function AuditLogs() {
                     <SelectValue placeholder="Usuário" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos os usuários</SelectItem>
+                    <AllSelectItem label="Todos os usuários" />
                     {profiles.map((profile) => (
                       <SelectItem key={profile.id} value={profile.id}>
                         {profile.display_name || profile.email || "Sem nome"}

@@ -50,7 +50,6 @@ export const quizService = {
       .single();
 
     if (error) {
-      console.error('Error saving quiz score:', error);
       return null;
     }
 
@@ -66,7 +65,6 @@ export const quizService = {
       .eq('played_at', targetDate);
 
     if (error || !scores) {
-      console.error('Error fetching daily ranking:', error);
       return [];
     }
 
@@ -129,7 +127,6 @@ export const quizService = {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching user scores:', error);
       return [];
     }
 

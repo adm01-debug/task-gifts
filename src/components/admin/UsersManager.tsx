@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -264,7 +265,7 @@ export function UsersManager() {
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os Roles</SelectItem>
+                <AllSelectItem label="Todos os Roles" />
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="manager">Gestor</SelectItem>
                 <SelectItem value="employee">Colaborador</SelectItem>
@@ -276,7 +277,7 @@ export function UsersManager() {
                 <SelectValue placeholder="Departamento" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os Deptos</SelectItem>
+                <AllSelectItem label="Todos os Deptos" />
                 {departments?.map((dept) => (
                   <SelectItem key={dept.id} value={dept.name}>
                     {dept.name}

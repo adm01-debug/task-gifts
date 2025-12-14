@@ -66,11 +66,9 @@ export const auditService = {
         .from("audit_logs")
         .insert(insertData as any);
       
-      if (error) {
-        console.error("Failed to create audit log:", error);
-      }
-    } catch (e) {
-      console.error("Audit logging failed:", e);
+      // Fire and forget - no console.error in production
+    } catch {
+      // Silently fail - audit logging should not block main operations
     }
   },
 

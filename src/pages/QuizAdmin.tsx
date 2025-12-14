@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import {
   Dialog,
   DialogContent,
@@ -354,7 +355,7 @@ function QuizAdminContent() {
               <SelectValue placeholder="Tipo de Quiz" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os tipos</SelectItem>
+              <AllSelectItem label="Todos os tipos" />
               <SelectItem value="magic_cards">Cartas Mágicas</SelectItem>
               <SelectItem value="millionaire">Show do Milhão</SelectItem>
             </SelectContent>
@@ -365,7 +366,7 @@ function QuizAdminContent() {
                 <SelectValue placeholder="Categoria" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas categorias</SelectItem>
+                <AllSelectItem label="Todas categorias" />
                 {categories.map((cat) => (
                   <SelectItem key={cat} value={cat as string}>
                     {cat}

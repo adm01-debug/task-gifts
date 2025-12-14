@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { useDepartments } from "@/hooks/useDepartments";
@@ -206,7 +207,7 @@ export default function DepartmentRankings() {
                 <SelectValue placeholder="Departamento" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Ranking Geral</SelectItem>
+                <AllSelectItem label="Ranking Geral" />
                 {departments.map(dept => (
                   <SelectItem key={dept.id} value={dept.id}>
                     {dept.name}
@@ -215,7 +216,7 @@ export default function DepartmentRankings() {
               </SelectContent>
             </Select>
 
-            <Tabs value={periodType} onValueChange={(v) => setPeriodType(v as any)}>
+            <Tabs value={periodType} onValueChange={(v) => setPeriodType(v as "weekly" | "monthly")}>
               <TabsList>
                 <TabsTrigger value="weekly">Semanal</TabsTrigger>
                 <TabsTrigger value="monthly">Mensal</TabsTrigger>

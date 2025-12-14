@@ -124,7 +124,7 @@ serve(async (req) => {
       const { data: tokenRecord } = await supabase
         .from('bitrix24_tokens')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (!tokenRecord) {
         return new Response(
@@ -175,7 +175,7 @@ serve(async (req) => {
       const { data: tokenRecord, error } = await supabase
         .from('bitrix24_tokens')
         .select('domain, expires_at, member_id')
-        .single();
+        .maybeSingle();
 
       const configured = !!clientId && !!clientSecret && !!bitrixDomain;
       const connected = !!tokenRecord && !error;

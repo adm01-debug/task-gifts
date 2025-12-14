@@ -38,6 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AllSelectItem } from "@/components/ui/all-select-item";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -287,7 +288,7 @@ function Bitrix24CRMContent() {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <AllSelectItem label="Todos os Status" />
                   {activeTab === "leads" && (
                     <>
                       <SelectItem value="NEW">Novo</SelectItem>
