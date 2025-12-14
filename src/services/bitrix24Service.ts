@@ -202,6 +202,64 @@ export const pauseWorkday = () => callApi<BitrixTimemanStatus>('timeman', 'pause
 export const getTimemanSettings = () => callApi<any>('timeman', 'getSettings', {});
 export const getTimemanReports = (filter?: any) => callApi<any[]>('timeman', 'getReports', filter);
 
+// IM - Instant Messaging
+export interface BitrixDialog {
+  ID: string;
+  TYPE: string;
+  TITLE: string;
+  AVATAR?: string;
+  USER_ID?: string;
+  CHAT_ID?: string;
+  COUNTER?: number;
+  DATE_LAST_MESSAGE?: string;
+}
+
+export interface BitrixMessage {
+  ID: string;
+  AUTHOR_ID: string;
+  TEXT: string;
+  DATE_CREATE: string;
+  CHAT_ID?: string;
+  DIALOG_ID?: string;
+}
+
+export interface BitrixNotification {
+  ID: string;
+  TYPE: string;
+  DATE: string;
+  TITLE?: string;
+  TEXT: string;
+  FROM_USER_ID?: string;
+  NOTIFY_TAG?: string;
+}
+
+export const getDialogs = () => callApi<BitrixDialog[]>('im', 'getDialogs', {});
+export const getMessages = (dialogId: string, limit = 20) => 
+  callApi<BitrixMessage[]>('im', 'getMessages', { DIALOG_ID: dialogId, LIMIT: limit });
+export const sendMessage = (dialogId: string, message: string) => 
+  callApi<number>('im', 'sendMessage', { DIALOG_ID: dialogId, MESSAGE: message });
+export const getUnreadCounters = () => callApi<any>('im', 'getUnread', {});
+export const markDialogRead = (dialogId: string) => 
+  callApi<boolean>('im', 'markRead', { DIALOG_ID: dialogId });
+export const getChatInfo = (chatId: string) => callApi<any>('im', 'getChatInfo', { CHAT_ID: chatId });
+export const createGroupChat = (title: string, userIds: string[]) => 
+  callApi<number>('im', 'createChat', { TITLE: title, USERS: userIds, TYPE: 'CHAT' });
+export const getUserStatus = () => callApi<any>('im', 'getUserStatus', {});
+
+// Notifications
+export const sendNotification = (userId: string, message: string, tag?: string) => 
+  callApi<number>('notify', 'send', { USER_ID: userId, MESSAGE: message, TAG: tag });
+export const sendSystemNotification = (userId: string, message: string, tag?: string) => 
+  callApi<number>('notify', 'sendSystem', { USER_ID: userId, MESSAGE: message, TAG: tag });
+export const getNotifications = (limit = 50) => 
+  callApi<BitrixNotification[]>('notify', 'getList', { LIMIT: limit });
+export const markNotificationRead = (id: string) => 
+  callApi<boolean>('notify', 'markRead', { ID: id });
+export const deleteNotification = (id: string) => 
+  callApi<boolean>('notify', 'delete', { ID: id });
+export const confirmNotification = (id: string) => 
+  callApi<boolean>('notify', 'confirm', { ID: id });
+
 // Raw API call for custom methods
 export const callRawMethod = <T>(method: string, params?: any) => 
   callApi<T>('raw', method, params);
