@@ -108,7 +108,7 @@ serve(async (req) => {
           .gte('created_at', sevenDaysAgo.toISOString());
 
         const recentXp = xpLogs?.reduce((acc, log) => {
-          const xp = (log.new_data as any)?.xp_gained || 0;
+          const xp = (log.new_data as { xp_gained?: number } | null)?.xp_gained || 0;
           return acc + xp;
         }, 0) || 0;
 

@@ -70,7 +70,7 @@ function useXpHistory(userId: string | undefined, days: number = 30) {
       
       data?.forEach((log) => {
         const day = format(new Date(log.created_at), "yyyy-MM-dd");
-        const xpGained = (log.metadata as any)?.xp_gained || 0;
+        const xpGained = (log.metadata as { xp_gained?: number } | null)?.xp_gained || 0;
         dailyXp[day] = (dailyXp[day] || 0) + xpGained;
       });
 
@@ -222,7 +222,7 @@ export default function PersonalStats() {
   // Dados para gráfico de raridade de conquistas
   const achievementsByRarity = userAchievements?.reduce(
     (acc, ua) => {
-      const achievement = ua.achievement as any;
+      const achievement = ua.achievement as { rarity?: string } | null;
       const rarity = achievement?.rarity || "common";
       acc[rarity] = (acc[rarity] || 0) + 1;
       return acc;

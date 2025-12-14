@@ -55,7 +55,7 @@ export function CompetencyAlertsPanel() {
 
       for (const member of teamMembers) {
         const userId = member.user_id;
-        const profile = member.profiles as any;
+        const profile = member.profiles as { display_name?: string; email?: string; xp?: number; level?: number; quests_completed?: number; streak?: number } | null;
 
         // Calculate competencies (simplified version - full calc in edge function)
         const { data: moduleProgress } = await supabase
