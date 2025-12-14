@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow, subDays, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -84,7 +84,7 @@ export default function SocialFeedPage() {
     return null;
   }
 
-  const handleLike = (id: string) => {
+  const handleLike = useCallback((id: string) => {
     setLikedItems((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -94,46 +94,48 @@ export default function SocialFeedPage() {
       }
       return next;
     });
-  };
+  }, []);
 
-  // Filter activities
-  const filteredActivities = activities.filter((activity) => {
-    // Type filter
-    if (activityType !== "all" && activity.type !== activityType) {
-      return false;
-    }
+  // Filter activities - memoized
+  const filteredActivities = useMemo(() => {
+    return activities.filter((activity) => {
+      // Type filter
+      if (activityType !== "all" && activity.type !== activityType) {
+        return false;
+      }
 
-    // Period filter
-    const activityDate = new Date(activity.createdAt);
-    const now = new Date();
+      // Period filter
+      const activityDate = new Date(activity.createdAt);
+      const now = new Date();
 
-    if (period === "today") {
-      const todayStart = startOfDay(now);
-      const todayEnd = endOfDay(now);
-      if (activityDate < todayStart || activityDate > todayEnd) return false;
-    } else if (period === "week") {
-      const weekAgo = subDays(now, 7);
-      if (activityDate < weekAgo) return false;
-    } else if (period === "month") {
-      const monthAgo = subDays(now, 30);
-      if (activityDate < monthAgo) return false;
-    } else if (period === "custom" && customDateRange.from) {
-      const from = startOfDay(customDateRange.from);
-      const to = customDateRange.to ? endOfDay(customDateRange.to) : endOfDay(now);
-      if (activityDate < from || activityDate > to) return false;
-    }
+      if (period === "today") {
+        const todayStart = startOfDay(now);
+        const todayEnd = endOfDay(now);
+        if (activityDate < todayStart || activityDate > todayEnd) return false;
+      } else if (period === "week") {
+        const weekAgo = subDays(now, 7);
+        if (activityDate < weekAgo) return false;
+      } else if (period === "month") {
+        const monthAgo = subDays(now, 30);
+        if (activityDate < monthAgo) return false;
+      } else if (period === "custom" && customDateRange.from) {
+        const from = startOfDay(customDateRange.from);
+        const to = customDateRange.to ? endOfDay(customDateRange.to) : endOfDay(now);
+        if (activityDate < from || activityDate > to) return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [activities, activityType, period, customDateRange]);
 
-  // Stats
-  const stats = {
+  // Stats - memoized
+  const stats = useMemo(() => ({
     total: filteredActivities.length,
     xpGained: filteredActivities.filter((a) => a.type === "xp_gained").length,
     levelUps: filteredActivities.filter((a) => a.type === "level_up").length,
     kudos: filteredActivities.filter((a) => a.type === "kudos_given" || a.type === "kudos_received").length,
     quests: filteredActivities.filter((a) => a.type === "quest_completed").length,
-  };
+  }), [filteredActivities]);
 
   return (
     <div className="min-h-screen bg-background">
