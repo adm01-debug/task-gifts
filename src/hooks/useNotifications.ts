@@ -36,8 +36,6 @@ export function useNotifications(limit = 50) {
   useEffect(() => {
     if (!user?.id) return;
 
-    console.log("Setting up realtime subscription for notifications");
-
     const channel = supabase
       .channel("notifications-realtime")
       .on(
@@ -49,7 +47,6 @@ export function useNotifications(limit = 50) {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          console.log("New notification received:", payload);
           const newNotification = payload.new as Notification;
 
           // Update cache immediately
@@ -80,7 +77,6 @@ export function useNotifications(limit = 50) {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          console.log("Notification updated:", payload);
           const updatedNotification = payload.new as Notification;
 
           // Update cache
@@ -107,7 +103,6 @@ export function useNotifications(limit = 50) {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          console.log("Notification deleted:", payload);
           const deletedId = (payload.old as { id: string }).id;
 
           // Update cache
@@ -123,12 +118,10 @@ export function useNotifications(limit = 50) {
         }
       )
       .subscribe((status) => {
-        console.log("Realtime subscription status:", status);
         setRealtimeEnabled(status === "SUBSCRIBED");
       });
 
     return () => {
-      console.log("Cleaning up realtime subscription");
       supabase.removeChannel(channel);
     };
   }, [user?.id, queryClient, toast]);

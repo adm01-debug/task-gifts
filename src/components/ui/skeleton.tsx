@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import { forwardRef } from "react";
 
 const skeletonVariants = cva(
   "rounded-md animate-pulse",
@@ -161,6 +162,9 @@ function SkeletonList({ items = 5, className, ...props }: SkeletonProps & { item
   );
 }
 
+// Pre-computed heights for consistent rendering
+const CHART_BAR_HEIGHTS = [65, 42, 88, 35, 72, 55, 80];
+
 function SkeletonChart({ className, ...props }: SkeletonProps) {
   return (
     <div className={cn("p-4 rounded-xl border border-border bg-card", className)} {...props}>
@@ -169,13 +173,13 @@ function SkeletonChart({ className, ...props }: SkeletonProps) {
         <Skeleton variant="shimmer" shape="pill" className="h-8 w-24" />
       </div>
       <div className="flex items-end gap-2 h-40">
-        {Array.from({ length: 7 }).map((_, i) => (
+        {CHART_BAR_HEIGHTS.map((height, i) => (
           <Skeleton 
             key={i}
             variant="glow"
             className="flex-1 rounded-t-md"
             style={{ 
-              height: `${30 + Math.random() * 70}%`,
+              height: `${height}%`,
               animationDelay: `${i * 100}ms`
             }}
           />
@@ -466,17 +470,19 @@ function SkeletonActivity({ className, ...props }: SkeletonProps) {
 }
 
 // List of activity skeletons
-function SkeletonActivityList({ count = 5, className, ...props }: SkeletonProps & { count?: number }) {
-  return (
-    <div className={cn("space-y-1", className)} {...props}>
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} style={{ animationDelay: `${i * 75}ms` }}>
-          <SkeletonActivity />
-        </div>
-      ))}
-    </div>
-  );
-}
+const SkeletonActivityList = forwardRef<HTMLDivElement, SkeletonProps & { count?: number }>(
+  function SkeletonActivityList({ count = 5, className, ...props }, ref) {
+    return (
+      <div ref={ref} className={cn("space-y-1", className)} {...props}>
+        {Array.from({ length: count }).map((_, i) => (
+          <div key={i} style={{ animationDelay: `${i * 75}ms` }}>
+            <SkeletonActivity />
+          </div>
+        ))}
+      </div>
+    );
+  }
+);
 
 export { 
   Skeleton,

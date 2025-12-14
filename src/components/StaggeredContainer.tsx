@@ -1,6 +1,6 @@
 import { motion, Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ReactNode } from "react";
+import { ReactNode, forwardRef } from "react";
 
 interface StaggeredContainerProps {
   children: ReactNode;
@@ -147,30 +147,30 @@ const slideInRightVariants: Variants = {
   },
 };
 
-export function StaggeredItemLeft({ 
-  children, 
-  className,
-}: StaggeredItemProps) {
-  return (
-    <motion.div
-      variants={slideInLeftVariants}
-      className={cn("", className)}
-    >
-      {children}
-    </motion.div>
-  );
-}
+export const StaggeredItemLeft = forwardRef<HTMLDivElement, StaggeredItemProps>(
+  function StaggeredItemLeft({ children, className }, ref) {
+    return (
+      <motion.div
+        ref={ref}
+        variants={slideInLeftVariants}
+        className={cn("", className)}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+);
 
-export function StaggeredItemRight({ 
-  children, 
-  className,
-}: StaggeredItemProps) {
-  return (
-    <motion.div
-      variants={slideInRightVariants}
-      className={cn("", className)}
-    >
-      {children}
-    </motion.div>
-  );
-}
+export const StaggeredItemRight = forwardRef<HTMLDivElement, StaggeredItemProps>(
+  function StaggeredItemRight({ children, className }, ref) {
+    return (
+      <motion.div
+        ref={ref}
+        variants={slideInRightVariants}
+        className={cn("", className)}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+);
