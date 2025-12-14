@@ -193,7 +193,10 @@ export const quizQuestionsService = {
       .update(updateData)
       .eq('id', questionId)
       .select()
-      .single();
+      .maybeSingle();
+
+    if (qError) throw qError;
+    if (!question) throw new Error('Question not found');
 
     if (qError) throw qError;
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
@@ -98,19 +98,22 @@ export function DepartmentsManager() {
   const removeMember = useRemoveDepartmentMember();
   const setManager = useSetDepartmentManager();
 
-  // Build department members map
-  const deptMembersMap = new Map<string, Array<{ memberId: string; userId: string; isManager: boolean; profile: any }>>();
-  allTeamMembers?.forEach((tm) => {
-    const profile = profiles?.find((p) => p.id === tm.user_id);
-    const existing = deptMembersMap.get(tm.department_id) || [];
-    existing.push({
-      memberId: tm.id,
-      userId: tm.user_id,
-      isManager: tm.is_manager,
-      profile,
+  // Build department members map (memoized)
+  const deptMembersMap = useMemo(() => {
+    const map = new Map<string, Array<{ memberId: string; userId: string; isManager: boolean; profile: any }>>();
+    allTeamMembers?.forEach((tm) => {
+      const profile = profiles?.find((p) => p.id === tm.user_id);
+      const existing = map.get(tm.department_id) || [];
+      existing.push({
+        memberId: tm.id,
+        userId: tm.user_id,
+        isManager: tm.is_manager,
+        profile,
+      });
+      map.set(tm.department_id, existing);
     });
-    deptMembersMap.set(tm.department_id, existing);
-  });
+    return map;
+  }, [allTeamMembers, profiles]);
 
   const handleCreate = () => {
     setEditingDept(null);

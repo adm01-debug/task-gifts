@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -35,7 +35,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const [claimingStepIds, setClaimingStepIds] = useState<Set<string>>(new Set());
   const [completingStepIds, setCompletingStepIds] = useState<Set<string>>(new Set());
 
-  const tutorialSlides = [
+  const tutorialSlides = useMemo(() => [
     {
       icon: "🎮",
       title: "Bem-vindo ao Task Gifts!",
@@ -60,7 +60,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
       description:
         "Participe dos rankings, envie kudos para colegas e ajude seu departamento a alcançar o topo!",
     },
-  ];
+  ], []);
 
   const handleTutorialNext = useCallback(() => {
     if (tutorialStep < tutorialSlides.length - 1) {
