@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Flame, Zap, Trophy, Target, Users, BarChart3, Gift, Settings, Home, Medal, X, ClipboardList, PlusCircle, Shield, Activity, BookOpen, Clock, LineChart, ShoppingBag, MessageSquare, TrendingUp, Swords, Heart, Gamepad2, HelpCircle, Bot, Search, Link2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -64,21 +64,33 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
   const streak = profile?.streak || 0;
   const coins = profile?.coins || 0;
 
-  // Calculate XP progress to next level
-  const xpForLevel = (lvl: number) => Math.floor(100 * Math.pow(1.5, lvl - 1));
-  const xpForCurrentLevel = xpForLevel(level);
-  const xpForNextLevel = xpForLevel(level + 1);
-  const xpInCurrentLevel = xp - xpForCurrentLevel;
-  const xpNeededForNext = xpForNextLevel - xpForCurrentLevel;
-  const xpProgress = xpNeededForNext > 0 ? Math.min(100, (xpInCurrentLevel / xpNeededForNext) * 100) : 0;
+  // Memoize XP calculations
+  const { xpInCurrentLevel, xpNeededForNext, xpProgress } = useMemo(() => {
+    const xpForLevel = (lvl: number) => Math.floor(100 * Math.pow(1.5, lvl - 1));
+    const xpForCurrentLevel = xpForLevel(level);
+    const xpForNextLevel = xpForLevel(level + 1);
+    const inCurrent = xp - xpForCurrentLevel;
+    const neededForNext = xpForNextLevel - xpForCurrentLevel;
+    return {
+      xpInCurrentLevel: inCurrent,
+      xpNeededForNext: neededForNext,
+      xpProgress: neededForNext > 0 ? Math.min(100, (inCurrent / neededForNext) * 100) : 0,
+    };
+  }, [level, xp]);
 
-  const handleItemClick = (item: NavItem) => {
+  // Memoize handlers
+  const handleItemClick = useCallback((item: NavItem) => {
     setActiveItem(item.label);
     if (item.path) {
       navigate(item.path);
     }
     onClose();
-  };
+  }, [navigate, onClose]);
+
+  const handleSettingsClick = useCallback(() => {
+    navigate("/profile");
+    onClose();
+  }, [navigate, onClose]);
 
   return (
     <Drawer open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -250,10 +262,7 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
           </div>
           <motion.button
             whileTap={{ scale: 0.98 }}
-            onClick={() => {
-              navigate("/profile");
-              onClose();
-            }}
+            onClick={handleSettingsClick}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-muted transition-colors"
           >
             <Settings className="w-6 h-6" />
