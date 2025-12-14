@@ -61,6 +61,7 @@ export default function Mentorship() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [completingMissionId, setCompletingMissionId] = useState<string | null>(null);
+  const [claimingMissionId, setClaimingMissionId] = useState<string | null>(null);
   const [requestingMentorId, setRequestingMentorId] = useState<string | null>(null);
   const [acceptingRequestId, setAcceptingRequestId] = useState<string | null>(null);
   
@@ -125,6 +126,7 @@ export default function Mentorship() {
     const prog = getMissionProgress(mission.id);
     if (!prog || !activePair) return;
 
+    setClaimingMissionId(mission.id);
     confetti({
       particleCount: 100,
       spread: 70,
@@ -137,6 +139,8 @@ export default function Mentorship() {
       xpReward: mission.xp_reward,
       coinReward: mission.coin_reward,
       pairId: activePair.id,
+    }, {
+      onSettled: () => setClaimingMissionId(null),
     });
   };
 
@@ -327,10 +331,11 @@ export default function Mentorship() {
                                 <Button
                                   size="sm"
                                   onClick={() => handleClaimReward(mission)}
+                                  disabled={claimingMissionId === mission.id}
                                   className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
                                 >
                                   <Gift className="h-4 w-4 mr-1" />
-                                  Resgatar
+                                  {claimingMissionId === mission.id ? "..." : "Resgatar"}
                                 </Button>
                               ) : isComplete ? (
                                 <Badge className="bg-green-500/20 text-green-400">
