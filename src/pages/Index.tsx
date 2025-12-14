@@ -1,4 +1,7 @@
-import { useState, useCallback, memo } from "react";
+// Core & Libs
+import { useState, useCallback, useEffect } from "react";
+
+// Components
 import { PageTransition } from "@/components/PageTransition";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileDrawer } from "@/components/MobileDrawer";
@@ -7,9 +10,16 @@ import { AchievementContainer, useAchievements } from "@/components/AchievementS
 import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
 import { SeasonalEventBanner } from "@/components/SeasonalEventBanner";
 import { DashboardHeader, DashboardLeftColumn, DashboardRightColumn } from "@/components/dashboard";
-import { useIsMobile } from "@/hooks/use-mobile";
+
+// Hooks
+import { useIsMobileWithHydration } from "@/hooks/use-mobile";
 import { useListenToRankChanges } from "@/hooks/useListenToRankChanges";
 import { useCompetencyAlerts } from "@/hooks/useCompetencyAlerts";
+
+// Constants
+import { DASHBOARD_TEXTS } from "@/constants/texts";
+
+const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";
 
 /**
  * Index - Main Dashboard Page
@@ -19,28 +29,56 @@ import { useCompetencyAlerts } from "@/hooks/useCompetencyAlerts";
  * - Layout is split into semantic sub-components for maintainability
  * - Below-the-fold widgets use LazyWidget with Intersection Observer
  * - Side-effect hooks are explicitly named for clarity
+ * - Sidebar state persists in localStorage
  */
-const Index = memo(function Index() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+function Index() {
+  // Persist sidebar state in localStorage
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+  
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const { achievements, hideAchievement, levelUp, closeLevelUp } = useAchievements();
-  const isMobile = useIsMobile();
+  
+  // Defensive defaults for useAchievements
+  const { 
+    achievements = [], 
+    hideAchievement = () => {}, 
+    levelUp = null, 
+    closeLevelUp = () => {} 
+  } = useAchievements() ?? {};
+  
+  // Use hydration-aware mobile detection to prevent layout shift
+  const { isMobile, isHydrated } = useIsMobileWithHydration();
 
   // Side-effect listeners - explicitly named for clarity
   useListenToRankChanges();
   useCompetencyAlerts();
 
+  // Persist sidebar state to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, String(sidebarCollapsed));
+    } catch {
+      // Ignore localStorage errors (e.g., private browsing)
+    }
+  }, [sidebarCollapsed]);
+
   // Memoized handlers
   const handleCloseMobileDrawer = useCallback(() => setMobileDrawerOpen(false), []);
   const handleToggleSidebar = useCallback(() => setSidebarCollapsed(prev => !prev), []);
   
+  // Unified menu click - reuses handleToggleSidebar to avoid duplication
   const handleMenuClick = useCallback(() => {
     if (isMobile) {
       setMobileDrawerOpen(true);
     } else {
-      setSidebarCollapsed(prev => !prev);
+      handleToggleSidebar();
     }
-  }, [isMobile]);
+  }, [isMobile, handleToggleSidebar]);
 
   return (
     <PageTransition>
@@ -56,8 +94,8 @@ const Index = memo(function Index() {
         {/* Mobile Drawer */}
         <MobileDrawer open={mobileDrawerOpen} onClose={handleCloseMobileDrawer} />
 
-        {/* Desktop Sidebar - Hidden on mobile */}
-        {!isMobile && (
+        {/* Desktop Sidebar - Hidden on mobile, waits for hydration to prevent layout shift */}
+        {isHydrated && !isMobile && (
           <AppSidebar 
             collapsed={sidebarCollapsed} 
             onToggle={handleToggleSidebar} 
@@ -100,14 +138,14 @@ const Index = memo(function Index() {
           {/* Footer */}
           <footer className="px-4 md:px-6 py-4 border-t border-border text-center">
             <p className="text-sm text-muted-foreground">
-              Feito com <span className="text-primary">♥</span> por Task Gifts • 
-              <span className="gradient-text font-semibold ml-1">Melhor que o Figma</span>
+              {DASHBOARD_TEXTS.footer.madeWith} <span className="text-primary">♥</span> {DASHBOARD_TEXTS.footer.by} • 
+              <span className="gradient-text font-semibold ml-1">{DASHBOARD_TEXTS.footer.tagline}</span>
             </p>
           </footer>
         </main>
       </div>
     </PageTransition>
   );
-});
+}
 
 export default Index;
