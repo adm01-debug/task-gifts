@@ -150,9 +150,10 @@ export const missionsService = {
         current_value: 0,
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Failed to create mission progress");
     return data as UserMissionProgress;
   },
 
@@ -180,9 +181,10 @@ export const missionsService = {
       })
       .eq("id", progress.id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Failed to update mission progress");
     return data as UserMissionProgress;
   },
 

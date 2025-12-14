@@ -62,9 +62,10 @@ export const questsService = {
       .from("custom_quests")
       .insert(quest)
       .select()
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
+    if (!data) throw new Error("Failed to create quest");
 
     // Audit quest creation
     try {
@@ -82,9 +83,10 @@ export const questsService = {
       .update(updates)
       .eq("id", id)
       .select()
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
+    if (!data) throw new Error("Quest not found");
     return data;
   },
 
@@ -122,9 +124,10 @@ export const questsService = {
       .from("quest_steps")
       .insert(step)
       .select()
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
+    if (!data) throw new Error("Failed to create quest step");
     return data;
   },
 
@@ -173,9 +176,10 @@ export const questsService = {
       .from("quest_assignments")
       .insert({ quest_id: questId, user_id: userId })
       .select()
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
+    if (!data) throw new Error("Failed to create quest assignment");
 
     // Get quest details for notification
     try {
@@ -196,9 +200,10 @@ export const questsService = {
       .update({ current_step: currentStep })
       .eq("id", assignmentId)
       .select()
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
+    if (!data) throw new Error("Assignment not found");
     return data;
   },
 
@@ -212,9 +217,10 @@ export const questsService = {
       .update({ completed_at: new Date().toISOString() })
       .eq("id", assignmentId)
       .select()
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
+    if (!data) throw new Error("Assignment not found");
 
     // Get quest details for notification and audit
     let quest: Quest | null = null;
