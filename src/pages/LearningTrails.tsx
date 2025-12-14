@@ -19,8 +19,8 @@ import { TrailRecommendations } from "@/components/TrailRecommendations";
 import { TrailDependencyTree } from "@/components/TrailDependencyTree";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { MobileHeader } from "@/components/MobileHeader";
 import type { LearningTrail, TrailEnrollment } from "@/services/trailsService";
-
 const statusConfig = {
   not_started: { label: "Iniciar", color: "bg-primary", icon: Play },
   in_progress: { label: "Continuar", color: "bg-amber-500", icon: ChevronRight },
@@ -314,7 +314,8 @@ export default function LearningTrails() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container max-w-7xl mx-auto px-4 py-8">
+      <MobileHeader title="Trilhas" />
+      <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
