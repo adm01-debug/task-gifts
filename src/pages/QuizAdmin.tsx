@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, ArrowLeft, Trash2, Edit2, Eye, EyeOff, 
@@ -117,26 +117,30 @@ function QuizAdminContent() {
   const deleteQuestion = useDeleteQuizQuestion();
   const toggleActive = useToggleQuizQuestionActive();
 
-  // Extract unique categories from questions
-  const categories = [...new Set(questions?.map(q => q.category).filter(Boolean) || [])].sort();
+  // Extract unique categories from questions (memoized)
+  const categories = useMemo(() => 
+    [...new Set(questions?.map(q => q.category).filter(Boolean) || [])].sort(),
+    [questions]
+  );
 
-  const filteredQuestions = questions?.filter(q => {
+  // Filtered questions (memoized)
+  const filteredQuestions = useMemo(() => questions?.filter(q => {
     const matchesType = filterType === 'all' || q.quiz_type === filterType;
     const matchesCategory = filterCategory === 'all' || q.category === filterCategory;
     const matchesSearch = q.question.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesType && matchesCategory && matchesSearch;
-  }) || [];
+  }) || [], [questions, filterType, filterCategory, searchQuery]);
 
-  const handleOpenCreate = () => {
+  const handleOpenCreate = useCallback(() => {
     setEditingId(null);
     setForm(emptyForm);
     setIsDialogOpen(true);
-  };
+  }, []);
 
-  const handleOpenEdit = (id: string) => {
+  const handleOpenEdit = useCallback((id: string) => {
     setEditingId(id);
     setIsDialogOpen(true);
-  };
+  }, []);
 
   // Load edit data when available
   if (editingId && editQuestion && form.question !== editQuestion.question) {
@@ -155,7 +159,7 @@ function QuizAdminContent() {
     });
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!form.question.trim()) {
       toast.error("Pergunta é obrigatória");
       return;
@@ -195,9 +199,9 @@ function QuizAdminContent() {
     } catch (error) {
       toast.error("Erro ao salvar pergunta");
     }
-  };
+  }, [form, editingId, updateQuestion, createQuestion]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!deleteId) return;
     try {
       await deleteQuestion.mutateAsync(deleteId);
@@ -206,40 +210,47 @@ function QuizAdminContent() {
     } catch (error) {
       toast.error("Erro ao excluir");
     }
-  };
+  }, [deleteId, deleteQuestion]);
 
-  const handleToggleActive = async (id: string, isActive: boolean) => {
+  const handleToggleActive = useCallback(async (id: string, isActive: boolean) => {
     try {
       await toggleActive.mutateAsync({ id, isActive: !isActive });
       toast.success(isActive ? "Pergunta desativada" : "Pergunta ativada");
     } catch (error) {
       toast.error("Erro ao alterar status");
     }
-  };
+  }, [toggleActive]);
 
-  const updateOption = (index: number, field: keyof OptionForm, value: string | boolean) => {
-    const newOptions = [...form.options];
-    if (field === 'is_correct' && value === true) {
-      // Uncheck others
-      newOptions.forEach((o, i) => o.is_correct = i === index);
-    } else {
-      newOptions[index] = { ...newOptions[index], [field]: value };
-    }
-    setForm({ ...form, options: newOptions });
-  };
+  const updateOption = useCallback((index: number, field: keyof OptionForm, value: string | boolean) => {
+    setForm(prev => {
+      const newOptions = [...prev.options];
+      if (field === 'is_correct' && value === true) {
+        newOptions.forEach((o, i) => o.is_correct = i === index);
+      } else {
+        newOptions[index] = { ...newOptions[index], [field]: value };
+      }
+      return { ...prev, options: newOptions };
+    });
+  }, []);
 
-  const addOption = () => {
-    if (form.options.length < 4) {
-      setForm({ ...form, options: [...form.options, { text: '', is_correct: false }] });
-    }
-  };
+  const addOption = useCallback(() => {
+    setForm(prev => {
+      if (prev.options.length < 4) {
+        return { ...prev, options: [...prev.options, { text: '', is_correct: false }] };
+      }
+      return prev;
+    });
+  }, []);
 
-  const removeOption = (index: number) => {
-    if (form.options.length > 2) {
-      const newOptions = form.options.filter((_, i) => i !== index);
-      setForm({ ...form, options: newOptions });
-    }
-  };
+  const removeOption = useCallback((index: number) => {
+    setForm(prev => {
+      if (prev.options.length > 2) {
+        const newOptions = prev.options.filter((_, i) => i !== index);
+        return { ...prev, options: newOptions };
+      }
+      return prev;
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">

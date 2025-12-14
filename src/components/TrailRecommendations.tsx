@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Brain, Target, TrendingUp, ChevronRight, RefreshCw, Lightbulb, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +42,7 @@ export function TrailRecommendations() {
   const [recommendations, setRecommendations] = useState<RecommendationsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     if (!user?.id) return;
 
     setIsLoading(true);
@@ -69,7 +69,7 @@ export function TrailRecommendations() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id]);
 
   if (!recommendations && !isLoading && !error) {
     return (
