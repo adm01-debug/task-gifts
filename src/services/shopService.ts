@@ -103,7 +103,7 @@ export const shopService = {
       .from("shop_rewards")
       .select("*")
       .eq("id", rewardId)
-      .single();
+      .maybeSingle();
 
     if (rewardError || !reward) throw new Error("Recompensa não encontrada");
     
@@ -325,7 +325,7 @@ export const shopService = {
       .from("shop_purchases")
       .select("user_id, reward:shop_rewards(name)")
       .eq("id", purchaseId)
-      .single();
+      .maybeSingle();
 
     if (purchase) {
       const statusLabels: Record<PurchaseStatus, string> = {

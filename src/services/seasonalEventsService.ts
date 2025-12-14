@@ -115,7 +115,7 @@ export const seasonalEventsService = {
       .from("seasonal_challenges")
       .select("target_value")
       .eq("id", challengeId)
-      .single();
+      .maybeSingle();
 
     if (!challenge) return;
 
@@ -159,7 +159,7 @@ export const seasonalEventsService = {
       .from("seasonal_challenges")
       .select("xp_reward, coin_reward, badge_name, badge_icon")
       .eq("id", challengeId)
-      .single();
+      .maybeSingle();
 
     if (!challenge) throw new Error("Challenge not found");
 
@@ -177,7 +177,7 @@ export const seasonalEventsService = {
       .from("profiles")
       .select("xp, coins")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     if (profile) {
       await supabase

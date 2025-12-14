@@ -138,7 +138,7 @@ export const socialFeedService = {
       .from("profiles")
       .select("id, display_name, avatar_url")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     return logs.map((log) => {
       const config = activityConfig[log.action] || {
