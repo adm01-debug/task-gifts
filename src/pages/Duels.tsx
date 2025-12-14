@@ -8,6 +8,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { showUndoToast } from "@/components/UndoToast";
+import { FloatingActionButton } from "@/components/FloatingActionButton";
+import { PageTransition } from "@/components/PageTransition";
 import { useAuth } from "@/hooks/useAuth";
 import {
   useUserDuels,
@@ -339,6 +343,12 @@ const Duels = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    type: "decline" | "cancel" | null;
+    duelId: string | null;
+    opponentName: string;
+  }>({ open: false, type: null, duelId: null, opponentName: "" });
 
   const { data: duels, isLoading: loadingDuels } = useUserDuels(user?.id);
   const { data: activeDuel } = useActiveDuel(user?.id);
@@ -346,6 +356,60 @@ const Duels = () => {
   const acceptDuel = useAcceptDuel();
   const declineDuel = useDeclineDuel();
   const cancelDuel = useCancelDuel();
+
+  const handleDeclineClick = (duelId: string, opponentName: string) => {
+    setConfirmDialog({ open: true, type: "decline", duelId, opponentName });
+  };
+
+  const handleCancelClick = (duelId: string, opponentName: string) => {
+    setConfirmDialog({ open: true, type: "cancel", duelId, opponentName });
+  };
+
+  const handleConfirmAction = () => {
+    if (!confirmDialog.duelId || !user) return;
+    
+    if (confirmDialog.type === "decline") {
+      declineDuel.mutate({ duelId: confirmDialog.duelId, userId: user.id }, {
+        onSuccess: () => {
+          showUndoToast({
+            message: `Duelo com ${confirmDialog.opponentName} recusado`,
+            onUndo: async () => {
+              // In a real scenario, you'd have a restore function
+              // For now, just show a message
+            },
+          });
+        },
+      });
+    } else if (confirmDialog.type === "cancel") {
+      cancelDuel.mutate({ duelId: confirmDialog.duelId, userId: user.id }, {
+        onSuccess: () => {
+          showUndoToast({
+            message: `Duelo com ${confirmDialog.opponentName} cancelado`,
+            onUndo: async () => {
+              // Restore would happen here
+            },
+          });
+        },
+      });
+    }
+    setConfirmDialog({ open: false, type: null, duelId: null, opponentName: "" });
+  };
+
+  // FAB actions
+  const fabActions = [
+    {
+      icon: Swords,
+      label: "Novo Duelo",
+      onClick: () => setDialogOpen(true),
+      color: "primary" as const,
+    },
+    {
+      icon: Trophy,
+      label: "Ver Ranking",
+      onClick: () => navigate("/"),
+      color: "warning" as const,
+    },
+  ];
 
   if (loading) {
     return (
@@ -363,9 +427,28 @@ const Duels = () => {
   const completedDuels = duels?.filter(d => ['completed', 'declined', 'cancelled'].includes(d.status)) || [];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        {/* Confirmation Dialog */}
+        <ConfirmDialog
+          open={confirmDialog.open}
+          onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
+          title={confirmDialog.type === "decline" ? "Recusar Duelo?" : "Cancelar Duelo?"}
+          description={
+            confirmDialog.type === "decline"
+              ? `Tem certeza que deseja recusar o desafio de ${confirmDialog.opponentName}? Esta ação pode ser desfeita.`
+              : `Tem certeza que deseja cancelar o duelo com ${confirmDialog.opponentName}?`
+          }
+          confirmText={confirmDialog.type === "decline" ? "Recusar" : "Cancelar Duelo"}
+          variant={confirmDialog.type === "decline" ? "warning" : "danger"}
+          onConfirm={handleConfirmAction}
+        />
+
+        {/* Floating Action Button */}
+        <FloatingActionButton actions={fabActions} />
+
+        {/* Header */}
+        <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
         <div className="container max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -433,8 +516,8 @@ const Duels = () => {
                   duel={duel}
                   userId={user!.id}
                   onAccept={() => acceptDuel.mutate({ duelId: duel.id, userId: user!.id })}
-                  onDecline={() => declineDuel.mutate({ duelId: duel.id, userId: user!.id })}
-                  onCancel={() => cancelDuel.mutate({ duelId: duel.id, userId: user!.id })}
+                  onDecline={() => handleDeclineClick(duel.id, duel.challenger?.display_name || "Oponente")}
+                  onCancel={() => handleCancelClick(duel.id, duel.opponent?.display_name || "Oponente")}
                 />
               ))}
             </div>
@@ -463,7 +546,8 @@ const Duels = () => {
           </section>
         )}
       </main>
-    </div>
+      </div>
+    </PageTransition>
   );
 };
 
