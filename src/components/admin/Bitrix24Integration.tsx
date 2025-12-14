@@ -17,7 +17,8 @@ import {
   CheckCircle,
   Clock,
   ExternalLink,
-  UserCheck
+  UserCheck,
+  Timer
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { 
@@ -28,7 +29,8 @@ import {
   useSyncBitrix24Users,
   useBitrix24UserMappings,
   useSyncBitrix24Calendar,
-  useBitrix24CalendarMappings
+  useBitrix24CalendarMappings,
+  useBitrix24AttendanceMappings
 } from "@/hooks/useBitrix24";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -42,6 +44,7 @@ export const Bitrix24Integration = () => {
   const { data: syncMappings } = useBitrix24SyncMappings();
   const { data: userMappings } = useBitrix24UserMappings();
   const { data: calendarMappings } = useBitrix24CalendarMappings();
+  const { data: attendanceMappings } = useBitrix24AttendanceMappings();
   const [activeTab, setActiveTab] = useState("status");
 
   const getStatusBadge = () => {
@@ -57,6 +60,7 @@ export const Bitrix24Integration = () => {
     { icon: CheckSquare, label: "Tarefas", description: "Gestão de tarefas", color: "text-green-500" },
     { icon: Calendar, label: "Calendário", description: "Eventos e atividades", color: "text-purple-500" },
     { icon: Users, label: "Usuários", description: "Estrutura organizacional", color: "text-orange-500" },
+    { icon: Timer, label: "Jornada", description: "Controle de ponto", color: "text-cyan-500" },
   ];
 
   return (
@@ -164,7 +168,7 @@ export const Bitrix24Integration = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="status" className="gap-2">
             <Activity className="h-4 w-4" />
             Atividade
@@ -176,6 +180,10 @@ export const Bitrix24Integration = () => {
           <TabsTrigger value="calendar" className="gap-2">
             <Calendar className="h-4 w-4" />
             Calendário
+          </TabsTrigger>
+          <TabsTrigger value="attendance" className="gap-2">
+            <Timer className="h-4 w-4" />
+            Jornada
           </TabsTrigger>
           <TabsTrigger value="sync" className="gap-2">
             <RefreshCw className="h-4 w-4" />
@@ -410,6 +418,103 @@ export const Bitrix24Integration = () => {
                   >
                     {syncingCalendar ? 'Sincronizando...' : 'Sincronizar Calendário'}
                   </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="attendance" className="mt-4">
+          <Card>
+            <CardHeader>
+              <div>
+                <CardTitle className="text-lg">Controle de Jornada</CardTitle>
+                <CardDescription>Check-ins e check-outs sincronizados automaticamente com Bitrix24</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                <div className="flex items-start gap-3">
+                  <Timer className="h-5 w-5 text-cyan-500 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-cyan-700 dark:text-cyan-300">Sincronização Automática</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Quando colaboradores fazem check-in/check-out no Task Gifts, o sistema sincroniza automaticamente 
+                      com o Timeman do Bitrix24 para os usuários que possuem mapeamento ativo.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {attendanceMappings?.length ? (
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-2">
+                    {attendanceMappings.map((mapping: any) => {
+                      const metadata = mapping.metadata as Record<string, any> || {};
+                      const localId = mapping.local_id as string;
+                      const datePart = localId.split('_').pop() || '';
+                      
+                      return (
+                        <div 
+                          key={mapping.id} 
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-full ${
+                              mapping.sync_status === 'checked_out' 
+                                ? 'bg-green-500/10' 
+                                : 'bg-cyan-500/10'
+                            }`}>
+                              <Timer className={`h-4 w-4 ${
+                                mapping.sync_status === 'checked_out' 
+                                  ? 'text-green-500' 
+                                  : 'text-cyan-500'
+                              }`} />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">
+                                {datePart ? format(new Date(datePart), "dd/MM/yyyy", { locale: ptBR }) : 'Data'}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {metadata.check_in_at && (
+                                  <span>
+                                    Entrada: {format(new Date(metadata.check_in_at), "HH:mm")}
+                                  </span>
+                                )}
+                                {metadata.check_out_at && (
+                                  <>
+                                    <span>•</span>
+                                    <span>
+                                      Saída: {format(new Date(metadata.check_out_at), "HH:mm")}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge 
+                              variant={mapping.sync_status === 'checked_out' ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {mapping.sync_status === 'checked_out' ? 'Concluído' : 'Trabalhando'}
+                            </Badge>
+                            {mapping.last_synced_at && (
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(mapping.last_synced_at), "HH:mm")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Timer className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>Nenhum registro de jornada sincronizado</p>
+                  <p className="text-sm mt-2">Os registros aparecerão quando colaboradores fizerem check-in</p>
                 </div>
               )}
             </CardContent>

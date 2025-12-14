@@ -5,6 +5,7 @@ import { notificationsService } from "./notificationsService";
 import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
 import { achievementsService } from "./achievementsService";
+import { bitrix24SyncService } from "./bitrix24SyncService";
 
 export interface AttendanceRecord {
   id: string;
@@ -284,6 +285,13 @@ export const attendanceService = {
       }
     });
 
+    // Sync with Bitrix24 timeman
+    try {
+      await bitrix24SyncService.syncCheckIn(userId);
+    } catch (e) {
+      console.error("Failed to sync check-in with Bitrix24:", e);
+    }
+
     return {
       record: record as AttendanceRecord,
       isPunctual,
@@ -309,6 +317,14 @@ export const attendanceService = {
       .single();
 
     if (error) throw error;
+
+    // Sync with Bitrix24 timeman
+    try {
+      await bitrix24SyncService.syncCheckOut(userId);
+    } catch (e) {
+      console.error("Failed to sync check-out with Bitrix24:", e);
+    }
+
     return data as AttendanceRecord;
   },
 

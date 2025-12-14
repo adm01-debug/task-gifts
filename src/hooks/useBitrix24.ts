@@ -287,3 +287,20 @@ export const useBitrix24CalendarMappings = () => {
     queryFn: bitrix24SyncService.getAllCalendarMappings,
   });
 };
+
+// Timeman status
+export const useBitrix24TimemanStatus = () => {
+  return useQuery({
+    queryKey: ['bitrix24-timeman-status'],
+    queryFn: bitrix24SyncService.getBitrixTimemanStatus,
+    enabled: false,
+  });
+};
+
+// Attendance sync mappings
+export const useBitrix24AttendanceMappings = () => {
+  return useQuery({
+    queryKey: ['bitrix24-attendance-mappings'],
+    queryFn: bitrix24SyncService.getAllAttendanceMappings,
+  });
+};

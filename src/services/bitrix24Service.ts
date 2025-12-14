@@ -179,6 +179,29 @@ export const getBitrixUser = (id: string) => callApi<Bitrix24User>('users', 'get
 export const getCurrentBitrixUser = () => callApi<Bitrix24User>('users', 'getCurrentUser', {});
 export const getBitrixDepartments = () => callApi<any[]>('users', 'getDepartments', {});
 
+// Timekeeping
+export interface BitrixTimemanStatus {
+  STATUS: string;
+  TIME_START?: string;
+  TIME_FINISH?: string;
+  DURATION?: string;
+  TIME_LEAKS?: string;
+  ACTIVE?: boolean;
+  IP_OPEN?: string;
+  IP_CLOSE?: string;
+  LAT_OPEN?: number;
+  LON_OPEN?: number;
+  LAT_CLOSE?: number;
+  LON_CLOSE?: number;
+}
+
+export const getTimemanStatus = () => callApi<BitrixTimemanStatus>('timeman', 'getStatus', {});
+export const openWorkday = (report?: string) => callApi<BitrixTimemanStatus>('timeman', 'open', { report });
+export const closeWorkday = (report?: string) => callApi<BitrixTimemanStatus>('timeman', 'close', { report });
+export const pauseWorkday = () => callApi<BitrixTimemanStatus>('timeman', 'pause', {});
+export const getTimemanSettings = () => callApi<any>('timeman', 'getSettings', {});
+export const getTimemanReports = (filter?: any) => callApi<any[]>('timeman', 'getReports', filter);
+
 // Raw API call for custom methods
 export const callRawMethod = <T>(method: string, params?: any) => 
   callApi<T>('raw', method, params);
