@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect, forwardRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -293,17 +293,17 @@ const RewardsManager = forwardRef<HTMLDivElement>(function RewardsManager(_, ref
   const [deleteConfirm, setDeleteConfirm] = useState<ShopReward | null>(null);
   const [deletingRewardId, setDeletingRewardId] = useState<string | null>(null);
 
-  const handleCreate = () => {
+  const handleCreate = useCallback(() => {
     setEditingReward(null);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleEdit = (reward: ShopReward) => {
+  const handleEdit = useCallback((reward: ShopReward) => {
     setEditingReward(reward);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleSave = (data: RewardFormData) => {
+  const handleSave = useCallback((data: RewardFormData) => {
     if (editingReward) {
       updateMutation.mutate(
         { id: editingReward.id, updates: data },
@@ -314,9 +314,9 @@ const RewardsManager = forwardRef<HTMLDivElement>(function RewardsManager(_, ref
         onSuccess: () => setDialogOpen(false),
       });
     }
-  };
+  }, [editingReward, updateMutation, createMutation]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (deleteConfirm) {
       setDeletingRewardId(deleteConfirm.id);
       deleteMutation.mutate(deleteConfirm.id, {
@@ -326,7 +326,7 @@ const RewardsManager = forwardRef<HTMLDivElement>(function RewardsManager(_, ref
         },
       });
     }
-  };
+  }, [deleteConfirm, deleteMutation]);
 
   if (isLoading) {
     return <div ref={ref} className="text-center py-8">Carregando recompensas...</div>;
@@ -475,10 +475,7 @@ const PurchasesManager = forwardRef<HTMLDivElement>(function PurchasesManager(_,
   const updateStatusMutation = useUpdatePurchaseStatus();
   const [updatingPurchaseId, setUpdatingPurchaseId] = useState<string | null>(null);
 
-  const statusConfig: Record<
-    PurchaseStatus,
-    { label: string; color: string; icon: React.ReactNode }
-  > = {
+  const statusConfig = useMemo(() => ({
     pending: {
       label: "Pendente",
       color: "bg-yellow-500",
@@ -499,9 +496,9 @@ const PurchasesManager = forwardRef<HTMLDivElement>(function PurchasesManager(_,
       color: "bg-red-500",
       icon: <XCircle className="w-4 h-4" />,
     },
-  };
+  } as Record<PurchaseStatus, { label: string; color: string; icon: React.ReactNode }>), []);
 
-  const handleStatusChange = (purchaseId: string, status: PurchaseStatus) => {
+  const handleStatusChange = useCallback((purchaseId: string, status: PurchaseStatus) => {
     setUpdatingPurchaseId(purchaseId);
     updateStatusMutation.mutate(
       { purchaseId, status },
@@ -509,13 +506,15 @@ const PurchasesManager = forwardRef<HTMLDivElement>(function PurchasesManager(_,
         onSettled: () => setUpdatingPurchaseId(null),
       }
     );
-  };
+  }, [updateStatusMutation]);
+
+  const pendingCount = useMemo(() => 
+    purchases?.filter((p) => p.status === "pending").length || 0
+  , [purchases]);
 
   if (isLoading) {
     return <div ref={ref} className="text-center py-8">Carregando pedidos...</div>;
   }
-
-  const pendingCount = purchases?.filter((p) => p.status === "pending").length || 0;
 
   return (
     <div ref={ref} className="space-y-4">
@@ -900,17 +899,17 @@ const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(
   const [deleteConfirm, setDeleteConfirm] = useState<ShopPromotion | null>(null);
   const [deletingPromoId, setDeletingPromoId] = useState<string | null>(null);
 
-  const handleCreate = () => {
+  const handleCreate = useCallback(() => {
     setEditingPromotion(null);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleEdit = (promo: ShopPromotion) => {
+  const handleEdit = useCallback((promo: ShopPromotion) => {
     setEditingPromotion(promo);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleSave = (data: PromotionFormData) => {
+  const handleSave = useCallback((data: PromotionFormData) => {
     const payload = {
       ...data,
       starts_at: new Date(data.starts_at).toISOString(),
@@ -927,9 +926,9 @@ const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(
         onSuccess: () => setDialogOpen(false),
       });
     }
-  };
+  }, [editingPromotion, updateMutation, createMutation]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (deleteConfirm) {
       setDeletingPromoId(deleteConfirm.id);
       deleteMutation.mutate(deleteConfirm.id, {
@@ -939,9 +938,9 @@ const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(
         },
       });
     }
-  };
+  }, [deleteConfirm, deleteMutation]);
 
-  const getPromoStatus = (promo: ShopPromotion) => {
+  const getPromoStatus = useCallback((promo: ShopPromotion) => {
     const now = new Date();
     const start = new Date(promo.starts_at);
     const end = new Date(promo.ends_at);
@@ -950,7 +949,7 @@ const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(
     if (now < start) return { label: "Agendada", color: "bg-blue-500 text-white" };
     if (now > end) return { label: "Expirada", color: "bg-red-500 text-white" };
     return { label: "Ativa", color: "bg-green-500 text-white" };
-  };
+  }, []);
 
   if (isLoading) {
     return <div ref={ref} className="text-center py-8">Carregando promoções...</div>;
