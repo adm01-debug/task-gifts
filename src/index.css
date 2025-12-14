@@ -10,49 +10,49 @@
      Enhanced depth, better contrast, refined shadows
      ======================================== */
   :root {
-    /* Base Colors - Warm Cream (gentil aos olhos) */
-    --background: 45 25% 96%;
-    --foreground: 225 30% 10%;
+    /* Base Colors - Warm Cream with better depth */
+    --background: 40 20% 95%;
+    --foreground: 225 35% 8%;
 
-    /* Card - Elevated white with subtle warmth */
+    /* Card - Elevated white with subtle warmth and better shadow */
     --card: 0 0% 100%;
-    --card-foreground: 225 30% 10%;
+    --card-foreground: 225 35% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 225 30% 10%;
+    --popover-foreground: 225 35% 8%;
 
-    /* Primary - Vibrant Orange (ajustado para melhor contraste) */
-    --primary: 24 92% 48%;
+    /* Primary - Vibrant Orange (otimizado para contraste WCAG) */
+    --primary: 24 95% 46%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - Electric Blue (mais profundo) */
-    --secondary: 215 95% 45%;
+    --secondary: 215 90% 42%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Success Green (mais saturado) */
-    --success: 145 72% 35%;
+    /* Success Green (melhor contraste) */
+    --success: 150 70% 32%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning Yellow (ajustado para legibilidade) */
-    --warning: 42 100% 45%;
-    --warning-foreground: 30 100% 10%;
+    /* Warning Yellow (texto escuro para legibilidade) */
+    --warning: 42 95% 48%;
+    --warning-foreground: 30 100% 8%;
 
-    /* Muted - Warm Gray com mais contraste */
-    --muted: 45 18% 90%;
-    --muted-foreground: 225 18% 35%;
+    /* Muted - Warm Gray com MUITO MAIS contraste */
+    --muted: 40 15% 88%;
+    --muted-foreground: 225 22% 38%;
 
-    /* Accent - Purple (mais vibrante) */
-    --accent: 275 80% 50%;
+    /* Accent - Purple (vibrante mas acessível) */
+    --accent: 275 75% 48%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
-    --destructive: 0 80% 48%;
+    --destructive: 0 78% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders & Inputs - Mais definição */
-    --border: 45 15% 78%;
-    --input: 45 12% 88%;
-    --ring: 24 92% 48%;
+    /* Borders & Inputs - Mais definição visual */
+    --border: 40 12% 72%;
+    --input: 40 10% 92%;
+    --ring: 24 95% 46%;
 
     --radius: 0.75rem;
 
@@ -64,70 +64,70 @@
     --spacing-section-lg: 3rem;
     
     /* Divider Gradient */
-    --divider-gradient: linear-gradient(90deg, transparent 0%, hsl(225 20% 60% / 0.25) 50%, transparent 100%);
+    --divider-gradient: linear-gradient(90deg, transparent 0%, hsl(225 20% 50% / 0.3) 50%, transparent 100%);
     
-    /* Header Sticky Shadow */
-    --header-shadow: 0 2px 12px hsl(225 30% 10% / 0.08);
-    --header-shadow-scrolled: 0 4px 24px hsl(225 30% 10% / 0.12);
+    /* Header Sticky Shadow - mais pronunciado */
+    --header-shadow: 0 2px 12px hsl(225 30% 10% / 0.10);
+    --header-shadow-scrolled: 0 4px 24px hsl(225 30% 10% / 0.15);
 
     /* Gamification Colors - Mais vibrantes */
-    --xp: 145 72% 34%;
+    --xp: 150 70% 32%;
     --xp-foreground: 0 0% 100%;
-    --coins: 42 100% 45%;
-    --coins-foreground: 30 100% 10%;
-    --streak: 24 92% 48%;
+    --coins: 42 95% 48%;
+    --coins-foreground: 30 100% 8%;
+    --streak: 24 95% 46%;
     --streak-foreground: 0 0% 100%;
 
-    /* Rank Colors - Mais ricos */
-    --gold: 42 100% 48%;
-    --gold-foreground: 35 100% 12%;
-    --silver: 220 15% 58%;
-    --silver-foreground: 225 25% 12%;
-    --bronze: 28 70% 40%;
+    /* Rank Colors - Com foreground para badges */
+    --gold: 42 100% 50%;
+    --gold-foreground: 35 100% 10%;
+    --silver: 220 12% 55%;
+    --silver-foreground: 225 30% 10%;
+    --bronze: 28 65% 38%;
     --bronze-foreground: 0 0% 100%;
 
     /* Glass & Effects - Mais visíveis */
-    --glass-bg: 0 0% 100% / 0.88;
-    --glass-border: 225 20% 60% / 0.35;
+    --glass-bg: 0 0% 100% / 0.90;
+    --glass-border: 225 20% 50% / 0.40;
 
     /* Elevated Surfaces */
     --elevated: 0 0% 100%;
-    --elevated-hover: 45 25% 98%;
+    --elevated-hover: 40 20% 97%;
 
     /* Gradients - Mais expressivos */
-    --gradient-primary: linear-gradient(135deg, hsl(24 92% 48%), hsl(340 80% 46%));
-    --gradient-secondary: linear-gradient(135deg, hsl(215 95% 45%), hsl(275 80% 50%));
-    --gradient-success: linear-gradient(135deg, hsl(145 72% 35%), hsl(168 70% 32%));
-    --gradient-xp: linear-gradient(90deg, hsl(145 72% 34%), hsl(175 70% 38%));
-    --gradient-gold: linear-gradient(135deg, hsl(48 100% 52%), hsl(32 100% 40%));
-    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(45 25% 96%));
+    --gradient-primary: linear-gradient(135deg, hsl(24 95% 46%), hsl(340 75% 45%));
+    --gradient-secondary: linear-gradient(135deg, hsl(215 90% 42%), hsl(275 75% 48%));
+    --gradient-success: linear-gradient(135deg, hsl(150 70% 32%), hsl(168 65% 30%));
+    --gradient-xp: linear-gradient(90deg, hsl(150 70% 32%), hsl(175 65% 36%));
+    --gradient-gold: linear-gradient(135deg, hsl(48 100% 55%), hsl(32 100% 42%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(40 20% 95%));
 
-    /* Shadows - Light mode: sombras mais definidas */
-    --shadow-xs: 0 1px 2px hsl(225 30% 10% / 0.04);
-    --shadow-sm: 0 2px 6px hsl(225 30% 10% / 0.06), 0 1px 3px hsl(225 30% 10% / 0.04);
-    --shadow-md: 0 4px 16px hsl(225 30% 10% / 0.08), 0 2px 6px hsl(225 30% 10% / 0.05);
-    --shadow-lg: 0 8px 32px hsl(225 30% 10% / 0.10), 0 4px 12px hsl(225 30% 10% / 0.06);
-    --shadow-xl: 0 16px 56px hsl(225 30% 10% / 0.12), 0 8px 24px hsl(225 30% 10% / 0.08);
-    --shadow-glow-primary: 0 4px 24px hsl(24 92% 48% / 0.28);
-    --shadow-glow-secondary: 0 4px 24px hsl(215 95% 45% / 0.28);
-    --shadow-glow-success: 0 4px 24px hsl(145 72% 35% / 0.28);
+    /* Shadows - Light mode: sombras MUITO mais definidas para elevação */
+    --shadow-xs: 0 1px 3px hsl(225 30% 10% / 0.06);
+    --shadow-sm: 0 2px 8px hsl(225 30% 10% / 0.08), 0 1px 3px hsl(225 30% 10% / 0.05);
+    --shadow-md: 0 4px 20px hsl(225 30% 10% / 0.12), 0 2px 8px hsl(225 30% 10% / 0.07);
+    --shadow-lg: 0 10px 40px hsl(225 30% 10% / 0.14), 0 4px 16px hsl(225 30% 10% / 0.08);
+    --shadow-xl: 0 20px 60px hsl(225 30% 10% / 0.16), 0 8px 28px hsl(225 30% 10% / 0.10);
+    --shadow-glow-primary: 0 4px 28px hsl(24 95% 46% / 0.32);
+    --shadow-glow-secondary: 0 4px 28px hsl(215 90% 42% / 0.32);
+    --shadow-glow-success: 0 4px 28px hsl(150 70% 32% / 0.32);
 
     /* Sidebar - Light mode refinado com mais contraste */
-    --sidebar-background: 45 22% 95%;
-    --sidebar-foreground: 225 30% 12%;
-    --sidebar-primary: 24 92% 48%;
+    --sidebar-background: 40 18% 94%;
+    --sidebar-foreground: 225 35% 10%;
+    --sidebar-primary: 24 95% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 45 25% 90%;
-    --sidebar-accent-foreground: 225 30% 10%;
-    --sidebar-border: 45 15% 82%;
-    --sidebar-ring: 24 92% 48%;
+    --sidebar-accent: 40 20% 88%;
+    --sidebar-accent-foreground: 225 35% 8%;
+    --sidebar-border: 40 12% 78%;
+    --sidebar-ring: 24 95% 46%;
 
     /* Chart Colors - Otimizados para light mode */
-    --chart-1: 24 92% 48%;
-    --chart-2: 215 95% 45%;
-    --chart-3: 145 72% 35%;
-    --chart-4: 275 80% 50%;
-    --chart-5: 42 100% 45%;
+    --chart-1: 24 95% 46%;
+    --chart-2: 215 90% 42%;
+    --chart-3: 150 70% 32%;
+    --chart-4: 275 75% 48%;
+    --chart-5: 42 95% 48%;
   }
 
   /* ========================================
@@ -287,37 +287,50 @@
 
   /* Enhanced focus states for accessibility - PHASE 3 UPGRADE */
   :focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)), 0 0 12px hsl(var(--ring) / 0.25);
+    @apply outline-none;
+    box-shadow: 
+      0 0 0 2px hsl(var(--background)), 
+      0 0 0 4px hsl(var(--ring)),
+      0 0 16px hsl(var(--ring) / 0.35);
     transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Focus visible for buttons - Extra glow */
+  /* Focus visible for buttons - Prominent glow */
   button:focus-visible,
   [role="button"]:focus-visible {
-    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)), 0 0 16px hsl(var(--ring) / 0.3);
+    box-shadow: 
+      0 0 0 2px hsl(var(--background)), 
+      0 0 0 4px hsl(var(--ring)),
+      0 0 20px hsl(var(--ring) / 0.4);
   }
 
   /* Focus visible for inputs - Subtle lift */
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)), 0 4px 12px hsl(var(--ring) / 0.15);
+    box-shadow: 
+      0 0 0 2px hsl(var(--background)), 
+      0 0 0 4px hsl(var(--ring)),
+      0 4px 16px hsl(var(--ring) / 0.2);
   }
 
   /* Links default styling */
   a {
-    @apply text-primary hover:text-primary/85 transition-colors;
+    @apply text-primary hover:text-primary/85;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
   }
 
   a:focus-visible {
     @apply rounded-sm;
-    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
+    box-shadow: 
+      0 0 0 2px hsl(var(--background)), 
+      0 0 0 4px hsl(var(--primary)),
+      0 0 12px hsl(var(--primary) / 0.3);
   }
 
-  /* Input labels - Melhor contraste */
+  /* Input labels - Maior contraste */
   label {
-    @apply text-foreground/90 font-medium;
+    @apply text-foreground font-medium;
   }
 }
 
@@ -475,34 +488,78 @@
     @apply transition-all duration-150 ease-out;
   }
 
-  /* Interactive hover effects */
+  /* Interactive hover effects - PADRONIZADOS */
   .hover-lift {
-    @apply transition-transform duration-200;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
   }
   .hover-lift:hover {
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .hover-lift-sm {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hover-lift-sm:hover {
+    transform: translateY(-1px);
   }
 
   .hover-lift-lg {
-    @apply transition-transform duration-200;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
   }
   .hover-lift-lg:hover {
     transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hover-scale {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  .hover-scale-sm {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hover-scale-sm:hover {
+    transform: scale(1.01);
   }
 
   .hover-glow {
-    @apply transition-shadow duration-200;
+    transition: box-shadow 0.2s ease;
   }
   .hover-glow:hover {
     box-shadow: var(--shadow-glow-primary);
   }
 
+  .hover-glow-secondary {
+    transition: box-shadow 0.2s ease;
+  }
+  .hover-glow-secondary:hover {
+    box-shadow: var(--shadow-glow-secondary);
+  }
+
+  .hover-glow-success {
+    transition: box-shadow 0.2s ease;
+  }
+  .hover-glow-success:hover {
+    box-shadow: var(--shadow-glow-success);
+  }
+
   /* Press/Active state feedback */
   .press-scale {
-    @apply transition-transform duration-100;
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .press-scale:active {
     transform: scale(0.97);
+  }
+
+  .press-scale-sm {
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .press-scale-sm:active {
+    transform: scale(0.98);
   }
 
   /* Loading skeleton pulse */
