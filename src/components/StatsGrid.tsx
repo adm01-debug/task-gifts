@@ -12,6 +12,7 @@ import { AnimatedLevelIndicator } from "@/components/effects/AnimatedLevelIndica
 import { AnimatedCoinsIndicator } from "@/components/effects/AnimatedCoinsIndicator";
 import { AnimatedXPParticles } from "@/components/effects/AnimatedXPParticles";
 import { MiniConfetti } from "@/components/effects/MiniConfetti";
+import { HelpTooltip, helpTexts } from "@/components/HelpTooltip";
 import { useFirstTimeIndicator } from "@/hooks/useFirstTimeIndicator";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 
@@ -59,6 +60,7 @@ interface StatCardProps {
   levelIndicator?: number;
   coinsIndicator?: number;
   xpParticles?: { active: boolean; gained: number };
+  helpText?: string;
 }
 
 const colorClasses = {
@@ -95,7 +97,7 @@ const pulseClasses = {
   success: "card-pulse-success",
 };
 
-const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator, trophyIndicator, levelIndicator, coinsIndicator, xpParticles }: StatCardProps) => {
+const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", color, delay = 0, isLoading, pulse, fireIndicator, trophyIndicator, levelIndicator, coinsIndicator, xpParticles, helpText }: StatCardProps) => {
   const colors = colorClasses[color];
 
   if (isLoading) {
@@ -178,7 +180,10 @@ const StatCard = ({ icon: Icon, label, value, change, changeType = "neutral", co
           )}
         </div>
 
-        <p className="text-sm text-muted-foreground mb-1">{label}</p>
+        <div className="flex items-center gap-1">
+          <p className="text-sm text-muted-foreground">{label}</p>
+          {helpText && <HelpTooltip content={helpText} side="right" />}
+        </div>
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -253,6 +258,7 @@ export const StatsGrid = () => {
       isLoading,
       levelIndicator: profile?.level || 0,
       xpParticles: xpParticlesState,
+      helpText: helpTexts.xp,
     },
     {
       icon: Flame,
@@ -264,6 +270,7 @@ export const StatsGrid = () => {
       isLoading,
       pulse: profile?.streak && profile.streak >= 3 ? "primary" : undefined,
       fireIndicator: profile?.streak || 0,
+      helpText: helpTexts.streak,
     },
     {
       icon: Trophy,
@@ -275,6 +282,7 @@ export const StatsGrid = () => {
       isLoading,
       pulse: rankData?.rank && rankData.rank <= 10 ? "warning" : undefined,
       trophyIndicator: rankData?.rank || undefined,
+      helpText: helpTexts.ranking,
     },
     {
       icon: Target,
@@ -285,6 +293,7 @@ export const StatsGrid = () => {
       color: "secondary",
       isLoading,
       coinsIndicator: profile?.coins || 0,
+      helpText: helpTexts.quests,
     },
   ];
 

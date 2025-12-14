@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { PageTransition } from "@/components/PageTransition";
 import { useNavigate } from "react-router-dom";
 import { Menu, LogOut, User } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -83,7 +84,8 @@ const Index = () => {
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Jogador";
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <PageTransition>
+      <div className="min-h-screen flex bg-background">
       {/* Achievement System */}
       <AchievementContainer
         achievements={achievements}
@@ -264,7 +266,8 @@ const Index = () => {
           </p>
         </footer>
       </main>
-    </div>
+      </div>
+    </PageTransition>
   );
 };
 
