@@ -163,7 +163,7 @@ export const missionsService = {
       .from("department_missions")
       .select("*")
       .eq("id", missionId)
-      .single();
+      .maybeSingle();
 
     if (!mission) throw new Error("Mission not found");
 
@@ -193,7 +193,7 @@ export const missionsService = {
       .from("user_mission_progress")
       .select("*, mission:department_missions(*)")
       .eq("id", progressId)
-      .single();
+      .maybeSingle();
 
     if (!progress) throw new Error("Progress not found");
     if ((progress as any).claimed) throw new Error("Already claimed");

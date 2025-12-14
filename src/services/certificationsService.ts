@@ -143,9 +143,10 @@ export const certificationsService = {
       .from('certifications')
       .select('*')
       .eq('id', certificationId)
-      .single();
+      .maybeSingle();
 
     if (certError) throw certError;
+    if (!cert) throw new Error("Certification not found");
 
     const expiresAt = cert.validity_months
       ? new Date(Date.now() + cert.validity_months * 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -187,9 +188,10 @@ export const certificationsService = {
       .from('user_certifications')
       .select('*, certifications(*)')
       .eq('id', userCertificationId)
-      .single();
+      .maybeSingle();
 
     if (currentError) throw currentError;
+    if (!current) throw new Error("User certification not found");
 
     const cert = (current as any).certifications;
     const newExpiresAt = cert.validity_months
@@ -279,7 +281,7 @@ export const certificationsService = {
           .select('department_id')
           .eq('user_id', managerId)
           .eq('is_manager', true)
-          .single()
+          .maybeSingle()
       ).data?.department_id || '');
 
     if (teamError) throw teamError;

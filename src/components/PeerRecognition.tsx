@@ -1,4 +1,4 @@
-import { useState, forwardRef } from "react";
+import { useState, forwardRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Send, Users, Sparkles, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,13 +29,13 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
   const [message, setMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const otherUsers = profiles.filter(p => p.id !== user?.id);
-  const filteredUsers = otherUsers.filter(p => 
+  const otherUsers = useMemo(() => profiles.filter(p => p.id !== user?.id), [profiles, user?.id]);
+  const filteredUsers = useMemo(() => otherUsers.filter(p => 
     p.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [otherUsers, searchQuery]);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (!user?.id || !selectedUser || !message.trim()) return;
 
     giveKudos.mutate({
@@ -52,9 +52,21 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
         onSuccess();
       },
     });
-  };
+  }, [user?.id, selectedUser, message, selectedBadge?.id, giveKudos, onSuccess]);
 
-  const selectedProfile = profiles.find(p => p.id === selectedUser);
+  const selectedProfile = useMemo(() => profiles.find(p => p.id === selectedUser), [profiles, selectedUser]);
+
+  const handleBadgeClick = useCallback((badge: KudosBadge) => {
+    setSelectedBadge(prev => prev?.id === badge.id ? null : badge);
+  }, []);
+
+  const handleUserClick = useCallback((userId: string) => {
+    setSelectedUser(userId);
+  }, []);
+
+  const handleClearUser = useCallback(() => {
+    setSelectedUser(null);
+  }, []);
 
   return (
     <div ref={ref} className="space-y-4">
@@ -67,7 +79,7 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
               key={badge.id}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setSelectedBadge(selectedBadge?.id === badge.id ? null : badge)}
+              onClick={() => handleBadgeClick(badge)}
               className={cn(
                 "p-3 rounded-xl border text-center transition-all",
                 selectedBadge?.id === badge.id
@@ -106,7 +118,7 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
                 <motion.button
                   key={profile.id}
                   whileHover={{ scale: 1.01 }}
-                  onClick={() => setSelectedUser(profile.id)}
+                  onClick={() => handleUserClick(profile.id)}
                   className={cn(
                     "w-full flex items-center gap-2 p-2 rounded-lg transition-all text-left",
                     selectedUser === profile.id
@@ -130,7 +142,7 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
           <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/20 flex items-center gap-2">
             <span className="text-xs">Selecionado:</span>
             <span className="text-xs font-semibold">{selectedProfile.display_name}</span>
-            <button onClick={() => setSelectedUser(null)} className="ml-auto p-1 rounded hover:bg-muted">
+            <button onClick={handleClearUser} className="ml-auto p-1 rounded hover:bg-muted">
               <X className="w-3 h-3" />
             </button>
           </div>
@@ -180,15 +192,19 @@ export const PeerRecognition = () => {
   const { data: recentKudos = [], isLoading } = useRecentKudos(10);
   const { data: profiles = [] } = useProfiles();
 
-  const getProfileName = (userId: string) => {
+  const getProfileName = useCallback((userId: string) => {
     const profile = profiles.find(p => p.id === userId);
     return profile?.display_name || "Usuário";
-  };
+  }, [profiles]);
 
-  const getProfileInitial = (userId: string) => {
+  const getProfileInitial = useCallback((userId: string) => {
     const name = getProfileName(userId);
     return name.charAt(0).toUpperCase();
-  };
+  }, [getProfileName]);
+
+  const handleDialogClose = useCallback(() => {
+    setDialogOpen(false);
+  }, []);
 
   return (
     <motion.div
@@ -223,7 +239,7 @@ export const PeerRecognition = () => {
                 Reconhecer um colega
               </DialogTitle>
             </DialogHeader>
-            <GiveKudosForm onSuccess={() => setDialogOpen(false)} />
+            <GiveKudosForm onSuccess={handleDialogClose} />
           </DialogContent>
         </Dialog>
       </div>
