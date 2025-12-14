@@ -85,6 +85,8 @@ export function DepartmentsManager() {
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
   const [addMemberDialog, setAddMemberDialog] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
+  const [togglingManagerId, setTogglingManagerId] = useState<string | null>(null);
 
   const { data: departments, isLoading } = useDepartments();
   const { data: profiles } = useProfiles();
@@ -182,20 +184,26 @@ export function DepartmentsManager() {
   };
 
   const handleRemoveMember = async (memberId: string) => {
+    setRemovingMemberId(memberId);
     try {
       await removeMember.mutateAsync(memberId);
       toast.success("Membro removido");
     } catch (error) {
       toast.error("Erro ao remover membro");
+    } finally {
+      setRemovingMemberId(null);
     }
   };
 
   const handleToggleManager = async (memberId: string, isCurrentlyManager: boolean) => {
+    setTogglingManagerId(memberId);
     try {
       await setManager.mutateAsync({ memberId, isManager: !isCurrentlyManager });
       toast.success(isCurrentlyManager ? "Gestor removido" : "Gestor definido");
     } catch (error) {
       toast.error("Erro ao atualizar gestor");
+    } finally {
+      setTogglingManagerId(null);
     }
   };
 
@@ -365,19 +373,29 @@ export function DepartmentsManager() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleToggleManager(member.memberId, member.isManager)}
+                                    disabled={togglingManagerId === member.memberId}
                                     title={member.isManager ? "Remover como gestor" : "Definir como gestor"}
                                   >
-                                    <Crown
-                                      className={`w-4 h-4 ${member.isManager ? "text-amber-500" : "text-muted-foreground"}`}
-                                    />
+                                    {togglingManagerId === member.memberId ? (
+                                      <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                      <Crown
+                                        className={`w-4 h-4 ${member.isManager ? "text-amber-500" : "text-muted-foreground"}`}
+                                      />
+                                    )}
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleRemoveMember(member.memberId)}
+                                    disabled={removingMemberId === member.memberId}
                                     className="text-destructive hover:text-destructive"
                                   >
-                                    <X className="w-4 h-4" />
+                                    {removingMemberId === member.memberId ? (
+                                      <div className="w-4 h-4 border-2 border-destructive border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                      <X className="w-4 h-4" />
+                                    )}
                                   </Button>
                                 </div>
                               </div>
