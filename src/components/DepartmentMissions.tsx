@@ -132,7 +132,7 @@ function MissionCard({
 export default function DepartmentMissions() {
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<"daily" | "weekly" | "monthly">("daily");
-  const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
   
   const { data: departments = [] } = useDepartments();
   const { data: missions = [], isLoading } = useDepartmentMissions(
@@ -149,9 +149,15 @@ export default function DepartmentMissions() {
   const claimableMissions = missions.filter(m => m.progress?.completed_at && !m.progress?.claimed);
 
   const handleClaim = (progressId: string) => {
-    setClaimingId(progressId);
+    setClaimingIds(prev => new Set(prev).add(progressId));
     claimMutation.mutate(progressId, {
-      onSettled: () => setClaimingId(null),
+      onSettled: () => {
+        setClaimingIds(prev => {
+          const next = new Set(prev);
+          next.delete(progressId);
+          return next;
+        });
+      },
     });
   };
 
@@ -278,7 +284,7 @@ export default function DepartmentMissions() {
                     <MissionCard
                       mission={mission}
                       onClaim={() => mission.progress && handleClaim(mission.progress.id)}
-                      isClaiming={claimingId === mission.progress?.id}
+                      isClaiming={claimingIds.has(mission.progress?.id || "")}
                     />
                   </motion.div>
                 ))

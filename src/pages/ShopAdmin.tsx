@@ -291,6 +291,7 @@ function RewardsManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<ShopReward | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ShopReward | null>(null);
+  const [deletingRewardId, setDeletingRewardId] = useState<string | null>(null);
 
   const handleCreate = () => {
     setEditingReward(null);
@@ -317,8 +318,12 @@ function RewardsManager() {
 
   const handleDelete = () => {
     if (deleteConfirm) {
+      setDeletingRewardId(deleteConfirm.id);
       deleteMutation.mutate(deleteConfirm.id, {
-        onSuccess: () => setDeleteConfirm(null),
+        onSettled: () => {
+          setDeletingRewardId(null);
+          setDeleteConfirm(null);
+        },
       });
     }
   };
@@ -453,9 +458,10 @@ function RewardsManager() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
+              disabled={deletingRewardId === deleteConfirm?.id}
               className="bg-destructive text-destructive-foreground"
             >
-              Excluir
+              {deletingRewardId === deleteConfirm?.id ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -896,6 +902,7 @@ function PromotionsManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<ShopPromotion | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ShopPromotion | null>(null);
+  const [deletingPromoId, setDeletingPromoId] = useState<string | null>(null);
 
   const handleCreate = () => {
     setEditingPromotion(null);
@@ -928,8 +935,12 @@ function PromotionsManager() {
 
   const handleDelete = () => {
     if (deleteConfirm) {
+      setDeletingPromoId(deleteConfirm.id);
       deleteMutation.mutate(deleteConfirm.id, {
-        onSuccess: () => setDeleteConfirm(null),
+        onSettled: () => {
+          setDeletingPromoId(null);
+          setDeleteConfirm(null);
+        },
       });
     }
   };
@@ -1060,9 +1071,10 @@ function PromotionsManager() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
+              disabled={deletingPromoId === deleteConfirm?.id}
               className="bg-destructive text-destructive-foreground"
             >
-              Excluir
+              {deletingPromoId === deleteConfirm?.id ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
