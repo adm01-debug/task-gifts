@@ -1,5 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
-import { completeTask, getBitrixUsers, getCalendarEvents, createCalendarEvent, type Bitrix24User } from "./bitrix24Service";
+import { 
+  completeTask, 
+  getBitrixUsers, 
+  getCalendarEvents, 
+  createCalendarEvent, 
+  openWorkday, 
+  closeWorkday, 
+  getTimemanStatus,
+  type Bitrix24User 
+} from "./bitrix24Service";
 
 export interface UserSyncResult {
   synced: number;
@@ -369,6 +378,114 @@ export const bitrix24SyncService = {
       .select("*")
       .eq("entity_type", "calendar_event")
       .eq("bitrix_entity_type", "calendar")
+      .order("last_synced_at", { ascending: false });
+
+    if (error) return [];
+    return data;
+  },
+
+  /**
+   * Sync check-in with Bitrix24 timeman
+   */
+  async syncCheckIn(userId: string): Promise<boolean> {
+    try {
+      // Check if user has Bitrix24 mapping
+      const userMapping = await this.getUserMappingByProfileId(userId);
+      if (!userMapping) {
+        console.log("No Bitrix24 mapping for user:", userId);
+        return false;
+      }
+
+      // Open workday in Bitrix24
+      await openWorkday("Check-in via Task Gifts");
+
+      // Create sync record
+      await supabase
+        .from("bitrix24_sync_mappings")
+        .upsert({
+          entity_type: "attendance",
+          local_id: `${userId}_${new Date().toISOString().split('T')[0]}`,
+          bitrix_entity_type: "timeman",
+          bitrix_id: userMapping.bitrix_id,
+          sync_status: "checked_in",
+          last_synced_at: new Date().toISOString(),
+          metadata: {
+            check_in_at: new Date().toISOString(),
+            user_id: userId,
+            bitrix_user_id: userMapping.bitrix_id
+          }
+        }, { 
+          onConflict: 'entity_type,local_id,bitrix_entity_type,bitrix_id' 
+        });
+
+      console.log("Bitrix24 workday opened for user:", userId);
+      return true;
+    } catch (error) {
+      console.error("Failed to sync check-in with Bitrix24:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Sync check-out with Bitrix24 timeman
+   */
+  async syncCheckOut(userId: string): Promise<boolean> {
+    try {
+      // Check if user has Bitrix24 mapping
+      const userMapping = await this.getUserMappingByProfileId(userId);
+      if (!userMapping) {
+        console.log("No Bitrix24 mapping for user:", userId);
+        return false;
+      }
+
+      // Close workday in Bitrix24
+      await closeWorkday("Check-out via Task Gifts");
+
+      // Update sync record
+      const today = new Date().toISOString().split('T')[0];
+      await supabase
+        .from("bitrix24_sync_mappings")
+        .update({
+          sync_status: "checked_out",
+          last_synced_at: new Date().toISOString(),
+          metadata: {
+            check_out_at: new Date().toISOString(),
+            user_id: userId,
+            bitrix_user_id: userMapping.bitrix_id
+          }
+        })
+        .eq("entity_type", "attendance")
+        .eq("local_id", `${userId}_${today}`);
+
+      console.log("Bitrix24 workday closed for user:", userId);
+      return true;
+    } catch (error) {
+      console.error("Failed to sync check-out with Bitrix24:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Get Bitrix24 timeman status for current user
+   */
+  async getBitrixTimemanStatus() {
+    try {
+      return await getTimemanStatus();
+    } catch (error) {
+      console.error("Failed to get Bitrix24 timeman status:", error);
+      return null;
+    }
+  },
+
+  /**
+   * Get all attendance sync mappings
+   */
+  async getAllAttendanceMappings() {
+    const { data, error } = await supabase
+      .from("bitrix24_sync_mappings")
+      .select("*")
+      .eq("entity_type", "attendance")
+      .eq("bitrix_entity_type", "timeman")
       .order("last_synced_at", { ascending: false });
 
     if (error) return [];

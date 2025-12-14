@@ -265,6 +265,33 @@ serve(async (req) => {
       }
     }
 
+    // Timekeeping Module
+    else if (module === 'timeman') {
+      switch (action) {
+        case 'getStatus':
+          result = await callBitrix(domain, token, 'timeman.status', requestData || {});
+          break;
+        case 'open':
+          result = await callBitrix(domain, token, 'timeman.open', requestData || {});
+          break;
+        case 'close':
+          result = await callBitrix(domain, token, 'timeman.close', requestData || {});
+          break;
+        case 'pause':
+          result = await callBitrix(domain, token, 'timeman.pause', requestData || {});
+          break;
+        case 'getSettings':
+          result = await callBitrix(domain, token, 'timeman.settings', requestData || {});
+          break;
+        case 'getReports':
+          result = await callBitrix(domain, token, 'timeman.reports.get', requestData || {});
+          break;
+
+        default:
+          throw new Error(`Timeman action não suportada: ${action}`);
+      }
+    }
+
     // Generic method call
     else if (module === 'raw') {
       result = await callBitrix(domain, token, action, requestData);
