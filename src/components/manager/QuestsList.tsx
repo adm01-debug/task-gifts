@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -369,12 +369,26 @@ export function QuestsList() {
     },
   });
 
-  const filteredQuests = quests?.filter(q => 
-    statusFilter === "all" || q.status === statusFilter
-  ) || [];
+  // Memoized filtered quests
+  const filteredQuests = useMemo(() => 
+    quests?.filter(q => statusFilter === "all" || q.status === statusFilter) || [],
+    [quests, statusFilter]
+  );
 
-  const activeCount = quests?.filter(q => q.status === "active").length || 0;
-  const draftCount = quests?.filter(q => q.status === "draft").length || 0;
+  const activeCount = useMemo(() => quests?.filter(q => q.status === "active").length || 0, [quests]);
+  const draftCount = useMemo(() => quests?.filter(q => q.status === "draft").length || 0, [quests]);
+
+  // Memoized handlers
+  const handleNavigateToQuestBuilder = useCallback(() => navigate("/quest-builder"), [navigate]);
+  const handleStatusFilterChange = useCallback((status: "all" | "active" | "draft" | "archived") => setStatusFilter(status), []);
+  const handleCloseStatsModal = useCallback(() => setStatsQuest(null), []);
+  const handleArchive = useCallback((q: Quest) => updateStatusMutation.mutate({ questId: q.id, status: "archived" }), [updateStatusMutation]);
+  const handleActivate = useCallback((q: Quest) => updateStatusMutation.mutate({ questId: q.id, status: "active" }), [updateStatusMutation]);
+  const handleDelete = useCallback((q: Quest) => {
+    if (confirm("Tem certeza que deseja excluir esta quest?")) {
+      deleteMutation.mutate(q.id);
+    }
+  }, [deleteMutation]);
 
   return (
     <div className="space-y-4">
@@ -392,7 +406,7 @@ export function QuestsList() {
             {(["all", "active", "draft", "archived"] as const).map((status) => (
               <button
                 key={status}
-                onClick={() => setStatusFilter(status)}
+                onClick={() => handleStatusFilterChange(status)}
                 className={`px-3 py-1.5 text-sm transition-colors ${
                   statusFilter === status
                     ? "bg-primary text-primary-foreground"
@@ -406,7 +420,7 @@ export function QuestsList() {
             ))}
           </div>
 
-          <Button onClick={() => navigate("/quest-builder")} className="gap-2">
+          <Button onClick={handleNavigateToQuestBuilder} className="gap-2">
             <Plus className="h-4 w-4" />
             Nova Quest
           </Button>
@@ -432,7 +446,7 @@ export function QuestsList() {
               : `Nenhuma quest ${statusFilter === "active" ? "ativa" : statusFilter === "draft" ? "em rascunho" : "arquivada"}`
             }
           </p>
-          <Button onClick={() => navigate("/quest-builder")} className="mt-4 gap-2">
+          <Button onClick={handleNavigateToQuestBuilder} className="mt-4 gap-2">
             <Plus className="h-4 w-4" />
             Criar Quest
           </Button>
@@ -446,13 +460,9 @@ export function QuestsList() {
                 quest={quest}
                 index={index}
                 onViewStats={setStatsQuest}
-                onArchive={(q) => updateStatusMutation.mutate({ questId: q.id, status: "archived" })}
-                onActivate={(q) => updateStatusMutation.mutate({ questId: q.id, status: "active" })}
-                onDelete={(q) => {
-                  if (confirm("Tem certeza que deseja excluir esta quest?")) {
-                    deleteMutation.mutate(q.id);
-                  }
-                }}
+                onArchive={handleArchive}
+                onActivate={handleActivate}
+                onDelete={handleDelete}
               />
             ))}
           </AnimatePresence>
@@ -463,7 +473,7 @@ export function QuestsList() {
       <QuestStatsModal
         quest={statsQuest}
         open={!!statsQuest}
-        onClose={() => setStatsQuest(null)}
+        onClose={handleCloseStatsModal}
       />
     </div>
   );

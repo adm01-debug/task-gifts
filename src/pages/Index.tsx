@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { PageTransition } from "@/components/PageTransition";
 import { useNavigate } from "react-router-dom";
 import { Menu, LogOut, User } from "lucide-react";
@@ -63,11 +63,24 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await signOut();
     toast.success("Até logo! 👋");
     navigate("/auth");
-  };
+  }, [signOut, navigate]);
+
+  const handleOpenMobileDrawer = useCallback(() => setMobileDrawerOpen(true), []);
+  const handleCloseMobileDrawer = useCallback(() => setMobileDrawerOpen(false), []);
+  const handleToggleSidebar = useCallback(() => setSidebarCollapsed(prev => !prev), []);
+  const handleToggleUserMenu = useCallback(() => setShowUserMenu(prev => !prev), []);
+  const handleNavigateToProfile = useCallback(() => navigate("/profile"), [navigate]);
+  const handleMenuClick = useCallback(() => {
+    if (isMobile) {
+      setMobileDrawerOpen(true);
+    } else {
+      setSidebarCollapsed(prev => !prev);
+    }
+  }, [isMobile]);
 
   if (loading) {
     return (
@@ -95,13 +108,13 @@ const Index = () => {
       />
 
       {/* Mobile Drawer */}
-      <MobileDrawer open={mobileDrawerOpen} onClose={() => setMobileDrawerOpen(false)} />
+      <MobileDrawer open={mobileDrawerOpen} onClose={handleCloseMobileDrawer} />
 
       {/* Desktop Sidebar - Hidden on mobile */}
       {!isMobile && (
         <AppSidebar 
           collapsed={sidebarCollapsed} 
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+          onToggle={handleToggleSidebar} 
         />
       )}
 
@@ -119,7 +132,7 @@ const Index = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => isMobile ? setMobileDrawerOpen(true) : setSidebarCollapsed(!sidebarCollapsed)}
+                onClick={handleMenuClick}
                 className="p-2 rounded-lg hover:bg-muted transition-colors"
               >
                 <Menu className="w-5 h-5" />
@@ -163,7 +176,7 @@ const Index = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  onClick={handleToggleUserMenu}
                   className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center font-bold text-sm"
                 >
                   {displayName.charAt(0).toUpperCase()}
@@ -183,7 +196,7 @@ const Index = () => {
                       </div>
                       <div className="p-2">
                         <button
-                          onClick={() => navigate("/profile")}
+                          onClick={handleNavigateToProfile}
                           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm"
                         >
                           <User className="w-4 h-4" />

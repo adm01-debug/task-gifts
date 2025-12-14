@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Flame, Zap, Gift, Settings, Home, Medal } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useCurrentProfile } from "@/hooks/useProfiles";
@@ -33,13 +33,23 @@ export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
   const streak = profile?.streak || 0;
   const coins = profile?.coins || 0;
 
-  // Calculate XP progress to next level
-  const xpForLevel = (lvl: number) => Math.floor(100 * Math.pow(1.5, lvl - 1));
-  const xpForCurrentLevel = xpForLevel(level);
-  const xpForNextLevel = xpForLevel(level + 1);
-  const xpInCurrentLevel = xp - xpForCurrentLevel;
-  const xpNeededForNext = xpForNextLevel - xpForCurrentLevel;
-  const xpProgress = xpNeededForNext > 0 ? Math.min(100, (xpInCurrentLevel / xpNeededForNext) * 100) : 0;
+  // Memoized XP calculations
+  const { xpInCurrentLevel, xpNeededForNext, xpProgress } = useMemo(() => {
+    const xpForLevel = (lvl: number) => Math.floor(100 * Math.pow(1.5, lvl - 1));
+    const xpForCurrentLevel = xpForLevel(level);
+    const xpForNextLevel = xpForLevel(level + 1);
+    const inCurrent = xp - xpForCurrentLevel;
+    const neededForNext = xpForNextLevel - xpForCurrentLevel;
+    return {
+      xpInCurrentLevel: inCurrent,
+      xpNeededForNext: neededForNext,
+      xpProgress: neededForNext > 0 ? Math.min(100, (inCurrent / neededForNext) * 100) : 0,
+    };
+  }, [level, xp]);
+
+  // Memoized handlers
+  const handleItemClick = useCallback((label: string) => setActiveItem(label), []);
+  const handleNavigateToProfile = useCallback(() => navigate("/profile"), [navigate]);
 
   return (
     <motion.aside
@@ -127,7 +137,7 @@ export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
         {navItems.map((item) => (
           <motion.button
             key={item.label}
-            onClick={() => setActiveItem(item.label)}
+            onClick={() => handleItemClick(item.label)}
             whileHover={{ x: 4 }}
             whileTap={{ scale: 0.98 }}
             className={cn(
@@ -192,7 +202,7 @@ export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
       <div className="p-2 border-t border-sidebar-border">
         <motion.button
           whileHover={{ x: 4 }}
-          onClick={() => navigate("/profile")}
+          onClick={handleNavigateToProfile}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors"
         >
           <Settings className="w-5 h-5" />
