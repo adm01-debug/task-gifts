@@ -5,6 +5,7 @@ import { useShopRewards } from "@/hooks/useShop";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
+import { useMemo, useCallback } from "react";
 
 const rarityConfig = {
   common: {
@@ -52,8 +53,11 @@ export const RewardsShop = () => {
   const userCoins = profile?.coins || 0;
   const isLoading = rewardsLoading || profileLoading;
 
-  // Take only first 4 rewards for preview
-  const previewRewards = rewards.slice(0, 4);
+  // Memoize preview rewards
+  const previewRewards = useMemo(() => rewards.slice(0, 4), [rewards]);
+
+  // Memoized navigation handler
+  const goToShop = useCallback(() => navigate("/loja"), [navigate]);
 
   if (isLoading) {
     return (
@@ -168,7 +172,7 @@ export const RewardsShop = () => {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => navigate("/loja")}
+                      onClick={goToShop}
                       className={cn(
                         "w-full py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-colors",
                         canAfford
@@ -196,7 +200,7 @@ export const RewardsShop = () => {
       <div className="p-4 border-t border-border">
         <motion.button
           whileHover={{ x: 4 }}
-          onClick={() => navigate("/loja")}
+          onClick={goToShop}
           className="w-full flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Ver todas as recompensas

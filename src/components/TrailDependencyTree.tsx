@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   GitBranch, ChevronDown, ChevronRight, CheckCircle2, 
@@ -280,6 +280,9 @@ export function TrailDependencyTree() {
   const [zoom, setZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  const handleZoomOut = useCallback(() => setZoom(prev => Math.max(0.5, prev - 0.1)), []);
+  const handleZoomIn = useCallback(() => setZoom(prev => Math.min(1.5, prev + 0.1)), []);
+
   const { data: trails = [] } = usePublishedTrails();
   const { data: enrollments = [] } = useUserEnrollments();
   const { data: prerequisites = [] } = useTrailPrerequisites();
@@ -371,7 +374,7 @@ export function TrailDependencyTree() {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
+                onClick={handleZoomOut}
                 disabled={zoom <= 0.5}
               >
                 <ZoomOut className="h-4 w-4" />
@@ -383,7 +386,7 @@ export function TrailDependencyTree() {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={() => setZoom(Math.min(1.5, zoom + 0.1))}
+                onClick={handleZoomIn}
                 disabled={zoom >= 1.5}
               >
                 <ZoomIn className="h-4 w-4" />

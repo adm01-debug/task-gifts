@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { motion, Variants } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Zap, Flame, Trophy, Target, TrendingUp, Users, Clock, ArrowUpRight } from "lucide-react";
@@ -247,14 +247,14 @@ export const StatsGrid = () => {
     }
   }, [rankData, isLoading, checkAndTrigger]);
 
-  const stats: StatCardProps[] = [
+  const stats: StatCardProps[] = useMemo(() => [
     {
       icon: Zap,
       label: "XP Total",
       value: profile?.xp?.toLocaleString() || "0",
       change: profile?.xp ? `Nível ${profile.level}` : undefined,
-      changeType: "positive",
-      color: "success",
+      changeType: "positive" as const,
+      color: "success" as const,
       isLoading,
       levelIndicator: profile?.level || 0,
       xpParticles: xpParticlesState,
@@ -265,10 +265,10 @@ export const StatsGrid = () => {
       label: "Streak Atual",
       value: `${profile?.streak || 0} dias`,
       change: profile?.best_streak ? `Melhor: ${profile.best_streak}` : undefined,
-      changeType: "neutral",
-      color: "primary",
+      changeType: "neutral" as const,
+      color: "primary" as const,
       isLoading,
-      pulse: profile?.streak && profile.streak >= 3 ? "primary" : undefined,
+      pulse: profile?.streak && profile.streak >= 3 ? "primary" as const : undefined,
       fireIndicator: profile?.streak || 0,
       helpText: helpTexts.streak,
     },
@@ -277,10 +277,10 @@ export const StatsGrid = () => {
       label: "Ranking",
       value: rankData?.rank ? `#${rankData.rank}` : "-",
       change: rankData?.tier || undefined,
-      changeType: "positive",
-      color: "warning",
+      changeType: "positive" as const,
+      color: "warning" as const,
       isLoading,
-      pulse: rankData?.rank && rankData.rank <= 10 ? "warning" : undefined,
+      pulse: rankData?.rank && rankData.rank <= 10 ? "warning" as const : undefined,
       trophyIndicator: rankData?.rank || undefined,
       helpText: helpTexts.ranking,
     },
@@ -289,13 +289,13 @@ export const StatsGrid = () => {
       label: "Quests Completas",
       value: profile?.quests_completed?.toString() || "0",
       change: profile?.coins ? `${profile.coins} coins` : undefined,
-      changeType: "positive",
-      color: "secondary",
+      changeType: "positive" as const,
+      color: "secondary" as const,
       isLoading,
       coinsIndicator: profile?.coins || 0,
       helpText: helpTexts.quests,
     },
-  ];
+  ], [profile, rankData, isLoading, xpParticlesState]);
 
   return (
     <>
@@ -353,12 +353,16 @@ const quickActionItemVariants: Variants = {
 // Additional component for quick actions
 export const QuickActions = () => {
   const navigate = useNavigate();
+
+  const goToQuestBuilder = useCallback(() => navigate("/quest-builder"), [navigate]);
+  const goToDuels = useCallback(() => navigate("/duelos"), [navigate]);
+  const goToTrails = useCallback(() => navigate("/trails"), [navigate]);
   
-  const actions = [
-    { icon: Target, label: "Nova Quest", color: "primary", onClick: () => navigate("/quest-builder") },
-    { icon: Users, label: "Desafio", color: "secondary", onClick: () => navigate("/duelos") },
-    { icon: Clock, label: "Evento", color: "accent", onClick: () => navigate("/trails") },
-  ];
+  const actions = useMemo(() => [
+    { icon: Target, label: "Nova Quest", color: "primary", onClick: goToQuestBuilder },
+    { icon: Users, label: "Desafio", color: "secondary", onClick: goToDuels },
+    { icon: Clock, label: "Evento", color: "accent", onClick: goToTrails },
+  ], [goToQuestBuilder, goToDuels, goToTrails]);
 
   return (
     <motion.div

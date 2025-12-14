@@ -11,7 +11,7 @@ import { useActivityReactions } from "@/hooks/useActivityReactions";
 import { ActivityComments } from "@/components/ActivityComments";
 import { ActivityReactions } from "@/components/ActivityReactions";
 import { Activity, Users } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
 interface SocialFeedProps {
@@ -28,9 +28,9 @@ export function SocialFeed({ limit = 30, compact = false, className }: SocialFee
   const { data: commentCounts = {} } = useCommentsCounts(activityIds);
   const { reactions } = useActivityReactions(activityIds);
 
-  const toggleComments = (id: string) => {
+  const toggleComments = useCallback((id: string) => {
     setOpenComments((prev) => (prev === id ? null : id));
-  };
+  }, []);
 
   if (isLoading) {
     return (

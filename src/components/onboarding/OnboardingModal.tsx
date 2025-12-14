@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -62,16 +62,16 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     },
   ];
 
-  const handleTutorialNext = () => {
+  const handleTutorialNext = useCallback(() => {
     if (tutorialStep < tutorialSlides.length - 1) {
-      setTutorialStep(tutorialStep + 1);
+      setTutorialStep(prev => prev + 1);
     } else {
       completeStep.mutate("welcome");
       setCurrentView("checklist");
     }
-  };
+  }, [tutorialStep, tutorialSlides.length, completeStep]);
 
-  const handleStepAction = async (stepId: string, route?: string) => {
+  const handleStepAction = useCallback(async (stepId: string, route?: string) => {
     setCompletingStepId(stepId);
     try {
       await completeStep.mutateAsync(stepId);
@@ -82,9 +82,9 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     } finally {
       setCompletingStepId(null);
     }
-  };
+  }, [completeStep, onOpenChange, navigate]);
 
-  const handleClaimReward = async (stepId: string) => {
+  const handleClaimReward = useCallback(async (stepId: string) => {
     setClaimingStepId(stepId);
     try {
       // Check if this will be the last reward to claim (all steps will be complete after this)
@@ -105,7 +105,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     } finally {
       setClaimingStepId(null);
     }
-  };
+  }, [progress, claimReward]);
 
   const completionPercentage = onboardingService.getCompletionPercentage(progress);
   const isComplete = onboardingService.isOnboardingComplete(progress);

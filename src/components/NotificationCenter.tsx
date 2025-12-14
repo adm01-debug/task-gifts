@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Bell, 
@@ -135,21 +135,21 @@ export const NotificationCenter = () => {
   const deleteNotification = useDeleteNotification();
   const clearAll = useClearAllNotifications();
 
-  const handleMarkRead = (id: string) => {
+  const handleMarkRead = useCallback((id: string) => {
     markAsRead.mutate(id);
-  };
+  }, [markAsRead]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     deleteNotification.mutate(id);
-  };
+  }, [deleteNotification]);
 
-  const handleMarkAllRead = () => {
+  const handleMarkAllRead = useCallback(() => {
     markAllAsRead.mutate();
-  };
+  }, [markAllAsRead]);
 
-  const handleClearAll = () => {
+  const handleClearAll = useCallback(() => {
     clearAll.mutate();
-  };
+  }, [clearAll]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
