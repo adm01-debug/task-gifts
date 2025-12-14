@@ -38,6 +38,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { useSocialFeed } from "@/hooks/useSocialFeed";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";

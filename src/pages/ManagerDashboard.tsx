@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AllSelectItem } from "@/components/ui/all-select-item";
+import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { useAuth } from "@/hooks/useAuth";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { useProfiles } from "@/hooks/useProfiles";
@@ -503,26 +504,36 @@ export default function ManagerDashboard() {
           </TabsContent>
 
           <TabsContent value="churn">
-            <ChurnPredictionPanel />
+            <SectionErrorBoundary sectionName="Predição de Churn">
+              <ChurnPredictionPanel />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="competencies">
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <TeamCompetencyDashboard />
+                <SectionErrorBoundary sectionName="Competências da Equipe">
+                  <TeamCompetencyDashboard />
+                </SectionErrorBoundary>
               </div>
               <div>
-                <CompetencyAlertsPanel />
+                <SectionErrorBoundary sectionName="Alertas de Competências">
+                  <CompetencyAlertsPanel />
+                </SectionErrorBoundary>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="certifications">
-            <TeamCertificationsPanel />
+            <SectionErrorBoundary sectionName="Certificações">
+              <TeamCertificationsPanel />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="quests">
-            <QuestsList />
+            <SectionErrorBoundary sectionName="Quests">
+              <QuestsList />
+            </SectionErrorBoundary>
           </TabsContent>
         </Tabs>
       </main>

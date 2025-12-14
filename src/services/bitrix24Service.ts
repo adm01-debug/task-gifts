@@ -117,8 +117,13 @@ export const getAuthUrl = async (): Promise<string> => {
   return data.authUrl;
 };
 
+// Filter types for Bitrix24 API calls
+export interface Bitrix24Filter {
+  [key: string]: string | number | boolean | string[] | number[] | undefined;
+}
+
 // Generic API call
-const callApi = async <T>(module: string, action: string, data?: any): Promise<T> => {
+const callApi = async <T>(module: string, action: string, data?: Bitrix24Filter | Record<string, unknown>): Promise<T> => {
   const { data: result, error } = await supabase.functions.invoke('bitrix24-api', {
     body: { module, action, data },
   });
@@ -135,46 +140,56 @@ const callApi = async <T>(module: string, action: string, data?: any): Promise<T
 };
 
 // CRM - Leads
-export const getLeads = (filter?: any) => callApi<Bitrix24Lead[]>('crm', 'getLeads', filter);
+export const getLeads = (filter?: Bitrix24Filter) => callApi<Bitrix24Lead[]>('crm', 'getLeads', filter);
 export const getLead = (id: string) => callApi<Bitrix24Lead>('crm', 'getLead', { id });
-export const createLead = (fields: Partial<Bitrix24Lead>) => callApi<string>('crm', 'createLead', fields);
+export const createLead = (fields: Partial<Bitrix24Lead>) => callApi<string>('crm', 'createLead', fields as Bitrix24Filter);
 export const updateLead = (id: string, fields: Partial<Bitrix24Lead>) => 
-  callApi<boolean>('crm', 'updateLead', { id, fields });
+  callApi<boolean>('crm', 'updateLead', { id, fields } as Record<string, unknown>);
 export const deleteLead = (id: string) => callApi<boolean>('crm', 'deleteLead', { id });
 
 // CRM - Deals
-export const getDeals = (filter?: any) => callApi<Bitrix24Deal[]>('crm', 'getDeals', filter);
+export const getDeals = (filter?: Bitrix24Filter) => callApi<Bitrix24Deal[]>('crm', 'getDeals', filter);
 export const getDeal = (id: string) => callApi<Bitrix24Deal>('crm', 'getDeal', { id });
-export const createDeal = (fields: Partial<Bitrix24Deal>) => callApi<string>('crm', 'createDeal', fields);
+export const createDeal = (fields: Partial<Bitrix24Deal>) => callApi<string>('crm', 'createDeal', fields as Bitrix24Filter);
 export const updateDeal = (id: string, fields: Partial<Bitrix24Deal>) => 
-  callApi<boolean>('crm', 'updateDeal', { id, fields });
+  callApi<boolean>('crm', 'updateDeal', { id, fields } as Record<string, unknown>);
 export const deleteDeal = (id: string) => callApi<boolean>('crm', 'deleteDeal', { id });
 
 // CRM - Contacts
-export const getContacts = (filter?: any) => callApi<Bitrix24Contact[]>('crm', 'getContacts', filter);
+export const getContacts = (filter?: Bitrix24Filter) => callApi<Bitrix24Contact[]>('crm', 'getContacts', filter);
 export const getContact = (id: string) => callApi<Bitrix24Contact>('crm', 'getContact', { id });
-export const createContact = (fields: Partial<Bitrix24Contact>) => callApi<string>('crm', 'createContact', fields);
+export const createContact = (fields: Partial<Bitrix24Contact>) => callApi<string>('crm', 'createContact', fields as Bitrix24Filter);
 export const updateContact = (id: string, fields: Partial<Bitrix24Contact>) => 
-  callApi<boolean>('crm', 'updateContact', { id, fields });
+  callApi<boolean>('crm', 'updateContact', { id, fields } as Record<string, unknown>);
 export const deleteContact = (id: string) => callApi<boolean>('crm', 'deleteContact', { id });
 
 // Tasks
-export const getTasks = (filter?: any) => callApi<Bitrix24Task[]>('tasks', 'getTasks', filter);
+export const getTasks = (filter?: Bitrix24Filter) => callApi<Bitrix24Task[]>('tasks', 'getTasks', filter);
 export const getTask = (id: string) => callApi<Bitrix24Task>('tasks', 'getTask', { id });
-export const createTask = (fields: Partial<Bitrix24Task>) => callApi<string>('tasks', 'createTask', fields);
+export const createTask = (fields: Partial<Bitrix24Task>) => callApi<string>('tasks', 'createTask', fields as Bitrix24Filter);
 export const updateTask = (id: string, fields: Partial<Bitrix24Task>) => 
-  callApi<boolean>('tasks', 'updateTask', { id, fields });
+  callApi<boolean>('tasks', 'updateTask', { id, fields } as Record<string, unknown>);
 export const deleteTask = (id: string) => callApi<boolean>('tasks', 'deleteTask', { id });
 export const completeTask = (id: string) => callApi<boolean>('tasks', 'completeTask', { id });
 
+// Calendar event types
+export interface Bitrix24CalendarEvent {
+  ID?: string;
+  NAME: string;
+  DATE_FROM: string;
+  DATE_TO: string;
+  DESCRIPTION?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
 // Calendar
-export const getCalendarEvents = (filter?: any) => callApi<any[]>('calendar', 'getEvents', filter);
-export const createCalendarEvent = (fields: any) => callApi<string>('calendar', 'createEvent', fields);
-export const updateCalendarEvent = (fields: any) => callApi<boolean>('calendar', 'updateEvent', fields);
+export const getCalendarEvents = (filter?: Bitrix24Filter) => callApi<Bitrix24CalendarEvent[]>('calendar', 'getEvents', filter);
+export const createCalendarEvent = (fields: Bitrix24CalendarEvent) => callApi<string>('calendar', 'createEvent', fields as unknown as Bitrix24Filter);
+export const updateCalendarEvent = (fields: Bitrix24CalendarEvent) => callApi<boolean>('calendar', 'updateEvent', fields as unknown as Bitrix24Filter);
 export const deleteCalendarEvent = (id: string) => callApi<boolean>('calendar', 'deleteEvent', { id });
 
 // Users
-export const getBitrixUsers = (filter?: any) => callApi<Bitrix24User[]>('users', 'getUsers', filter);
+export const getBitrixUsers = (filter?: Bitrix24Filter) => callApi<Bitrix24User[]>('users', 'getUsers', filter);
 export const getBitrixUser = (id: string) => callApi<Bitrix24User>('users', 'getUser', { id });
 export const getCurrentBitrixUser = () => callApi<Bitrix24User>('users', 'getCurrentUser', {});
 export const getBitrixDepartments = () => callApi<any[]>('users', 'getDepartments', {});

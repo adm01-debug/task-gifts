@@ -20,6 +20,7 @@ import { AvatarPreview } from "@/components/AvatarPreview";
 import { ProfileAvatarSection } from "@/components/ProfileAvatarSection";
 import { SoundSettingsCard } from "@/components/SoundSettingsCard";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { useAvatarConfig } from "@/hooks/useAvatar";
 import { useUserRank } from "@/hooks/useUserRank";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
@@ -212,7 +213,6 @@ const Profile = () => {
         setProfile(data as ProfileData);
       }
     } catch (err) {
-      console.error("Error fetching profile:", err);
       toast.error("Erro ao carregar perfil");
     } finally {
       setLoadingProfile(false);
@@ -390,13 +390,15 @@ const Profile = () => {
 
         {/* Avatar Collection Section */}
         {user?.id && profile && (
-          <ProfileAvatarSection
-            userId={user.id}
-            userLevel={profile.level}
-            userStreak={profile.streak}
-            userCoins={profile.coins}
-            displayName={profile.display_name || "Jogador"}
-          />
+          <SectionErrorBoundary sectionName="Coleção de Avatar">
+            <ProfileAvatarSection
+              userId={user.id}
+              userLevel={profile.level}
+              userStreak={profile.streak}
+              userCoins={profile.coins}
+              displayName={profile.display_name || "Jogador"}
+            />
+          </SectionErrorBoundary>
         )}
 
         {/* Achievements */}
@@ -462,7 +464,9 @@ const Profile = () => {
         </motion.div>
 
         {/* Certifications Panel */}
-        <CertificationsPanel />
+        <SectionErrorBoundary sectionName="Certificações">
+          <CertificationsPanel />
+        </SectionErrorBoundary>
 
         {/* Sound Settings */}
         <SoundSettingsCard />
@@ -471,13 +475,23 @@ const Profile = () => {
         <PushNotificationToggle />
 
         {/* Competency Radar */}
-        {user?.id && <CompetencyRadar userId={user.id} />}
+        {user?.id && (
+          <SectionErrorBoundary sectionName="Radar de Competências">
+            <CompetencyRadar userId={user.id} />
+          </SectionErrorBoundary>
+        )}
 
         {/* Kudos Received Section */}
-        {user?.id && <ProfileKudosSection userId={user.id} />}
+        {user?.id && (
+          <SectionErrorBoundary sectionName="Kudos Recebidos">
+            <ProfileKudosSection userId={user.id} />
+          </SectionErrorBoundary>
+        )}
 
         {/* Activity Timeline */}
-        <ProfileActivityTimeline userId={user?.id} />
+        <SectionErrorBoundary sectionName="Linha do Tempo">
+          <ProfileActivityTimeline userId={user?.id} />
+        </SectionErrorBoundary>
 
         {/* Member Since */}
         <motion.div

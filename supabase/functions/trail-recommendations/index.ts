@@ -35,7 +35,7 @@ serve(async (req) => {
       .from("profiles")
       .select("*")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     // Fetch user's department
     const { data: teamMember } = await supabase
