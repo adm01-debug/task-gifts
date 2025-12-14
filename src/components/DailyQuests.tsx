@@ -9,6 +9,7 @@ import type { MissionWithProgress } from "@/services/missionsService";
 
 export const DailyQuests = () => {
   const [hoveredQuest, setHoveredQuest] = useState<string | null>(null);
+  const [claimingId, setClaimingId] = useState<string | null>(null);
   const { data: missions = [], isLoading } = useAllMissions();
   const { data: profile } = useCurrentProfile();
   const claimMutation = useClaimMissionReward();
@@ -21,7 +22,10 @@ export const DailyQuests = () => {
 
   const handleClaim = (mission: MissionWithProgress) => {
     if (mission.progress?.id) {
-      claimMutation.mutate(mission.progress.id);
+      setClaimingId(mission.progress.id);
+      claimMutation.mutate(mission.progress.id, {
+        onSettled: () => setClaimingId(null),
+      });
     }
   };
 
@@ -211,10 +215,10 @@ export const DailyQuests = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleClaim(mission)}
-                      disabled={claimMutation.isPending}
+                      disabled={claimingId === mission.progress?.id}
                       className="px-3 py-1.5 rounded-lg bg-success text-success-foreground text-xs font-bold disabled:opacity-50"
                     >
-                      {claimMutation.isPending ? "..." : "Resgatar"}
+                      {claimingId === mission.progress?.id ? "..." : "Resgatar"}
                     </motion.button>
                   )}
 

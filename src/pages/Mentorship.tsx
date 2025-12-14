@@ -60,6 +60,8 @@ export default function Mentorship() {
   const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [completingMissionId, setCompletingMissionId] = useState<string | null>(null);
+  const [requestingMentorId, setRequestingMentorId] = useState<string | null>(null);
   
   const { data: activePair, isLoading: pairLoading } = useActiveMentorship();
   const { data: missions } = useMentorshipMissions();
@@ -108,10 +110,13 @@ export default function Mentorship() {
 
   const handleComplete = (missionId: string) => {
     if (!activePair) return;
+    setCompletingMissionId(missionId);
     completeMission.mutate({
       pairId: activePair.id,
       missionId,
       isMentor,
+    }, {
+      onSettled: () => setCompletingMissionId(null),
     });
   };
 
@@ -139,10 +144,13 @@ export default function Mentorship() {
   };
 
   const handleRequestMentor = (mentorId: string) => {
+    setRequestingMentorId(mentorId);
     createRequest.mutate({
       targetId: mentorId,
       requestType: "find_mentor",
       message: "Gostaria de ter você como meu mentor!",
+    }, {
+      onSettled: () => setRequestingMentorId(null),
     });
   };
 
@@ -330,10 +338,10 @@ export default function Mentorship() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleComplete(mission.id)}
-                                  disabled={completeMission.isPending}
+                                  disabled={completingMissionId === mission.id}
                                 >
                                   <CheckCircle2 className="h-4 w-4 mr-1" />
-                                  Concluir
+                                  {completingMissionId === mission.id ? "..." : "Concluir"}
                                 </Button>
                               ) : (
                                 <Badge variant="outline" className="text-muted-foreground">
@@ -404,10 +412,10 @@ export default function Mentorship() {
                             <Button
                               size="sm"
                               onClick={() => handleRequestMentor(mentor.id)}
-                              disabled={createRequest.isPending}
+                              disabled={requestingMentorId === mentor.id}
                             >
                               <UserPlus className="h-4 w-4 mr-1" />
-                              Solicitar
+                              {requestingMentorId === mentor.id ? "..." : "Solicitar"}
                             </Button>
                           </div>
                         </motion.div>

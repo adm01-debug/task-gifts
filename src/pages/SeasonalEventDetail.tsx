@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { differenceInDays, differenceInHours, format } from "date-fns";
@@ -19,6 +20,7 @@ export default function SeasonalEventDetail() {
   const { user } = useAuth();
   const { event, isLoading } = useSeasonalEventDetail(eventId || "");
   const claimReward = useClaimSeasonalReward();
+  const [claimingId, setClaimingId] = useState<string | null>(null);
 
   if (!user) {
     navigate("/auth");
@@ -26,13 +28,18 @@ export default function SeasonalEventDetail() {
   }
 
   const handleClaim = async (challengeId: string) => {
-    await claimReward.mutateAsync(challengeId);
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: [event?.banner_color || "#dc2626", "#ffd700", "#ffffff"],
-    });
+    setClaimingId(challengeId);
+    try {
+      await claimReward.mutateAsync(challengeId);
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: [event?.banner_color || "#dc2626", "#ffd700", "#ffffff"],
+      });
+    } finally {
+      setClaimingId(null);
+    }
   };
 
   if (isLoading) {
@@ -288,12 +295,12 @@ export default function SeasonalEventDetail() {
                           <Button
                             size="sm"
                             onClick={() => handleClaim(challenge.id)}
-                            disabled={claimReward.isPending}
+                            disabled={claimingId === challenge.id}
                             style={{ backgroundColor: event.banner_color }}
                             className="text-white"
                           >
                             <Gift className="h-4 w-4 mr-1" />
-                            Coletar
+                            {claimingId === challenge.id ? "..." : "Coletar"}
                           </Button>
                         ) : (
                           <Badge variant="outline" className="text-muted-foreground">
