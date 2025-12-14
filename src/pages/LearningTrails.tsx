@@ -35,6 +35,7 @@ function TrailCard({
   certificationName,
   isLocked,
   missingPrerequisiteNames,
+  isEnrolling,
   onEnroll,
   onContinue,
 }: { 
@@ -44,6 +45,7 @@ function TrailCard({
   certificationName?: string;
   isLocked?: boolean;
   missingPrerequisiteNames?: string[];
+  isEnrolling?: boolean;
   onEnroll: () => void;
   onContinue: () => void;
 }) {
@@ -178,10 +180,14 @@ function TrailCard({
                           : ""
                     }`}
                     onClick={isLocked ? undefined : (enrollment ? onContinue : onEnroll)}
-                    disabled={status === "completed" || isLocked}
+                    disabled={status === "completed" || isLocked || isEnrolling}
                   >
-                    <Icon className="h-4 w-4" />
-                    {config.label}
+                    {isEnrolling ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Icon className="h-4 w-4" />
+                    )}
+                    {isEnrolling ? 'Inscrevendo...' : config.label}
                   </Button>
                 </div>
               </TooltipTrigger>
@@ -203,6 +209,7 @@ export default function LearningTrails() {
   const { user } = useAuth();
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("all");
+  const [enrollingTrailId, setEnrollingTrailId] = useState<string | null>(null);
 
   const { data: trails = [], isLoading: trailsLoading } = usePublishedTrails();
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useUserEnrollments();
@@ -299,8 +306,13 @@ export default function LearningTrails() {
     }, 0);
 
   const handleEnroll = async (trailId: string) => {
-    await enrollMutation.mutateAsync(trailId);
-    navigate(`/trails/${trailId}`);
+    setEnrollingTrailId(trailId);
+    try {
+      await enrollMutation.mutateAsync(trailId);
+      navigate(`/trails/${trailId}`);
+    } finally {
+      setEnrollingTrailId(null);
+    }
   };
 
   const handleContinue = (trailId: string) => {
@@ -486,6 +498,7 @@ export default function LearningTrails() {
                       certificationName={trailCertificationMap.get(trail.id)?.name}
                       isLocked={lockedInfo.isLocked}
                       missingPrerequisiteNames={lockedInfo.missingNames}
+                      isEnrolling={enrollingTrailId === trail.id}
                       onEnroll={() => handleEnroll(trail.id)}
                       onContinue={() => handleContinue(trail.id)}
                     />
