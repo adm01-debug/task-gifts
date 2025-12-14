@@ -32,6 +32,7 @@ import Duels from "./pages/Duels";
 import DailyQuiz from "./pages/DailyQuiz";
 import QuizAdmin from "./pages/QuizAdmin";
 import AdminPanel from "./pages/AdminPanel";
+import Bitrix24CRM from "./pages/Bitrix24CRM";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -67,6 +68,7 @@ const App = () => (
                 <Route path="/quiz" element={<DailyQuiz />} />
                 <Route path="/quiz/admin" element={<QuizAdmin />} />
                 <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/bitrix24" element={<Bitrix24CRM />} />
                 <Route
                   path="/loja/admin"
                   element={
