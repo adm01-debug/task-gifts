@@ -62,6 +62,7 @@ export default function Mentorship() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [completingMissionId, setCompletingMissionId] = useState<string | null>(null);
   const [requestingMentorId, setRequestingMentorId] = useState<string | null>(null);
+  const [acceptingRequestId, setAcceptingRequestId] = useState<string | null>(null);
   
   const { data: activePair, isLoading: pairLoading } = useActiveMentorship();
   const { data: missions } = useMentorshipMissions();
@@ -140,7 +141,10 @@ export default function Mentorship() {
   };
 
   const handleAcceptRequest = (requestId: string) => {
-    acceptRequest.mutate(requestId);
+    setAcceptingRequestId(requestId);
+    acceptRequest.mutate(requestId, {
+      onSettled: () => setAcceptingRequestId(null),
+    });
   };
 
   const handleRequestMentor = (mentorId: string) => {
@@ -474,10 +478,10 @@ export default function Mentorship() {
                             </div>
                             <Button
                               onClick={() => handleAcceptRequest(request.id)}
-                              disabled={acceptRequest.isPending}
+                              disabled={acceptingRequestId === request.id}
                               className="bg-gradient-to-r from-purple-500 to-blue-500"
                             >
-                              Aceitar
+                              {acceptingRequestId === request.id ? "Aceitando..." : "Aceitar"}
                             </Button>
                           </div>
                         </motion.div>
