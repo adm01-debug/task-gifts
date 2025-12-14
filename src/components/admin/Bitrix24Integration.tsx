@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Link2, 
-  Link2Off, 
   RefreshCw, 
   Building2, 
   Users, 
@@ -17,14 +16,17 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  ExternalLink
+  ExternalLink,
+  UserCheck
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { 
   useBitrix24Status, 
   useConnectBitrix24,
   useBitrix24WebhookLogs,
-  useBitrix24SyncMappings
+  useBitrix24SyncMappings,
+  useSyncBitrix24Users,
+  useBitrix24UserMappings
 } from "@/hooks/useBitrix24";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -32,8 +34,10 @@ import { ptBR } from "date-fns/locale";
 export const Bitrix24Integration = () => {
   const { data: status, isLoading: statusLoading, refetch: refetchStatus } = useBitrix24Status();
   const { mutate: connect, isPending: connecting } = useConnectBitrix24();
+  const { mutate: syncUsers, isPending: syncingUsers } = useSyncBitrix24Users();
   const { data: webhookLogs } = useBitrix24WebhookLogs(20);
   const { data: syncMappings } = useBitrix24SyncMappings();
+  const { data: userMappings, refetch: refetchUserMappings } = useBitrix24UserMappings();
   const [activeTab, setActiveTab] = useState("status");
 
   const getStatusBadge = () => {
@@ -156,10 +160,14 @@ export const Bitrix24Integration = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="status" className="gap-2">
             <Activity className="h-4 w-4" />
             Atividade
+          </TabsTrigger>
+          <TabsTrigger value="users" className="gap-2">
+            <UserCheck className="h-4 w-4" />
+            Colaboradores
           </TabsTrigger>
           <TabsTrigger value="sync" className="gap-2">
             <RefreshCw className="h-4 w-4" />
@@ -208,6 +216,98 @@ export const Bitrix24Integration = () => {
                 <div className="text-center py-8 text-muted-foreground">
                   <Activity className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>Nenhuma atividade registrada</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="users" className="mt-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Sincronização de Colaboradores</CardTitle>
+                  <CardDescription>Vincule usuários do Bitrix24 com perfis do sistema</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => syncUsers()} 
+                  disabled={syncingUsers || !status?.connected}
+                  size="sm"
+                >
+                  {syncingUsers ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Sincronizando...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Sincronizar Agora
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {userMappings?.length ? (
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-2">
+                    {userMappings.map((mapping: any) => {
+                      const metadata = mapping.metadata as Record<string, any> || {};
+                      const fullName = [metadata.name, metadata.last_name].filter(Boolean).join(' ');
+                      
+                      return (
+                        <div 
+                          key={mapping.id} 
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-full bg-primary/10">
+                              <Users className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">{fullName || `Usuário ${mapping.bitrix_id}`}</p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {metadata.email && <span>{metadata.email}</span>}
+                                {metadata.position && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{metadata.position}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge 
+                              variant={metadata.active !== false ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {metadata.active !== false ? 'Ativo' : 'Inativo'}
+                            </Badge>
+                            {mapping.last_synced_at && (
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(mapping.last_synced_at), "dd/MM HH:mm")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <UserCheck className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p className="mb-4">Nenhum colaborador sincronizado</p>
+                  <Button 
+                    onClick={() => syncUsers()} 
+                    disabled={syncingUsers || !status?.connected}
+                    variant="outline"
+                  >
+                    {syncingUsers ? 'Sincronizando...' : 'Iniciar Sincronização'}
+                  </Button>
                 </div>
               )}
             </CardContent>
