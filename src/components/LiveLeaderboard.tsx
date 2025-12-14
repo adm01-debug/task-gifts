@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Crown, Medal, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,11 @@ interface LeaderboardPlayer {
 
 const podiumOrder = [1, 0, 2]; // Silver, Gold, Bronze positions
 
-export const LiveLeaderboard = () => {
+/**
+ * LiveLeaderboard - Displays top players with animated podium
+ * Wrapped in React.memo to prevent unnecessary re-renders from parent state changes
+ */
+export const LiveLeaderboard = memo(function LiveLeaderboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profiles = [], isLoading } = useLeaderboard(10);
@@ -259,4 +263,4 @@ export const LiveLeaderboard = () => {
       </div>
     </motion.div>
   );
-};
+});
