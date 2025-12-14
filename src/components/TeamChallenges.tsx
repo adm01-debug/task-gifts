@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Users, Clock, Zap, ChevronRight, Flame, Swords, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -16,9 +16,10 @@ export const TeamChallenges = () => {
   const { data: duels = [], isLoading } = useActiveDuels();
 
   // Filter for active challenges (both weekly and direct duels)
-  const activeChallenges = duels.filter(d => d.status === "active");
+  const activeChallenges = useMemo(() => duels.filter(d => d.status === "active"), [duels]);
 
-  const formatTimeLeft = (endsAt: string) => {
+  const goToDuels = useCallback(() => navigate("/duelos"), [navigate]);
+  const formatTimeLeft = useCallback((endsAt: string) => {
     const end = new Date(endsAt);
     const now = new Date();
     const hoursLeft = differenceInHours(end, now);
@@ -29,7 +30,7 @@ export const TeamChallenges = () => {
       return `${days}d ${hoursLeft % 24}h`;
     }
     return `${hoursLeft}h ${minutesLeft}m`;
-  };
+  }, []);
 
   if (isLoading) {
     return (
@@ -91,7 +92,7 @@ export const TeamChallenges = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("/duelos")}
+              onClick={goToDuels}
               className="gap-2"
             >
               <Plus className="w-4 h-4" />
@@ -218,7 +219,7 @@ export const TeamChallenges = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => navigate("/duelos")}
+          onClick={goToDuels}
           className="w-full py-2.5 rounded-xl bg-gradient-to-r from-secondary to-accent text-secondary-foreground font-semibold text-sm transition-all duration-200 hover:opacity-90"
         >
           {activeChallenges.length > 0 ? "Ver todos os desafios" : "Criar novo desafio"}

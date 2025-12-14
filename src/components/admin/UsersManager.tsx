@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
@@ -166,21 +166,21 @@ export function UsersManager() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleSelectAll = () => {
+  const handleSelectAll = useCallback(() => {
     if (selectedUsers.length === paginatedUsers.length) {
       setSelectedUsers([]);
     } else {
       setSelectedUsers(paginatedUsers.map((u) => u.id));
     }
-  };
+  }, [selectedUsers.length, paginatedUsers]);
 
-  const handleSelectUser = (userId: string) => {
+  const handleSelectUser = useCallback((userId: string) => {
     setSelectedUsers((prev) =>
       prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
     );
-  };
+  }, []);
 
-  const handleAssignRole = async () => {
+  const handleAssignRole = useCallback(async () => {
     if (!roleDialogUser) return;
     try {
       await assignRole.mutateAsync({ userId: roleDialogUser, role: selectedRole });
@@ -189,9 +189,9 @@ export function UsersManager() {
     } catch (error) {
       toast.error("Erro ao atribuir role");
     }
-  };
+  }, [roleDialogUser, selectedRole, assignRole]);
 
-  const handleRemoveRole = async () => {
+  const handleRemoveRole = useCallback(async () => {
     if (!removeRoleConfirm) return;
     try {
       await removeRole.mutateAsync(removeRoleConfirm);
@@ -200,9 +200,9 @@ export function UsersManager() {
     } catch (error) {
       toast.error("Erro ao remover role");
     }
-  };
+  }, [removeRoleConfirm, removeRole]);
 
-  const handleAssignDepartment = async () => {
+  const handleAssignDepartment = useCallback(async () => {
     if (!deptDialogUser || !selectedDept) return;
     try {
       await assignDepartment.mutateAsync({ userId: deptDialogUser, departmentId: selectedDept });
@@ -212,9 +212,9 @@ export function UsersManager() {
     } catch (error) {
       toast.error("Erro ao adicionar ao departamento");
     }
-  };
+  }, [deptDialogUser, selectedDept, assignDepartment]);
 
-  const handleRemoveDepartmentMember = async (memberId: string) => {
+  const handleRemoveDepartmentMember = useCallback(async (memberId: string) => {
     setRemovingDeptMemberId(memberId);
     try {
       await removeDepartmentMember.mutateAsync(memberId);
@@ -224,7 +224,9 @@ export function UsersManager() {
     } finally {
       setRemovingDeptMemberId(null);
     }
-  };
+  }, [removeDepartmentMember]);
+
+  const clearSelection = useCallback(() => setSelectedUsers([]), []);
 
   if (profilesLoading) {
     return (

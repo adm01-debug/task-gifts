@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -42,10 +42,13 @@ export function FloatingActionButton({
   // Only show on mobile
   if (!isMobile) return null;
 
-  const handleActionClick = (action: FABAction) => {
+  const handleActionClick = useCallback((action: FABAction) => {
     action.onClick();
     setIsOpen(false);
-  };
+  }, []);
+
+  const closeMenu = useCallback(() => setIsOpen(false), []);
+  const toggleMenu = useCallback(() => setIsOpen(prev => !prev), []);
 
   return (
     <>
@@ -57,7 +60,7 @@ export function FloatingActionButton({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
-            onClick={() => setIsOpen(false)}
+            onClick={closeMenu}
           />
         )}
       </AnimatePresence>
@@ -122,7 +125,7 @@ export function FloatingActionButton({
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggleMenu}
           className={cn(
             "w-14 h-14 rounded-full flex items-center justify-center shadow-xl",
             "bg-primary text-primary-foreground",

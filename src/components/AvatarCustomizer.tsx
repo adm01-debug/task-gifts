@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Palette, Sparkles, Frame, Crown, Wand2, Shield,
@@ -67,9 +67,9 @@ export function AvatarCustomizer({
   const purchaseItem = usePurchaseItem();
   const updateConfig = useUpdateAvatarConfig();
 
-  const categoryItems = items?.filter(i => i.category === activeCategory) || [];
+  const categoryItems = useMemo(() => items?.filter(i => i.category === activeCategory) || [], [items, activeCategory]);
 
-  const getSelectedItemId = (category: AvatarCategory): string | null => {
+  const getSelectedItemId = useCallback((category: AvatarCategory): string | null => {
     if (!config) return null;
     switch (category) {
       case 'background': return config.selected_background;
@@ -78,14 +78,16 @@ export function AvatarCustomizer({
       case 'effect': return config.selected_effect;
       case 'badge_style': return config.selected_badge_style;
     }
-  };
+  }, [config]);
 
-  const selectedBackground = items?.find(i => i.id === config?.selected_background);
-  const selectedFrame = items?.find(i => i.id === config?.selected_frame);
-  const selectedAccessory = items?.find(i => i.id === config?.selected_accessory);
-  const selectedEffect = items?.find(i => i.id === config?.selected_effect);
+  const { selectedBackground, selectedFrame, selectedAccessory, selectedEffect } = useMemo(() => ({
+    selectedBackground: items?.find(i => i.id === config?.selected_background),
+    selectedFrame: items?.find(i => i.id === config?.selected_frame),
+    selectedAccessory: items?.find(i => i.id === config?.selected_accessory),
+    selectedEffect: items?.find(i => i.id === config?.selected_effect),
+  }), [items, config]);
 
-  const handleItemClick = (item: AvatarItemWithOwnership) => {
+  const handleItemClick = useCallback((item: AvatarItemWithOwnership) => {
     if (item.owned) {
       // Equip/unequip
       const currentSelected = getSelectedItemId(item.category);
@@ -103,7 +105,7 @@ export function AvatarCustomizer({
         unlockItem.mutate({ userId, itemId: item.id });
       }
     }
-  };
+  }, [getSelectedItemId, updateConfig, unlockItem, purchaseItem, userId, userCoins]);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>

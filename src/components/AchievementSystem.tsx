@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Trophy, Zap, Star, Flame, Award, PartyPopper } from "lucide-react";
 
 interface Achievement {
@@ -253,21 +253,21 @@ export const useAchievements = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [levelUp, setLevelUp] = useState<number | null>(null);
 
-  const showAchievement = (achievement: Achievement) => {
+  const showAchievement = useCallback((achievement: Achievement) => {
     setAchievements(prev => [...prev, achievement]);
-  };
+  }, []);
 
-  const hideAchievement = (id: string) => {
+  const hideAchievement = useCallback((id: string) => {
     setAchievements(prev => prev.filter(a => a.id !== id));
-  };
+  }, []);
 
-  const triggerLevelUp = (level: number) => {
+  const triggerLevelUp = useCallback((level: number) => {
     setLevelUp(level);
-  };
+  }, []);
 
-  const closeLevelUp = () => {
+  const closeLevelUp = useCallback(() => {
     setLevelUp(null);
-  };
+  }, []);
 
   return { achievements, showAchievement, hideAchievement, levelUp, triggerLevelUp, closeLevelUp };
 };

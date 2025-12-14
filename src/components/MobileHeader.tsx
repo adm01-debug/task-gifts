@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Menu, Gift } from "lucide-react";
 import { motion } from "framer-motion";
 import { MobileDrawer } from "./MobileDrawer";
@@ -13,6 +13,9 @@ export function MobileHeader({ title, showTitle = true }: MobileHeaderProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
 
+  const openDrawer = useCallback(() => setDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+
   if (!isMobile) return null;
 
   return (
@@ -21,7 +24,7 @@ export function MobileHeader({ title, showTitle = true }: MobileHeaderProps) {
         <div className="container flex h-14 items-center justify-between px-4">
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => setDrawerOpen(true)}
+            onClick={openDrawer}
             className="flex items-center justify-center w-10 h-10 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
             aria-label="Abrir menu"
           >
@@ -44,7 +47,7 @@ export function MobileHeader({ title, showTitle = true }: MobileHeaderProps) {
         </div>
       </header>
 
-      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <MobileDrawer open={drawerOpen} onClose={closeDrawer} />
     </>
   );
 }
