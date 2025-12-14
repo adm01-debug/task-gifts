@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -282,7 +282,7 @@ function RewardFormDialog({
   );
 }
 
-function RewardsManager() {
+const RewardsManager = forwardRef<HTMLDivElement>(function RewardsManager(_, ref) {
   const { data: rewards, isLoading } = useAdminRewards();
   const createMutation = useCreateReward();
   const updateMutation = useUpdateReward();
@@ -329,11 +329,11 @@ function RewardsManager() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Carregando recompensas...</div>;
+    return <div ref={ref} className="text-center py-8">Carregando recompensas...</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">
           Recompensas ({rewards?.length || 0})
@@ -468,9 +468,9 @@ function RewardsManager() {
       </AlertDialog>
     </div>
   );
-}
+});
 
-function PurchasesManager() {
+const PurchasesManager = forwardRef<HTMLDivElement>(function PurchasesManager(_, ref) {
   const { data: purchases, isLoading } = useAdminPurchases();
   const updateStatusMutation = useUpdatePurchaseStatus();
   const [updatingPurchaseId, setUpdatingPurchaseId] = useState<string | null>(null);
@@ -512,13 +512,13 @@ function PurchasesManager() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Carregando pedidos...</div>;
+    return <div ref={ref} className="text-center py-8">Carregando pedidos...</div>;
   }
 
   const pendingCount = purchases?.filter((p) => p.status === "pending").length || 0;
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className="space-y-4">
       <div className="flex items-center gap-2">
         <h2 className="text-lg font-semibold">Pedidos ({purchases?.length || 0})</h2>
         {pendingCount > 0 && (
@@ -630,7 +630,7 @@ function PurchasesManager() {
       )}
     </div>
   );
-}
+});
 
 interface PromotionFormData {
   reward_id: string;
@@ -892,7 +892,7 @@ function PromotionFormDialog({
   );
 }
 
-function PromotionsManager() {
+const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(_, ref) {
   const { data: promotions, isLoading } = useAdminPromotions();
   const { data: rewards } = useAdminRewards();
   const createMutation = useCreatePromotion();
@@ -957,11 +957,11 @@ function PromotionsManager() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Carregando promoções...</div>;
+    return <div ref={ref} className="text-center py-8">Carregando promoções...</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">Promoções ({promotions?.length || 0})</h2>
         <Button onClick={handleCreate}>
@@ -1081,7 +1081,7 @@ function PromotionsManager() {
       </AlertDialog>
     </div>
   );
-}
+});
 
 export default function ShopAdmin() {
   return (
