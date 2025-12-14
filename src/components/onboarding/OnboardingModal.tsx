@@ -87,10 +87,15 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const handleClaimReward = async (stepId: string) => {
     setClaimingStepId(stepId);
     try {
+      // Check if this will be the last reward to claim (all steps will be complete after this)
+      const willCompleteAll = progress && 
+        progress.rewards_claimed.length === ONBOARDING_STEPS.length - 1 &&
+        !progress.rewards_claimed.includes(stepId);
+      
       await claimReward.mutateAsync(stepId);
       
-      // Celebrate if all steps completed
-      if (progress && progress.completed_steps.length === ONBOARDING_STEPS.length - 1) {
+      // Celebrate if all rewards are now claimed
+      if (willCompleteAll) {
         confetti({
           particleCount: 100,
           spread: 70,

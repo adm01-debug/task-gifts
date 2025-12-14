@@ -30,13 +30,14 @@ function RewardCard({
   reward,
   userCoins,
   onPurchase,
-  isPurchasing,
+  purchasingRewardId,
 }: {
   reward: ShopReward;
   userCoins: number;
   onPurchase: (reward: ShopReward) => void;
-  isPurchasing: boolean;
+  purchasingRewardId: string | null;
 }) {
+  const isPurchasing = purchasingRewardId === reward.id;
   const rarityConfig = shopService.getRarityConfig(reward.rarity);
   const categoryConfig = shopService.getCategoryConfig(reward.category);
   const canAfford = userCoins >= reward.price_coins;
@@ -234,6 +235,7 @@ export default function Shop() {
   const [selectedReward, setSelectedReward] = useState<ShopReward | null>(null);
   const [activeCategory, setActiveCategory] = useState<"all" | RewardCategory>("all");
   const [celebration, setCelebration] = useState<{ active: boolean; type: "epic" | "legendary" } | null>(null);
+  const [purchasingRewardId, setPurchasingRewardId] = useState<string | null>(null);
   const isScrolled = useScrollHeader(10);
 
   const triggerCelebration = useCallback((rarity: string) => {
@@ -260,13 +262,16 @@ export default function Shop() {
   const confirmPurchase = () => {
     if (!selectedReward) return;
     const rewardRarity = selectedReward.rarity;
+    const rewardId = selectedReward.id;
+    setPurchasingRewardId(rewardId);
     purchaseMutation.mutate(
-      { rewardId: selectedReward.id },
+      { rewardId },
       {
         onSuccess: () => {
           setSelectedReward(null);
           triggerCelebration(rewardRarity);
         },
+        onSettled: () => setPurchasingRewardId(null),
       }
     );
   };
@@ -397,7 +402,7 @@ export default function Shop() {
                       reward={reward}
                       userCoins={userCoins}
                       onPurchase={handlePurchase}
-                      isPurchasing={purchaseMutation.isPending}
+                      purchasingRewardId={purchasingRewardId}
                     />
                   ))}
                 </AnimatePresence>
