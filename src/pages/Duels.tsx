@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -27,21 +27,23 @@ import { DuelWithProfiles } from "@/services/duelsService";
 import { formatDistanceToNow, differenceInSeconds, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-const DuelCard = ({ 
-  duel, 
-  userId,
-  onAccept,
-  onDecline,
-  onCancel,
-  pendingAction,
-}: { 
+interface DuelCardProps {
   duel: DuelWithProfiles;
   userId: string;
   onAccept?: () => void;
   onDecline?: () => void;
   onCancel?: () => void;
   pendingAction?: { duelId: string; type: 'accept' | 'decline' | 'cancel' } | null;
-}) => {
+}
+
+const DuelCard = forwardRef<HTMLDivElement, DuelCardProps>(({ 
+  duel, 
+  userId,
+  onAccept,
+  onDecline,
+  onCancel,
+  pendingAction,
+}, ref) => {
   const isThisDuelPending = pendingAction?.duelId === duel.id;
   const isAccepting = isThisDuelPending && pendingAction?.type === 'accept';
   const isDeclining = isThisDuelPending && pendingAction?.type === 'decline';
@@ -88,6 +90,7 @@ const DuelCard = ({
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={`
@@ -244,15 +247,18 @@ const DuelCard = ({
       </div>
     </motion.div>
   );
-};
+});
+DuelCard.displayName = "DuelCard";
 
-const CreateDuelDialog = ({ 
-  userId, 
-  onClose 
-}: { 
+interface CreateDuelDialogProps {
   userId: string;
   onClose: () => void;
-}) => {
+}
+
+const CreateDuelDialog = forwardRef<HTMLDivElement, CreateDuelDialogProps>(({ 
+  userId, 
+  onClose 
+}, ref) => {
   const [selectedOpponent, setSelectedOpponent] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [duration, setDuration] = useState(24);
@@ -353,7 +359,8 @@ const CreateDuelDialog = ({
       </Button>
     </div>
   );
-};
+});
+CreateDuelDialog.displayName = "CreateDuelDialog";
 
 const Duels = () => {
   const navigate = useNavigate();
