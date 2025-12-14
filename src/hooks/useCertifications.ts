@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { certificationsService, Certification, UserCertification } from '@/services/certificationsService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { logger } from '@/services/loggingService';
 
 const certificationKeys = {
   all: ['certifications'] as const,
@@ -78,9 +79,9 @@ export function useIssueCertification() {
       queryClient.invalidateQueries({ queryKey: certificationKeys.all });
       toast.success('Certificação emitida com sucesso!');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error('Erro ao emitir certificação');
-      console.error(error);
+      logger.apiError("Error issuing certification", error, "useCertifications");
     },
   });
 }
@@ -95,9 +96,9 @@ export function useRenewCertification() {
       queryClient.invalidateQueries({ queryKey: certificationKeys.all });
       toast.success('Certificação renovada com sucesso!');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error('Erro ao renovar certificação');
-      console.error(error);
+      logger.apiError("Error renewing certification", error, "useCertifications");
     },
   });
 }

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "./loggingService";
 
 export interface UserCombo {
   id: string;
@@ -32,7 +33,7 @@ export const comboService = {
       .maybeSingle();
 
     if (error) {
-      console.error("Error fetching combo:", error);
+      logger.apiError("Error fetching combo", error, "comboService");
       return null;
     }
 
@@ -56,7 +57,7 @@ export const comboService = {
       .single();
 
     if (error) {
-      console.error("Error initializing combo:", error);
+      logger.apiError("Error initializing combo", error, "comboService");
       return null;
     }
 
@@ -125,7 +126,7 @@ export const comboService = {
       .single();
 
     if (error) {
-      console.error("Error updating combo:", error);
+      logger.apiError("Error updating combo", error, "comboService");
       return { finalXp: baseXp, bonusXp: 0, combo, tierUp: false };
     }
 
@@ -144,7 +145,7 @@ export const comboService = {
       .order("combo_date", { ascending: false });
 
     if (error) {
-      console.error("Error fetching combo history:", error);
+      logger.apiError("Error fetching combo history", error, "comboService");
       return [];
     }
 

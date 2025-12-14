@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { profilesService } from "./profilesService";
+import { logger } from "./loggingService";
 
 export interface DepartmentMission {
   id: string;
@@ -274,7 +275,7 @@ export const missionsService = {
         await this.updateProgress(userId, mission.id, increment);
       }
     } catch (e) {
-      console.error(`Failed to update mission progress for metric ${metricKey}:`, e);
+      logger.apiError(`Failed to update mission progress for metric ${metricKey}`, e, "missionsService");
     }
   },
 };

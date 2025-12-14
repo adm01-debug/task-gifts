@@ -5,6 +5,7 @@ import { auditService } from "./auditService";
 import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
 import { achievementsService } from "./achievementsService";
+import { logger } from "./loggingService";
 
 export interface KudosBadge {
   id: string;
@@ -85,7 +86,7 @@ export const kudosService = {
       .limit(limit);
     
     if (error) {
-      console.error("Error fetching kudos:", error);
+      logger.apiError("Error fetching kudos", error, "kudosService");
       throw error;
     }
 
@@ -197,7 +198,7 @@ export const kudosService = {
         senderName = sender.display_name;
       }
     } catch (e) {
-      console.error("Failed to get sender name:", e);
+      logger.apiError("Failed to get sender name", e, "kudosService");
     }
 
     // Audit kudos given and received
@@ -205,7 +206,7 @@ export const kudosService = {
       await auditService.logKudosGiven(kudos.from_user_id, kudos.to_user_id, data.id, kudos.badge_id ?? undefined);
       await auditService.logKudosReceived(kudos.to_user_id, kudos.from_user_id, data.id, kudos.badge_id ?? undefined);
     } catch (e) {
-      console.error("Failed to audit kudos:", e);
+      logger.apiError("Failed to audit kudos", e, "kudosService");
     }
 
     // Add XP to the recipient with combo multiplier
@@ -220,7 +221,7 @@ export const kudosService = {
       };
       await profilesService.addXp(kudos.to_user_id, result.finalXp, `Kudos: ${badgeName}`);
     } catch (e) {
-      console.error("Failed to add XP for kudos:", e);
+      logger.apiError("Failed to add XP for kudos", e, "kudosService");
     }
 
     // Notify the recipient with combo info
@@ -243,7 +244,7 @@ export const kudosService = {
         },
       });
     } catch (e) {
-      console.error("Failed to create kudos notification:", e);
+      logger.apiError("Failed to create kudos notification", e, "kudosService");
     }
 
     // Auto-update mission progress for kudos given
@@ -251,7 +252,7 @@ export const kudosService = {
       await missionsService.incrementByMetricKey(kudos.from_user_id, 'kudos_given', 1);
       await missionsService.incrementByMetricKey(kudos.to_user_id, 'kudos_received', 1);
     } catch (e) {
-      console.error("Failed to update kudos mission progress:", e);
+      logger.apiError("Failed to update kudos mission progress", e, "kudosService");
     }
 
     // Check for kudos achievements
@@ -259,7 +260,7 @@ export const kudosService = {
       await achievementsService.checkKudosGivenAchievements(kudos.from_user_id);
       await achievementsService.checkKudosReceivedAchievements(kudos.to_user_id);
     } catch (e) {
-      console.error("Failed to check kudos achievements:", e);
+      logger.apiError("Failed to check kudos achievements", e, "kudosService");
     }
 
     return { kudos: data as Kudos, comboResult };

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePublishedTrails, useUserEnrollments, useTrailPrerequisites } from "@/hooks/useTrails";
 import type { LearningTrail, TrailEnrollment, TrailPrerequisite } from "@/services/trailsService";
 
@@ -283,9 +284,11 @@ export function TrailDependencyTree() {
   const handleZoomOut = useCallback(() => setZoom(prev => Math.max(0.5, prev - 0.1)), []);
   const handleZoomIn = useCallback(() => setZoom(prev => Math.min(1.5, prev + 0.1)), []);
 
-  const { data: trails = [] } = usePublishedTrails();
-  const { data: enrollments = [] } = useUserEnrollments();
-  const { data: prerequisites = [] } = useTrailPrerequisites();
+  const { data: trails = [], isLoading: isLoadingTrails } = usePublishedTrails();
+  const { data: enrollments = [], isLoading: isLoadingEnrollments } = useUserEnrollments();
+  const { data: prerequisites = [], isLoading: isLoadingPrerequisites } = useTrailPrerequisites();
+
+  const isLoading = isLoadingTrails || isLoadingEnrollments || isLoadingPrerequisites;
 
   const completedTrailIds = useMemo(() => {
     return new Set(
@@ -321,7 +324,39 @@ export function TrailDependencyTree() {
     };
   }, [trails, prerequisites]);
 
-  const TreeContent = (
+  const SkeletonContent = (
+    <div className="space-y-4 p-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="space-y-2">
+          <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-border">
+            <Skeleton className="h-6 w-6" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <div className="flex gap-2">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-5 w-20" />
+              </div>
+            </div>
+          </div>
+          {i === 1 && (
+            <div className="ml-8 pl-6 border-l-2 border-border space-y-2">
+              <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-border">
+                <Skeleton className="h-6 w-6" />
+                <Skeleton className="h-8 w-8 rounded" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-5 w-14" />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  const TreeContent = isLoading ? SkeletonContent : (
     <>
       {/* Legend */}
       <div className="flex flex-wrap gap-4 mb-6 p-4 rounded-lg bg-muted/30 border border-border/50">

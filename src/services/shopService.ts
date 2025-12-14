@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { profilesService } from "./profilesService";
 import { notificationsService } from "./notificationsService";
 import { auditService } from "./auditService";
+import { logger } from "./loggingService";
 
 export type RewardCategory = "product" | "benefit" | "experience";
 export type RewardRarity = "common" | "rare" | "epic" | "legendary";
@@ -175,7 +176,7 @@ export const shopService = {
         },
       });
     } catch (e) {
-      console.error("Failed to audit purchase:", e);
+      logger.apiError("Failed to audit purchase", e, "shopService");
     }
 
     // Send notification
@@ -192,7 +193,7 @@ export const shopService = {
         },
       });
     } catch (e) {
-      console.error("Failed to create purchase notification:", e);
+      logger.apiError("Failed to create purchase notification", e, "shopService");
     }
 
     return purchase as ShopPurchase;
@@ -356,7 +357,7 @@ export const shopService = {
           data: { purchase_id: purchaseId, status },
         });
       } catch (e) {
-        console.error("Failed to notify user:", e);
+        logger.apiError("Failed to notify user", e, "shopService");
       }
     }
   },

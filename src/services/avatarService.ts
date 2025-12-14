@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "./loggingService";
 
 export type AvatarCategory = 'background' | 'frame' | 'accessory' | 'effect' | 'badge_style';
 export type AvatarRarity = 'common' | 'rare' | 'epic' | 'legendary';

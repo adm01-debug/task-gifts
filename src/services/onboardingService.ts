@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "./loggingService";
 
 export interface OnboardingStep {
   id: string;
