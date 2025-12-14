@@ -20,6 +20,7 @@ export interface ShopPromotion {
   max_claims: number | null;
   current_claims: number;
   created_at: string;
+  updated_at: string;
   reward?: ShopReward;
 }
 
@@ -34,6 +35,7 @@ export interface ShopReward {
   rarity: RewardRarity;
   is_active: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 export interface ShopPurchase {
@@ -49,6 +51,13 @@ export interface ShopPurchase {
   processed_by: string | null;
   reward?: ShopReward;
 }
+
+// Input types for mutations (without auto-generated fields)
+export type CreateRewardInput = Omit<ShopReward, "id" | "created_at" | "updated_at">;
+export type UpdateRewardInput = Partial<CreateRewardInput>;
+
+export type CreatePromotionInput = Omit<ShopPromotion, "id" | "created_at" | "updated_at" | "current_claims" | "reward">;
+export type UpdatePromotionInput = Partial<Omit<CreatePromotionInput, "reward_id">>;
 
 export const shopService = {
   // Get all active rewards
@@ -249,7 +258,7 @@ export const shopService = {
 
   // Create a new reward
   async createReward(
-    reward: Omit<ShopReward, "id" | "created_at">
+    reward: CreateRewardInput
   ): Promise<ShopReward> {
     const { data, error } = await supabase
       .from("shop_rewards")
@@ -265,7 +274,7 @@ export const shopService = {
   // Update a reward
   async updateReward(
     id: string,
-    updates: Partial<Omit<ShopReward, "id" | "created_at">>
+    updates: UpdateRewardInput
   ): Promise<ShopReward> {
     const { data, error } = await supabase
       .from("shop_rewards")
@@ -388,7 +397,7 @@ export const shopService = {
 
   // Create promotion
   async createPromotion(
-    promotion: Omit<ShopPromotion, "id" | "created_at" | "current_claims" | "reward">
+    promotion: CreatePromotionInput
   ): Promise<ShopPromotion> {
     const { data, error } = await supabase
       .from("shop_promotions")
@@ -404,7 +413,7 @@ export const shopService = {
   // Update promotion
   async updatePromotion(
     id: string,
-    updates: Partial<Omit<ShopPromotion, "id" | "created_at" | "reward">>
+    updates: UpdatePromotionInput
   ): Promise<ShopPromotion> {
     const { data, error } = await supabase
       .from("shop_promotions")
