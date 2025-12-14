@@ -31,8 +31,6 @@ export function useRecentKudos(limit = 20) {
   useEffect(() => {
     if (!user?.id) return;
 
-    console.log("Setting up realtime subscription for kudos");
-
     const channel = supabase
       .channel("kudos-realtime")
       .on(
@@ -43,7 +41,6 @@ export function useRecentKudos(limit = 20) {
           table: "kudos",
         },
         (payload) => {
-          console.log("New kudos received:", payload);
           // Invalidate queries to refetch with new data
           queryClient.invalidateQueries({ queryKey: kudosKeys.recent(limit) });
           

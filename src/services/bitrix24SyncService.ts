@@ -38,7 +38,6 @@ export const bitrix24SyncService = {
       }
 
       if (!mapping) {
-        console.log("No Bitrix24 task mapping found for quest:", questId);
         return false;
       }
 
@@ -56,7 +55,6 @@ export const bitrix24SyncService = {
         })
         .eq("id", mapping.id);
 
-      console.log("Bitrix24 task completed for quest:", questId, "task:", mapping.bitrix_id);
       return true;
     } catch (error) {
       console.error("Failed to sync quest completion with Bitrix24:", error);
@@ -392,7 +390,6 @@ export const bitrix24SyncService = {
       // Check if user has Bitrix24 mapping
       const userMapping = await this.getUserMappingByProfileId(userId);
       if (!userMapping) {
-        console.log("No Bitrix24 mapping for user:", userId);
         return false;
       }
 
@@ -418,7 +415,6 @@ export const bitrix24SyncService = {
           onConflict: 'entity_type,local_id,bitrix_entity_type,bitrix_id' 
         });
 
-      console.log("Bitrix24 workday opened for user:", userId);
       return true;
     } catch (error) {
       console.error("Failed to sync check-in with Bitrix24:", error);
@@ -434,7 +430,6 @@ export const bitrix24SyncService = {
       // Check if user has Bitrix24 mapping
       const userMapping = await this.getUserMappingByProfileId(userId);
       if (!userMapping) {
-        console.log("No Bitrix24 mapping for user:", userId);
         return false;
       }
 
@@ -457,7 +452,6 @@ export const bitrix24SyncService = {
         .eq("entity_type", "attendance")
         .eq("local_id", `${userId}_${today}`);
 
-      console.log("Bitrix24 workday closed for user:", userId);
       return true;
     } catch (error) {
       console.error("Failed to sync check-out with Bitrix24:", error);
