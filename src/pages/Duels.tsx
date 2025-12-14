@@ -38,9 +38,9 @@ const DuelCard = ({
 }: { 
   duel: DuelWithProfiles;
   userId: string;
-  onAccept: () => void;
-  onDecline: () => void;
-  onCancel: () => void;
+  onAccept?: () => void;
+  onDecline?: () => void;
+  onCancel?: () => void;
   isAccepting?: boolean;
   isDeclining?: boolean;
   isCancelling?: boolean;
@@ -199,7 +199,7 @@ const DuelCard = ({
         )}
 
         {/* Actions */}
-        {duel.status === 'pending' && !isChallenger && (
+        {duel.status === 'pending' && !isChallenger && onAccept && onDecline && (
           <div className="flex gap-2">
             <Button 
               onClick={onAccept} 
@@ -225,7 +225,7 @@ const DuelCard = ({
           </div>
         )}
 
-        {duel.status === 'pending' && isChallenger && (
+        {duel.status === 'pending' && isChallenger && onCancel && (
           <Button 
             onClick={onCancel} 
             variant="outline" 
@@ -563,9 +563,6 @@ const Duels = () => {
                   key={duel.id}
                   duel={duel}
                   userId={user!.id}
-                  onAccept={() => {}}
-                  onDecline={() => {}}
-                  onCancel={() => {}}
                 />
               ))}
             </div>
