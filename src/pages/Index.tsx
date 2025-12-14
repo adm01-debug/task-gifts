@@ -98,12 +98,19 @@ function Index() {
         {/* Mobile Drawer */}
         <MobileDrawer open={mobileDrawerOpen} onClose={handleCloseMobileDrawer} />
 
-        {/* Desktop Sidebar - Hidden on mobile, waits for hydration to prevent layout shift */}
-        {isHydrated && !isMobile && (
-          <AppSidebar 
-            collapsed={sidebarCollapsed} 
-            onToggle={handleToggleSidebar} 
-          />
+        {/* Desktop Sidebar - Skeleton placeholder prevents layout shift during hydration */}
+        {!isMobile && (
+          isHydrated ? (
+            <AppSidebar 
+              collapsed={sidebarCollapsed} 
+              onToggle={handleToggleSidebar} 
+            />
+          ) : (
+            <div 
+              className="hidden lg:block w-64 shrink-0 bg-card border-r border-border" 
+              aria-hidden="true" 
+            />
+          )
         )}
 
         {/* Main Content */}
