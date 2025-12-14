@@ -20,7 +20,7 @@ export default function SeasonalEventDetail() {
   const { user } = useAuth();
   const { event, isLoading } = useSeasonalEventDetail(eventId || "");
   const claimReward = useClaimSeasonalReward();
-  const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
 
   if (!user) {
     navigate("/auth");
@@ -28,7 +28,7 @@ export default function SeasonalEventDetail() {
   }
 
   const handleClaim = async (challengeId: string) => {
-    setClaimingId(challengeId);
+    setClaimingIds(prev => new Set(prev).add(challengeId));
     try {
       await claimReward.mutateAsync(challengeId);
       confetti({
@@ -38,7 +38,11 @@ export default function SeasonalEventDetail() {
         colors: [event?.banner_color || "#dc2626", "#ffd700", "#ffffff"],
       });
     } finally {
-      setClaimingId(null);
+      setClaimingIds(prev => {
+        const next = new Set(prev);
+        next.delete(challengeId);
+        return next;
+      });
     }
   };
 
@@ -295,12 +299,12 @@ export default function SeasonalEventDetail() {
                           <Button
                             size="sm"
                             onClick={() => handleClaim(challenge.id)}
-                            disabled={claimingId === challenge.id}
+                            disabled={claimingIds.has(challenge.id)}
                             style={{ backgroundColor: event.banner_color }}
                             className="text-white"
                           >
                             <Gift className="h-4 w-4 mr-1" />
-                            {claimingId === challenge.id ? "..." : "Coletar"}
+                            {claimingIds.has(challenge.id) ? "..." : "Coletar"}
                           </Button>
                         ) : (
                           <Badge variant="outline" className="text-muted-foreground">

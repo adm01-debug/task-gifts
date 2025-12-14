@@ -9,7 +9,7 @@ import type { MissionWithProgress } from "@/services/missionsService";
 
 export const DailyQuests = () => {
   const [hoveredQuest, setHoveredQuest] = useState<string | null>(null);
-  const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
   const { data: missions = [], isLoading } = useAllMissions();
   const { data: profile } = useCurrentProfile();
   const claimMutation = useClaimMissionReward();
@@ -22,9 +22,14 @@ export const DailyQuests = () => {
 
   const handleClaim = (mission: MissionWithProgress) => {
     if (mission.progress?.id) {
-      setClaimingId(mission.progress.id);
-      claimMutation.mutate(mission.progress.id, {
-        onSettled: () => setClaimingId(null),
+      const progressId = mission.progress.id;
+      setClaimingIds(prev => new Set(prev).add(progressId));
+      claimMutation.mutate(progressId, {
+        onSettled: () => setClaimingIds(prev => {
+          const next = new Set(prev);
+          next.delete(progressId);
+          return next;
+        }),
       });
     }
   };
@@ -208,17 +213,17 @@ export const DailyQuests = () => {
                   </div>
 
                   {/* Claim button for completed */}
-                  {isCompleted && !isClaimed && (
+                  {isCompleted && !isClaimed && mission.progress?.id && (
                     <motion.button
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleClaim(mission)}
-                      disabled={claimingId === mission.progress?.id}
+                      disabled={claimingIds.has(mission.progress.id)}
                       className="px-3 py-1.5 rounded-lg bg-success text-success-foreground text-xs font-bold disabled:opacity-50"
                     >
-                      {claimingId === mission.progress?.id ? "..." : "Resgatar"}
+                      {claimingIds.has(mission.progress.id) ? "..." : "Resgatar"}
                     </motion.button>
                   )}
 
