@@ -5,6 +5,9 @@ import {
   type ShopReward,
   type PurchaseStatus,
   type ShopPromotion,
+  type CreateRewardInput,
+  type CreatePromotionInput,
+  type UpdatePromotionInput,
 } from "@/services/shopService";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
@@ -86,7 +89,7 @@ export function useCreateReward() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (reward: Omit<ShopReward, "id" | "created_at">) =>
+    mutationFn: (reward: CreateRewardInput) =>
       shopService.createReward(reward),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
@@ -169,7 +172,7 @@ export function useCreatePromotion() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (promotion: Omit<ShopPromotion, "id" | "created_at" | "current_claims" | "reward">) =>
+    mutationFn: (promotion: CreatePromotionInput) =>
       shopService.createPromotion(promotion),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
@@ -185,7 +188,7 @@ export function useUpdatePromotion() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<Omit<ShopPromotion, "id" | "created_at" | "reward">> }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: UpdatePromotionInput }) =>
       shopService.updatePromotion(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });

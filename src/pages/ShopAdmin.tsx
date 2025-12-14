@@ -67,20 +67,13 @@ import {
   type RewardCategory,
   type RewardRarity,
   type PurchaseStatus,
+  type CreateRewardInput,
+  type CreatePromotionInput,
 } from "@/services/shopService";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-interface RewardFormData {
-  name: string;
-  description: string;
-  category: RewardCategory;
-  price_coins: number;
-  stock: number | null;
-  rarity: RewardRarity;
-  is_active: boolean;
-  image_url: string;
-}
+type RewardFormData = CreateRewardInput;
 
 const emptyFormData: RewardFormData = {
   name: "",
@@ -310,7 +303,7 @@ const RewardsManager = forwardRef<HTMLDivElement>(function RewardsManager(_, ref
         { onSuccess: () => setDialogOpen(false) }
       );
     } else {
-      createMutation.mutate(data as any, {
+      createMutation.mutate(data, {
         onSuccess: () => setDialogOpen(false),
       });
     }
@@ -639,17 +632,10 @@ const PurchasesManager = forwardRef<HTMLDivElement>(function PurchasesManager(_,
   );
 });
 
-interface PromotionFormData {
-  reward_id: string;
-  title: string;
-  description: string;
-  discount_percent: number | null;
-  discount_coins: number | null;
+type PromotionFormData = Omit<CreatePromotionInput, "starts_at" | "ends_at"> & {
   starts_at: string;
   ends_at: string;
-  is_active: boolean;
-  max_claims: number | null;
-}
+};
 
 const emptyPromotionForm: PromotionFormData = {
   reward_id: "",
@@ -922,7 +908,7 @@ const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(
       ...data,
       starts_at: new Date(data.starts_at).toISOString(),
       ends_at: new Date(data.ends_at).toISOString(),
-    };
+    } satisfies CreatePromotionInput;
 
     if (editingPromotion) {
       updateMutation.mutate(
@@ -930,7 +916,7 @@ const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(
         { onSuccess: () => setDialogOpen(false) }
       );
     } else {
-      createMutation.mutate(payload as any, {
+      createMutation.mutate(payload, {
         onSuccess: () => setDialogOpen(false),
       });
     }
