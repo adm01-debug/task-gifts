@@ -43,9 +43,29 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useExecutiveMetrics, useMonthlyTrends, useDepartmentMetrics } from "@/hooks/useExecutiveMetrics";
 import { useQueryClient } from "@tanstack/react-query";
+// Type for executive metrics from API
+interface ExecutiveMetricsData {
+  totalUsers: number;
+  activeUsersToday: number;
+  activeUsersWeek: number;
+  level5Plus: number;
+  totalXpEarned: number;
+  totalQuestsCompleted: number;
+  totalKudos: number;
+  punctualCheckins: number;
+  totalCheckins: number;
+  completedTrails: number;
+  totalEnrollments: number;
+  avgTrainingHours: number;
+  dau: number;
+  wau: number;
+  punctualityRate: number;
+  trainingCompletionRate: number;
+  level5PlusRate: number;
+}
 
 // Calculate derived metrics from real database values
-const calculateFinancialMetrics = (metrics: any) => {
+const calculateFinancialMetrics = (metrics: ExecutiveMetricsData | undefined) => {
   // ROI calculated from real engagement metrics
   const engagementScore = metrics ? (metrics.totalXpEarned / 100) + (metrics.totalQuestsCompleted * 5) + (metrics.totalKudos * 2) : 0;
   const baseROI = metrics ? Math.min(300, 100 + engagementScore) : 0;
@@ -63,7 +83,7 @@ const calculateFinancialMetrics = (metrics: any) => {
   };
 };
 
-const calculatePeopleMetrics = (metrics: any) => {
+const calculatePeopleMetrics = (metrics: ExecutiveMetricsData | undefined) => {
   return {
     enps: { value: null, target: 50, promoters: null, passives: null, detractors: null }, // Requires eNPS survey integration
     turnover: { value: null, target: 10, previousYear: null }, // Requires HR system integration
@@ -90,7 +110,7 @@ const calculatePeopleMetrics = (metrics: any) => {
   };
 };
 
-const calculateOperationalMetrics = (metrics: any) => {
+const calculateOperationalMetrics = (metrics: ExecutiveMetricsData | undefined) => {
   return {
     punctualCheckin: { 
       value: metrics?.punctualityRate || 0, 

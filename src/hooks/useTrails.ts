@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { trailsService, type LearningTrail, type TrailModule, type TrailPrerequisite } from "@/services/trailsService";
+import { trailsService, type LearningTrail, type TrailModule, type TrailPrerequisite, type CreateTrailInput, type CreateModuleInput } from "@/services/trailsService";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
@@ -134,7 +134,7 @@ export function useCreateTrail() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: (trail: Partial<LearningTrail>) => 
+    mutationFn: (trail: Omit<CreateTrailInput, 'created_by'>) => 
       trailsService.createTrail({ ...trail, created_by: user!.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: trailKeys.all });
@@ -150,7 +150,7 @@ export function useCreateModule() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (module: Partial<TrailModule>) => trailsService.createModule(module),
+    mutationFn: (module: CreateModuleInput) => trailsService.createModule(module),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: trailKeys.all });
     },

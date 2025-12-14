@@ -5,6 +5,7 @@ import { comboService } from "./comboService";
 import { profilesService } from "./profilesService";
 import { achievementsService } from "./achievementsService";
 import { certificationsService } from "./certificationsService";
+import { Json } from "@/integrations/supabase/types";
 
 export interface LearningTrail {
   id: string;
@@ -30,13 +31,41 @@ export interface TrailModule {
   title: string;
   description: string | null;
   content_type: "video" | "text" | "quiz" | "flashcard" | "infographic" | "simulation" | "checklist";
-  content: Record<string, unknown>;
+  content: Json | null;
   video_url: string | null;
   xp_reward: number;
   duration_minutes: number;
   order_index: number;
   created_at: string;
   updated_at: string;
+}
+
+// Input types for create operations (without auto-generated fields)
+export interface CreateTrailInput {
+  title: string;
+  description?: string | null;
+  icon?: string;
+  department_id?: string | null;
+  estimated_hours?: number;
+  xp_reward?: number;
+  coin_reward?: number;
+  badge_name?: string | null;
+  badge_icon?: string | null;
+  status?: "draft" | "published" | "archived";
+  order_index?: number;
+  created_by: string;
+}
+
+export interface CreateModuleInput {
+  trail_id: string;
+  title: string;
+  description?: string | null;
+  content_type?: "video" | "text" | "quiz" | "flashcard" | "infographic" | "simulation" | "checklist";
+  content?: Json | null;
+  video_url?: string | null;
+  xp_reward?: number;
+  duration_minutes?: number;
+  order_index?: number;
 }
 
 export interface TrailEnrollment {
@@ -306,10 +335,23 @@ export const trailsService = {
   },
 
   // Create trail (for managers/admins)
-  async createTrail(trail: Partial<LearningTrail>): Promise<LearningTrail> {
+  async createTrail(trail: CreateTrailInput): Promise<LearningTrail> {
     const { data, error } = await supabase
       .from("learning_trails")
-      .insert(trail as any)
+      .insert({
+        title: trail.title,
+        description: trail.description,
+        icon: trail.icon,
+        department_id: trail.department_id,
+        estimated_hours: trail.estimated_hours,
+        xp_reward: trail.xp_reward,
+        coin_reward: trail.coin_reward,
+        badge_name: trail.badge_name,
+        badge_icon: trail.badge_icon,
+        status: trail.status,
+        order_index: trail.order_index,
+        created_by: trail.created_by,
+      })
       .select()
       .single();
 
@@ -318,10 +360,20 @@ export const trailsService = {
   },
 
   // Create module
-  async createModule(module: Partial<TrailModule>): Promise<TrailModule> {
+  async createModule(module: CreateModuleInput): Promise<TrailModule> {
     const { data, error } = await supabase
       .from("trail_modules")
-      .insert(module as any)
+      .insert({
+        trail_id: module.trail_id,
+        title: module.title,
+        description: module.description,
+        content_type: module.content_type,
+        content: module.content,
+        video_url: module.video_url,
+        xp_reward: module.xp_reward,
+        duration_minutes: module.duration_minutes,
+        order_index: module.order_index,
+      })
       .select()
       .single();
 
@@ -343,10 +395,20 @@ export const trailsService = {
   },
 
   // Update module
-  async updateModule(id: string, updates: Partial<TrailModule>): Promise<TrailModule> {
+  async updateModule(id: string, updates: Partial<Omit<TrailModule, 'id' | 'created_at' | 'updated_at'>>): Promise<TrailModule> {
     const { data, error } = await supabase
       .from("trail_modules")
-      .update(updates as any)
+      .update({
+        ...(updates.trail_id !== undefined && { trail_id: updates.trail_id }),
+        ...(updates.title !== undefined && { title: updates.title }),
+        ...(updates.description !== undefined && { description: updates.description }),
+        ...(updates.content_type !== undefined && { content_type: updates.content_type }),
+        ...(updates.content !== undefined && { content: updates.content }),
+        ...(updates.video_url !== undefined && { video_url: updates.video_url }),
+        ...(updates.xp_reward !== undefined && { xp_reward: updates.xp_reward }),
+        ...(updates.duration_minutes !== undefined && { duration_minutes: updates.duration_minutes }),
+        ...(updates.order_index !== undefined && { order_index: updates.order_index }),
+      })
       .eq("id", id)
       .select()
       .single();

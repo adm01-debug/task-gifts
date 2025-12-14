@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +44,63 @@ import {
 } from "@/hooks/useBitrix24";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Json } from "@/integrations/supabase/types";
+
+// Type definitions for Bitrix24 data structures
+interface BitrixUserMetadata {
+  name?: string;
+  last_name?: string;
+  email?: string;
+  position?: string;
+  active?: boolean;
+}
+
+interface BitrixCalendarMetadata {
+  name?: string;
+  date_from?: string;
+  date_to?: string;
+  type?: string;
+}
+
+interface BitrixAttendanceMetadata {
+  check_in_at?: string;
+  check_out_at?: string;
+}
+
+interface BitrixSyncMapping {
+  id: string;
+  bitrix_id: string;
+  local_id: string;
+  entity_type: string;
+  bitrix_entity_type: string;
+  sync_status: string;
+  last_synced_at: string | null;
+  metadata: Json;
+}
+
+interface BitrixWebhookLog {
+  id: string;
+  event_type: string;
+  created_at: string;
+  processed: boolean;
+  error_message: string | null;
+  payload: Json;
+}
+
+interface BitrixDialog {
+  ID: string;
+  TITLE?: string;
+  TYPE?: string;
+  COUNTER?: number;
+}
+
+interface BitrixNotification {
+  ID: string;
+  TITLE?: string;
+  TEXT?: string;
+  DATE?: string;
+  TYPE?: string;
+}
 
 export const Bitrix24Integration = () => {
   const { data: status, isLoading: statusLoading, refetch: refetchStatus } = useBitrix24Status();
@@ -101,12 +158,14 @@ export const Bitrix24Integration = () => {
     });
   };
 
-  const filteredUsers = userMappings?.filter((mapping: any) => {
-    if (!searchUser) return true;
-    const metadata = mapping.metadata as Record<string, any> || {};
-    const fullName = [metadata.name, metadata.last_name].filter(Boolean).join(' ').toLowerCase();
-    return fullName.includes(searchUser.toLowerCase()) || metadata.email?.toLowerCase().includes(searchUser.toLowerCase());
-  });
+  const filteredUsers = useMemo(() => {
+    return userMappings?.filter((mapping: BitrixSyncMapping) => {
+      if (!searchUser) return true;
+      const metadata = (mapping.metadata as BitrixUserMetadata) || {};
+      const fullName = [metadata.name, metadata.last_name].filter(Boolean).join(' ').toLowerCase();
+      return fullName.includes(searchUser.toLowerCase()) || metadata.email?.toLowerCase().includes(searchUser.toLowerCase());
+    });
+  }, [userMappings, searchUser]);
 
   return (
     <div className="space-y-6">
@@ -258,7 +317,7 @@ export const Bitrix24Integration = () => {
               {webhookLogs?.length ? (
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-3">
-                    {webhookLogs.map((log: any) => (
+                    {(webhookLogs as BitrixWebhookLog[] | undefined)?.map((log) => (
                       <div 
                         key={log.id} 
                         className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
@@ -322,8 +381,8 @@ export const Bitrix24Integration = () => {
               {userMappings?.length ? (
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-2">
-                    {userMappings.map((mapping: any) => {
-                      const metadata = mapping.metadata as Record<string, any> || {};
+                    {(userMappings as BitrixSyncMapping[] | undefined)?.map((mapping) => {
+                      const metadata = (mapping.metadata as BitrixUserMetadata) || {};
                       const fullName = [metadata.name, metadata.last_name].filter(Boolean).join(' ');
                       
                       return (
@@ -414,8 +473,8 @@ export const Bitrix24Integration = () => {
               {calendarMappings?.length ? (
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-2">
-                    {calendarMappings.map((mapping: any) => {
-                      const metadata = mapping.metadata as Record<string, any> || {};
+                    {(calendarMappings as BitrixSyncMapping[] | undefined)?.map((mapping) => {
+                      const metadata = (mapping.metadata as BitrixCalendarMetadata) || {};
                       
                       return (
                         <div 
@@ -502,9 +561,9 @@ export const Bitrix24Integration = () => {
               {attendanceMappings?.length ? (
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-2">
-                    {attendanceMappings.map((mapping: any) => {
-                      const metadata = mapping.metadata as Record<string, any> || {};
-                      const localId = mapping.local_id as string;
+                    {(attendanceMappings as BitrixSyncMapping[] | undefined)?.map((mapping) => {
+                      const metadata = (mapping.metadata as BitrixAttendanceMetadata) || {};
+                      const localId = mapping.local_id;
                       const datePart = localId.split('_').pop() || '';
                       
                       return (
@@ -613,8 +672,8 @@ export const Bitrix24Integration = () => {
                         </div>
                         {searchUser && filteredUsers?.length ? (
                           <div className="max-h-[150px] overflow-auto rounded-lg border bg-background">
-                            {filteredUsers.slice(0, 5).map((mapping: any) => {
-                              const metadata = mapping.metadata as Record<string, any> || {};
+                            {filteredUsers.slice(0, 5).map((mapping) => {
+                              const metadata = (mapping.metadata as BitrixUserMetadata) || {};
                               const fullName = [metadata.name, metadata.last_name].filter(Boolean).join(' ');
                               return (
                                 <button
@@ -667,7 +726,7 @@ export const Bitrix24Integration = () => {
                 {dialogs?.length ? (
                   <ScrollArea className="h-[200px]">
                     <div className="space-y-2">
-                      {dialogs.map((dialog: any) => (
+                      {(dialogs as BitrixDialog[]).map((dialog) => (
                         <div 
                           key={dialog.ID} 
                           className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
@@ -686,7 +745,7 @@ export const Bitrix24Integration = () => {
                               </p>
                             </div>
                           </div>
-                          {dialog.COUNTER > 0 && (
+                          {(dialog.COUNTER ?? 0) > 0 && (
                             <Badge className="bg-pink-500">{dialog.COUNTER}</Badge>
                           )}
                         </div>
@@ -742,8 +801,8 @@ export const Bitrix24Integration = () => {
                         </div>
                         {userMappings?.length && !notificationUserId ? (
                           <div className="max-h-[100px] overflow-auto rounded-lg border bg-background">
-                            {userMappings.slice(0, 3).map((mapping: any) => {
-                              const metadata = mapping.metadata as Record<string, any> || {};
+                            {(userMappings as BitrixSyncMapping[]).slice(0, 3).map((mapping) => {
+                              const metadata = (mapping.metadata as BitrixUserMetadata) || {};
                               const fullName = [metadata.name, metadata.last_name].filter(Boolean).join(' ');
                               return (
                                 <button
@@ -791,7 +850,7 @@ export const Bitrix24Integration = () => {
                 {notifications?.length ? (
                   <ScrollArea className="h-[200px]">
                     <div className="space-y-2">
-                      {notifications.map((notification: any) => (
+                      {(notifications as BitrixNotification[]).map((notification) => (
                         <div 
                           key={notification.ID} 
                           className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
@@ -834,7 +893,7 @@ export const Bitrix24Integration = () => {
               {syncMappings?.length ? (
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-2">
-                    {syncMappings.map((mapping: any) => (
+                    {(syncMappings as BitrixSyncMapping[]).map((mapping) => (
                       <div 
                         key={mapping.id} 
                         className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
@@ -874,7 +933,7 @@ export const Bitrix24Integration = () => {
               {webhookLogs?.length ? (
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-2">
-                    {webhookLogs.map((log: any) => (
+                    {(webhookLogs as BitrixWebhookLog[]).map((log) => (
                       <details 
                         key={log.id} 
                         className="group rounded-lg bg-muted/50 overflow-hidden"
