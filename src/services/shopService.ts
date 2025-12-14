@@ -147,9 +147,10 @@ export const shopService = {
         total_coins: totalCost,
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (purchaseError) throw purchaseError;
+    if (!purchase) throw new Error("Failed to create purchase record");
 
     // Log audit
     try {
@@ -254,9 +255,10 @@ export const shopService = {
       .from("shop_rewards")
       .insert(reward)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Failed to create reward");
     return data as ShopReward;
   },
 
@@ -270,9 +272,10 @@ export const shopService = {
       .update(updates)
       .eq("id", id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Reward not found");
     return data as ShopReward;
   },
 
@@ -391,9 +394,10 @@ export const shopService = {
       .from("shop_promotions")
       .insert(promotion)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Failed to create promotion");
     return data as ShopPromotion;
   },
 
@@ -407,9 +411,10 @@ export const shopService = {
       .update(updates)
       .eq("id", id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Promotion not found");
     return data as ShopPromotion;
   },
 

@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useLeaderboard } from "@/hooks/useProfiles";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+// Tooltip content function - avoids forwardRef warning from recharts
+const renderCustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
   if (active && payload && payload.length) {
     return (
       <div className="glass rounded-lg p-3 border border-border">
@@ -157,7 +158,7 @@ export const AnalyticsWidget = () => {
                   tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                 />
                 <YAxis hide />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={renderCustomTooltip} />
                 <Area
                   type="monotone"
                   dataKey="xp"
@@ -188,7 +189,7 @@ export const AnalyticsWidget = () => {
                   tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                   width={50}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={renderCustomTooltip} />
                 <Bar
                   dataKey="score"
                   fill="hsl(var(--secondary))"
