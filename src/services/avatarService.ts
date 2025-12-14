@@ -183,18 +183,20 @@ export const avatarService = {
         .update({ [column]: itemId })
         .eq("user_id", userId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Failed to update avatar config");
       return data;
     } else {
       const { data, error } = await supabase
         .from("user_avatar_config")
         .insert({ user_id: userId, [column]: itemId })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Failed to create avatar config");
       return data;
     }
   },
