@@ -1,3 +1,4 @@
+import { useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Swords, Trophy, Clock, TrendingUp, Flame } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { differenceInDays, differenceInHours } from "date-fns";
 import { WeeklyChallengeVictory } from "@/components/effects/WeeklyChallengeVictory";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
-import { useEffect } from "react";
 
 export function WeeklyChallengeCard() {
   const { user } = useAuth();
@@ -22,6 +22,48 @@ export function WeeklyChallengeCard() {
       playAchievementSound();
     }
   }, [showVictory, playAchievementSound]);
+
+  // Memoize derived data
+  const derivedData = useMemo(() => {
+    if (!challenge || !user) return null;
+
+    const isChallenger = user.id === challenge.challenger_id;
+    const myXpGained = isChallenger ? challenge.challenger_xp_gained : challenge.opponent_xp_gained;
+    const opponentXpGained = isChallenger ? challenge.opponent_xp_gained : challenge.challenger_xp_gained;
+    const myProfile = isChallenger ? challenge.challengerProfile : challenge.opponentProfile;
+    const opponentProfile = isChallenger ? challenge.opponentProfile : challenge.challengerProfile;
+
+    const totalXp = myXpGained + opponentXpGained || 1;
+    const myProgress = (myXpGained / totalXp) * 100;
+    const opponentProgress = (opponentXpGained / totalXp) * 100;
+
+    const isWinning = myXpGained > opponentXpGained;
+    const isTie = myXpGained === opponentXpGained;
+
+    return {
+      isChallenger,
+      myXpGained,
+      opponentXpGained,
+      myProfile,
+      opponentProfile,
+      myProgress,
+      opponentProgress,
+      isWinning,
+      isTie,
+    };
+  }, [challenge, user]);
+
+  // Memoize time calculations
+  const timeLeft = useMemo(() => {
+    if (!challenge) return null;
+
+    const weekEnd = new Date(challenge.week_end);
+    const now = new Date();
+    const daysLeft = differenceInDays(weekEnd, now);
+    const hoursLeft = differenceInHours(weekEnd, now) % 24;
+
+    return { daysLeft, hoursLeft };
+  }, [challenge?.week_end]);
 
   if (isLoading) {
     return (
@@ -40,7 +82,7 @@ export function WeeklyChallengeCard() {
     );
   }
 
-  if (!challenge) {
+  if (!challenge || !derivedData || !timeLeft) {
     return (
       <Card className="bg-gradient-to-br from-card to-card/80 border-border/50">
         <CardHeader className="pb-2">
@@ -58,23 +100,8 @@ export function WeeklyChallengeCard() {
     );
   }
 
-  const isChallenger = user?.id === challenge.challenger_id;
-  const myXpGained = isChallenger ? challenge.challenger_xp_gained : challenge.opponent_xp_gained;
-  const opponentXpGained = isChallenger ? challenge.opponent_xp_gained : challenge.challenger_xp_gained;
-  const myProfile = isChallenger ? challenge.challengerProfile : challenge.opponentProfile;
-  const opponentProfile = isChallenger ? challenge.opponentProfile : challenge.challengerProfile;
-
-  const totalXp = myXpGained + opponentXpGained || 1;
-  const myProgress = (myXpGained / totalXp) * 100;
-  const opponentProgress = (opponentXpGained / totalXp) * 100;
-
-  const isWinning = myXpGained > opponentXpGained;
-  const isTie = myXpGained === opponentXpGained;
-
-  const weekEnd = new Date(challenge.week_end);
-  const now = new Date();
-  const daysLeft = differenceInDays(weekEnd, now);
-  const hoursLeft = differenceInHours(weekEnd, now) % 24;
+  const { myXpGained, opponentXpGained, myProfile, opponentProfile, myProgress, opponentProgress, isWinning, isTie } = derivedData;
+  const { daysLeft, hoursLeft } = timeLeft;
 
   return (
     <motion.div
@@ -85,7 +112,6 @@ export function WeeklyChallengeCard() {
       <Card variant="featured" className="overflow-hidden relative">
         {/* Animated background effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 animate-pulse" />
-        
         <CardHeader className="pb-2 relative">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">

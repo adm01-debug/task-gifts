@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { differenceInDays, differenceInHours, format } from "date-fns";
@@ -22,12 +22,8 @@ export default function SeasonalEventDetail() {
   const claimReward = useClaimSeasonalReward();
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
 
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
-
-  const handleClaim = async (challengeId: string) => {
+  // Memoize handleClaim
+  const handleClaim = useCallback(async (challengeId: string) => {
     setClaimingIds(prev => new Set(prev).add(challengeId));
     try {
       await claimReward.mutateAsync(challengeId);
@@ -44,7 +40,36 @@ export default function SeasonalEventDetail() {
         return next;
       });
     }
-  };
+  }, [claimReward, event?.banner_color]);
+
+  // Memoize time calculations
+  const timeRemaining = useMemo(() => {
+    if (!event) return null;
+    const endsAt = new Date(event.ends_at);
+    const now = new Date();
+    return {
+      endsAt,
+      daysRemaining: differenceInDays(endsAt, now),
+      hoursRemaining: differenceInHours(endsAt, now) % 24,
+    };
+  }, [event?.ends_at]);
+
+  // Memoize progress calculations
+  const progressStats = useMemo(() => {
+    if (!event?.challenges) return { completedChallenges: [], totalChallenges: 0, overallProgress: 0 };
+    
+    const challenges = event.challenges || [];
+    const completedChallenges = challenges.filter((c) => c.progress?.completed_at);
+    const totalChallenges = challenges.length;
+    const overallProgress = totalChallenges > 0 ? (completedChallenges.length / totalChallenges) * 100 : 0;
+    
+    return { completedChallenges, totalChallenges, overallProgress };
+  }, [event?.challenges]);
+
+  if (!user) {
+    navigate("/auth");
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -60,7 +85,7 @@ export default function SeasonalEventDetail() {
     );
   }
 
-  if (!event) {
+  if (!event || !timeRemaining) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <p className="text-muted-foreground">Evento não encontrado</p>
@@ -71,14 +96,8 @@ export default function SeasonalEventDetail() {
     );
   }
 
-  const endsAt = new Date(event.ends_at);
-  const now = new Date();
-  const daysRemaining = differenceInDays(endsAt, now);
-  const hoursRemaining = differenceInHours(endsAt, now) % 24;
-
-  const completedChallenges = event.challenges?.filter((c) => c.progress?.completed_at) || [];
-  const totalChallenges = event.challenges?.length || 0;
-  const overallProgress = totalChallenges > 0 ? (completedChallenges.length / totalChallenges) * 100 : 0;
+  const { endsAt, daysRemaining, hoursRemaining } = timeRemaining;
+  const { completedChallenges, totalChallenges, overallProgress } = progressStats;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
