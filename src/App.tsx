@@ -76,7 +76,7 @@ const App = () => (
                 <BrowserRouter>
                   <Suspense fallback={<PageLoader />}>
                     <Routes>
-                      <Route path="/" element={<Index />} />
+                      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                       <Route path="/manager" element={<ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>} />

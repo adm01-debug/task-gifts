@@ -87,7 +87,7 @@ function getRankChangeMessage(data: RankChangeData): {
   }
 }
 
-export function useRankChangeNotifier() {
+export function useListenToRankChanges() {
   const { user } = useAuth();
   const { data: rankData, isLoading } = useUserRank();
   const { playAchievementSound, playLevelUpSound } = useSoundEffects();
