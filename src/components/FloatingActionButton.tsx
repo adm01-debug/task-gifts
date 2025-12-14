@@ -80,26 +80,27 @@ export function FloatingActionButton({
                 const Icon = action.icon;
                 const color = action.color || "secondary";
 
-                return (
-                  <motion.button
-                    key={action.label}
-                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                    animate={{ 
-                      opacity: 1, 
-                      y: 0, 
-                      scale: 1,
-                      transition: { delay: index * 0.05 }
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      y: 10, 
-                      scale: 0.8,
-                      transition: { delay: (actions.length - index) * 0.03 }
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleActionClick(action)}
-                    className="flex items-center gap-3"
+                  return (
+                    <motion.button
+                      key={action.label}
+                      initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                      animate={{ 
+                        opacity: 1, 
+                        y: 0, 
+                        scale: 1,
+                        transition: { delay: index * 0.05 }
+                      }}
+                      exit={{ 
+                        opacity: 0, 
+                        y: 10, 
+                        scale: 0.8,
+                        transition: { delay: (actions.length - index) * 0.03 }
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleActionClick(action)}
+                      className="flex items-center gap-3"
+                      aria-label={action.label}
                   >
                     {showLabels && (
                       <span className="px-3 py-1.5 bg-card border border-border rounded-lg text-sm font-medium shadow-lg">
@@ -126,6 +127,8 @@ export function FloatingActionButton({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={toggleMenu}
+          aria-label={isOpen ? "Fechar menu de ações" : "Abrir menu de ações"}
+          aria-expanded={isOpen}
           className={cn(
             "w-14 h-14 rounded-full flex items-center justify-center shadow-xl",
             "bg-primary text-primary-foreground",

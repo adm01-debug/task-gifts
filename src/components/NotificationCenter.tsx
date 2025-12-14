@@ -160,6 +160,7 @@ export const NotificationCenter = () => {
           variant="ghost"
           size="icon"
           className="relative"
+          aria-label={`Notificações${unreadCount > 0 ? ` (${unreadCount} não lidas)` : ''}`}
         >
           <Bell className="w-5 h-5" />
           <AnimatePresence>
