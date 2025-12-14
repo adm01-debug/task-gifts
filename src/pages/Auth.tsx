@@ -2,16 +2,19 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Gift, Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import { Gift, Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const emailSchema = z.string().email("Email inválido");
 const passwordSchema = z.string().min(6, "Senha deve ter pelo menos 6 caracteres");
 
+type AuthView = "login" | "signup" | "forgot-password";
+
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState<AuthView>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -47,24 +50,57 @@ const Auth = () => {
       newErrors.email = emailResult.error.errors[0].message;
     }
 
-    const passwordResult = passwordSchema.safeParse(password);
-    if (!passwordResult.success) {
-      newErrors.password = passwordResult.error.errors[0].message;
+    if (view !== "forgot-password") {
+      const passwordResult = passwordSchema.safeParse(password);
+      if (!passwordResult.success) {
+        newErrors.password = passwordResult.error.errors[0].message;
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleForgotPassword = async () => {
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) {
+      setErrors({ email: emailResult.error.errors[0].message });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
+        setView("login");
+      }
+    } catch (err) {
+      toast.error("Erro ao enviar email. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (view === "forgot-password") {
+      await handleForgotPassword();
+      return;
+    }
+
     if (!validateForm()) return;
 
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (view === "login") {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes("Invalid login credentials")) {
@@ -94,6 +130,201 @@ const Auth = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderFormContent = () => {
+    if (view === "forgot-password") {
+      return (
+        <motion.div
+          key="forgot-password"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-5"
+        >
+          <button
+            type="button"
+            onClick={() => setView("login")}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar ao login
+          </button>
+
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-semibold mb-2">Esqueceu sua senha?</h3>
+            <p className="text-sm text-muted-foreground">
+              Digite seu email e enviaremos um link para redefinir sua senha.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setErrors({ ...errors, email: undefined });
+                  }}
+                  placeholder="seu@email.com"
+                  className={`
+                    w-full pl-12 pr-4 py-3 rounded-xl bg-muted/50 border outline-none transition-all
+                    ${errors.email 
+                      ? "border-destructive focus:border-destructive focus:ring-destructive/20" 
+                      : "border-border focus:border-primary focus:ring-2 focus:ring-primary/20"}
+                  `}
+                />
+              </div>
+              {errors.email && (
+                <p className="text-xs text-destructive mt-1">{errors.email}</p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 text-base"
+              variant="hero"
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  Enviar link de recuperação
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </>
+              )}
+            </Button>
+          </form>
+        </motion.div>
+      );
+    }
+
+    return (
+      <motion.form
+        key={view}
+        initial={{ opacity: 0, x: view === "login" ? -20 : 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: view === "login" ? 20 : -20 }}
+        transition={{ duration: 0.2 }}
+        onSubmit={handleSubmit}
+        className="space-y-5"
+      >
+        {view === "signup" && (
+          <div>
+            <label className="text-sm font-medium text-muted-foreground mb-2 block">
+              Nome de exibição
+            </label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Seu nome no game"
+                className="w-full pl-12 pr-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              />
+            </div>
+          </div>
+        )}
+
+        <div>
+          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+            Email
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrors({ ...errors, email: undefined });
+              }}
+              placeholder="seu@email.com"
+              className={`
+                w-full pl-12 pr-4 py-3 rounded-xl bg-muted/50 border outline-none transition-all
+                ${errors.email 
+                  ? "border-destructive focus:border-destructive focus:ring-destructive/20" 
+                  : "border-border focus:border-primary focus:ring-2 focus:ring-primary/20"}
+              `}
+            />
+          </div>
+          {errors.email && (
+            <p className="text-xs text-destructive mt-1">{errors.email}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+            Senha
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrors({ ...errors, password: undefined });
+              }}
+              placeholder="••••••••"
+              className={`
+                w-full pl-12 pr-12 py-3 rounded-xl bg-muted/50 border outline-none transition-all
+                ${errors.password 
+                  ? "border-destructive focus:border-destructive focus:ring-destructive/20" 
+                  : "border-border focus:border-primary focus:ring-2 focus:ring-primary/20"}
+              `}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="text-xs text-destructive mt-1">{errors.password}</p>
+          )}
+        </div>
+
+        {view === "login" && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setView("forgot-password")}
+              className="text-sm text-primary hover:text-primary/80 transition-colors"
+            >
+              Esqueceu sua senha?
+            </button>
+          </div>
+        )}
+
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full h-12 text-base"
+          variant="hero"
+        >
+          {loading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <>
+              {view === "login" ? "Entrar" : "Criar conta"}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </>
+          )}
+        </Button>
+      </motion.form>
+    );
   };
 
   return (
@@ -195,129 +426,28 @@ const Auth = () => {
               <span className="text-xl font-bold">Task Gifts</span>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-1 p-1 rounded-xl bg-muted/50 mb-8">
-              {["Login", "Cadastro"].map((tab, i) => (
-                <button
-                  key={tab}
-                  onClick={() => setIsLogin(i === 0)}
-                  className={`
-                    flex-1 py-2.5 rounded-lg font-medium text-sm transition-all duration-200
-                    ${(i === 0 ? isLogin : !isLogin) 
-                      ? "bg-primary text-primary-foreground shadow-lg" 
-                      : "text-muted-foreground hover:text-foreground"}
-                  `}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+            {/* Tabs - only show when not in forgot-password view */}
+            {view !== "forgot-password" && (
+              <div className="flex gap-1 p-1 rounded-xl bg-muted/50 mb-8">
+                {["Login", "Cadastro"].map((tab, i) => (
+                  <button
+                    key={tab}
+                    onClick={() => setView(i === 0 ? "login" : "signup")}
+                    className={`
+                      flex-1 py-2.5 rounded-lg font-medium text-sm transition-all duration-200
+                      ${(i === 0 ? view === "login" : view === "signup") 
+                        ? "bg-primary text-primary-foreground shadow-lg" 
+                        : "text-muted-foreground hover:text-foreground"}
+                    `}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <AnimatePresence mode="wait">
-              <motion.form
-                key={isLogin ? "login" : "signup"}
-                initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
-                transition={{ duration: 0.2 }}
-                onSubmit={handleSubmit}
-                className="space-y-5"
-              >
-                {!isLogin && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                      Nome de exibição
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                      <input
-                        type="text"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder="Seu nome no game"
-                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                    Email
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        setErrors({ ...errors, email: undefined });
-                      }}
-                      placeholder="seu@email.com"
-                      className={`
-                        w-full pl-12 pr-4 py-3 rounded-xl bg-muted/50 border outline-none transition-all
-                        ${errors.email 
-                          ? "border-destructive focus:border-destructive focus:ring-destructive/20" 
-                          : "border-border focus:border-primary focus:ring-2 focus:ring-primary/20"}
-                      `}
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="text-xs text-destructive mt-1">{errors.email}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                    Senha
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setErrors({ ...errors, password: undefined });
-                      }}
-                      placeholder="••••••••"
-                      className={`
-                        w-full pl-12 pr-12 py-3 rounded-xl bg-muted/50 border outline-none transition-all
-                        ${errors.password 
-                          ? "border-destructive focus:border-destructive focus:ring-destructive/20" 
-                          : "border-border focus:border-primary focus:ring-2 focus:ring-primary/20"}
-                      `}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="text-xs text-destructive mt-1">{errors.password}</p>
-                  )}
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-12 text-base"
-                  variant="hero"
-                >
-                  {loading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      {isLogin ? "Entrar" : "Criar conta"}
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
-                </Button>
-              </motion.form>
+              {renderFormContent()}
             </AnimatePresence>
 
           </div>
