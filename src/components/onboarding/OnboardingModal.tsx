@@ -32,6 +32,8 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const claimReward = useClaimOnboardingReward();
   const [currentView, setCurrentView] = useState<"tutorial" | "checklist">("tutorial");
   const [tutorialStep, setTutorialStep] = useState(0);
+  const [claimingStepId, setClaimingStepId] = useState<string | null>(null);
+  const [completingStepId, setCompletingStepId] = useState<string | null>(null);
 
   const tutorialSlides = [
     {
@@ -70,23 +72,33 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   };
 
   const handleStepAction = async (stepId: string, route?: string) => {
-    await completeStep.mutateAsync(stepId);
-    if (route) {
-      onOpenChange(false);
-      navigate(route);
+    setCompletingStepId(stepId);
+    try {
+      await completeStep.mutateAsync(stepId);
+      if (route) {
+        onOpenChange(false);
+        navigate(route);
+      }
+    } finally {
+      setCompletingStepId(null);
     }
   };
 
   const handleClaimReward = async (stepId: string) => {
-    await claimReward.mutateAsync(stepId);
-    
-    // Celebrate if all steps completed
-    if (progress && progress.completed_steps.length === ONBOARDING_STEPS.length - 1) {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
+    setClaimingStepId(stepId);
+    try {
+      await claimReward.mutateAsync(stepId);
+      
+      // Celebrate if all steps completed
+      if (progress && progress.completed_steps.length === ONBOARDING_STEPS.length - 1) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      }
+    } finally {
+      setClaimingStepId(null);
     }
   };
 
@@ -240,11 +252,11 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
                             <Button
                               size="sm"
                               onClick={() => handleClaimReward(step.id)}
-                              disabled={claimReward.isPending}
+                              disabled={claimingStepId === step.id}
                               className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                             >
                               <Gift className="w-4 h-4 mr-1" />
-                              Resgatar
+                              {claimingStepId === step.id ? "..." : "Resgatar"}
                             </Button>
                           ) : isClaimed ? (
                             <Badge className="bg-green-500">
@@ -256,9 +268,9 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
                               size="sm"
                               variant="outline"
                               onClick={() => handleStepAction(step.id, step.route)}
-                              disabled={completeStep.isPending}
+                              disabled={completingStepId === step.id}
                             >
-                              {step.route ? "Ir" : "Concluir"}
+                              {completingStepId === step.id ? "..." : (step.route ? "Ir" : "Concluir")}
                               <ChevronRight className="w-4 h-4 ml-1" />
                             </Button>
                           )}

@@ -33,19 +33,19 @@ const DuelCard = ({
   onAccept,
   onDecline,
   onCancel,
-  isAccepting = false,
-  isDeclining = false,
-  isCancelling = false,
+  pendingAction,
 }: { 
   duel: DuelWithProfiles;
   userId: string;
   onAccept?: () => void;
   onDecline?: () => void;
   onCancel?: () => void;
-  isAccepting?: boolean;
-  isDeclining?: boolean;
-  isCancelling?: boolean;
+  pendingAction?: { duelId: string; type: 'accept' | 'decline' | 'cancel' } | null;
 }) => {
+  const isThisDuelPending = pendingAction?.duelId === duel.id;
+  const isAccepting = isThisDuelPending && pendingAction?.type === 'accept';
+  const isDeclining = isThisDuelPending && pendingAction?.type === 'decline';
+  const isCancelling = isThisDuelPending && pendingAction?.type === 'cancel';
   const isChallenger = duel.challenger_id === userId;
   const opponent = isChallenger ? duel.opponent : duel.challenger;
   const myXpGained = isChallenger ? duel.challenger_xp_gained : duel.opponent_xp_gained;
@@ -365,6 +365,10 @@ const Duels = () => {
     duelId: string | null;
     opponentName: string;
   }>({ open: false, type: null, duelId: null, opponentName: "" });
+  const [pendingAction, setPendingAction] = useState<{
+    duelId: string;
+    type: 'accept' | 'decline' | 'cancel';
+  } | null>(null);
 
   const { data: duels, isLoading: loadingDuels } = useUserDuels(user?.id);
   const { data: activeDuel } = useActiveDuel(user?.id);
@@ -388,6 +392,7 @@ const Duels = () => {
     const opponentNameToRestore = confirmDialog.opponentName;
     
     if (confirmDialog.type === "decline") {
+      setPendingAction({ duelId: duelIdToRestore, type: 'decline' });
       declineDuel.mutate({ duelId: confirmDialog.duelId, userId: user.id }, {
         onSuccess: () => {
           showUndoToast({
@@ -397,13 +402,14 @@ const Duels = () => {
                 .from("direct_duels")
                 .update({ status: "pending" })
                 .eq("id", duelIdToRestore);
-              // Realtime subscription will auto-update, but force refetch for immediate feedback
               window.location.reload();
             },
           });
         },
+        onSettled: () => setPendingAction(null),
       });
     } else if (confirmDialog.type === "cancel") {
+      setPendingAction({ duelId: duelIdToRestore, type: 'cancel' });
       cancelDuel.mutate({ duelId: confirmDialog.duelId, userId: user.id }, {
         onSuccess: () => {
           showUndoToast({
@@ -417,6 +423,7 @@ const Duels = () => {
             },
           });
         },
+        onSettled: () => setPendingAction(null),
       });
     }
     setConfirmDialog({ open: false, type: null, duelId: null, opponentName: "" });
@@ -542,12 +549,15 @@ const Duels = () => {
                     key={duel.id}
                     duel={duel}
                     userId={user!.id}
-                    onAccept={() => acceptDuel.mutate({ duelId: duel.id, userId: user!.id })}
+                    onAccept={() => {
+                      setPendingAction({ duelId: duel.id, type: 'accept' });
+                      acceptDuel.mutate({ duelId: duel.id, userId: user!.id }, {
+                        onSettled: () => setPendingAction(null),
+                      });
+                    }}
                     onDecline={() => handleDeclineClick(duel.id, opponentName)}
                     onCancel={() => handleCancelClick(duel.id, opponentName)}
-                    isAccepting={acceptDuel.isPending}
-                    isDeclining={declineDuel.isPending}
-                    isCancelling={cancelDuel.isPending}
+                    pendingAction={pendingAction}
                   />
                 );
               })}
