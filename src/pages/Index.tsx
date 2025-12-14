@@ -34,7 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserRank } from "@/hooks/useUserRank";
-import { useRankChangeNotifier } from "@/hooks/useRankChangeNotifier";
+import { useListenToRankChanges } from "@/hooks/useListenToRankChanges";
 import { useCompetencyAlerts } from "@/hooks/useCompetencyAlerts";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { toast } from "sonner";
@@ -52,16 +52,13 @@ const Index = () => {
   const { data: rankData } = useUserRank();
   const isScrolled = useScrollHeader(10);
   // Track rank changes and notify user
-  useRankChangeNotifier();
+  useListenToRankChanges();
   
   // Auto-trigger competency analysis for alerts
   useCompetencyAlerts();
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-    }
-  }, [user, loading, navigate]);
+  // Auth redirect is handled by ProtectedRoute wrapper in App.tsx
+  // No need for manual useEffect redirect here
 
   const handleSignOut = useCallback(async () => {
     await signOut();
