@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -17,12 +17,18 @@ interface ActivityCommentsProps {
   commentCount: number;
 }
 
-export function ActivityComments({ activityId, isOpen, onToggle, commentCount }: ActivityCommentsProps) {
+export const ActivityComments = forwardRef<HTMLDivElement, ActivityCommentsProps>(({ 
+  activityId, 
+  isOpen, 
+  onToggle, 
+  commentCount 
+}, ref) => {
   const { user } = useAuth();
   const { comments, isLoading } = useActivityComments(activityId);
   const addComment = useAddComment();
   const deleteComment = useDeleteComment();
   const [newComment, setNewComment] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,11 +41,14 @@ export function ActivityComments({ activityId, isOpen, onToggle, commentCount }:
   };
 
   const handleDelete = (commentId: string) => {
-    deleteComment.mutate(commentId);
+    setDeletingId(commentId);
+    deleteComment.mutate(commentId, {
+      onSettled: () => setDeletingId(null),
+    });
   };
 
   return (
-    <div className="mt-2">
+    <div ref={ref} className="mt-2">
       {/* Comment toggle button */}
       <button
         onClick={onToggle}
@@ -103,8 +112,17 @@ export function ActivityComments({ activityId, isOpen, onToggle, commentCount }:
                           size="icon"
                           className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => handleDelete(comment.id)}
+                          disabled={deletingId === comment.id}
                         >
-                          <Trash2 className="h-3 w-3 text-destructive" />
+                          {deletingId === comment.id ? (
+                            <motion.div 
+                              animate={{ rotate: 360 }} 
+                              transition={{ repeat: Infinity, duration: 1 }} 
+                              className="w-3 h-3 border border-current border-t-transparent rounded-full"
+                            />
+                          ) : (
+                            <Trash2 className="h-3 w-3 text-destructive" />
+                          )}
                         </Button>
                       )}
                     </motion.div>
@@ -145,4 +163,5 @@ export function ActivityComments({ activityId, isOpen, onToggle, commentCount }:
       </AnimatePresence>
     </div>
   );
-}
+});
+ActivityComments.displayName = "ActivityComments";

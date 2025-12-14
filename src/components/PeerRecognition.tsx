@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Send, Users, Sparkles, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ interface GiveKudosFormProps {
   onSuccess: () => void;
 }
 
-const GiveKudosForm = ({ onSuccess }: GiveKudosFormProps) => {
+const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSuccess }, ref) => {
   const { user } = useAuth();
   const { data: badges = [] } = useKudosBadges();
   const { data: profiles = [] } = useProfiles();
@@ -57,7 +57,7 @@ const GiveKudosForm = ({ onSuccess }: GiveKudosFormProps) => {
   const selectedProfile = profiles.find(p => p.id === selectedUser);
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className="space-y-4">
       {/* Badge Selection */}
       <div>
         <label className="text-sm font-medium mb-2 block">Escolha um badge (opcional)</label>
@@ -172,7 +172,8 @@ const GiveKudosForm = ({ onSuccess }: GiveKudosFormProps) => {
       </Button>
     </div>
   );
-};
+});
+GiveKudosForm.displayName = "GiveKudosForm";
 
 export const PeerRecognition = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
