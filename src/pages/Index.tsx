@@ -107,7 +107,7 @@ function Index() {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto" role="main" aria-label="Dashboard principal">
+        <main className="flex-1 overflow-auto" aria-label="Dashboard principal">
           {/* Top Header */}
           <DashboardHeader onMenuClick={handleMenuClick} />
 
