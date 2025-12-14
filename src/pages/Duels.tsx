@@ -384,7 +384,7 @@ const Duels = () => {
     if (!confirmDialog.duelId || !user) return;
     
     const duelIdToRestore = confirmDialog.duelId;
-    const previousStatus = confirmDialog.type === "decline" ? "pending" : "pending";
+    const previousStatus = "pending";
     
     if (confirmDialog.type === "decline") {
       declineDuel.mutate({ duelId: confirmDialog.duelId, userId: user.id }, {
@@ -392,12 +392,14 @@ const Duels = () => {
           showUndoToast({
             message: `Duelo com ${confirmDialog.opponentName} recusado`,
             onUndo: async () => {
-              // Restore duel to pending status
               const { supabase } = await import("@/integrations/supabase/client");
+              const { useQueryClient } = await import("@tanstack/react-query");
               await supabase
                 .from("direct_duels")
                 .update({ status: previousStatus })
                 .eq("id", duelIdToRestore);
+              // Trigger refetch by window reload as we can't access queryClient in async callback
+              window.location.reload();
             },
           });
         },
@@ -408,12 +410,12 @@ const Duels = () => {
           showUndoToast({
             message: `Duelo com ${confirmDialog.opponentName} cancelado`,
             onUndo: async () => {
-              // Restore duel to pending status
               const { supabase } = await import("@/integrations/supabase/client");
               await supabase
                 .from("direct_duels")
                 .update({ status: previousStatus })
                 .eq("id", duelIdToRestore);
+              window.location.reload();
             },
           });
         },
@@ -444,7 +446,7 @@ const Duels = () => {
     );
   }
 
-  const activeDuels = duels?.filter(d => ['pending', 'active'].includes(d.status)) || [];
+  const activeDuels = duels?.filter(d => ['pending', 'accepted', 'active'].includes(d.status)) || [];
   const completedDuels = duels?.filter(d => ['completed', 'declined', 'cancelled'].includes(d.status)) || [];
 
   return (
