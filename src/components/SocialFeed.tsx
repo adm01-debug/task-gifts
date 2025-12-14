@@ -11,7 +11,7 @@ import { useActivityReactions } from "@/hooks/useActivityReactions";
 import { ActivityComments } from "@/components/ActivityComments";
 import { ActivityReactions } from "@/components/ActivityReactions";
 import { Activity, Users } from "lucide-react";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { cn } from "@/lib/utils";
 
 interface SocialFeedProps {
@@ -20,7 +20,11 @@ interface SocialFeedProps {
   className?: string;
 }
 
-export function SocialFeed({ limit = 30, compact = false, className }: SocialFeedProps) {
+/**
+ * SocialFeed - Displays team activity timeline with reactions and comments
+ * Wrapped in React.memo to prevent unnecessary re-renders from parent state changes
+ */
+export const SocialFeed = memo(function SocialFeed({ limit = 30, compact = false, className }: SocialFeedProps) {
   const { activities, isLoading } = useSocialFeed(limit);
   const [openComments, setOpenComments] = useState<string | null>(null);
 
@@ -190,4 +194,4 @@ export function SocialFeed({ limit = 30, compact = false, className }: SocialFee
       </CardContent>
     </Card>
   );
-}
+});
