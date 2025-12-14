@@ -22,6 +22,12 @@ export function useOnboardingProgress() {
         progress = await onboardingService.initProgress(user.id);
       }
       
+      // Ensure arrays are never null
+      if (progress) {
+        progress.completed_steps = progress.completed_steps || [];
+        progress.rewards_claimed = progress.rewards_claimed || [];
+      }
+      
       return progress;
     },
     enabled: !!user?.id,
