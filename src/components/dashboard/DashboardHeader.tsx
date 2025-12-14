@@ -1,16 +1,26 @@
+// Core & Libs
 import { memo, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+
+// Icons
 import { Menu, LogOut, User } from "lucide-react";
+
+// Components (UI)
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AICoachDialog } from "@/components/AICoachDialog";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { ComboIndicator } from "@/components/ComboIndicator";
 import { RankingBadge } from "@/components/RankingBadge";
+
+// Hooks
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRank } from "@/hooks/useUserRank";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
+import { useClickOutside } from "@/hooks/useClickOutside";
+
+// Utils
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +28,10 @@ interface DashboardHeaderProps {
   onMenuClick: () => void;
 }
 
+/**
+ * DashboardHeader - Main dashboard header with navigation and user menu
+ * Includes: Menu toggle, search, notifications, theme, user dropdown
+ */
 export const DashboardHeader = memo(function DashboardHeader({ 
   onMenuClick 
 }: DashboardHeaderProps) {
@@ -29,6 +43,10 @@ export const DashboardHeader = memo(function DashboardHeader({
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Jogador";
 
+  // Close menu when clicking outside
+  const closeUserMenu = useCallback(() => setShowUserMenu(false), []);
+  const userMenuRef = useClickOutside<HTMLDivElement>(closeUserMenu, showUserMenu);
+
   const handleSignOut = useCallback(async () => {
     await signOut();
     toast.success("Até logo! 👋");
@@ -36,7 +54,11 @@ export const DashboardHeader = memo(function DashboardHeader({
   }, [signOut, navigate]);
 
   const handleToggleUserMenu = useCallback(() => setShowUserMenu(prev => !prev), []);
-  const handleNavigateToProfile = useCallback(() => navigate("/profile"), [navigate]);
+  
+  const handleNavigateToProfile = useCallback(() => {
+    setShowUserMenu(false);
+    navigate("/profile");
+  }, [navigate]);
 
   return (
     <header 
@@ -44,6 +66,7 @@ export const DashboardHeader = memo(function DashboardHeader({
         "header-sticky border-b border-border",
         isScrolled && "scrolled"
       )}
+      role="banner"
     >
       <div className="flex items-center justify-between px-4 md:px-6 py-4">
         <div className="flex items-center gap-3 md:gap-4">
@@ -52,9 +75,10 @@ export const DashboardHeader = memo(function DashboardHeader({
             whileTap={{ scale: 0.95 }}
             onClick={onMenuClick}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
-            aria-label="Abrir menu"
+            aria-label="Abrir menu de navegação"
+            title="Menu"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5" aria-hidden="true" />
           </motion.button>
           
           <div>
@@ -76,8 +100,8 @@ export const DashboardHeader = memo(function DashboardHeader({
           <ComboIndicator variant="compact" />
           <AICoachDialog />
 
-          {/* User Menu */}
-          <div className="relative flex items-center gap-2">
+          {/* User Menu with Click Outside */}
+          <div className="relative flex items-center gap-2" ref={userMenuRef}>
             {rankData?.rank && (
               <RankingBadge rank={rankData.rank} size="sm" />
             )}
@@ -88,6 +112,9 @@ export const DashboardHeader = memo(function DashboardHeader({
               onClick={handleToggleUserMenu}
               className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center font-bold text-sm"
               aria-label="Menu do usuário"
+              aria-expanded={showUserMenu}
+              aria-haspopup="menu"
+              title={`Menu de ${displayName}`}
             >
               {displayName.charAt(0).toUpperCase()}
             </motion.button>
@@ -99,6 +126,9 @@ export const DashboardHeader = memo(function DashboardHeader({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   className="absolute right-0 top-12 w-56 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50"
+                  role="menu"
+                  aria-orientation="vertical"
+                  aria-labelledby="user-menu-button"
                 >
                   <div className="p-3 border-b border-border">
                     <p className="font-semibold text-sm">{displayName}</p>
@@ -108,15 +138,17 @@ export const DashboardHeader = memo(function DashboardHeader({
                     <button
                       onClick={handleNavigateToProfile}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm"
+                      role="menuitem"
                     >
-                      <User className="w-4 h-4" />
+                      <User className="w-4 h-4" aria-hidden="true" />
                       Meu Perfil
                     </button>
                     <button
                       onClick={handleSignOut}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors text-sm"
+                      role="menuitem"
                     >
-                      <LogOut className="w-4 h-4" />
+                      <LogOut className="w-4 h-4" aria-hidden="true" />
                       Sair
                     </button>
                   </div>
