@@ -304,3 +304,101 @@ export const useBitrix24AttendanceMappings = () => {
     queryFn: bitrix24SyncService.getAllAttendanceMappings,
   });
 };
+
+// IM - Dialogs/Chats
+export const useBitrix24Dialogs = () => {
+  return useQuery({
+    queryKey: ['bitrix24-dialogs'],
+    queryFn: bitrix24Service.getDialogs,
+    enabled: false,
+  });
+};
+
+export const useBitrix24Messages = (dialogId: string) => {
+  return useQuery({
+    queryKey: ['bitrix24-messages', dialogId],
+    queryFn: () => bitrix24Service.getMessages(dialogId),
+    enabled: !!dialogId,
+  });
+};
+
+export const useSendBitrix24Message = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ dialogId, message }: { dialogId: string; message: string }) =>
+      bitrix24Service.sendMessage(dialogId, message),
+    onSuccess: (_, { dialogId }) => {
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-messages', dialogId] });
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-dialogs'] });
+      toast.success('Mensagem enviada');
+    },
+    onError: (error: Error) => {
+      toast.error(`Erro ao enviar mensagem: ${error.message}`);
+    },
+  });
+};
+
+export const useBitrix24UnreadCounters = () => {
+  return useQuery({
+    queryKey: ['bitrix24-unread-counters'],
+    queryFn: bitrix24Service.getUnreadCounters,
+    refetchInterval: 30000,
+  });
+};
+
+export const useCreateBitrix24GroupChat = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ title, userIds }: { title: string; userIds: string[] }) =>
+      bitrix24Service.createGroupChat(title, userIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-dialogs'] });
+      toast.success('Chat em grupo criado');
+    },
+    onError: (error: Error) => {
+      toast.error(`Erro ao criar chat: ${error.message}`);
+    },
+  });
+};
+
+// Notifications
+export const useBitrix24Notifications = (limit = 50) => {
+  return useQuery({
+    queryKey: ['bitrix24-notifications', limit],
+    queryFn: () => bitrix24Service.getNotifications(limit),
+    enabled: false,
+  });
+};
+
+export const useSendBitrix24Notification = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ userId, message, tag }: { userId: string; message: string; tag?: string }) =>
+      bitrix24Service.sendNotification(userId, message, tag),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bitrix24-notifications'] });
+      toast.success('Notificação enviada');
+    },
+    onError: (error: Error) => {
+      toast.error(`Erro ao enviar notificação: ${error.message}`);
+    },
+  });
+};
+
+export const useSendBitrix24SystemNotification = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ userId, message, tag }: { userId: string; message: string; tag?: string }) =>
+      bitrix24Service.sendSystemNotification(userId, message, tag),
+    onSuccess: () => {
+      toast.success('Notificação de sistema enviada');
+    },
+    onError: (error: Error) => {
+      toast.error(`Erro ao enviar notificação: ${error.message}`);
+    },
+  });
+};

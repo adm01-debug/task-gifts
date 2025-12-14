@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Link2, 
   RefreshCw, 
@@ -18,7 +20,11 @@ import {
   Clock,
   ExternalLink,
   UserCheck,
-  Timer
+  Timer,
+  MessageSquare,
+  Bell,
+  Send,
+  Search
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { 
@@ -30,7 +36,11 @@ import {
   useBitrix24UserMappings,
   useSyncBitrix24Calendar,
   useBitrix24CalendarMappings,
-  useBitrix24AttendanceMappings
+  useBitrix24AttendanceMappings,
+  useBitrix24Dialogs,
+  useSendBitrix24Message,
+  useBitrix24Notifications,
+  useSendBitrix24Notification
 } from "@/hooks/useBitrix24";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -45,7 +55,16 @@ export const Bitrix24Integration = () => {
   const { data: userMappings } = useBitrix24UserMappings();
   const { data: calendarMappings } = useBitrix24CalendarMappings();
   const { data: attendanceMappings } = useBitrix24AttendanceMappings();
+  const { data: dialogs, refetch: refetchDialogs } = useBitrix24Dialogs();
+  const { data: notifications, refetch: refetchNotifications } = useBitrix24Notifications();
+  const { mutate: sendMessage, isPending: sendingMessage } = useSendBitrix24Message();
+  const { mutate: sendNotification, isPending: sendingNotification } = useSendBitrix24Notification();
   const [activeTab, setActiveTab] = useState("status");
+  const [selectedDialog, setSelectedDialog] = useState<string | null>(null);
+  const [messageText, setMessageText] = useState("");
+  const [notificationUserId, setNotificationUserId] = useState("");
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [searchUser, setSearchUser] = useState("");
 
   const getStatusBadge = () => {
     if (statusLoading) return <Badge variant="outline">Verificando...</Badge>;
@@ -61,7 +80,33 @@ export const Bitrix24Integration = () => {
     { icon: Calendar, label: "Calendário", description: "Eventos e atividades", color: "text-purple-500" },
     { icon: Users, label: "Usuários", description: "Estrutura organizacional", color: "text-orange-500" },
     { icon: Timer, label: "Jornada", description: "Controle de ponto", color: "text-cyan-500" },
+    { icon: MessageSquare, label: "Chat", description: "Mensagens internas", color: "text-pink-500" },
+    { icon: Bell, label: "Notificações", description: "Alertas e avisos", color: "text-yellow-500" },
   ];
+
+  const handleSendMessage = () => {
+    if (!selectedDialog || !messageText.trim()) return;
+    sendMessage({ dialogId: selectedDialog, message: messageText }, {
+      onSuccess: () => setMessageText("")
+    });
+  };
+
+  const handleSendNotification = () => {
+    if (!notificationUserId || !notificationMessage.trim()) return;
+    sendNotification({ userId: notificationUserId, message: notificationMessage }, {
+      onSuccess: () => {
+        setNotificationUserId("");
+        setNotificationMessage("");
+      }
+    });
+  };
+
+  const filteredUsers = userMappings?.filter((mapping: any) => {
+    if (!searchUser) return true;
+    const metadata = mapping.metadata as Record<string, any> || {};
+    const fullName = [metadata.name, metadata.last_name].filter(Boolean).join(' ').toLowerCase();
+    return fullName.includes(searchUser.toLowerCase()) || metadata.email?.toLowerCase().includes(searchUser.toLowerCase());
+  });
 
   return (
     <div className="space-y-6">
@@ -168,30 +213,38 @@ export const Bitrix24Integration = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="status" className="gap-2">
             <Activity className="h-4 w-4" />
-            Atividade
+            <span className="hidden sm:inline">Atividade</span>
           </TabsTrigger>
           <TabsTrigger value="users" className="gap-2">
             <UserCheck className="h-4 w-4" />
-            Colaboradores
+            <span className="hidden sm:inline">Colaboradores</span>
           </TabsTrigger>
           <TabsTrigger value="calendar" className="gap-2">
             <Calendar className="h-4 w-4" />
-            Calendário
+            <span className="hidden sm:inline">Calendário</span>
           </TabsTrigger>
           <TabsTrigger value="attendance" className="gap-2">
             <Timer className="h-4 w-4" />
-            Jornada
+            <span className="hidden sm:inline">Jornada</span>
+          </TabsTrigger>
+          <TabsTrigger value="chat" className="gap-2">
+            <MessageSquare className="h-4 w-4" />
+            <span className="hidden sm:inline">Chat</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-2">
+            <Bell className="h-4 w-4" />
+            <span className="hidden sm:inline">Notificações</span>
           </TabsTrigger>
           <TabsTrigger value="sync" className="gap-2">
             <RefreshCw className="h-4 w-4" />
-            Mapeamentos
+            <span className="hidden sm:inline">Mapeamentos</span>
           </TabsTrigger>
           <TabsTrigger value="logs" className="gap-2">
             <FileText className="h-4 w-4" />
-            Logs
+            <span className="hidden sm:inline">Logs</span>
           </TabsTrigger>
         </TabsList>
 
@@ -517,6 +570,256 @@ export const Bitrix24Integration = () => {
                   <p className="text-sm mt-2">Os registros aparecerão quando colaboradores fizerem check-in</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="chat" className="mt-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Chat Interno Bitrix24</CardTitle>
+                  <CardDescription>Envie mensagens para colaboradores</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => refetchDialogs()} 
+                  disabled={!status?.connected}
+                  size="sm"
+                  variant="outline"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Carregar Conversas
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* User search for quick message */}
+                <div className="p-4 rounded-lg bg-pink-500/10 border border-pink-500/20">
+                  <div className="flex items-start gap-3">
+                    <MessageSquare className="h-5 w-5 text-pink-500 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-medium text-pink-700 dark:text-pink-300 mb-3">Enviar Mensagem Rápida</p>
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Buscar colaborador..."
+                            value={searchUser}
+                            onChange={(e) => setSearchUser(e.target.value)}
+                            className="pl-10"
+                          />
+                        </div>
+                        {searchUser && filteredUsers?.length ? (
+                          <div className="max-h-[150px] overflow-auto rounded-lg border bg-background">
+                            {filteredUsers.slice(0, 5).map((mapping: any) => {
+                              const metadata = mapping.metadata as Record<string, any> || {};
+                              const fullName = [metadata.name, metadata.last_name].filter(Boolean).join(' ');
+                              return (
+                                <button
+                                  key={mapping.id}
+                                  onClick={() => {
+                                    setSelectedDialog(mapping.bitrix_id);
+                                    setSearchUser(fullName);
+                                  }}
+                                  className="w-full flex items-center gap-2 p-2 hover:bg-muted text-left"
+                                >
+                                  <Users className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm">{fullName}</span>
+                                  {metadata.email && (
+                                    <span className="text-xs text-muted-foreground ml-auto">{metadata.email}</span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : null}
+                        <Textarea
+                          placeholder="Digite sua mensagem..."
+                          value={messageText}
+                          onChange={(e) => setMessageText(e.target.value)}
+                          rows={3}
+                        />
+                        <Button 
+                          onClick={handleSendMessage}
+                          disabled={!selectedDialog || !messageText.trim() || sendingMessage || !status?.connected}
+                          className="w-full"
+                        >
+                          {sendingMessage ? (
+                            <>
+                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                              Enviando...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Enviar Mensagem
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dialog list */}
+                {dialogs?.length ? (
+                  <ScrollArea className="h-[200px]">
+                    <div className="space-y-2">
+                      {dialogs.map((dialog: any) => (
+                        <div 
+                          key={dialog.ID} 
+                          className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                            selectedDialog === dialog.ID ? 'bg-primary/10 border border-primary/30' : 'bg-muted/50 hover:bg-muted'
+                          }`}
+                          onClick={() => setSelectedDialog(dialog.ID)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-full bg-pink-500/10">
+                              <MessageSquare className="h-4 w-4 text-pink-500" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">{dialog.TITLE || `Conversa ${dialog.ID}`}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {dialog.TYPE === 'private' ? 'Privado' : 'Grupo'}
+                              </p>
+                            </div>
+                          </div>
+                          {dialog.COUNTER > 0 && (
+                            <Badge className="bg-pink-500">{dialog.COUNTER}</Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground text-sm">
+                    <p>Clique em "Carregar Conversas" para ver as conversas recentes</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications" className="mt-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Notificações Bitrix24</CardTitle>
+                  <CardDescription>Envie alertas e avisos para colaboradores</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => refetchNotifications()} 
+                  disabled={!status?.connected}
+                  size="sm"
+                  variant="outline"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Carregar Notificações
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Send notification form */}
+                <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                  <div className="flex items-start gap-3">
+                    <Bell className="h-5 w-5 text-yellow-500 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-medium text-yellow-700 dark:text-yellow-300 mb-3">Enviar Notificação</p>
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="ID do usuário Bitrix24 ou buscar..."
+                            value={notificationUserId}
+                            onChange={(e) => setNotificationUserId(e.target.value)}
+                            className="pl-10"
+                          />
+                        </div>
+                        {userMappings?.length && !notificationUserId ? (
+                          <div className="max-h-[100px] overflow-auto rounded-lg border bg-background">
+                            {userMappings.slice(0, 3).map((mapping: any) => {
+                              const metadata = mapping.metadata as Record<string, any> || {};
+                              const fullName = [metadata.name, metadata.last_name].filter(Boolean).join(' ');
+                              return (
+                                <button
+                                  key={mapping.id}
+                                  onClick={() => setNotificationUserId(mapping.bitrix_id)}
+                                  className="w-full flex items-center gap-2 p-2 hover:bg-muted text-left"
+                                >
+                                  <Users className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm">{fullName}</span>
+                                  <span className="text-xs text-muted-foreground ml-auto">ID: {mapping.bitrix_id}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : null}
+                        <Textarea
+                          placeholder="Mensagem da notificação..."
+                          value={notificationMessage}
+                          onChange={(e) => setNotificationMessage(e.target.value)}
+                          rows={3}
+                        />
+                        <Button 
+                          onClick={handleSendNotification}
+                          disabled={!notificationUserId || !notificationMessage.trim() || sendingNotification || !status?.connected}
+                          className="w-full"
+                        >
+                          {sendingNotification ? (
+                            <>
+                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                              Enviando...
+                            </>
+                          ) : (
+                            <>
+                              <Bell className="h-4 w-4 mr-2" />
+                              Enviar Notificação
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent notifications */}
+                {notifications?.length ? (
+                  <ScrollArea className="h-[200px]">
+                    <div className="space-y-2">
+                      {notifications.map((notification: any) => (
+                        <div 
+                          key={notification.ID} 
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-full bg-yellow-500/10">
+                              <Bell className="h-4 w-4 text-yellow-500" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">{notification.TITLE || notification.TEXT?.substring(0, 50) || 'Notificação'}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {notification.DATE ? format(new Date(notification.DATE), "dd/MM/yyyy HH:mm", { locale: ptBR }) : 'Data'}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {notification.TYPE || 'Personal'}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground text-sm">
+                    <p>Clique em "Carregar Notificações" para ver as notificações recentes</p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

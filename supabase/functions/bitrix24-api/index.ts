@@ -292,6 +292,72 @@ serve(async (req) => {
       }
     }
 
+    // IM (Instant Messaging) Module
+    else if (module === 'im') {
+      switch (action) {
+        case 'getDialogs':
+          result = await callBitrix(domain, token, 'im.recent.list', requestData || {});
+          break;
+        case 'getMessages':
+          result = await callBitrix(domain, token, 'im.dialog.messages.get', requestData);
+          break;
+        case 'sendMessage':
+          result = await callBitrix(domain, token, 'im.message.add', requestData);
+          break;
+        case 'sendNotify':
+          result = await callBitrix(domain, token, 'im.notify.personal.add', requestData);
+          break;
+        case 'getUnread':
+          result = await callBitrix(domain, token, 'im.counters.get', requestData || {});
+          break;
+        case 'markRead':
+          result = await callBitrix(domain, token, 'im.dialog.read', requestData);
+          break;
+        case 'getChatInfo':
+          result = await callBitrix(domain, token, 'im.chat.get', requestData);
+          break;
+        case 'createChat':
+          result = await callBitrix(domain, token, 'im.chat.add', requestData);
+          break;
+        case 'getUserStatus':
+          result = await callBitrix(domain, token, 'im.user.status.get', requestData || {});
+          break;
+
+        default:
+          throw new Error(`IM action não suportada: ${action}`);
+      }
+    }
+
+    // Notifications Module
+    else if (module === 'notify') {
+      switch (action) {
+        case 'send':
+          result = await callBitrix(domain, token, 'im.notify.personal.add', requestData);
+          break;
+        case 'sendSystem':
+          result = await callBitrix(domain, token, 'im.notify.system.add', requestData);
+          break;
+        case 'getList':
+          result = await callBitrix(domain, token, 'im.notify.get', requestData || {});
+          break;
+        case 'markRead':
+          result = await callBitrix(domain, token, 'im.notify.read', requestData);
+          break;
+        case 'delete':
+          result = await callBitrix(domain, token, 'im.notify.delete', requestData);
+          break;
+        case 'confirm':
+          result = await callBitrix(domain, token, 'im.notify.confirm', requestData);
+          break;
+        case 'decline':
+          result = await callBitrix(domain, token, 'im.notify.decline', requestData);
+          break;
+
+        default:
+          throw new Error(`Notify action não suportada: ${action}`);
+      }
+    }
+
     // Generic method call
     else if (module === 'raw') {
       result = await callBitrix(domain, token, action, requestData);
