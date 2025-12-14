@@ -70,7 +70,7 @@ export const achievementsService = {
       .from("achievements")
       .select("*")
       .eq("key", achievementKey)
-      .single();
+      .maybeSingle();
 
     if (achError || !achievement) {
       console.error("Achievement not found:", achievementKey);
@@ -95,7 +95,7 @@ export const achievementsService = {
       .from("profiles")
       .select("xp, coins")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     if (profile) {
       await supabase
@@ -255,7 +255,7 @@ export const achievementsService = {
       .from("profiles")
       .select("quests_completed")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     const completedCount = profile?.quests_completed || 0;
 

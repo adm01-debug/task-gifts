@@ -291,7 +291,7 @@ const RewardsManager = forwardRef<HTMLDivElement>(function RewardsManager(_, ref
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<ShopReward | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ShopReward | null>(null);
-  const [deletingRewardId, setDeletingRewardId] = useState<string | null>(null);
+  const [deletingRewardIds, setDeletingRewardIds] = useState<Set<string>>(new Set());
 
   const handleCreate = useCallback(() => {
     setEditingReward(null);
@@ -318,10 +318,14 @@ const RewardsManager = forwardRef<HTMLDivElement>(function RewardsManager(_, ref
 
   const handleDelete = useCallback(() => {
     if (deleteConfirm) {
-      setDeletingRewardId(deleteConfirm.id);
+      setDeletingRewardIds(prev => new Set(prev).add(deleteConfirm.id));
       deleteMutation.mutate(deleteConfirm.id, {
         onSettled: () => {
-          setDeletingRewardId(null);
+          setDeletingRewardIds(prev => {
+            const next = new Set(prev);
+            next.delete(deleteConfirm.id);
+            return next;
+          });
           setDeleteConfirm(null);
         },
       });
@@ -458,10 +462,10 @@ const RewardsManager = forwardRef<HTMLDivElement>(function RewardsManager(_, ref
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={deletingRewardId === deleteConfirm?.id}
+              disabled={deletingRewardIds.has(deleteConfirm?.id || '')}
               className="bg-destructive text-destructive-foreground"
             >
-              {deletingRewardId === deleteConfirm?.id ? "Excluindo..." : "Excluir"}
+              {deletingRewardIds.has(deleteConfirm?.id || '') ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -473,7 +477,7 @@ const RewardsManager = forwardRef<HTMLDivElement>(function RewardsManager(_, ref
 const PurchasesManager = forwardRef<HTMLDivElement>(function PurchasesManager(_, ref) {
   const { data: purchases, isLoading } = useAdminPurchases();
   const updateStatusMutation = useUpdatePurchaseStatus();
-  const [updatingPurchaseId, setUpdatingPurchaseId] = useState<string | null>(null);
+  const [updatingPurchaseIds, setUpdatingPurchaseIds] = useState<Set<string>>(new Set());
 
   const statusConfig = useMemo(() => ({
     pending: {
@@ -499,11 +503,15 @@ const PurchasesManager = forwardRef<HTMLDivElement>(function PurchasesManager(_,
   } as Record<PurchaseStatus, { label: string; color: string; icon: React.ReactNode }>), []);
 
   const handleStatusChange = useCallback((purchaseId: string, status: PurchaseStatus) => {
-    setUpdatingPurchaseId(purchaseId);
+    setUpdatingPurchaseIds(prev => new Set(prev).add(purchaseId));
     updateStatusMutation.mutate(
       { purchaseId, status },
       {
-        onSettled: () => setUpdatingPurchaseId(null),
+        onSettled: () => setUpdatingPurchaseIds(prev => {
+          const next = new Set(prev);
+          next.delete(purchaseId);
+          return next;
+        }),
       }
     );
   }, [updateStatusMutation]);
@@ -600,7 +608,7 @@ const PurchasesManager = forwardRef<HTMLDivElement>(function PurchasesManager(_,
                           onValueChange={(v) =>
                             handleStatusChange(purchase.id, v as PurchaseStatus)
                           }
-                          disabled={updatingPurchaseId === purchase.id}
+                          disabled={updatingPurchaseIds.has(purchase.id)}
                         >
                           <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="Alterar status" />
@@ -897,7 +905,7 @@ const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<ShopPromotion | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ShopPromotion | null>(null);
-  const [deletingPromoId, setDeletingPromoId] = useState<string | null>(null);
+  const [deletingPromoIds, setDeletingPromoIds] = useState<Set<string>>(new Set());
 
   const handleCreate = useCallback(() => {
     setEditingPromotion(null);
@@ -930,10 +938,14 @@ const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(
 
   const handleDelete = useCallback(() => {
     if (deleteConfirm) {
-      setDeletingPromoId(deleteConfirm.id);
+      setDeletingPromoIds(prev => new Set(prev).add(deleteConfirm.id));
       deleteMutation.mutate(deleteConfirm.id, {
         onSettled: () => {
-          setDeletingPromoId(null);
+          setDeletingPromoIds(prev => {
+            const next = new Set(prev);
+            next.delete(deleteConfirm.id);
+            return next;
+          });
           setDeleteConfirm(null);
         },
       });
@@ -1066,10 +1078,10 @@ const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={deletingPromoId === deleteConfirm?.id}
+              disabled={deletingPromoIds.has(deleteConfirm?.id || '')}
               className="bg-destructive text-destructive-foreground"
             >
-              {deletingPromoId === deleteConfirm?.id ? "Excluindo..." : "Excluir"}
+              {deletingPromoIds.has(deleteConfirm?.id || '') ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
