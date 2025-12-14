@@ -76,27 +76,27 @@ const App = () => (
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/manager" element={<ManagerDashboard />} />
-                    <Route path="/quest-builder" element={<QuestBuilder />} />
-                    <Route path="/reports" element={<EngagementReports />} />
-                    <Route path="/audit" element={<AuditLogs />} />
-                    <Route path="/analytics" element={<RealTimeAnalytics />} />
-                    <Route path="/trails" element={<LearningTrails />} />
-                    <Route path="/trails/:id" element={<TrailDetail />} />
-                    <Route path="/ponto" element={<Attendance />} />
-                    <Route path="/executivo" element={<ExecutiveDashboard />} />
-                    <Route path="/feed" element={<SocialFeed />} />
-                    <Route path="/conquistas" element={<Achievements />} />
-                    <Route path="/estatisticas" element={<PersonalStats />} />
-                    <Route path="/loja" element={<Shop />} />
-                    <Route path="/eventos/:eventId" element={<SeasonalEventDetail />} />
-                    <Route path="/mentoria" element={<Mentorship />} />
-                    <Route path="/duelos" element={<Duels />} />
-                    <Route path="/quiz" element={<DailyQuiz />} />
-                    <Route path="/quiz/admin" element={<QuizAdmin />} />
-                    <Route path="/admin" element={<AdminPanel />} />
-                    <Route path="/bitrix24" element={<Bitrix24CRM />} />
+                    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                    <Route path="/manager" element={<ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>} />
+                    <Route path="/quest-builder" element={<ProtectedRoute requiredRole="manager"><QuestBuilder /></ProtectedRoute>} />
+                    <Route path="/reports" element={<ProtectedRoute requiredRole="manager"><EngagementReports /></ProtectedRoute>} />
+                    <Route path="/audit" element={<ProtectedRoute requiredRole="admin"><AuditLogs /></ProtectedRoute>} />
+                    <Route path="/analytics" element={<ProtectedRoute><RealTimeAnalytics /></ProtectedRoute>} />
+                    <Route path="/trails" element={<ProtectedRoute><LearningTrails /></ProtectedRoute>} />
+                    <Route path="/trails/:id" element={<ProtectedRoute><TrailDetail /></ProtectedRoute>} />
+                    <Route path="/ponto" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+                    <Route path="/executivo" element={<ProtectedRoute requiredRole="admin"><ExecutiveDashboard /></ProtectedRoute>} />
+                    <Route path="/feed" element={<ProtectedRoute><SocialFeed /></ProtectedRoute>} />
+                    <Route path="/conquistas" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+                    <Route path="/estatisticas" element={<ProtectedRoute><PersonalStats /></ProtectedRoute>} />
+                    <Route path="/loja" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
+                    <Route path="/eventos/:eventId" element={<ProtectedRoute><SeasonalEventDetail /></ProtectedRoute>} />
+                    <Route path="/mentoria" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
+                    <Route path="/duelos" element={<ProtectedRoute><Duels /></ProtectedRoute>} />
+                    <Route path="/quiz" element={<ProtectedRoute><DailyQuiz /></ProtectedRoute>} />
+                    <Route path="/quiz/admin" element={<ProtectedRoute requiredRole="manager"><QuizAdmin /></ProtectedRoute>} />
+                    <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
+                    <Route path="/bitrix24" element={<ProtectedRoute requiredRole="admin"><Bitrix24CRM /></ProtectedRoute>} />
                     <Route
                       path="/loja/admin"
                       element={
