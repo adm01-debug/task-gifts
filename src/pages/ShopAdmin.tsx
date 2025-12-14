@@ -467,6 +467,7 @@ function RewardsManager() {
 function PurchasesManager() {
   const { data: purchases, isLoading } = useAdminPurchases();
   const updateStatusMutation = useUpdatePurchaseStatus();
+  const [updatingPurchaseId, setUpdatingPurchaseId] = useState<string | null>(null);
 
   const statusConfig: Record<
     PurchaseStatus,
@@ -495,7 +496,13 @@ function PurchasesManager() {
   };
 
   const handleStatusChange = (purchaseId: string, status: PurchaseStatus) => {
-    updateStatusMutation.mutate({ purchaseId, status });
+    setUpdatingPurchaseId(purchaseId);
+    updateStatusMutation.mutate(
+      { purchaseId, status },
+      {
+        onSettled: () => setUpdatingPurchaseId(null),
+      }
+    );
   };
 
   if (isLoading) {
@@ -588,7 +595,7 @@ function PurchasesManager() {
                           onValueChange={(v) =>
                             handleStatusChange(purchase.id, v as PurchaseStatus)
                           }
-                          disabled={updateStatusMutation.isPending}
+                          disabled={updatingPurchaseId === purchase.id}
                         >
                           <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="Alterar status" />
