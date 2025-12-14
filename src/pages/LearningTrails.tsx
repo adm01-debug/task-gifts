@@ -289,7 +289,14 @@ export default function LearningTrails() {
   // Stats
   const completedCount = enrollments.filter(e => e.completed_at).length;
   const inProgressCount = enrollments.filter(e => !e.completed_at).length;
-  const totalXpEarned = completedCount * 100; // Simplified
+  
+  // Calculate actual XP earned from completed trails
+  const totalXpEarned = enrollments
+    .filter(e => e.completed_at)
+    .reduce((sum, enrollment) => {
+      const trail = trails.find(t => t.id === enrollment.trail_id);
+      return sum + (trail?.xp_reward || 0);
+    }, 0);
 
   const handleEnroll = async (trailId: string) => {
     await enrollMutation.mutateAsync(trailId);
