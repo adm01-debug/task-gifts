@@ -61,7 +61,7 @@ export function usePurchaseReward() {
       queryClient.invalidateQueries({ queryKey: ["profiles"] });
       toast.success("🎉 Recompensa resgatada com sucesso!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Erro ao resgatar recompensa");
     },
   });
@@ -95,7 +95,7 @@ export function useCreateReward() {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
       toast.success("Recompensa criada com sucesso!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Erro ao criar recompensa");
     },
   });
@@ -111,7 +111,7 @@ export function useUpdateReward() {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
       toast.success("Recompensa atualizada!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Erro ao atualizar recompensa");
     },
   });
@@ -126,7 +126,7 @@ export function useDeleteReward() {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
       toast.success("Recompensa removida!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Erro ao remover recompensa");
     },
   });
@@ -143,7 +143,7 @@ export function useUpdatePurchaseStatus() {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
       toast.success("Status do pedido atualizado!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Erro ao atualizar status");
     },
   });
@@ -178,7 +178,7 @@ export function useCreatePromotion() {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
       toast.success("Promoção criada com sucesso!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Erro ao criar promoção");
     },
   });
@@ -194,7 +194,7 @@ export function useUpdatePromotion() {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
       toast.success("Promoção atualizada!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Erro ao atualizar promoção");
     },
   });
@@ -209,7 +209,7 @@ export function useDeletePromotion() {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
       toast.success("Promoção removida!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Erro ao remover promoção");
     },
   });

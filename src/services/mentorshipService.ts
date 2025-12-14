@@ -326,7 +326,13 @@ export const mentorshipService = {
   },
 
   // Get potential mentors (higher level users)
-  async getPotentialMentors(userId: string): Promise<any[]> {
+  async getPotentialMentors(userId: string): Promise<{
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+    level: number;
+    xp: number;
+  }[]> {
     const { data: userProfile } = await supabase
       .from('profiles')
       .select('level')

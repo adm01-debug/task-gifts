@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { useTrailWithModules, useUserEnrollments, useModuleProgress, useEnrollInTrail, useStartModule, useCompleteModule } from "@/hooks/useTrails";
 import { useAuth } from "@/hooks/useAuth";
 import type { TrailModule, ModuleProgress } from "@/services/trailsService";
@@ -439,11 +440,13 @@ export default function TrailDetail() {
       {/* Module Viewer Modal */}
       <AnimatePresence>
         {showViewer && activeModule && (
-          <ModuleViewer
-            module={activeModule}
-            onComplete={handleModuleComplete}
-            onClose={() => setShowViewer(false)}
-          />
+          <SectionErrorBoundary sectionName="Visualizador de Módulo">
+            <ModuleViewer
+              module={activeModule}
+              onComplete={handleModuleComplete}
+              onClose={() => setShowViewer(false)}
+            />
+          </SectionErrorBoundary>
         )}
       </AnimatePresence>
     </div>
