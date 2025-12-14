@@ -531,19 +531,26 @@ const Duels = () => {
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {activeDuels.map(duel => (
-                <DuelCard
-                  key={duel.id}
-                  duel={duel}
-                  userId={user!.id}
-                  onAccept={() => acceptDuel.mutate({ duelId: duel.id, userId: user!.id })}
-                  onDecline={() => handleDeclineClick(duel.id, duel.challenger?.display_name || "Oponente")}
-                  onCancel={() => handleCancelClick(duel.id, duel.opponent?.display_name || "Oponente")}
-                  isAccepting={acceptDuel.isPending}
-                  isDeclining={declineDuel.isPending}
-                  isCancelling={cancelDuel.isPending}
-                />
-              ))}
+              {activeDuels.map(duel => {
+                const isChallenger = duel.challenger_id === user!.id;
+                const opponentName = isChallenger 
+                  ? (duel.opponent?.display_name || "Oponente")
+                  : (duel.challenger?.display_name || "Desafiante");
+                
+                return (
+                  <DuelCard
+                    key={duel.id}
+                    duel={duel}
+                    userId={user!.id}
+                    onAccept={() => acceptDuel.mutate({ duelId: duel.id, userId: user!.id })}
+                    onDecline={() => handleDeclineClick(duel.id, opponentName)}
+                    onCancel={() => handleCancelClick(duel.id, opponentName)}
+                    isAccepting={acceptDuel.isPending}
+                    isDeclining={declineDuel.isPending}
+                    isCancelling={cancelDuel.isPending}
+                  />
+                );
+              })}
             </div>
           )}
         </section>
