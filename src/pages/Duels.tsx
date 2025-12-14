@@ -13,6 +13,7 @@ import { showUndoToast } from "@/components/UndoToast";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { PageTransition } from "@/components/PageTransition";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   useUserDuels,
   useActiveDuel,
@@ -384,21 +385,19 @@ const Duels = () => {
     if (!confirmDialog.duelId || !user) return;
     
     const duelIdToRestore = confirmDialog.duelId;
-    const previousStatus = "pending";
+    const opponentNameToRestore = confirmDialog.opponentName;
     
     if (confirmDialog.type === "decline") {
       declineDuel.mutate({ duelId: confirmDialog.duelId, userId: user.id }, {
         onSuccess: () => {
           showUndoToast({
-            message: `Duelo com ${confirmDialog.opponentName} recusado`,
+            message: `Duelo com ${opponentNameToRestore} recusado`,
             onUndo: async () => {
-              const { supabase } = await import("@/integrations/supabase/client");
-              const { useQueryClient } = await import("@tanstack/react-query");
               await supabase
                 .from("direct_duels")
-                .update({ status: previousStatus })
+                .update({ status: "pending" })
                 .eq("id", duelIdToRestore);
-              // Trigger refetch by window reload as we can't access queryClient in async callback
+              // Realtime subscription will auto-update, but force refetch for immediate feedback
               window.location.reload();
             },
           });
@@ -408,12 +407,11 @@ const Duels = () => {
       cancelDuel.mutate({ duelId: confirmDialog.duelId, userId: user.id }, {
         onSuccess: () => {
           showUndoToast({
-            message: `Duelo com ${confirmDialog.opponentName} cancelado`,
+            message: `Duelo com ${opponentNameToRestore} cancelado`,
             onUndo: async () => {
-              const { supabase } = await import("@/integrations/supabase/client");
               await supabase
                 .from("direct_duels")
-                .update({ status: previousStatus })
+                .update({ status: "pending" })
                 .eq("id", duelIdToRestore);
               window.location.reload();
             },
