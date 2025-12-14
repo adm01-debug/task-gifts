@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback, memo } from "react";
 import { motion, Variants } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Zap, Flame, Trophy, Target, TrendingUp, Users, Clock, ArrowUpRight } from "lucide-react";
@@ -351,7 +351,7 @@ const quickActionItemVariants: Variants = {
 };
 
 // Additional component for quick actions
-export const QuickActions = () => {
+export const QuickActions = memo(function QuickActions() {
   const navigate = useNavigate();
 
   const goToQuestBuilder = useCallback(() => navigate("/quest-builder"), [navigate]);
@@ -414,4 +414,4 @@ export const QuickActions = () => {
       ))}
     </motion.div>
   );
-};
+});
