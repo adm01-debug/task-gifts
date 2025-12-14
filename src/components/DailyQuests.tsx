@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Target, Clock, Zap, CheckCircle2, Circle, Flame, Star, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useAllMissions, useClaimMissionReward } from "@/hooks/useMissions";
 import { useCurrentProfile } from "@/hooks/useProfiles";
@@ -14,13 +14,20 @@ export const DailyQuests = () => {
   const { data: profile } = useCurrentProfile();
   const claimMutation = useClaimMissionReward();
 
-  // Filter only daily missions for this component
-  const dailyMissions = missions.filter(m => m.frequency === "daily");
-  
-  const completedCount = dailyMissions.filter(m => m.progress?.completed_at).length;
-  const claimableCount = dailyMissions.filter(m => m.progress?.completed_at && !m.progress?.claimed).length;
+  // Memoize filtered missions
+  const dailyMissions = useMemo(() => 
+    missions.filter(m => m.frequency === "daily"), 
+    [missions]
+  );
 
-  const handleClaim = (mission: MissionWithProgress) => {
+  // Memoize counts
+  const { completedCount, claimableCount } = useMemo(() => ({
+    completedCount: dailyMissions.filter(m => m.progress?.completed_at).length,
+    claimableCount: dailyMissions.filter(m => m.progress?.completed_at && !m.progress?.claimed).length,
+  }), [dailyMissions]);
+
+  // Memoize handler
+  const handleClaim = useCallback((mission: MissionWithProgress) => {
     if (mission.progress?.id) {
       const progressId = mission.progress.id;
       setClaimingIds(prev => new Set(prev).add(progressId));
@@ -32,13 +39,15 @@ export const DailyQuests = () => {
         }),
       });
     }
-  };
+  }, [claimMutation]);
 
-  // Calculate time left until midnight
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  const hoursLeft = Math.floor((midnight.getTime() - now.getTime()) / (1000 * 60 * 60));
+  // Memoize time calculation
+  const hoursLeft = useMemo(() => {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    return Math.floor((midnight.getTime() - now.getTime()) / (1000 * 60 * 60));
+  }, []);
 
   if (isLoading) {
     return (
