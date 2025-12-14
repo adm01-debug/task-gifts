@@ -32,8 +32,8 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const claimReward = useClaimOnboardingReward();
   const [currentView, setCurrentView] = useState<"tutorial" | "checklist">("tutorial");
   const [tutorialStep, setTutorialStep] = useState(0);
-  const [claimingStepId, setClaimingStepId] = useState<string | null>(null);
-  const [completingStepId, setCompletingStepId] = useState<string | null>(null);
+  const [claimingStepIds, setClaimingStepIds] = useState<Set<string>>(new Set());
+  const [completingStepIds, setCompletingStepIds] = useState<Set<string>>(new Set());
 
   const tutorialSlides = [
     {
@@ -72,7 +72,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   }, [tutorialStep, tutorialSlides.length, completeStep]);
 
   const handleStepAction = useCallback(async (stepId: string, route?: string) => {
-    setCompletingStepId(stepId);
+    setCompletingStepIds(prev => new Set(prev).add(stepId));
     try {
       await completeStep.mutateAsync(stepId);
       if (route) {
@@ -80,12 +80,16 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
         navigate(route);
       }
     } finally {
-      setCompletingStepId(null);
+      setCompletingStepIds(prev => {
+        const next = new Set(prev);
+        next.delete(stepId);
+        return next;
+      });
     }
   }, [completeStep, onOpenChange, navigate]);
 
   const handleClaimReward = useCallback(async (stepId: string) => {
-    setClaimingStepId(stepId);
+    setClaimingStepIds(prev => new Set(prev).add(stepId));
     try {
       // Check if this will be the last reward to claim (all steps will be complete after this)
       const willCompleteAll = progress && 
@@ -103,7 +107,11 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
         });
       }
     } finally {
-      setClaimingStepId(null);
+      setClaimingStepIds(prev => {
+        const next = new Set(prev);
+        next.delete(stepId);
+        return next;
+      });
     }
   }, [progress, claimReward]);
 
@@ -257,11 +265,11 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
                             <Button
                               size="sm"
                               onClick={() => handleClaimReward(step.id)}
-                              disabled={claimingStepId === step.id}
+                              disabled={claimingStepIds.has(step.id)}
                               className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                             >
                               <Gift className="w-4 h-4 mr-1" />
-                              {claimingStepId === step.id ? "..." : "Resgatar"}
+                              {claimingStepIds.has(step.id) ? "..." : "Resgatar"}
                             </Button>
                           ) : isClaimed ? (
                             <Badge className="bg-green-500">
@@ -273,9 +281,9 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
                               size="sm"
                               variant="outline"
                               onClick={() => handleStepAction(step.id, step.route)}
-                              disabled={completingStepId === step.id}
+                              disabled={completingStepIds.has(step.id)}
                             >
-                              {completingStepId === step.id ? "..." : (step.route ? "Ir" : "Concluir")}
+                              {completingStepIds.has(step.id) ? "..." : (step.route ? "Ir" : "Concluir")}
                               <ChevronRight className="w-4 h-4 ml-1" />
                             </Button>
                           )}

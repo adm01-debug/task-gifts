@@ -40,7 +40,7 @@ export const questsService = {
       .from("custom_quests")
       .select("*, quest_steps(*)")
       .eq("id", id)
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
     return data;

@@ -142,7 +142,7 @@ export const avatarService = {
       .from("profiles")
       .select("coins")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     if (!profile || profile.coins < price) {
       throw new Error("Coins insuficientes");
