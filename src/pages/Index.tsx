@@ -64,6 +64,13 @@ function Index() {
     }
   }, [sidebarCollapsed]);
 
+  // Close mobile drawer when switching to desktop viewport
+  useEffect(() => {
+    if (!isMobile && mobileDrawerOpen) {
+      setMobileDrawerOpen(false);
+    }
+  }, [isMobile, mobileDrawerOpen]);
+
   // Memoized handlers
   const handleCloseMobileDrawer = useCallback(() => setMobileDrawerOpen(false), []);
   const handleToggleSidebar = useCallback(() => setSidebarCollapsed(prev => !prev), []);
