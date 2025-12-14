@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { TrendingUp, Users, Target, Zap, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { useNavigate } from "react-router-dom";
 import { useLeaderboard } from "@/hooks/useProfiles";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -21,6 +22,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export const AnalyticsWidget = () => {
+  const navigate = useNavigate();
   const { data: profiles = [], isLoading: profilesLoading } = useLeaderboard(50);
 
   const isLoading = profilesLoading;
@@ -102,6 +104,7 @@ export const AnalyticsWidget = () => {
           </div>
           <motion.button
             whileHover={{ scale: 1.05 }}
+            onClick={() => navigate("/analytics")}
             className="text-xs text-primary font-medium"
           >
             Ver detalhes →

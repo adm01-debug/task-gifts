@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Trophy, Crown, Medal, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useLeaderboard } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
 import { SkeletonLeaderboard } from "@/components/ui/skeleton";
@@ -18,6 +19,7 @@ interface LeaderboardPlayer {
 const podiumOrder = [1, 0, 2]; // Silver, Gold, Bronze positions
 
 export const LiveLeaderboard = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profiles = [], isLoading } = useLeaderboard(10);
 
@@ -241,6 +243,7 @@ export const LiveLeaderboard = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => navigate("/estatisticas")}
           className="w-full py-2 rounded-lg bg-muted/50 hover:bg-muted text-sm font-medium transition-colors"
         >
           Ver ranking completo

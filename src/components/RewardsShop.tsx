@@ -168,12 +168,12 @@ export const RewardsShop = () => {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      disabled={!canAfford}
+                      onClick={() => navigate("/loja")}
                       className={cn(
                         "w-full py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-colors",
                         canAfford
                           ? "bg-coins/20 text-coins hover:bg-coins/30"
-                          : "bg-muted text-muted-foreground cursor-not-allowed"
+                          : "bg-muted text-muted-foreground"
                       )}
                     >
                       <Star className="w-3 h-3" />
