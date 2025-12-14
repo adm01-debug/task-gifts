@@ -30,7 +30,7 @@ serve(async (req) => {
       .from('learning_trails')
       .select('id, title, description')
       .eq('id', trailId)
-      .single();
+      .maybeSingle();
 
     if (trailError || !trail) {
       console.error('Trail fetch error:', trailError);

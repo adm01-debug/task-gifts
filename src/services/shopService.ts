@@ -343,7 +343,7 @@ export const shopService = {
           user_id: purchase.user_id,
           type: "info",
           title: "📦 Atualização do Pedido",
-          message: `Seu pedido de "${(purchase.reward as any)?.name}" foi atualizado para: ${statusLabels[status]}`,
+          message: `Seu pedido de "${(purchase.reward as { name?: string })?.name || 'item'}" foi atualizado para: ${statusLabels[status]}`,
           data: { purchase_id: purchaseId, status },
         });
       } catch (e) {

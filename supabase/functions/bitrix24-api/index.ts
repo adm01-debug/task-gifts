@@ -11,7 +11,7 @@ async function getValidToken(supabase: any) {
   const { data: tokenRecord, error } = await supabase
     .from('bitrix24_tokens')
     .select('*')
-    .single();
+    .maybeSingle();
 
   if (error || !tokenRecord) {
     throw new Error('Bitrix24 não conectado');

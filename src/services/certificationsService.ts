@@ -193,7 +193,7 @@ export const certificationsService = {
     if (currentError) throw currentError;
     if (!current) throw new Error("User certification not found");
 
-    const cert = (current as any).certifications;
+    const cert = current.certifications as { name?: string; validity_months?: number } | null;
     const newExpiresAt = cert.validity_months
       ? new Date(Date.now() + cert.validity_months * 30 * 24 * 60 * 60 * 1000).toISOString()
       : null;
@@ -221,7 +221,7 @@ export const certificationsService = {
       data: { certification_id: current.certification_id }
     });
 
-    return { ...data, certification: cert } as UserCertification;
+    return data as unknown as UserCertification;
   },
 
   async checkAndNotifyExpiringCertifications(userId: string): Promise<void> {
@@ -315,7 +315,7 @@ export const certificationsService = {
 
       results.push({
         userId: member.user_id,
-        displayName: (member.profiles as any)?.display_name || 'Usuário',
+        displayName: (member.profiles as { display_name?: string } | null)?.display_name || 'Usuário',
         totalCertifications: userCerts?.length || 0,
         activeCertifications: activeCerts.length,
         expiringCertifications: expiringCerts.length,
