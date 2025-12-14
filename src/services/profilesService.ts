@@ -66,32 +66,16 @@ export const profilesService = {
       level: newLevel 
     });
 
-    // Audit XP gain
-    try {
-      await auditService.logXpGain(id, xpAmount, source || "atividade");
-    } catch (e) {
-      console.error("Failed to audit XP gain:", e);
-    }
+    // Audit XP gain (fire and forget - don't block main flow)
+    auditService.logXpGain(id, xpAmount, source || "atividade").catch(() => {});
 
-    // Create XP notification
-    try {
-      await notificationsService.notifyXpGain(id, xpAmount, source || "atividade");
-    } catch (e) {
-      console.error("Failed to create XP notification:", e);
-    }
+    // Create XP notification (fire and forget)
+    notificationsService.notifyXpGain(id, xpAmount, source || "atividade").catch(() => {});
 
     // Create level up notification and audit if leveled up
     if (leveledUp) {
-      try {
-        await auditService.logLevelUp(id, oldLevel, newLevel);
-      } catch (e) {
-        console.error("Failed to audit level up:", e);
-      }
-      try {
-        await notificationsService.notifyLevelUp(id, newLevel);
-      } catch (e) {
-        console.error("Failed to create level up notification:", e);
-      }
+      auditService.logLevelUp(id, oldLevel, newLevel).catch(() => {});
+      notificationsService.notifyLevelUp(id, newLevel).catch(() => {});
     }
 
     return { profile: updatedProfile, leveledUp, newLevel: leveledUp ? newLevel : undefined };
@@ -119,12 +103,8 @@ export const profilesService = {
       best_streak: bestStreak
     });
 
-    // Audit streak update
-    try {
-      await auditService.logStreakUpdate(id, oldStreak, newStreak);
-    } catch (e) {
-      console.error("Failed to audit streak update:", e);
-    }
+    // Audit streak update (fire and forget)
+    auditService.logStreakUpdate(id, oldStreak, newStreak).catch(() => {});
 
     return updatedProfile;
   },

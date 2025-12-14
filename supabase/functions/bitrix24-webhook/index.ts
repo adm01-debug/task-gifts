@@ -34,7 +34,7 @@ serve(async (req) => {
       }
     }
 
-    console.log('Bitrix24 webhook received:', JSON.stringify(payload));
+    // Webhook payload logged to database for audit
 
     // Determine event type
     const eventType = payload.event || payload.EVENT || 'unknown';
@@ -102,7 +102,7 @@ serve(async (req) => {
           break;
 
         default:
-          console.log(`Unhandled event type: ${eventType}`);
+          // Unhandled event type - marked as processed to avoid retry loops
           processed = true; // Mark as processed to avoid retry loops
       }
     } catch (processError) {

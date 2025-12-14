@@ -190,7 +190,7 @@ serve(async (req) => {
     const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
     alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
 
-    console.log(`Generated ${alerts.length} admin alerts`);
+    // Alerts generated and sorted by severity
 
     return new Response(JSON.stringify({ alerts }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
