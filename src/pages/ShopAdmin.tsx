@@ -656,21 +656,17 @@ const emptyPromotionForm: PromotionFormData = {
   max_claims: null,
 };
 
-function PromotionFormDialog({
-  open,
-  onOpenChange,
-  editingPromotion,
-  rewards,
-  onSave,
-  isSaving,
-}: {
+interface PromotionFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editingPromotion: ShopPromotion | null;
   rewards: ShopReward[];
   onSave: (data: PromotionFormData) => void;
   isSaving: boolean;
-}) {
+}
+
+const PromotionFormDialog = forwardRef<HTMLDivElement, PromotionFormDialogProps>(
+  function PromotionFormDialog({ open, onOpenChange, editingPromotion, rewards, onSave, isSaving }, ref) {
   const [formData, setFormData] = useState<PromotionFormData>(emptyPromotionForm);
   const [discountType, setDiscountType] = useState<"percent" | "coins">("percent");
 
@@ -890,7 +886,7 @@ function PromotionFormDialog({
       </DialogContent>
     </Dialog>
   );
-}
+});
 
 const PromotionsManager = forwardRef<HTMLDivElement>(function PromotionsManager(_, ref) {
   const { data: promotions, isLoading } = useAdminPromotions();
