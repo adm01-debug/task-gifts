@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Flame, Zap, Gift, Settings, Home, Medal } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 
@@ -21,6 +22,7 @@ interface AppSidebarProps {
 }
 
 export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
+  const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState("Dashboard");
   const { data: profile } = useCurrentProfile();
 
@@ -190,6 +192,7 @@ export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
       <div className="p-2 border-t border-sidebar-border">
         <motion.button
           whileHover={{ x: 4 }}
+          onClick={() => navigate("/profile")}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors"
         >
           <Settings className="w-5 h-5" />

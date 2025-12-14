@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AICoachDialog } from "@/components/AICoachDialog";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { useCurrentProfile } from "@/hooks/useProfiles";
 import {
   Drawer,
   DrawerClose,
@@ -33,9 +34,9 @@ const navItems: NavItem[] = [
   { icon: BookOpen, label: "Trilhas", path: "/trails" },
   { icon: Gamepad2, label: "Quiz Diário", path: "/quiz" },
   { icon: HelpCircle, label: "Admin Quiz", path: "/quiz/admin" },
-  { icon: Target, label: "Quests", badge: 3 },
+  { icon: Target, label: "Quests", badge: 3, path: "/manager" },
   { icon: PlusCircle, label: "Criar Quest", path: "/quest-builder" },
-  { icon: Users, label: "Equipes" },
+  { icon: Users, label: "Equipes", path: "/manager" },
   { icon: ClipboardList, label: "Gestor", path: "/manager" },
   { icon: Gift, label: "Loja", path: "/loja", badge: 2 },
   { icon: ShoppingBag, label: "Admin Loja", path: "/loja/admin" },
@@ -54,6 +55,22 @@ interface MobileDrawerProps {
 export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
   const [activeItem, setActiveItem] = useState("Dashboard");
   const navigate = useNavigate();
+  const { data: profile } = useCurrentProfile();
+
+  const displayName = profile?.display_name || "Usuário";
+  const initials = displayName.substring(0, 2).toUpperCase();
+  const level = profile?.level || 1;
+  const xp = profile?.xp || 0;
+  const streak = profile?.streak || 0;
+  const coins = profile?.coins || 0;
+
+  // Calculate XP progress to next level
+  const xpForLevel = (lvl: number) => Math.floor(100 * Math.pow(1.5, lvl - 1));
+  const xpForCurrentLevel = xpForLevel(level);
+  const xpForNextLevel = xpForLevel(level + 1);
+  const xpInCurrentLevel = xp - xpForCurrentLevel;
+  const xpNeededForNext = xpForNextLevel - xpForCurrentLevel;
+  const xpProgress = xpNeededForNext > 0 ? Math.min(100, (xpInCurrentLevel / xpNeededForNext) * 100) : 0;
 
   const handleItemClick = (item: NavItem) => {
     setActiveItem(item.label);
@@ -95,17 +112,17 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
           <div className="flex items-center gap-3 mb-3">
             <div className="relative">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-accent flex items-center justify-center text-lg font-bold">
-                JD
+                {initials}
               </div>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-card border-2 border-background flex items-center justify-center">
-                <span className="text-xs font-bold text-primary">42</span>
+                <span className="text-xs font-bold text-primary">{level}</span>
               </div>
             </div>
             <div className="flex-1">
-              <p className="font-semibold">João Dev</p>
+              <p className="font-semibold">{displayName}</p>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Flame className="w-4 h-4 text-streak streak-fire" />
-                <span>12 dias de streak</span>
+                <span>{streak} dias de streak</span>
               </div>
             </div>
           </div>
@@ -113,14 +130,16 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
           {/* XP Bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">XP até Nível 43</span>
-              <span className="text-success font-semibold">2,450 / 3,000</span>
+              <span className="text-muted-foreground">XP até Nível {level + 1}</span>
+              <span className="text-success font-semibold">
+                {xpInCurrentLevel.toLocaleString()} / {xpNeededForNext.toLocaleString()}
+              </span>
             </div>
             <div className="h-3 rounded-full bg-muted overflow-hidden">
               <motion.div
                 className="h-full xp-bar rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: "82%" }}
+                animate={{ width: `${xpProgress}%` }}
                 transition={{ duration: 0.8 }}
               />
             </div>
@@ -172,16 +191,16 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
             <div className="bg-muted/50 rounded-xl p-3 text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <Zap className="w-4 h-4 text-success" />
-                <span className="text-sm text-muted-foreground">XP Hoje</span>
+                <span className="text-sm text-muted-foreground">XP Total</span>
               </div>
-              <p className="text-xl font-bold text-success">+450</p>
+              <p className="text-xl font-bold text-success">{xp.toLocaleString()}</p>
             </div>
             <div className="bg-muted/50 rounded-xl p-3 text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <Medal className="w-4 h-4 text-warning coin-shine" />
                 <span className="text-sm text-muted-foreground">Coins</span>
               </div>
-              <p className="text-xl font-bold text-warning">1,250</p>
+              <p className="text-xl font-bold text-warning">{coins.toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -231,6 +250,10 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
           </div>
           <motion.button
             whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              navigate("/profile");
+              onClose();
+            }}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-muted transition-colors"
           >
             <Settings className="w-6 h-6" />
