@@ -303,25 +303,6 @@ const Auth = () => {
               </motion.form>
             </AnimatePresence>
 
-            {/* Divider */}
-            <div className="flex items-center gap-4 my-6">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground">ou</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            {/* Demo access */}
-            <button
-              onClick={() => {
-                setEmail("demo@taskgifts.com");
-                setPassword("demo123");
-                toast.info("Credenciais de demo preenchidas!");
-              }}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border hover:bg-muted/30 transition-colors text-sm text-muted-foreground hover:text-foreground"
-            >
-              <Sparkles className="w-4 h-4" />
-              Usar conta demo
-            </button>
           </div>
         </motion.div>
       </div>
