@@ -88,9 +88,18 @@ const dealStageMap: Record<string, { label: string; color: string }> = {
   LOSE: { label: "Perdido", color: "bg-red-500" },
 };
 
+type TabType = "leads" | "deals" | "contacts";
+type CreateType = "lead" | "deal" | "contact";
+
+const tabToCreateType: Record<TabType, CreateType> = {
+  leads: "lead",
+  deals: "deal",
+  contacts: "contact",
+};
+
 function Bitrix24CRMContent() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("leads");
+  const [activeTab, setActiveTab] = useState<TabType>("leads");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -309,7 +318,7 @@ function Bitrix24CRMContent() {
                 </SelectContent>
               </Select>
 
-              <Button onClick={() => openCreateDialog(activeTab as any)}>
+              <Button onClick={() => openCreateDialog(tabToCreateType[activeTab])}>
                 <Plus className="h-4 w-4 mr-2" />
                 Novo {activeTab === "leads" ? "Lead" : activeTab === "deals" ? "Negócio" : "Contato"}
               </Button>
@@ -318,7 +327,7 @@ function Bitrix24CRMContent() {
         </Card>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="leads" className="gap-2">
               <UserCircle className="h-4 w-4" />
