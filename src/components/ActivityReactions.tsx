@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,16 +13,16 @@ interface ActivityReactionsProps {
   reactions: ReactionCount[];
 }
 
-export function ActivityReactions({ activityId, reactions }: ActivityReactionsProps) {
+export const ActivityReactions = memo(function ActivityReactions({ activityId, reactions }: ActivityReactionsProps) {
   const { user } = useAuth();
   const toggleReaction = useToggleReaction();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleReaction = (emoji: string) => {
+  const handleReaction = useCallback((emoji: string) => {
     if (!user) return;
     toggleReaction.mutate({ activityId, userId: user.id, emoji });
     setIsOpen(false);
-  };
+  }, [user, toggleReaction, activityId]);
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
@@ -83,4 +83,4 @@ export function ActivityReactions({ activityId, reactions }: ActivityReactionsPr
       )}
     </div>
   );
-}
+});

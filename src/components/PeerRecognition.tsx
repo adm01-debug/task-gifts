@@ -1,4 +1,4 @@
-import { useState, forwardRef, useCallback, useMemo } from "react";
+import { useState, forwardRef, useCallback, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Send, Users, Sparkles, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -187,6 +187,62 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
 });
 GiveKudosForm.displayName = "GiveKudosForm";
 
+interface KudosItemProps {
+  kudos: {
+    id: string;
+    from_user_id: string;
+    to_user_id: string;
+    message: string;
+    created_at: string;
+    badge?: { name: string; icon: string } | null;
+  };
+  index: number;
+  getProfileName: (userId: string) => string;
+  getProfileInitial: (userId: string) => string;
+}
+
+const KudosItem = memo(({ kudos, index, getProfileName, getProfileInitial }: KudosItemProps) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="p-3 hover:bg-muted/30 transition-colors"
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex -space-x-2">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xs font-bold text-primary-foreground border-2 border-card">
+            {getProfileInitial(kudos.from_user_id)}
+          </div>
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-pink-500 flex items-center justify-center text-xs font-bold text-primary-foreground border-2 border-card">
+            {getProfileInitial(kudos.to_user_id)}
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs">
+            <span className="font-semibold">{getProfileName(kudos.from_user_id)}</span>
+            {" → "}
+            <span className="font-semibold">{getProfileName(kudos.to_user_id)}</span>
+          </p>
+          <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
+            {kudos.message}
+          </p>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            {formatDistanceToNow(new Date(kudos.created_at), { addSuffix: true, locale: ptBR })}
+          </p>
+        </div>
+        {kudos.badge && (
+          <span className="text-2xl" title={kudos.badge.name}>
+            {kudos.badge.icon}
+          </span>
+        )}
+      </div>
+    </motion.div>
+  );
+});
+
+KudosItem.displayName = "KudosItem";
+
 export const PeerRecognition = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { data: recentKudos = [], isLoading } = useRecentKudos(10);
@@ -258,42 +314,13 @@ export const PeerRecognition = () => {
           <div className="divide-y divide-border">
             <AnimatePresence mode="popLayout">
               {recentKudos.map((kudos, index) => (
-                <motion.div
+                <KudosItem
                   key={kudos.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="p-3 hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex -space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xs font-bold text-primary-foreground border-2 border-card">
-                        {getProfileInitial(kudos.from_user_id)}
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-pink-500 flex items-center justify-center text-xs font-bold text-primary-foreground border-2 border-card">
-                        {getProfileInitial(kudos.to_user_id)}
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs">
-                        <span className="font-semibold">{getProfileName(kudos.from_user_id)}</span>
-                        {" → "}
-                        <span className="font-semibold">{getProfileName(kudos.to_user_id)}</span>
-                      </p>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
-                        {kudos.message}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        {formatDistanceToNow(new Date(kudos.created_at), { addSuffix: true, locale: ptBR })}
-                      </p>
-                    </div>
-                    {kudos.badge && (
-                      <span className="text-2xl" title={kudos.badge.name}>
-                        {kudos.badge.icon}
-                      </span>
-                    )}
-                  </div>
-                </motion.div>
+                  kudos={kudos}
+                  index={index}
+                  getProfileName={getProfileName}
+                  getProfileInitial={getProfileInitial}
+                />
               ))}
             </AnimatePresence>
           </div>

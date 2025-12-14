@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Bell, 
@@ -48,7 +48,7 @@ interface NotificationItemProps {
   onDelete: (id: string) => void;
 }
 
-const NotificationItem = ({ notification, onMarkRead, onDelete }: NotificationItemProps) => {
+const NotificationItem = memo(({ notification, onMarkRead, onDelete }: NotificationItemProps) => {
   const icon = notificationIcons[notification.type] || notificationIcons.info;
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { 
     addSuffix: true, 
@@ -125,7 +125,9 @@ const NotificationItem = ({ notification, onMarkRead, onDelete }: NotificationIt
       </div>
     </motion.div>
   );
-};
+});
+
+NotificationItem.displayName = "NotificationItem";
 
 export const NotificationCenter = () => {
   const [open, setOpen] = useState(false);
