@@ -40,6 +40,7 @@ const DailyQuiz = lazy(() => import("./pages/DailyQuiz"));
 const QuizAdmin = lazy(() => import("./pages/QuizAdmin"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const Bitrix24CRM = lazy(() => import("./pages/Bitrix24CRM"));
+const BIDashboard = lazy(() => import("./pages/BIDashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -99,6 +100,7 @@ const App = () => (
                       <Route path="/quiz/admin" element={<ProtectedRoute requiredRole="manager"><QuizAdmin /></ProtectedRoute>} />
                       <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
                       <Route path="/bitrix24" element={<ProtectedRoute requiredRole="admin"><Bitrix24CRM /></ProtectedRoute>} />
+                      <Route path="/bi" element={<ProtectedRoute requiredRole="manager"><BIDashboard /></ProtectedRoute>} />
                       <Route
                         path="/loja/admin"
                         element={
