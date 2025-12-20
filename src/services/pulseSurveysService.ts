@@ -85,7 +85,7 @@ export const pulseSurveysService = {
 
     return (surveys ?? []).map(s => ({
       ...s,
-      questions: s.questions as SurveyQuestion[],
+      questions: s.questions as unknown as SurveyQuestion[],
       has_responded: respondedIds.has(s.id),
     })) as PulseSurvey[];
   },
@@ -103,7 +103,7 @@ export const pulseSurveysService = {
     if (error) throw error;
     return (data ?? []).map(s => ({
       ...s,
-      questions: s.questions as SurveyQuestion[],
+      questions: s.questions as unknown as SurveyQuestion[],
     })) as PulseSurvey[];
   },
 
@@ -119,7 +119,7 @@ export const pulseSurveysService = {
 
     return {
       ...data,
-      questions: data.questions as SurveyQuestion[],
+      questions: data.questions as unknown as SurveyQuestion[],
     } as PulseSurvey;
   },
 
@@ -127,20 +127,28 @@ export const pulseSurveysService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
+    const insertPayload = {
+      title: survey.title,
+      description: survey.description || null,
+      questions: survey.questions as never,
+      is_anonymous: survey.is_anonymous ?? true,
+      department_id: survey.department_id || null,
+      starts_at: survey.starts_at || new Date().toISOString(),
+      ends_at: survey.ends_at,
+      created_by: user.id,
+      status: 'active' as const,
+    };
+
     const { data, error } = await supabase
       .from("pulse_surveys")
-      .insert({
-        ...survey,
-        created_by: user.id,
-        status: 'active',
-      })
+      .insert(insertPayload)
       .select()
       .single();
 
     if (error) throw error;
     return {
       ...data,
-      questions: data.questions as SurveyQuestion[],
+      questions: data.questions as unknown as SurveyQuestion[],
     } as PulseSurvey;
   },
 
@@ -174,7 +182,7 @@ export const pulseSurveysService = {
       .select("answers")
       .eq("survey_id", surveyId);
 
-    const questions = (survey?.questions || []) as SurveyQuestion[];
+    const questions = (survey?.questions || []) as unknown as SurveyQuestion[];
     const allResponses = responses || [];
     
     const questionStats: Record<string, QuestionStats> = {};
