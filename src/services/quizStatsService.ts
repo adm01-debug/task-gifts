@@ -43,7 +43,7 @@ export const quizStatsService = {
       .single();
 
     if (error) {
-      console.error('Error recording quiz answer:', error);
+      logger.apiError('recordAnswer', error, 'quizStatsService');
       return null;
     }
 
@@ -54,7 +54,7 @@ export const quizStatsService = {
     const { data, error } = await supabase.rpc('get_quiz_category_stats');
 
     if (error) {
-      console.error('Error fetching category stats:', error);
+      logger.apiError('getCategoryStats', error, 'quizStatsService');
       return [];
     }
 
@@ -79,7 +79,7 @@ export const quizStatsService = {
       .eq('question_id', questionId);
 
     if (error) {
-      console.error('Error fetching question stats:', error);
+      logger.apiError('getQuestionStats', error, 'quizStatsService');
       return { total: 0, correct: 0, rate: 0 };
     }
 
@@ -110,7 +110,7 @@ export const quizStatsService = {
       `);
 
     if (answersError) {
-      console.error('Error fetching answers:', answersError);
+      logger.apiError('getHardestQuestions.answers', answersError, 'quizStatsService');
       return [];
     }
 
@@ -121,7 +121,7 @@ export const quizStatsService = {
       .eq('is_active', true);
 
     if (questionsError) {
-      console.error('Error fetching questions:', questionsError);
+      logger.apiError('getHardestQuestions.questions', questionsError, 'quizStatsService');
       return [];
     }
 

@@ -36,6 +36,7 @@ import {
   usePotentialMentors,
   useCreateMentorshipRequest,
 } from "@/hooks/useMentorship";
+import { MentorshipMission } from "@/services/mentorshipService";
 import confetti from "canvas-confetti";
 
 const difficultyColors = {
@@ -84,7 +85,7 @@ export default function Mentorship() {
     return progress?.find((p) => p.mission_id === missionId);
   };
 
-  const isMissionComplete = (mission: any) => {
+  const isMissionComplete = (mission: MentorshipMission) => {
     const prog = getMissionProgress(mission.id);
     if (!prog) return false;
 
@@ -97,7 +98,7 @@ export default function Mentorship() {
     }
   };
 
-  const canComplete = (mission: any) => {
+  const canComplete = (mission: MentorshipMission) => {
     const prog = getMissionProgress(mission.id);
     
     if (mission.mission_type === "mentor_only" && !isMentor) return false;
@@ -123,7 +124,7 @@ export default function Mentorship() {
     });
   };
 
-  const handleClaimReward = (mission: any) => {
+  const handleClaimReward = (mission: MentorshipMission) => {
     const prog = getMissionProgress(mission.id);
     if (!prog || !activePair) return;
 

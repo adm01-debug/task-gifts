@@ -174,12 +174,16 @@ const ChartCard = ({
 );
 
 // Custom tooltip for charts
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { 
+  active?: boolean; 
+  payload?: Array<{ name: string; value: number | string; color?: string }>;
+  label?: string;
+}) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-popover border border-border rounded-lg p-3 shadow-xl">
         <p className="font-medium text-foreground mb-1">{label}</p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {entry.name}: {entry.value}
           </p>

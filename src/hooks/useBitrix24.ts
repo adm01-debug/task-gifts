@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as bitrix24Service from "@/services/bitrix24Service";
 import { bitrix24SyncService } from "@/services/bitrix24SyncService";
 import { toast } from "sonner";
+import type { Bitrix24Filter } from "@/services/bitrix24Service";
 
 // Connection status
 export const useBitrix24Status = () => {
@@ -14,7 +15,7 @@ export const useBitrix24Status = () => {
 };
 
 // CRM Leads
-export const useBitrix24Leads = (filter?: any) => {
+export const useBitrix24Leads = (filter?: Bitrix24Filter) => {
   return useQuery({
     queryKey: ['bitrix24-leads', filter],
     queryFn: () => bitrix24Service.getLeads(filter),
@@ -54,7 +55,7 @@ export const useUpdateBitrix24Lead = () => {
 };
 
 // CRM Deals
-export const useBitrix24Deals = (filter?: any) => {
+export const useBitrix24Deals = (filter?: Bitrix24Filter) => {
   return useQuery({
     queryKey: ['bitrix24-deals', filter],
     queryFn: () => bitrix24Service.getDeals(filter),
@@ -78,7 +79,7 @@ export const useCreateBitrix24Deal = () => {
 };
 
 // CRM Contacts
-export const useBitrix24Contacts = (filter?: any) => {
+export const useBitrix24Contacts = (filter?: Bitrix24Filter) => {
   return useQuery({
     queryKey: ['bitrix24-contacts', filter],
     queryFn: () => bitrix24Service.getContacts(filter),
@@ -102,7 +103,7 @@ export const useCreateBitrix24Contact = () => {
 };
 
 // Tasks
-export const useBitrix24Tasks = (filter?: any) => {
+export const useBitrix24Tasks = (filter?: Bitrix24Filter) => {
   return useQuery({
     queryKey: ['bitrix24-tasks', filter],
     queryFn: () => bitrix24Service.getTasks(filter),
@@ -141,7 +142,7 @@ export const useCompleteBitrix24Task = () => {
 };
 
 // Calendar
-export const useBitrix24Calendar = (filter?: any) => {
+export const useBitrix24Calendar = (filter?: Bitrix24Filter) => {
   return useQuery({
     queryKey: ['bitrix24-calendar', filter],
     queryFn: () => bitrix24Service.getCalendarEvents(filter),

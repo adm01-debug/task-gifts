@@ -95,7 +95,7 @@ export const onboardingService = {
       .maybeSingle();
 
     if (error) {
-      console.error("Error fetching onboarding progress:", error);
+      logger.apiError('getProgress', error, 'onboardingService');
       return null;
     }
 
@@ -110,7 +110,7 @@ export const onboardingService = {
       .single();
 
     if (error) {
-      console.error("Error initializing onboarding:", error);
+      logger.apiError('initProgress', error, 'onboardingService');
       return null;
     }
 
@@ -137,7 +137,7 @@ export const onboardingService = {
       .eq("user_id", userId);
 
     if (error) {
-      console.error("Error completing step:", error);
+      logger.apiError('completeStep', error, 'onboardingService');
       return false;
     }
 
@@ -163,7 +163,7 @@ export const onboardingService = {
       .eq("user_id", userId);
 
     if (progressError) {
-      console.error("Error claiming reward:", progressError);
+      logger.apiError('claimReward', progressError, 'onboardingService');
       return false;
     }
 

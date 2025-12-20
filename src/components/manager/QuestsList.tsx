@@ -347,7 +347,7 @@ export function QuestsList() {
       queryClient.invalidateQueries({ queryKey: ["manager-quests"] });
       toast({ title: "Status atualizado!" });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     },
   });
@@ -364,7 +364,7 @@ export function QuestsList() {
       queryClient.invalidateQueries({ queryKey: ["manager-quests"] });
       toast({ title: "Quest excluída!" });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     },
   });
