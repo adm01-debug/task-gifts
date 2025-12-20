@@ -1,17 +1,37 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface TokenRecord {
+  id: string;
+  access_token: string;
+  refresh_token: string;
+  expires_at: string;
+  domain: string;
+  member_id: string | null;
+  user_id: string;
+}
+
+interface BitrixApiParams {
+  [key: string]: unknown;
+}
+
+interface RequestData {
+  id?: string | number;
+  fields?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 // Helper to get valid access token (refreshing if needed)
-async function getValidToken(supabase: any) {
+async function getValidToken(supabase: SupabaseClient) {
   const { data: tokenRecord, error } = await supabase
     .from('bitrix24_tokens')
     .select('*')
-    .maybeSingle();
+    .maybeSingle() as { data: TokenRecord | null; error: Error | null };
 
   if (error || !tokenRecord) {
     throw new Error('Bitrix24 não conectado');
@@ -61,7 +81,7 @@ async function getValidToken(supabase: any) {
 }
 
 // Make Bitrix24 API call
-async function callBitrix(domain: string, token: string, method: string, params: any = {}) {
+async function callBitrix(domain: string, token: string, method: string, params: BitrixApiParams = {}) {
   const url = `https://${domain}/rest/${method}`;
   
   const response = await fetch(url, {
@@ -92,7 +112,11 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { action, module, data: requestData } = await req.json();
+    const { action, module, data: requestData } = await req.json() as { 
+      action: string; 
+      module: string; 
+      data: RequestData | null;
+    };
     const { token, domain } = await getValidToken(supabase);
 
     let result;
@@ -109,19 +133,19 @@ serve(async (req) => {
           });
           break;
         case 'getLead':
-          result = await callBitrix(domain, token, 'crm.lead.get', { id: requestData.id });
+          result = await callBitrix(domain, token, 'crm.lead.get', { id: requestData?.id });
           break;
         case 'createLead':
           result = await callBitrix(domain, token, 'crm.lead.add', { fields: requestData });
           break;
         case 'updateLead':
           result = await callBitrix(domain, token, 'crm.lead.update', { 
-            id: requestData.id, 
-            fields: requestData.fields 
+            id: requestData?.id, 
+            fields: requestData?.fields 
           });
           break;
         case 'deleteLead':
-          result = await callBitrix(domain, token, 'crm.lead.delete', { id: requestData.id });
+          result = await callBitrix(domain, token, 'crm.lead.delete', { id: requestData?.id });
           break;
 
         // Deals
@@ -133,19 +157,19 @@ serve(async (req) => {
           });
           break;
         case 'getDeal':
-          result = await callBitrix(domain, token, 'crm.deal.get', { id: requestData.id });
+          result = await callBitrix(domain, token, 'crm.deal.get', { id: requestData?.id });
           break;
         case 'createDeal':
           result = await callBitrix(domain, token, 'crm.deal.add', { fields: requestData });
           break;
         case 'updateDeal':
           result = await callBitrix(domain, token, 'crm.deal.update', { 
-            id: requestData.id, 
-            fields: requestData.fields 
+            id: requestData?.id, 
+            fields: requestData?.fields 
           });
           break;
         case 'deleteDeal':
-          result = await callBitrix(domain, token, 'crm.deal.delete', { id: requestData.id });
+          result = await callBitrix(domain, token, 'crm.deal.delete', { id: requestData?.id });
           break;
 
         // Contacts
@@ -157,19 +181,19 @@ serve(async (req) => {
           });
           break;
         case 'getContact':
-          result = await callBitrix(domain, token, 'crm.contact.get', { id: requestData.id });
+          result = await callBitrix(domain, token, 'crm.contact.get', { id: requestData?.id });
           break;
         case 'createContact':
           result = await callBitrix(domain, token, 'crm.contact.add', { fields: requestData });
           break;
         case 'updateContact':
           result = await callBitrix(domain, token, 'crm.contact.update', { 
-            id: requestData.id, 
-            fields: requestData.fields 
+            id: requestData?.id, 
+            fields: requestData?.fields 
           });
           break;
         case 'deleteContact':
-          result = await callBitrix(domain, token, 'crm.contact.delete', { id: requestData.id });
+          result = await callBitrix(domain, token, 'crm.contact.delete', { id: requestData?.id });
           break;
 
         // Companies
@@ -197,22 +221,22 @@ serve(async (req) => {
           });
           break;
         case 'getTask':
-          result = await callBitrix(domain, token, 'tasks.task.get', { taskId: requestData.id });
+          result = await callBitrix(domain, token, 'tasks.task.get', { taskId: requestData?.id });
           break;
         case 'createTask':
           result = await callBitrix(domain, token, 'tasks.task.add', { fields: requestData });
           break;
         case 'updateTask':
           result = await callBitrix(domain, token, 'tasks.task.update', { 
-            taskId: requestData.id, 
-            fields: requestData.fields 
+            taskId: requestData?.id, 
+            fields: requestData?.fields 
           });
           break;
         case 'deleteTask':
-          result = await callBitrix(domain, token, 'tasks.task.delete', { taskId: requestData.id });
+          result = await callBitrix(domain, token, 'tasks.task.delete', { taskId: requestData?.id });
           break;
         case 'completeTask':
-          result = await callBitrix(domain, token, 'tasks.task.complete', { taskId: requestData.id });
+          result = await callBitrix(domain, token, 'tasks.task.complete', { taskId: requestData?.id });
           break;
 
         default:
@@ -230,13 +254,13 @@ serve(async (req) => {
           });
           break;
         case 'createEvent':
-          result = await callBitrix(domain, token, 'calendar.event.add', requestData);
+          result = await callBitrix(domain, token, 'calendar.event.add', requestData || {});
           break;
         case 'updateEvent':
-          result = await callBitrix(domain, token, 'calendar.event.update', requestData);
+          result = await callBitrix(domain, token, 'calendar.event.update', requestData || {});
           break;
         case 'deleteEvent':
-          result = await callBitrix(domain, token, 'calendar.event.delete', { id: requestData.id });
+          result = await callBitrix(domain, token, 'calendar.event.delete', { id: requestData?.id });
           break;
 
         default:
@@ -251,7 +275,7 @@ serve(async (req) => {
           result = await callBitrix(domain, token, 'user.get', requestData || {});
           break;
         case 'getUser':
-          result = await callBitrix(domain, token, 'user.get', { ID: requestData.id });
+          result = await callBitrix(domain, token, 'user.get', { ID: requestData?.id });
           break;
         case 'getCurrentUser':
           result = await callBitrix(domain, token, 'user.current');
@@ -299,25 +323,25 @@ serve(async (req) => {
           result = await callBitrix(domain, token, 'im.recent.list', requestData || {});
           break;
         case 'getMessages':
-          result = await callBitrix(domain, token, 'im.dialog.messages.get', requestData);
+          result = await callBitrix(domain, token, 'im.dialog.messages.get', requestData || {});
           break;
         case 'sendMessage':
-          result = await callBitrix(domain, token, 'im.message.add', requestData);
+          result = await callBitrix(domain, token, 'im.message.add', requestData || {});
           break;
         case 'sendNotify':
-          result = await callBitrix(domain, token, 'im.notify.personal.add', requestData);
+          result = await callBitrix(domain, token, 'im.notify.personal.add', requestData || {});
           break;
         case 'getUnread':
           result = await callBitrix(domain, token, 'im.counters.get', requestData || {});
           break;
         case 'markRead':
-          result = await callBitrix(domain, token, 'im.dialog.read', requestData);
+          result = await callBitrix(domain, token, 'im.dialog.read', requestData || {});
           break;
         case 'getChatInfo':
-          result = await callBitrix(domain, token, 'im.chat.get', requestData);
+          result = await callBitrix(domain, token, 'im.chat.get', requestData || {});
           break;
         case 'createChat':
-          result = await callBitrix(domain, token, 'im.chat.add', requestData);
+          result = await callBitrix(domain, token, 'im.chat.add', requestData || {});
           break;
         case 'getUserStatus':
           result = await callBitrix(domain, token, 'im.user.status.get', requestData || {});
@@ -332,25 +356,25 @@ serve(async (req) => {
     else if (module === 'notify') {
       switch (action) {
         case 'send':
-          result = await callBitrix(domain, token, 'im.notify.personal.add', requestData);
+          result = await callBitrix(domain, token, 'im.notify.personal.add', requestData || {});
           break;
         case 'sendSystem':
-          result = await callBitrix(domain, token, 'im.notify.system.add', requestData);
+          result = await callBitrix(domain, token, 'im.notify.system.add', requestData || {});
           break;
         case 'getList':
           result = await callBitrix(domain, token, 'im.notify.get', requestData || {});
           break;
         case 'markRead':
-          result = await callBitrix(domain, token, 'im.notify.read', requestData);
+          result = await callBitrix(domain, token, 'im.notify.read', requestData || {});
           break;
         case 'delete':
-          result = await callBitrix(domain, token, 'im.notify.delete', requestData);
+          result = await callBitrix(domain, token, 'im.notify.delete', requestData || {});
           break;
         case 'confirm':
-          result = await callBitrix(domain, token, 'im.notify.confirm', requestData);
+          result = await callBitrix(domain, token, 'im.notify.confirm', requestData || {});
           break;
         case 'decline':
-          result = await callBitrix(domain, token, 'im.notify.decline', requestData);
+          result = await callBitrix(domain, token, 'im.notify.decline', requestData || {});
           break;
 
         default:
@@ -360,7 +384,7 @@ serve(async (req) => {
 
     // Generic method call
     else if (module === 'raw') {
-      result = await callBitrix(domain, token, action, requestData);
+      result = await callBitrix(domain, token, action, requestData || {});
     }
 
     else {
