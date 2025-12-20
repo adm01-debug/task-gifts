@@ -332,7 +332,7 @@ export function AICoachDialog({ trigger }: AICoachDialogProps = {}) {
         </ScrollArea>
 
         {error && (
-          <div className="px-4 py-2 bg-destructive/10 text-destructive text-sm flex-shrink-0">
+          <div role="alert" className="px-4 py-2 bg-destructive/10 text-destructive text-sm flex-shrink-0">
             {error}
           </div>
         )}

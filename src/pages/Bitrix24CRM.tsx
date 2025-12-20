@@ -251,7 +251,7 @@ function Bitrix24CRMContent() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Voltar">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
@@ -384,7 +384,7 @@ function Bitrix24CRMContent() {
                             </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100">
+                                <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100" aria-label="Opções do lead">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -493,8 +493,8 @@ function Bitrix24CRMContent() {
                               {deal.TITLE}
                             </CardTitle>
                             <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100">
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100" aria-label="Opções do negócio">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -606,7 +606,7 @@ function Bitrix24CRMContent() {
                             </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100">
+                                <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100" aria-label="Opções do contato">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>

@@ -431,7 +431,7 @@ export function TrailDependencyTree() {
             {/* Fullscreen dialog */}
             <Dialog open={isFullscreen} onOpenChange={setIsFullscreen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="icon" className="h-8 w-8">
+                <Button variant="outline" size="icon" className="h-8 w-8" aria-label="Expandir tela cheia">
                   <Maximize2 className="h-4 w-4" />
                 </Button>
               </DialogTrigger>

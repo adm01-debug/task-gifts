@@ -47,7 +47,7 @@ export function AdminAlertsPanel() {
     return (
       <Card className="border-destructive/50">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-2 text-destructive">
+          <div role="alert" className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
             <span>Erro ao carregar alertas</span>
           </div>

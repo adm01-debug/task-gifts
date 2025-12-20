@@ -255,7 +255,7 @@ export default function AIQuestionGenerator({ onQuestionsGenerated }: AIQuestion
         </AnimatePresence>
 
         {!selectedTrail && trails?.length === 0 && (
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive">
+          <div role="alert" className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive">
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm">Nenhuma trilha publicada encontrada</span>
           </div>
