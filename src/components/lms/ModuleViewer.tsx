@@ -447,7 +447,7 @@ export default function ModuleViewer({ module, onComplete, onClose }: ModuleView
               <p className="text-muted-foreground">{module.description}</p>
             )}
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fechar módulo">
             <X className="h-5 w-5" />
           </Button>
         </div>

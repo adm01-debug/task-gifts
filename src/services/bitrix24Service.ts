@@ -210,12 +210,30 @@ export interface BitrixTimemanStatus {
   LON_CLOSE?: number;
 }
 
+export interface BitrixTimemanSettings {
+  UF_TIMEMAN: boolean;
+  UF_TM_ALLOWED_DELTA: number;
+  UF_TM_FREE: boolean;
+  UF_TM_MAX_STATE: number;
+  UF_TM_MIN_STATE: number;
+}
+
+export interface BitrixTimemanReport {
+  ID: string;
+  USER_ID: string;
+  DATE_START: string;
+  DATE_FINISH: string;
+  DURATION: number;
+  PAUSES: number;
+  ACTIVE: boolean;
+}
+
 export const getTimemanStatus = () => callApi<BitrixTimemanStatus>('timeman', 'getStatus', {});
 export const openWorkday = (report?: string) => callApi<BitrixTimemanStatus>('timeman', 'open', { report });
 export const closeWorkday = (report?: string) => callApi<BitrixTimemanStatus>('timeman', 'close', { report });
 export const pauseWorkday = () => callApi<BitrixTimemanStatus>('timeman', 'pause', {});
-export const getTimemanSettings = () => callApi<any>('timeman', 'getSettings', {});
-export const getTimemanReports = (filter?: any) => callApi<any[]>('timeman', 'getReports', filter);
+export const getTimemanSettings = () => callApi<BitrixTimemanSettings>('timeman', 'getSettings', {});
+export const getTimemanReports = (filter?: Bitrix24Filter) => callApi<BitrixTimemanReport[]>('timeman', 'getReports', filter);
 
 // IM - Instant Messaging
 export interface BitrixDialog {
@@ -248,18 +266,44 @@ export interface BitrixNotification {
   NOTIFY_TAG?: string;
 }
 
+export interface BitrixUnreadCounters {
+  TOTAL: number;
+  CHAT: number;
+  NOTIFY: number;
+  LINES: number;
+}
+
+export interface BitrixChatInfo {
+  ID: string;
+  TYPE: string;
+  NAME: string;
+  OWNER: string;
+  AVATAR?: string;
+  USERS: string[];
+  MESSAGE_COUNT: number;
+  DATE_CREATE: string;
+}
+
+export interface BitrixUserStatus {
+  ID: string;
+  STATUS: string;
+  IDLE: boolean;
+  MOBILE: boolean;
+  DESKTOP: boolean;
+}
+
 export const getDialogs = () => callApi<BitrixDialog[]>('im', 'getDialogs', {});
 export const getMessages = (dialogId: string, limit = 20) => 
   callApi<BitrixMessage[]>('im', 'getMessages', { DIALOG_ID: dialogId, LIMIT: limit });
 export const sendMessage = (dialogId: string, message: string) => 
   callApi<number>('im', 'sendMessage', { DIALOG_ID: dialogId, MESSAGE: message });
-export const getUnreadCounters = () => callApi<any>('im', 'getUnread', {});
+export const getUnreadCounters = () => callApi<BitrixUnreadCounters>('im', 'getUnread', {});
 export const markDialogRead = (dialogId: string) => 
   callApi<boolean>('im', 'markRead', { DIALOG_ID: dialogId });
-export const getChatInfo = (chatId: string) => callApi<any>('im', 'getChatInfo', { CHAT_ID: chatId });
+export const getChatInfo = (chatId: string) => callApi<BitrixChatInfo>('im', 'getChatInfo', { CHAT_ID: chatId });
 export const createGroupChat = (title: string, userIds: string[]) => 
   callApi<number>('im', 'createChat', { TITLE: title, USERS: userIds, TYPE: 'CHAT' });
-export const getUserStatus = () => callApi<any>('im', 'getUserStatus', {});
+export const getUserStatus = () => callApi<BitrixUserStatus>('im', 'getUserStatus', {});
 
 // Notifications
 export const sendNotification = (userId: string, message: string, tag?: string) => 
@@ -276,7 +320,7 @@ export const confirmNotification = (id: string) =>
   callApi<boolean>('notify', 'confirm', { ID: id });
 
 // Raw API call for custom methods
-export const callRawMethod = <T>(method: string, params?: any) => 
+export const callRawMethod = <T>(method: string, params?: Record<string, unknown>) => 
   callApi<T>('raw', method, params);
 
 // Sync mappings

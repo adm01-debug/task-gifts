@@ -11,6 +11,7 @@ import { MobileDrawer } from "@/components/MobileDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { WeeklyPerformanceComparison } from "@/components/WeeklyPerformanceComparison";
 import { ComboHistory } from "@/components/ComboHistory";
+import { AchievementRecord } from "@/types/charts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -117,7 +118,7 @@ function useAchievementHistory(userId: string | undefined) {
       if (error) throw error;
 
       // Agrupar por mês
-      const monthlyAchievements: Record<string, { count: number; achievements: any[] }> = {};
+      const monthlyAchievements: Record<string, { count: number; achievements: AchievementRecord[] }> = {};
       
       data?.forEach((ua) => {
         const month = format(new Date(ua.unlocked_at), "yyyy-MM");

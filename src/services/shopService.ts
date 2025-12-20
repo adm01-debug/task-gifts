@@ -60,6 +60,15 @@ export type UpdateRewardInput = Partial<CreateRewardInput>;
 export type CreatePromotionInput = Omit<ShopPromotion, "id" | "created_at" | "updated_at" | "current_claims" | "reward">;
 export type UpdatePromotionInput = Partial<Omit<CreatePromotionInput, "reward_id">>;
 
+// Query result types for supabase joins
+interface PurchaseQueryResult extends Omit<ShopPurchase, 'reward'> {
+  reward: ShopReward;
+}
+
+interface PromotionQueryResult extends Omit<ShopPromotion, 'reward'> {
+  reward: ShopReward;
+}
+
 export const shopService = {
   // Get all active rewards
   async getRewards(): Promise<ShopReward[]> {
@@ -96,7 +105,7 @@ export const shopService = {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return (data || []).map((p: any) => ({
+    return (data || []).map((p: PurchaseQueryResult) => ({
       ...p,
       reward: p.reward as ShopReward,
     })) as ShopPurchase[];
@@ -307,11 +316,14 @@ export const shopService = {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return (data || []).map((p: any) => ({
-      ...p,
-      reward: p.reward as ShopReward,
-      profile: p.profile,
-    }));
+    return (data || []).map((p: unknown) => {
+      const purchase = p as PurchaseQueryResult & { profile?: { display_name: string; email: string } };
+      return {
+        ...purchase,
+        reward: purchase.reward as ShopReward,
+        profile: purchase.profile,
+      };
+    });
   },
 
   // Update purchase status
@@ -376,10 +388,10 @@ export const shopService = {
       .order("ends_at", { ascending: true });
 
     if (error) throw error;
-    return (data || []).map((p: any) => ({
-      ...p,
-      reward: p.reward as ShopReward,
-    })) as ShopPromotion[];
+    return (data || []).map((p: unknown) => {
+      const promo = p as PromotionQueryResult;
+      return { ...promo, reward: promo.reward as ShopReward };
+    }) as ShopPromotion[];
   },
 
   // Get all promotions (admin)
@@ -390,10 +402,10 @@ export const shopService = {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return (data || []).map((p: any) => ({
-      ...p,
-      reward: p.reward as ShopReward,
-    })) as ShopPromotion[];
+    return (data || []).map((p: unknown) => {
+      const promo = p as PromotionQueryResult;
+      return { ...promo, reward: promo.reward as ShopReward };
+    }) as ShopPromotion[];
   },
 
   // Create promotion
