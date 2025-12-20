@@ -24,24 +24,58 @@ export const AnimatedFireIndicator = ({ streakDays, className = "", playSound = 
 
   if (streakDays <= 0) return null;
 
+  // Milestone configurations
+  const isMilestone = [7, 14, 21, 30, 50, 100].includes(streakDays);
+  const milestoneLevel = streakDays >= 100 ? 5 : streakDays >= 50 ? 4 : streakDays >= 30 ? 3 : streakDays >= 14 ? 2 : streakDays >= 7 ? 1 : 0;
+
   // More flames for higher streaks
   const flameCount = Math.min(Math.ceil(streakDays / 3), 5);
   const intensity = Math.min(streakDays / 10, 1);
+  
+  // Colors based on milestone
+  const flameColors = {
+    base: milestoneLevel >= 3 ? 15 : milestoneLevel >= 2 ? 20 : 25, // Hue: red -> orange
+    inner: milestoneLevel >= 3 ? 35 : milestoneLevel >= 2 ? 40 : 45,
+    glow: milestoneLevel >= 4 ? "from-red-500/60 via-orange-500/40 to-yellow-500/20" : 
+          milestoneLevel >= 2 ? "from-orange-500/50 via-yellow-500/30 to-transparent" :
+          "from-primary/40 to-transparent",
+  };
 
   return (
     <div className={`absolute -top-1 -right-1 flex items-center ${className}`}>
+      {/* Milestone ring effect */}
+      {isMilestone && (
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{
+            width: 40,
+            height: 40,
+            left: -10,
+            top: -10,
+          }}
+          animate={{
+            boxShadow: [
+              "0 0 0 0 hsl(var(--primary) / 0.7)",
+              "0 0 0 8px hsl(var(--primary) / 0)",
+            ],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeOut",
+          }}
+        />
+      )}
+
       {/* Fire glow effect */}
       <motion.div
-        className="absolute inset-0 rounded-full blur-md"
-        style={{
-          background: `radial-gradient(circle, hsl(var(--primary) / ${0.4 + intensity * 0.3}) 0%, transparent 70%)`,
-        }}
+        className={`absolute inset-0 rounded-full blur-md bg-gradient-radial ${flameColors.glow}`}
         animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.6, 1, 0.6],
+          scale: isMilestone ? [1, 1.4, 1] : [1, 1.2, 1],
+          opacity: isMilestone ? [0.8, 1, 0.8] : [0.6, 1, 0.6],
         }}
         transition={{
-          duration: 1.5,
+          duration: isMilestone ? 1 : 1.5,
           repeat: Infinity,
           ease: "easeInOut",
         }}
@@ -80,7 +114,7 @@ export const AnimatedFireIndicator = ({ streakDays, className = "", playSound = 
               {/* Outer flame */}
               <motion.path
                 d="M12 2C12 2 4 12 4 20C4 24.4183 7.58172 28 12 28C16.4183 28 20 24.4183 20 20C20 12 12 2 12 2Z"
-                fill={`hsl(${25 + i * 10}, ${80 + intensity * 20}%, ${50 + i * 5}%)`}
+                fill={`hsl(${flameColors.base + i * 10}, ${80 + intensity * 20}%, ${50 + i * 5}%)`}
                 animate={{
                   d: [
                     "M12 2C12 2 4 12 4 20C4 24.4183 7.58172 28 12 28C16.4183 28 20 24.4183 20 20C20 12 12 2 12 2Z",
@@ -97,7 +131,7 @@ export const AnimatedFireIndicator = ({ streakDays, className = "", playSound = 
               {/* Inner flame */}
               <motion.path
                 d="M12 10C12 10 8 16 8 20C8 22.2091 9.79086 24 12 24C14.2091 24 16 22.2091 16 20C16 16 12 10 12 10Z"
-                fill={`hsl(${45 + i * 5}, 100%, ${65 + i * 3}%)`}
+                fill={`hsl(${flameColors.inner + i * 5}, 100%, ${65 + i * 3}%)`}
                 animate={{
                   opacity: [0.8, 1, 0.8],
                 }}
@@ -158,17 +192,33 @@ export const AnimatedFireIndicator = ({ streakDays, className = "", playSound = 
 
       {/* Streak counter badge */}
       <motion.div
-        className="relative ml-1 bg-gradient-to-r from-primary to-warning text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg"
-        animate={{
+        className={`relative ml-1 text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg ${
+          milestoneLevel >= 4 ? "bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500" :
+          milestoneLevel >= 2 ? "bg-gradient-to-r from-orange-500 to-yellow-500" :
+          "bg-gradient-to-r from-primary to-warning"
+        }`}
+        animate={isMilestone ? {
+          scale: [1, 1.15, 1],
+          rotate: [0, -3, 3, 0],
+        } : {
           scale: [1, 1.05, 1],
         }}
         transition={{
-          duration: 2,
+          duration: isMilestone ? 0.5 : 2,
           repeat: Infinity,
           ease: "easeInOut",
         }}
       >
         🔥 {streakDays}
+        {isMilestone && (
+          <motion.span
+            className="absolute -top-1 -right-1 text-[8px]"
+            animate={{ rotate: [0, 360] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          >
+            ⭐
+          </motion.span>
+        )}
       </motion.div>
     </div>
   );
