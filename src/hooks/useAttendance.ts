@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { attendanceService, AttendanceRecord, AttendanceStreak, CheckInResult } from "@/services/attendanceService";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import { logger } from "@/services/loggingService";
 
 export const attendanceKeys = {
   all: ['attendance'] as const,
@@ -87,7 +88,7 @@ export function useCheckIn() {
     },
     onError: (error) => {
       toast.error('Erro ao registrar check-in');
-      console.error('Check-in error:', error);
+      logger.apiError("checkIn", error, "Attendance");
     },
   });
 }
@@ -111,7 +112,7 @@ export function useCheckOut() {
     },
     onError: (error) => {
       toast.error('Erro ao registrar check-out');
-      console.error('Check-out error:', error);
+      logger.apiError("checkOut", error, "Attendance");
     },
   });
 }

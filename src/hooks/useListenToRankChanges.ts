@@ -4,6 +4,7 @@ import { useAuth } from "./useAuth";
 import { notificationsService } from "@/services/notificationsService";
 import { useSoundEffects } from "./useSoundEffects";
 import { toast } from "sonner";
+import { logger } from "@/services/loggingService";
 
 const RANK_STORAGE_KEY = "user_last_rank";
 
@@ -148,7 +149,7 @@ export function useListenToRankChanges() {
         direction,
         positions,
       },
-    }).catch(console.error);
+    }).catch((err) => logger.warn("Failed to create rank notification", err instanceof Error ? err.message : String(err)));
 
     // Show toast with appropriate styling
     if (direction === "up") {
