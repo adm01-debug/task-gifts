@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -5,10 +6,42 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLeagues } from "@/hooks/useLeagues";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { Trophy, TrendingUp, TrendingDown, Minus, Crown, Zap } from "lucide-react";
 
 export function LeagueCard() {
   const { leagues, myLeague, leaderboard, isLoading } = useLeagues();
+  const { playAchievementSound, playLevelUpSound } = useSoundEffects();
+  const previousPositionRef = useRef<number | null>(null);
+
+  // Detectar mudanças de posição e tocar sons
+  useEffect(() => {
+    if (!myLeague || leaderboard.length === 0) return;
+    
+    const currentPosition = leaderboard.findIndex(u => u.user_id === myLeague.user_id) + 1;
+    
+    if (previousPositionRef.current !== null && currentPosition > 0) {
+      const previousPosition = previousPositionRef.current;
+      const currentLeagueData = leagues.find(l => l.id === myLeague.league_id);
+      const promotionSlots = currentLeagueData?.promotion_slots || 3;
+      
+      // Subiu de posição
+      if (currentPosition < previousPosition) {
+        // Entrou na zona de promoção
+        if (currentPosition <= promotionSlots && previousPosition > promotionSlots) {
+          playLevelUpSound();
+        } else {
+          playAchievementSound();
+        }
+      }
+      // Chegou ao primeiro lugar
+      if (currentPosition === 1 && previousPosition !== 1) {
+        playLevelUpSound();
+      }
+    }
+    
+    previousPositionRef.current = currentPosition;
+  }, [leaderboard, myLeague, leagues, playAchievementSound, playLevelUpSound]);
 
   if (isLoading) {
     return (

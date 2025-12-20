@@ -177,10 +177,10 @@ export function SurveyCreator() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <CardTitle className="text-base">{survey.title}</CardTitle>
-                        <Badge className={statusColors[survey.status]} variant="secondary">
+                        <Badge className={statusColors[survey.status] || "bg-gray-500/10 text-gray-500"} variant="secondary">
                           {survey.status === "active" ? "Ativo" : 
                            survey.status === "draft" ? "Rascunho" :
-                           survey.status === "completed" ? "Concluído" : "Pausado"}
+                           survey.status === "closed" ? "Encerrado" : "Pausado"}
                         </Badge>
                       </div>
                       <CardDescription>{survey.description}</CardDescription>

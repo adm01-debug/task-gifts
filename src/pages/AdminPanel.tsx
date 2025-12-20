@@ -17,6 +17,13 @@ import {
   TrendingUp,
   AlertTriangle,
   Link2,
+  Trophy,
+  Target,
+  BarChart3,
+  MessageSquare,
+  Megaphone,
+  PartyPopper,
+  Heart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -31,6 +38,13 @@ import { AdminChangeHistory } from "@/components/admin/AdminChangeHistory";
 import { AdminMetricsDashboard } from "@/components/admin/AdminMetricsDashboard";
 import { AdminAlertsPanel } from "@/components/admin/AdminAlertsPanel";
 import { Bitrix24Integration } from "@/components/admin/Bitrix24Integration";
+import { LeaguesManager } from "@/components/admin/LeaguesManager";
+import { GoalsManager } from "@/components/admin/GoalsManager";
+import { SurveyCreator } from "@/components/admin/SurveyCreator";
+import { FeedbackCycleManager } from "@/components/admin/FeedbackCycleManager";
+import { AnnouncementPublisher } from "@/components/admin/AnnouncementPublisher";
+import { CelebrationManager } from "@/components/admin/CelebrationManager";
+import { MoodAnalytics } from "@/components/admin/MoodAnalytics";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -220,6 +234,34 @@ function AdminPanelContent() {
               <Link2 className="h-4 w-4" />
               Bitrix24
             </TabsTrigger>
+            <TabsTrigger value="leagues" className="gap-2">
+              <Trophy className="h-4 w-4" />
+              Ligas
+            </TabsTrigger>
+            <TabsTrigger value="goals" className="gap-2">
+              <Target className="h-4 w-4" />
+              Goals
+            </TabsTrigger>
+            <TabsTrigger value="surveys" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Surveys
+            </TabsTrigger>
+            <TabsTrigger value="feedback" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Feedback
+            </TabsTrigger>
+            <TabsTrigger value="announcements" className="gap-2">
+              <Megaphone className="h-4 w-4" />
+              Anúncios
+            </TabsTrigger>
+            <TabsTrigger value="celebrations" className="gap-2">
+              <PartyPopper className="h-4 w-4" />
+              Celebrações
+            </TabsTrigger>
+            <TabsTrigger value="mood" className="gap-2">
+              <Heart className="h-4 w-4" />
+              Mood
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -326,6 +368,41 @@ function AdminPanelContent() {
           {/* Bitrix24 Tab */}
           <TabsContent value="bitrix24">
             <Bitrix24Integration />
+          </TabsContent>
+
+          {/* Leagues Tab */}
+          <TabsContent value="leagues">
+            <LeaguesManager />
+          </TabsContent>
+
+          {/* Goals Tab */}
+          <TabsContent value="goals">
+            <GoalsManager />
+          </TabsContent>
+
+          {/* Surveys Tab */}
+          <TabsContent value="surveys">
+            <SurveyCreator />
+          </TabsContent>
+
+          {/* Feedback Tab */}
+          <TabsContent value="feedback">
+            <FeedbackCycleManager />
+          </TabsContent>
+
+          {/* Announcements Tab */}
+          <TabsContent value="announcements">
+            <AnnouncementPublisher />
+          </TabsContent>
+
+          {/* Celebrations Tab */}
+          <TabsContent value="celebrations">
+            <CelebrationManager />
+          </TabsContent>
+
+          {/* Mood Tab */}
+          <TabsContent value="mood">
+            <MoodAnalytics />
           </TabsContent>
         </Tabs>
       </main>
