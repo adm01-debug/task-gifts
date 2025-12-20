@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Sparkles, Loader2, Check, BookOpen, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { logger } from "@/services/loggingService";
 
 interface GeneratedQuestion {
   question: string;
@@ -57,7 +58,7 @@ export default function AIQuestionGenerator({ onQuestionsGenerated }: AIQuestion
       setGeneratedQuestions(data.questions || []);
       toast.success(`${data.questions?.length || 0} perguntas geradas!`);
     } catch (error) {
-      console.error("Generation error:", error);
+      logger.apiError('handleGenerate', error, 'AIQuestionGenerator');
       toast.error(error instanceof Error ? error.message : "Erro ao gerar perguntas");
     } finally {
       setIsGenerating(false);
@@ -92,7 +93,7 @@ export default function AIQuestionGenerator({ onQuestionsGenerated }: AIQuestion
       setGeneratedQuestions([]);
       onQuestionsGenerated?.();
     } catch (error) {
-      console.error("Save error:", error);
+      logger.apiError('handleSaveAll', error, 'AIQuestionGenerator');
       toast.error(`Erro ao salvar. ${savedCount} de ${generatedQuestions.length} salvas.`);
     } finally {
       setIsSaving(false);

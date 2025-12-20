@@ -135,7 +135,7 @@ const calculateOperationalMetrics = (metrics: ExecutiveMetricsData | undefined) 
 };
 
 // eNPS distribution would come from survey integration - not available yet
-const getEnpsDistribution = (peopleMetrics: any) => {
+const getEnpsDistribution = (peopleMetrics: { enps: { promoters: number | null; passives: number | null; detractors: number | null } }) => {
   if (peopleMetrics.enps.promoters === null) return null;
   return [
     { name: 'Promotores', value: peopleMetrics.enps.promoters, color: 'hsl(var(--success))' },
@@ -610,7 +610,7 @@ const ExecutiveDashboard = () => {
                             border: '1px solid hsl(var(--border))',
                             borderRadius: '8px'
                           }}
-                          formatter={(value: number, name: string, props: any) => [
+                          formatter={(value: number, name: string, props: { payload: { employees: number } }) => [
                             `${value} pts (${props.payload.employees} colaboradores)`,
                             'Score'
                           ]}

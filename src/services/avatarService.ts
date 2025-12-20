@@ -227,6 +227,6 @@ export const avatarService = {
       .from("user_avatar_items")
       .insert(itemsToAdd.map(i => ({ user_id: userId, item_id: i.id })));
 
-    if (error) console.error("Error initializing default items:", error);
+    if (error) logger.warn('Error initializing default items', error instanceof Error ? error.message : String(error));
   },
 };

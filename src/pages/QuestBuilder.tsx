@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { QuestPreview } from "@/components/quest-builder/QuestPreview";
 import { QuestStepEditor } from "@/components/quest-builder/QuestStepEditor";
 import { IconPicker } from "@/components/quest-builder/IconPicker";
+import { logger } from "@/services/loggingService";
 
 interface QuestStep {
   id: string;
@@ -170,11 +171,12 @@ export default function QuestBuilder() {
         navigate("/manager");
       }, 1500);
 
-    } catch (error: any) {
-      console.error("Error saving quest:", error);
+    } catch (error) {
+      logger.apiError('handleSave', error, 'QuestBuilder');
+      const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro ao salvar a quest.";
       toast({
         title: "Erro ao salvar",
-        description: error.message || "Ocorreu um erro ao salvar a quest.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

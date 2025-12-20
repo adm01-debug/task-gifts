@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { logger } from "@/services/loggingService";
 
 interface TrailRecommendation {
   trailId: string;
@@ -62,7 +63,7 @@ export function TrailRecommendations() {
       setRecommendations(data);
       toast.success("Recomendações geradas com sucesso!");
     } catch (err) {
-      console.error("Error fetching recommendations:", err);
+      logger.apiError('fetchRecommendations', err, 'TrailRecommendations');
       const message = err instanceof Error ? err.message : "Erro ao gerar recomendações";
       setError(message);
       toast.error(message);

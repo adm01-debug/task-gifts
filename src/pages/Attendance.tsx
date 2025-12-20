@@ -447,8 +447,8 @@ const Attendance = () => {
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px'
                       }}
-                      formatter={(value: number, name: string, props: any) => [
-                        props.payload.displayTime, 
+                      formatter={(value: number, name: string, props: { payload: { displayTime?: string } }) => [
+                        props.payload.displayTime || String(value), 
                         'Check-in'
                       ]}
                     />

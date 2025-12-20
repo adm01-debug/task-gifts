@@ -84,7 +84,7 @@ export function useClaimMissionReward() {
       queryClient.invalidateQueries({ queryKey: missionKeys.all });
       toast.success(`🎉 Recompensa coletada! +${xp} XP${coins > 0 ? ` +${coins} 🪙` : ""}`);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Erro ao coletar recompensa");
     },
   });
