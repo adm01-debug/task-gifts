@@ -601,8 +601,13 @@ const ExecutiveDashboard = () => {
               </CardHeader>
               <CardContent>
                 {departmentsLoading ? (
-                  <div className="h-[300px] flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  <div className="h-[300px] space-y-4 p-4">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-6 flex-1" style={{ width: `${Math.random() * 40 + 40}%` }} />
+                      </div>
+                    ))}
                   </div>
                 ) : departmentChartData.length > 0 ? (
                   <div className="h-[300px]">
