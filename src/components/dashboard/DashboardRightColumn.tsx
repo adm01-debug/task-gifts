@@ -9,6 +9,9 @@ import { LiveLeaderboard } from "@/components/LiveLeaderboard";
 import { KudosRanking } from "@/components/KudosRanking";
 import { AnalyticsWidget } from "@/components/AnalyticsWidget";
 import { RewardsShop } from "@/components/RewardsShop";
+import { LeagueCard } from "@/components/LeagueCard";
+import { ActivityHeatmap, useActivityHeatmapData } from "@/components/ActivityHeatmap";
+import { MoodTrackerWidget } from "@/components/MoodTrackerWidget";
 import { StaggeredContainer, StaggeredItemRight } from "@/components/StaggeredContainer";
 import { LazyWidget } from "./LazyWidget";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
@@ -16,20 +19,37 @@ import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 /**
  * DashboardRightColumn - Contains secondary content widgets
  * Combo, Attendance, Rankings, Leaderboard, Kudos, Analytics & Rewards
+ * + League Card, Activity Heatmap, Mood Tracker
  * Uses LazyWidget for below-the-fold content to improve performance
  * Each widget is wrapped with SectionErrorBoundary for fault isolation
  */
 export const DashboardRightColumn = memo(function DashboardRightColumn() {
+  const activityData = useActivityHeatmapData();
+  
   return (
     <StaggeredContainer 
       className="space-y-4 md:space-y-6"
       staggerDelay={0.1}
       initialDelay={0.2}
     >
+      {/* League Card - Gamification priority */}
+      <StaggeredItemRight>
+        <SectionErrorBoundary sectionName="Liga">
+          <LeagueCard />
+        </SectionErrorBoundary>
+      </StaggeredItemRight>
+
       {/* Weekly Challenge - Above the fold priority */}
       <StaggeredItemRight>
         <SectionErrorBoundary sectionName="Desafio Semanal">
           <WeeklyChallengeCard />
+        </SectionErrorBoundary>
+      </StaggeredItemRight>
+
+      {/* Mood Tracker Widget */}
+      <StaggeredItemRight>
+        <SectionErrorBoundary sectionName="Humor do Dia">
+          <MoodTrackerWidget />
         </SectionErrorBoundary>
       </StaggeredItemRight>
 
@@ -45,6 +65,15 @@ export const DashboardRightColumn = memo(function DashboardRightColumn() {
         <LazyWidget fallbackHeight="160px">
           <SectionErrorBoundary sectionName="Histórico de Combo">
             <ComboHistory />
+          </SectionErrorBoundary>
+        </LazyWidget>
+      </StaggeredItemRight>
+
+      {/* Activity Heatmap */}
+      <StaggeredItemRight>
+        <LazyWidget fallbackHeight="200px">
+          <SectionErrorBoundary sectionName="Mapa de Atividades">
+            <ActivityHeatmap data={activityData} />
           </SectionErrorBoundary>
         </LazyWidget>
       </StaggeredItemRight>
