@@ -7,6 +7,7 @@ import {
   AvatarCategory 
 } from "@/services/avatarService";
 import { toast } from "sonner";
+import { logger } from "@/services/loggingService";
 
 export const avatarKeys = {
   all: ["avatar"] as const,
@@ -20,7 +21,9 @@ export function useAvatarItems(userId: string | undefined, userLevel: number = 1
   // Initialize default items on first load
   useEffect(() => {
     if (userId) {
-      avatarService.initializeDefaultItems(userId).catch(console.error);
+      avatarService.initializeDefaultItems(userId).catch((err) => 
+        logger.warn("Failed to initialize default avatar items", err instanceof Error ? err.message : String(err))
+      );
     }
   }, [userId]);
 

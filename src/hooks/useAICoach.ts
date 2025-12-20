@@ -4,6 +4,7 @@ import { useCurrentProfile } from "./useProfiles";
 import { useCompetencies } from "./useCompetencies";
 import { usePublishedTrails, useUserEnrollments } from "./useTrails";
 import { aiCoachService } from "@/services/aiCoachService";
+import { logger } from "@/services/loggingService";
 
 interface Message {
   role: "user" | "assistant";
@@ -65,7 +66,7 @@ export function useAICoach() {
         setSuggestions(data.suggestions || []);
       }
     } catch (e) {
-      console.error("Failed to generate suggestions:", e);
+      logger.warn("Failed to generate suggestions", e instanceof Error ? e.message : String(e));
     }
   }, []);
 
@@ -206,7 +207,7 @@ export function useAICoach() {
         generateSuggestions(finalMessages);
       }
     } catch (e) {
-      console.error("AI Coach error:", e);
+      logger.apiError("sendMessage", e, "AI Coach");
       setError(e instanceof Error ? e.message : "Erro ao enviar mensagem");
       // Remove the user message if there was an error
       setMessages(prev => prev.slice(0, -1));

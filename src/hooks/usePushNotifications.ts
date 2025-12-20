@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
+import { logger } from "@/services/loggingService";
 
 interface PushNotificationState {
   isSupported: boolean;
@@ -63,7 +64,7 @@ export function usePushNotifications() {
 
       return isGranted;
     } catch (error) {
-      console.error("Error requesting notification permission:", error);
+      logger.apiError("requestPermission", error, "PushNotifications");
       toast.error("Erro ao solicitar permissão de notificações");
       return false;
     }
@@ -86,7 +87,7 @@ export function usePushNotifications() {
 
       return notification;
     } catch (error) {
-      console.error("Error showing notification:", error);
+      logger.warn("Error showing notification", error instanceof Error ? error.message : String(error));
       return null;
     }
   }, [state.isGranted]);
