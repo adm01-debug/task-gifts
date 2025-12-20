@@ -9,7 +9,7 @@ import { LeagueCard } from "@/components/LeagueCard";
 
 export default function Leagues() {
   const navigate = useNavigate();
-  const { currentLeague, leaderboard, leagueHistory, isLoading } = useLeagues();
+  const { myLeague, leaderboard, history, isLoading } = useLeagues();
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,11 +33,11 @@ export default function Leagues() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {leagueHistory.length === 0 ? (
+              {history.length === 0 ? (
                 <p className="text-muted-foreground text-center py-8">Nenhum histórico ainda</p>
               ) : (
                 <div className="space-y-2">
-                  {leagueHistory.map((entry: any) => (
+                  {history.map((entry: any) => (
                     <div key={entry.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                       <span>{entry.change_type === "promotion" ? "⬆️ Promovido" : entry.change_type === "demotion" ? "⬇️ Rebaixado" : "➡️ Mantido"}</span>
                       <span className="text-sm text-muted-foreground">{entry.weekly_xp} XP</span>
