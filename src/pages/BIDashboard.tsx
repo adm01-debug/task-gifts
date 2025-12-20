@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useExecutiveMetrics, useMonthlyTrends, useDepartmentMetrics } from "@/hooks/useExecutiveMetrics";
 import { useCompletionTrend, useDepartmentPerformance, useWeeklyEngagement, useEngagementMetrics } from "@/hooks/useEngagementReports";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { TrendData, DepartmentData, WeeklyEngagementData } from "@/types/charts";
 import {
   AreaChart,
   Area,
@@ -171,7 +172,7 @@ export default function BIDashboard() {
   const isLoading = loadingMetrics || loadingTrends || loadingDepts;
 
   // Prepare chart data
-  const trendsData = trends?.map((t: any) => ({
+  const trendsData = trends?.map((t: TrendData) => ({
     month: t.month,
     usuarios: t.totalUsers,
     xpTotal: Math.round((t.totalXp || 0) / 1000),
@@ -180,7 +181,7 @@ export default function BIDashboard() {
     adocao: t.adoption
   })) || [];
 
-  const deptData = departments?.map((d: any) => ({
+  const deptData = departments?.map((d: DepartmentData) => ({
     name: d.name?.substring(0, 12) || 'N/A',
     funcionarios: d.employeeCount || 0,
     xpTotal: Math.round((d.totalXp || 0) / 1000),
@@ -190,7 +191,7 @@ export default function BIDashboard() {
     score: d.score || 0
   })) || [];
 
-  const engagementData = weeklyEngagement?.map((w: any) => ({
+  const engagementData = weeklyEngagement?.map((w: WeeklyEngagementData) => ({
     dia: w.day?.substring(0, 3) || 'N/A',
     atividade: w.quests || 0
   })) || [];

@@ -35,6 +35,7 @@ import { useRecentAuditLogs, AuditAction } from "@/hooks/useAudit";
 import { useProfiles } from "@/hooks/useProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { RechartsTooltipProps, RechartsTooltipPayloadItem } from "@/types/charts";
 
 const actionCategories: Record<string, AuditAction[]> = {
   auth: ["user_signup", "user_login"],
@@ -66,12 +67,12 @@ const categoryLabels: Record<string, string> = {
   roles: "Cargos",
 };
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: RechartsTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-popover border border-border rounded-lg p-3 shadow-xl">
         <p className="font-medium text-foreground mb-2">{label}</p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry: RechartsTooltipPayloadItem, index: number) => (
           <p key={index} className="text-sm flex items-center gap-2">
             <span
               className="w-3 h-3 rounded-full"

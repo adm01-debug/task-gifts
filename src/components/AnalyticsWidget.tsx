@@ -4,14 +4,15 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, 
 import { useNavigate } from "react-router-dom";
 import { useLeaderboard } from "@/hooks/useProfiles";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RechartsTooltipProps, RechartsTooltipPayloadItem } from "@/types/charts";
 
 // Tooltip content function - avoids forwardRef warning from recharts
-const renderCustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
+const renderCustomTooltip = ({ active, payload, label }: RechartsTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="glass rounded-lg p-3 border border-border">
         <p className="font-semibold text-sm mb-1">{label}</p>
-        {payload.map((entry: any, i: number) => (
+        {payload.map((entry: RechartsTooltipPayloadItem, i: number) => (
           <p key={i} className="text-xs" style={{ color: entry.color }}>
             {entry.name}: {entry.value.toLocaleString()}
           </p>

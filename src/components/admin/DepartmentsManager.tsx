@@ -100,7 +100,7 @@ export function DepartmentsManager() {
 
   // Build department members map (memoized)
   const deptMembersMap = useMemo(() => {
-    const map = new Map<string, Array<{ memberId: string; userId: string; isManager: boolean; profile: any }>>();
+    const map = new Map<string, Array<{ memberId: string; userId: string; isManager: boolean; profile: { id: string; display_name: string | null; email: string | null; level: number; xp: number; avatar_url?: string | null } | undefined }>>();
     allTeamMembers?.forEach((tm) => {
       const profile = profiles?.find((p) => p.id === tm.user_id);
       const existing = map.get(tm.department_id) || [];
