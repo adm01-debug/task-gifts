@@ -1,7 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { leaguesService } from "@/services/leaguesService";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useLeagues() {
+  const queryClient = useQueryClient();
+
   const leaguesQuery = useQuery({
     queryKey: ["leagues"],
     queryFn: () => leaguesService.getAllLeagues(),
@@ -26,6 +30,41 @@ export function useLeagues() {
     queryKey: ["leagues", "history"],
     queryFn: () => leaguesService.getMyLeagueHistory(),
   });
+
+  // Realtime subscription para league_members
+  useEffect(() => {
+    const channel = supabase
+      .channel('league-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'league_members',
+        },
+        () => {
+          // Invalidar queries quando houver mudanças
+          queryClient.invalidateQueries({ queryKey: ["leagues", "mine"] });
+          queryClient.invalidateQueries({ queryKey: ["leagues", "leaderboard"] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'league_history',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["leagues", "history"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   return {
     leagues: leaguesQuery.data ?? [],

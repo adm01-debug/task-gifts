@@ -74,6 +74,41 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     coinReward: 5,
     route: "/loja",
   },
+  {
+    id: "set_goal",
+    title: "Defina uma Meta",
+    description: "Crie seu primeiro objetivo ou OKR",
+    icon: "🎯",
+    xpReward: 25,
+    coinReward: 15,
+    route: "/goals",
+  },
+  {
+    id: "join_league",
+    title: "Entre em uma Liga",
+    description: "Participe da competição semanal",
+    icon: "🏆",
+    xpReward: 30,
+    coinReward: 20,
+    route: "/leagues",
+  },
+  {
+    id: "answer_survey",
+    title: "Responda uma Pesquisa",
+    description: "Participe das pesquisas de clima",
+    icon: "📋",
+    xpReward: 20,
+    coinReward: 10,
+    route: "/surveys",
+  },
+  {
+    id: "check_mood",
+    title: "Registre seu Humor",
+    description: "Compartilhe como você está se sentindo",
+    icon: "😊",
+    xpReward: 15,
+    coinReward: 10,
+  },
 ];
 
 export interface OnboardingProgress {
