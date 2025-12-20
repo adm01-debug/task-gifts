@@ -1,5 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.87.0";
+import { 
+  checkRateLimit, 
+  getRateLimitIdentifier, 
+  createRateLimitResponse,
+  RATE_LIMITS 
+} from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,6 +52,15 @@ Responda APENAS com as 3 sugestões, uma por linha, sem formatação adicional.`
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Apply rate limiting
+  const identifier = getRateLimitIdentifier(req, "ai-coach");
+  const rateLimitResult = checkRateLimit(identifier, RATE_LIMITS.ai);
+  
+  if (!rateLimitResult.allowed) {
+    console.log(`Rate limit exceeded for ${identifier}`);
+    return createRateLimitResponse(rateLimitResult.retryAfter || 60, corsHeaders);
   }
 
   try {
