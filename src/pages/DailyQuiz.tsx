@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Trophy, Gamepad2, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+import { Sparkles, Trophy, Gamepad2, ArrowLeft, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MagicCardQuiz, QuizQuestion } from "@/components/quiz/MagicCardQuiz";
 import { MillionaireQuiz, MillionaireQuestion } from "@/components/quiz/MillionaireQuiz";
 import { QuizDailyRanking } from "@/components/quiz/QuizDailyRanking";
@@ -155,8 +156,41 @@ export default function DailyQuiz() {
         </motion.div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 grid md:grid-cols-2 gap-6">
+              {[1, 2].map((i) => (
+                <Card key={i} className="p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-14 w-14 rounded-xl" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <Skeleton className="h-8 w-40" />
+                  <Skeleton className="h-16 w-full" />
+                  <div className="space-y-2">
+                    {[1, 2, 3].map((j) => (
+                      <div key={j} className="flex items-center gap-2">
+                        <Skeleton className="h-2 w-2 rounded-full" />
+                        <Skeleton className="h-4 flex-1" />
+                      </div>
+                    ))}
+                  </div>
+                  <Skeleton className="h-10 w-full" />
+                </Card>
+              ))}
+            </div>
+            <Card className="p-6 space-y-4">
+              <Skeleton className="h-6 w-32" />
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <div className="flex-1 space-y-1">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                  <Skeleton className="h-6 w-12" />
+                </div>
+              ))}
+            </Card>
           </div>
         ) : !activeQuiz ? (
           /* Quiz Selection + Ranking */

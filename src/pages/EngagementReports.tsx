@@ -163,8 +163,15 @@ const ChartCard = ({
         {action}
       </div>
       {loading ? (
-        <div className="h-72 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <div className="h-72 space-y-4 p-4">
+          <div className="flex items-end justify-between h-full gap-3">
+            {[...Array(7)].map((_, i) => (
+              <div key={i} className="flex-1 flex flex-col justify-end gap-2">
+                <Skeleton className="w-full" style={{ height: `${Math.random() * 50 + 30}%` }} />
+                <Skeleton className="h-3 w-full" />
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         children
