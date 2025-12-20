@@ -62,7 +62,7 @@ export const checkinsService = {
     if (error) throw error;
     return (data ?? []).map(t => ({
       ...t,
-      questions: t.questions as CheckinQuestion[],
+      questions: t.questions as unknown as CheckinQuestion[],
     })) as CheckinTemplate[];
   },
 
