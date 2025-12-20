@@ -51,6 +51,8 @@ export interface GoalInsert {
   description?: string;
   goal_type?: 'personal' | 'team' | 'company';
   priority?: 'low' | 'medium' | 'high' | 'critical';
+  status?: 'draft' | 'active' | 'completed' | 'cancelled';
+  progress_percent?: number;
   start_date?: string;
   due_date?: string;
   department_id?: string;
