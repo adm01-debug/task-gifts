@@ -410,8 +410,15 @@ const ExecutiveDashboard = () => {
               </CardHeader>
               <CardContent>
                 {trendsLoading ? (
-                  <div className="h-[300px] flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  <div className="h-[300px] space-y-4 p-4">
+                    <div className="flex items-end justify-between h-full gap-2">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="flex-1 flex flex-col justify-end gap-2">
+                          <Skeleton className="w-full" style={{ height: `${Math.random() * 60 + 40}%` }} />
+                          <Skeleton className="h-4 w-full" />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="h-[300px]">

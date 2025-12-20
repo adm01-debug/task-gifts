@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useRecentAuditLogs, AuditAction } from "@/hooks/useAudit";
 import { useProfiles } from "@/hooks/useProfiles";
 import { cn } from "@/lib/utils";
@@ -399,8 +400,19 @@ export default function AuditLogs() {
             </CardHeader>
             <CardContent>
               {logsLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <div className="space-y-3">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-4 p-3">
+                      <Skeleton className="h-4 w-32" />
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 flex-1" />
+                    </div>
+                  ))}
                 </div>
               ) : filteredLogs.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
