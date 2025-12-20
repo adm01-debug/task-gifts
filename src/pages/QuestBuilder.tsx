@@ -199,6 +199,7 @@ export default function QuestBuilder() {
               size="icon"
               onClick={() => navigate(-1)}
               className="shrink-0"
+              aria-label="Voltar"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>

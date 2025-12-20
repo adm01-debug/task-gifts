@@ -170,6 +170,7 @@ function TreeNodeCard({
               size="icon"
               className="h-6 w-6 shrink-0"
               onClick={() => setIsExpanded(!isExpanded)}
+              aria-label={isExpanded ? 'Recolher dependências' : 'Expandir dependências'}
             >
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
@@ -411,6 +412,7 @@ export function TrailDependencyTree() {
                 className="h-8 w-8"
                 onClick={handleZoomOut}
                 disabled={zoom <= 0.5}
+                aria-label="Diminuir zoom"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
@@ -423,6 +425,7 @@ export function TrailDependencyTree() {
                 className="h-8 w-8"
                 onClick={handleZoomIn}
                 disabled={zoom >= 1.5}
+                aria-label="Aumentar zoom"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
