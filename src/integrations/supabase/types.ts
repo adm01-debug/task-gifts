@@ -128,6 +128,123 @@ export type Database = {
         }
         Relationships: []
       }
+      announcement_reactions: {
+        Row: {
+          announcement_id: string
+          created_at: string
+          emoji: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          announcement_id: string
+          created_at?: string
+          emoji: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_reactions_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcement_reads: {
+        Row: {
+          announcement_id: string
+          id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          announcement_id: string
+          id?: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string
+          id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_reads_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          author_id: string
+          category: string
+          content: string
+          created_at: string
+          department_id: string | null
+          expires_at: string | null
+          id: string
+          is_pinned: boolean
+          pin_expires_at: string | null
+          published_at: string | null
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          author_id: string
+          category?: string
+          content: string
+          created_at?: string
+          department_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean
+          pin_expires_at?: string | null
+          published_at?: string | null
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          content?: string
+          created_at?: string
+          department_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean
+          pin_expires_at?: string | null
+          published_at?: string | null
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_records: {
         Row: {
           check_in: string
@@ -430,6 +547,51 @@ export type Database = {
         }
         Relationships: []
       }
+      celebrations: {
+        Row: {
+          auto_generated: boolean
+          celebration_date: string
+          celebration_type: string
+          coin_reward: number
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          title: string
+          user_id: string
+          xp_reward: number
+          year_count: number | null
+        }
+        Insert: {
+          auto_generated?: boolean
+          celebration_date: string
+          celebration_type: string
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          title: string
+          user_id: string
+          xp_reward?: number
+          year_count?: number | null
+        }
+        Update: {
+          auto_generated?: boolean
+          celebration_date?: string
+          celebration_type?: string
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          title?: string
+          user_id?: string
+          xp_reward?: number
+          year_count?: number | null
+        }
+        Relationships: []
+      }
       certifications: {
         Row: {
           category: string
@@ -489,6 +651,95 @@ export type Database = {
             columns: ["trail_id"]
             isOneToOne: false
             referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkin_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_default: boolean
+          name: string
+          questions: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          questions?: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          questions?: Json
+        }
+        Relationships: []
+      }
+      checkins: {
+        Row: {
+          action_items: Json | null
+          completed_at: string | null
+          created_at: string
+          employee_id: string
+          id: string
+          manager_id: string
+          mood_rating: number | null
+          notes: string | null
+          responses: Json | null
+          scheduled_at: string
+          status: string
+          template_id: string | null
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          action_items?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          manager_id: string
+          mood_rating?: number | null
+          notes?: string | null
+          responses?: Json | null
+          scheduled_at: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          action_items?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          manager_id?: string
+          mood_rating?: number | null
+          notes?: string | null
+          responses?: Json | null
+          scheduled_at?: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkins_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "checkin_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -754,6 +1005,299 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_cycles: {
+        Row: {
+          created_at: string
+          created_by: string
+          cycle_type: string
+          description: string | null
+          ends_at: string
+          id: string
+          name: string
+          questions: Json
+          starts_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          cycle_type?: string
+          description?: string | null
+          ends_at: string
+          id?: string
+          name: string
+          questions?: Json
+          starts_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          cycle_type?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          name?: string
+          questions?: Json
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      feedback_requests: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          due_date: string | null
+          from_user_id: string
+          id: string
+          relationship: string
+          status: string
+          to_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          due_date?: string | null
+          from_user_id: string
+          id?: string
+          relationship: string
+          status?: string
+          to_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          due_date?: string | null
+          from_user_id?: string
+          id?: string
+          relationship?: string
+          status?: string
+          to_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_requests_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_responses: {
+        Row: {
+          answers: Json
+          id: string
+          improvements: string | null
+          is_anonymous: boolean
+          overall_rating: number | null
+          request_id: string
+          strengths: string | null
+          submitted_at: string
+        }
+        Insert: {
+          answers?: Json
+          id?: string
+          improvements?: string | null
+          is_anonymous?: boolean
+          overall_rating?: number | null
+          request_id: string
+          strengths?: string | null
+          submitted_at?: string
+        }
+        Update: {
+          answers?: Json
+          id?: string
+          improvements?: string | null
+          is_anonymous?: boolean
+          overall_rating?: number | null
+          request_id?: string
+          strengths?: string | null
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_responses_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_updates: {
+        Row: {
+          created_at: string
+          goal_id: string
+          id: string
+          key_result_id: string | null
+          new_value: number
+          note: string | null
+          previous_value: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          goal_id: string
+          id?: string
+          key_result_id?: string | null
+          new_value: number
+          note?: string | null
+          previous_value?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          goal_id?: string
+          id?: string
+          key_result_id?: string | null
+          new_value?: number
+          note?: string | null
+          previous_value?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_updates_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_updates_key_result_id_fkey"
+            columns: ["key_result_id"]
+            isOneToOne: false
+            referencedRelation: "key_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goals: {
+        Row: {
+          coin_reward: number
+          completed_at: string | null
+          created_at: string
+          department_id: string | null
+          description: string | null
+          due_date: string | null
+          goal_type: string
+          id: string
+          priority: string
+          progress_percent: number
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          goal_type?: string
+          id?: string
+          priority?: string
+          progress_percent?: number
+          start_date?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          goal_type?: string
+          id?: string
+          priority?: string
+          progress_percent?: number
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      key_results: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          description: string | null
+          goal_id: string
+          id: string
+          metric_type: string
+          target_value: number
+          title: string
+          unit: string | null
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          description?: string | null
+          goal_id: string
+          id?: string
+          metric_type?: string
+          target_value?: number
+          title: string
+          unit?: string | null
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          description?: string | null
+          goal_id?: string
+          id?: string
+          metric_type?: string
+          target_value?: number
+          title?: string
+          unit?: string | null
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_results_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kudos: {
         Row: {
           badge_id: string | null
@@ -819,6 +1363,93 @@ export type Database = {
           id?: string
           name?: string
           xp_value?: number
+        }
+        Relationships: []
+      }
+      league_history: {
+        Row: {
+          change_type: string
+          created_at: string
+          from_league_id: string | null
+          id: string
+          to_league_id: string
+          user_id: string
+          week_date: string
+          weekly_xp: number
+        }
+        Insert: {
+          change_type: string
+          created_at?: string
+          from_league_id?: string | null
+          id?: string
+          to_league_id: string
+          user_id: string
+          week_date: string
+          weekly_xp?: number
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          from_league_id?: string | null
+          id?: string
+          to_league_id?: string
+          user_id?: string
+          week_date?: string
+          weekly_xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "league_history_from_league_id_fkey"
+            columns: ["from_league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "league_history_to_league_id_fkey"
+            columns: ["to_league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leagues: {
+        Row: {
+          color: string
+          created_at: string
+          demotion_slots: number
+          icon: string
+          id: string
+          min_xp_weekly: number
+          name: string
+          promotion_slots: number
+          tier: number
+          xp_bonus_percent: number
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          demotion_slots?: number
+          icon?: string
+          id?: string
+          min_xp_weekly?: number
+          name: string
+          promotion_slots?: number
+          tier: number
+          xp_bonus_percent?: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          demotion_slots?: number
+          icon?: string
+          id?: string
+          min_xp_weekly?: number
+          name?: string
+          promotion_slots?: number
+          tier?: number
+          xp_bonus_percent?: number
         }
         Relationships: []
       }
@@ -1090,6 +1721,42 @@ export type Database = {
           },
         ]
       }
+      mood_entries: {
+        Row: {
+          created_at: string
+          entry_date: string
+          factors: Json | null
+          id: string
+          is_anonymous: boolean
+          mood_emoji: string
+          mood_score: number
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_date?: string
+          factors?: Json | null
+          id?: string
+          is_anonymous?: boolean
+          mood_emoji?: string
+          mood_score: number
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          factors?: Json | null
+          id?: string
+          is_anonymous?: boolean
+          mood_emoji?: string
+          mood_score?: number
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -1163,10 +1830,12 @@ export type Database = {
         Row: {
           avatar_url: string | null
           best_streak: number
+          birth_date: string | null
           coins: number
           created_at: string
           display_name: string | null
           email: string | null
+          hire_date: string | null
           id: string
           level: number
           quests_completed: number
@@ -1177,10 +1846,12 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           best_streak?: number
+          birth_date?: string | null
           coins?: number
           created_at?: string
           display_name?: string | null
           email?: string | null
+          hire_date?: string | null
           id: string
           level?: number
           quests_completed?: number
@@ -1191,10 +1862,12 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           best_streak?: number
+          birth_date?: string | null
           coins?: number
           created_at?: string
           display_name?: string | null
           email?: string | null
+          hire_date?: string | null
           id?: string
           level?: number
           quests_completed?: number
@@ -1203,6 +1876,91 @@ export type Database = {
           xp?: number
         }
         Relationships: []
+      }
+      pulse_responses: {
+        Row: {
+          answers: Json
+          id: string
+          submitted_at: string
+          survey_id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          id?: string
+          submitted_at?: string
+          survey_id: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          id?: string
+          submitted_at?: string
+          survey_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulse_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "pulse_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pulse_surveys: {
+        Row: {
+          created_at: string
+          created_by: string
+          department_id: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          is_anonymous: boolean
+          questions: Json
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          department_id?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          is_anonymous?: boolean
+          questions?: Json
+          starts_at?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          is_anonymous?: boolean
+          questions?: Json
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulse_surveys_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quest_assignments: {
         Row: {
@@ -2075,6 +2833,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_leagues: {
+        Row: {
+          created_at: string
+          demoted_at: string | null
+          id: string
+          league_id: string
+          promoted_at: string | null
+          rank_in_league: number | null
+          updated_at: string
+          user_id: string
+          week_start: string
+          weekly_xp: number
+        }
+        Insert: {
+          created_at?: string
+          demoted_at?: string | null
+          id?: string
+          league_id: string
+          promoted_at?: string | null
+          rank_in_league?: number | null
+          updated_at?: string
+          user_id: string
+          week_start?: string
+          weekly_xp?: number
+        }
+        Update: {
+          created_at?: string
+          demoted_at?: string | null
+          id?: string
+          league_id?: string
+          promoted_at?: string | null
+          rank_in_league?: number | null
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+          weekly_xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_leagues_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_mission_progress: {
         Row: {
