@@ -354,6 +354,7 @@ export default function ManagerDashboard() {
                 variant="ghost" 
                 size="icon"
                 onClick={() => navigate("/")}
+                aria-label="Voltar para o início"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>

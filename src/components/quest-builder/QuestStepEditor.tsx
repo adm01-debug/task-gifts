@@ -146,6 +146,7 @@ export function QuestStepEditor({ steps, onStepsChange }: QuestStepEditorProps) 
                     size="icon"
                     onClick={() => removeStep(step.id)}
                     className="shrink-0 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                    aria-label="Remover etapa"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

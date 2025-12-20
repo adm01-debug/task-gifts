@@ -444,7 +444,7 @@ function QuizAdminContent() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleToggleActive(q.id, q.is_active)}
-                              title={q.is_active ? 'Desativar' : 'Ativar'}
+                              aria-label={q.is_active ? 'Desativar pergunta' : 'Ativar pergunta'}
                             >
                               {q.is_active ? (
                                 <Eye className="w-4 h-4 text-emerald-500" />
@@ -456,6 +456,7 @@ function QuizAdminContent() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleOpenEdit(q.id)}
+                              aria-label="Editar pergunta"
                             >
                               <Edit2 className="w-4 h-4" />
                             </Button>
@@ -463,6 +464,7 @@ function QuizAdminContent() {
                               variant="ghost"
                               size="icon"
                               onClick={() => setDeleteId(q.id)}
+                              aria-label="Excluir pergunta"
                             >
                               <Trash2 className="w-4 h-4 text-destructive" />
                             </Button>
