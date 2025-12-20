@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import { AchievementContainer } from "@/components/AchievementSystem";
+import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 
 interface AchievementNotification {
   id: string;
@@ -47,11 +48,18 @@ const iconFromDbIcon = (dbIcon: string): "trophy" | "zap" | "star" | "flame" | "
 export function AchievementNotificationProvider({ children }: { children: ReactNode }) {
   const [achievements, setAchievements] = useState<AchievementNotification[]>([]);
   const [levelUp, setLevelUp] = useState<number | null>(null);
+  const haptic = useHapticFeedback();
 
   const showAchievementNotification = useCallback((achievement: AchievementNotification) => {
     const notificationId = `${achievement.id}-${Date.now()}`;
     setAchievements(prev => [...prev, { ...achievement, id: notificationId }]);
-  }, []);
+    // Trigger haptic feedback based on rarity
+    if (achievement.rarity === "legendary" || achievement.rarity === "epic") {
+      haptic.achievementUnlocked();
+    } else {
+      haptic.questCompleted();
+    }
+  }, [haptic]);
 
   const hideAchievement = useCallback((id: string) => {
     setAchievements(prev => prev.filter(a => a.id !== id));
@@ -59,7 +67,8 @@ export function AchievementNotificationProvider({ children }: { children: ReactN
 
   const triggerLevelUp = useCallback((level: number) => {
     setLevelUp(level);
-  }, []);
+    haptic.levelUp();
+  }, [haptic]);
 
   const closeLevelUp = useCallback(() => {
     setLevelUp(null);

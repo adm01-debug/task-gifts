@@ -124,6 +124,54 @@ export function usePushNotifications() {
     });
   }, [showNotification]);
 
+  // Helper to show duel notifications
+  const notifyDuelChallenge = useCallback((challengerName: string) => {
+    return showNotification(`⚔️ Desafio de Duelo!`, {
+      body: `${challengerName} te desafiou para um duelo!`,
+      tag: "duel-challenge",
+    });
+  }, [showNotification]);
+
+  const notifyDuelResult = useCallback((won: boolean, opponentName: string, xpGained?: number) => {
+    if (won) {
+      return showNotification(`🏆 Vitória no Duelo!`, {
+        body: `Você venceu ${opponentName}!${xpGained ? ` +${xpGained} XP` : ''}`,
+        tag: "duel-result",
+      });
+    }
+    return showNotification(`😢 Derrota no Duelo`, {
+      body: `${opponentName} venceu desta vez. Continue tentando!`,
+      tag: "duel-result",
+    });
+  }, [showNotification]);
+
+  // Helper to show streak notifications
+  const notifyStreakMilestone = useCallback((days: number) => {
+    return showNotification(`🔥 Streak de ${days} dias!`, {
+      body: `Incrível! Você manteve seu streak por ${days} dias consecutivos!`,
+      tag: "streak",
+    });
+  }, [showNotification]);
+
+  // Helper to show challenge expiring notifications
+  const notifyChallengeExpiring = useCallback((challengeTitle: string, hoursLeft: number) => {
+    return showNotification(`⏰ Desafio Expirando!`, {
+      body: `${challengeTitle} expira em ${hoursLeft}h. Complete agora!`,
+      tag: "challenge-expiring",
+    });
+  }, [showNotification]);
+
+  // Helper to show combo notifications
+  const notifyComboMultiplier = useCallback((multiplier: number) => {
+    if (multiplier >= 3) {
+      return showNotification(`🚀 Combo x${multiplier}!`, {
+        body: `Seu multiplicador está em x${multiplier}! Continue assim!`,
+        tag: "combo",
+      });
+    }
+    return null;
+  }, [showNotification]);
+
   return {
     ...state,
     requestPermission,
@@ -132,5 +180,10 @@ export function usePushNotifications() {
     notifyLevelUp,
     notifyKudos,
     notifyQuestComplete,
+    notifyDuelChallenge,
+    notifyDuelResult,
+    notifyStreakMilestone,
+    notifyChallengeExpiring,
+    notifyComboMultiplier,
   };
 }

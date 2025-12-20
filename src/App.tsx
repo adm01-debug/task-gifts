@@ -9,6 +9,8 @@ import { AchievementNotificationProvider } from "@/contexts/AchievementNotificat
 import { SoundSettingsProvider } from "@/contexts/SoundSettingsContext";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { lazy, Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -76,6 +78,8 @@ const App = () => (
                 <Sonner />
                 <BrowserRouter>
                   <Suspense fallback={<PageLoader />}>
+                    <OfflineIndicator />
+                    <KeyboardShortcutsHelp />
                     <Routes>
                       <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                       <Route path="/auth" element={<Auth />} />
