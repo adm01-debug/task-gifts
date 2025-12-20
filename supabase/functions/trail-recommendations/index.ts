@@ -6,6 +6,43 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Type definitions for query results
+interface TeamMemberWithDept {
+  department_id: string | null;
+  is_manager: boolean;
+  departments: { name: string } | null;
+}
+
+interface EnrollmentWithTrail {
+  trail_id: string;
+  progress_percent: number | null;
+  completed_at: string | null;
+  learning_trails: { title: string } | null;
+}
+
+interface QuestAssignmentWithQuest {
+  quest_id: string;
+  completed_at: string | null;
+  custom_quests: { title: string; tags: string[] | null } | null;
+}
+
+interface ModuleProgressWithModule {
+  module_id: string;
+  score: number | null;
+  completed_at: string | null;
+  trail_modules: { title: string; content_type: string } | null;
+}
+
+interface AvailableTrail {
+  id: string;
+  title: string;
+  description: string | null;
+  department_id: string | null;
+  estimated_hours: number | null;
+  xp_reward: number | null;
+  departments: { name: string } | null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -42,42 +79,42 @@ serve(async (req) => {
       .from("team_members")
       .select("department_id, is_manager, departments(name)")
       .eq("user_id", userId)
-      .maybeSingle();
+      .maybeSingle() as { data: TeamMemberWithDept | null };
 
     // Fetch user's completed trails
     const { data: enrollments } = await supabase
       .from("trail_enrollments")
       .select("trail_id, progress_percent, completed_at, learning_trails(title)")
-      .eq("user_id", userId);
+      .eq("user_id", userId) as { data: EnrollmentWithTrail[] | null };
 
     // Fetch user's completed quests
     const { data: questAssignments } = await supabase
       .from("quest_assignments")
       .select("quest_id, completed_at, custom_quests(title, tags)")
-      .eq("user_id", userId);
+      .eq("user_id", userId) as { data: QuestAssignmentWithQuest[] | null };
 
     // Fetch user's module progress for skill analysis
     const { data: moduleProgress } = await supabase
       .from("module_progress")
       .select("module_id, score, completed_at, trail_modules(title, content_type)")
-      .eq("user_id", userId);
+      .eq("user_id", userId) as { data: ModuleProgressWithModule[] | null };
 
     // Fetch available trails
     const { data: availableTrails } = await supabase
       .from("learning_trails")
       .select("id, title, description, department_id, estimated_hours, xp_reward, departments(name)")
-      .eq("status", "published");
+      .eq("status", "published") as { data: AvailableTrail[] | null };
 
     // Type helpers
-    const getDeptName = (tm: any) => tm?.departments?.name || "Não definido";
-    const getTrailTitle = (e: any) => e?.learning_trails?.title;
-    const getQuestData = (q: any) => ({ title: q?.custom_quests?.title, tags: q?.custom_quests?.tags });
-    const getModuleData = (m: any) => ({ 
+    const getDeptName = (tm: TeamMemberWithDept | null) => tm?.departments?.name || "Não definido";
+    const getTrailTitle = (e: EnrollmentWithTrail) => e?.learning_trails?.title;
+    const getQuestData = (q: QuestAssignmentWithQuest) => ({ title: q?.custom_quests?.title, tags: q?.custom_quests?.tags });
+    const getModuleData = (m: ModuleProgressWithModule) => ({ 
       module: m?.trail_modules?.title, 
       type: m?.trail_modules?.content_type, 
       score: m?.score 
     });
-    const getAvailableTrailData = (t: any) => ({
+    const getAvailableTrailData = (t: AvailableTrail) => ({
       id: t.id,
       title: t.title,
       description: t.description,

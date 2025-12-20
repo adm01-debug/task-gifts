@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +13,40 @@ interface CompetencyData {
   icon: string;
 }
 
-async function calculateUserCompetencies(supabase: any, userId: string): Promise<CompetencyData[]> {
+interface ModuleProgressItem {
+  id: string;
+  score: number | null;
+  completed_at: string | null;
+  module_id: string;
+}
+
+interface QuestAssignmentItem {
+  id: string;
+  completed_at: string | null;
+  quest_id: string;
+}
+
+interface UserAchievementItem {
+  id: string;
+  achievement_id: string;
+}
+
+interface KudosItem {
+  id: string;
+  badge_id: string | null;
+}
+
+interface AttendanceStreakItem {
+  current_streak: number;
+  best_streak: number;
+  total_punctual_days: number;
+}
+
+interface ProfileItem {
+  id: string;
+}
+
+async function calculateUserCompetencies(supabase: SupabaseClient, userId: string): Promise<CompetencyData[]> {
   const competencies: CompetencyData[] = [];
 
   // Fetch completed modules
@@ -21,36 +54,36 @@ async function calculateUserCompetencies(supabase: any, userId: string): Promise
     .from("module_progress")
     .select("id, score, completed_at, module_id")
     .eq("user_id", userId)
-    .not("completed_at", "is", null);
+    .not("completed_at", "is", null) as { data: ModuleProgressItem[] | null };
 
   // Fetch completed quests
   const { data: questAssignments } = await supabase
     .from("quest_assignments")
     .select("id, completed_at, quest_id")
     .eq("user_id", userId)
-    .not("completed_at", "is", null);
+    .not("completed_at", "is", null) as { data: QuestAssignmentItem[] | null };
 
   // Fetch achievements
   const { data: userAchievements } = await supabase
     .from("user_achievements")
     .select("id, achievement_id")
-    .eq("user_id", userId);
+    .eq("user_id", userId) as { data: UserAchievementItem[] | null };
 
   // Fetch kudos received
   const { data: kudosReceived } = await supabase
     .from("kudos")
     .select("id, badge_id")
-    .eq("to_user_id", userId);
+    .eq("to_user_id", userId) as { data: KudosItem[] | null };
 
   // Fetch attendance streaks
   const { data: attendanceStreak } = await supabase
     .from("attendance_streaks")
     .select("current_streak, best_streak, total_punctual_days")
     .eq("user_id", userId)
-    .maybeSingle();
+    .maybeSingle() as { data: AttendanceStreakItem | null };
 
   // 1. Conhecimento Técnico
-  const moduleScores = moduleProgress?.map((m: any) => m.score || 0) || [];
+  const moduleScores = moduleProgress?.map((m) => m.score || 0) || [];
   const avgScore = moduleScores.length > 0 
     ? moduleScores.reduce((a: number, b: number) => a + b, 0) / moduleScores.length 
     : 0;
@@ -159,8 +192,8 @@ serve(async (req) => {
 
     if (checkAllUsers) {
       // Get all users for batch analysis (e.g., scheduled job)
-      const { data: profiles } = await supabase.from('profiles').select('id');
-      usersToAnalyze = profiles?.map((p: any) => p.id) || [];
+      const { data: profiles } = await supabase.from('profiles').select('id') as { data: ProfileItem[] | null };
+      usersToAnalyze = profiles?.map((p: ProfileItem) => p.id) || [];
     } else if (userId) {
       usersToAnalyze = [userId];
     } else {

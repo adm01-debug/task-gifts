@@ -1,10 +1,37 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+interface BitrixEventData {
+  FIELDS?: { ID?: string; [key: string]: unknown };
+  id?: string;
+  [key: string]: unknown;
+}
+
+interface AdminRole {
+  user_id: string;
+}
+
+interface SyncMapping {
+  local_id: string;
+  [key: string]: unknown;
+}
+
+interface QuestAssignment {
+  id: string;
+  user_id: string;
+  quest_id: string;
+  completed_at: string | null;
+}
+
+interface Quest {
+  xp_reward: number;
+  coin_reward: number;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -17,7 +44,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Parse webhook payload
-    let payload;
+    let payload: Record<string, unknown>;
     const contentType = req.headers.get('content-type') || '';
     
     if (contentType.includes('application/json')) {
@@ -37,8 +64,8 @@ serve(async (req) => {
     // Webhook payload logged to database for audit
 
     // Determine event type
-    const eventType = payload.event || payload.EVENT || 'unknown';
-    const eventData = payload.data || payload.DATA || payload;
+    const eventType = (payload.event || payload.EVENT || 'unknown') as string;
+    const eventData = (payload.data || payload.DATA || payload) as BitrixEventData;
 
     // Log the webhook
     const { data: logEntry, error: logError } = await supabase
@@ -137,7 +164,7 @@ serve(async (req) => {
 });
 
 // Process CRM events (leads, deals, contacts)
-async function processCrmEvent(supabase: any, entityType: string, eventType: string, data: any) {
+async function processCrmEvent(supabase: SupabaseClient, entityType: string, eventType: string, data: BitrixEventData) {
   const bitrixId = data.FIELDS?.ID || data.id;
   
   if (!bitrixId) return;
@@ -170,10 +197,10 @@ async function processCrmEvent(supabase: any, entityType: string, eventType: str
   const { data: admins } = await supabase
     .from('user_roles')
     .select('user_id')
-    .eq('role', 'admin');
+    .eq('role', 'admin') as { data: AdminRole[] | null };
 
   if (admins?.length) {
-    const notifications = admins.map((admin: any) => ({
+    const notifications = admins.map((admin: AdminRole) => ({
       user_id: admin.user_id,
       title: `Bitrix24: ${entityType} ${action}`,
       message: `Um ${entityType} foi ${action === 'created' ? 'criado' : action === 'updated' ? 'atualizado' : 'deletado'} no Bitrix24`,
@@ -186,7 +213,7 @@ async function processCrmEvent(supabase: any, entityType: string, eventType: str
 }
 
 // Process Task events
-async function processTaskEvent(supabase: any, eventType: string, data: any) {
+async function processTaskEvent(supabase: SupabaseClient, eventType: string, data: BitrixEventData) {
   const taskId = data.FIELDS?.ID || data.id;
   
   if (!taskId) return;
@@ -201,7 +228,7 @@ async function processTaskEvent(supabase: any, eventType: string, data: any) {
     .select('*')
     .eq('bitrix_id', taskId.toString())
     .eq('bitrix_entity_type', 'task')
-    .maybeSingle();
+    .maybeSingle() as { data: SyncMapping | null };
 
   if (mapping && action === 'completed') {
     // Auto-complete the linked quest assignment
@@ -210,7 +237,7 @@ async function processTaskEvent(supabase: any, eventType: string, data: any) {
       .select('*')
       .eq('id', mapping.local_id)
       .is('completed_at', null)
-      .maybeSingle();
+      .maybeSingle() as { data: QuestAssignment | null };
 
     if (assignment) {
       await supabase
@@ -223,7 +250,7 @@ async function processTaskEvent(supabase: any, eventType: string, data: any) {
         .from('custom_quests')
         .select('xp_reward, coin_reward')
         .eq('id', assignment.quest_id)
-        .maybeSingle();
+        .maybeSingle() as { data: Quest | null };
 
       if (quest) {
         await supabase.rpc('add_user_xp', { 
@@ -249,7 +276,7 @@ async function processTaskEvent(supabase: any, eventType: string, data: any) {
 }
 
 // Process User events
-async function processUserEvent(supabase: any, eventType: string, data: any) {
+async function processUserEvent(supabase: SupabaseClient, eventType: string, data: BitrixEventData) {
   const userId = data.FIELDS?.ID || data.id;
   
   if (!userId) return;
