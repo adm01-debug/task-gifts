@@ -122,13 +122,13 @@ export function LeagueCard() {
                     {position}
                   </div>
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar_url || undefined} />
+                    <AvatarImage src={(user as any).profile?.avatar_url || undefined} />
                     <AvatarFallback>
-                      {user.display_name?.charAt(0) || '?'}
+                      {((user as any).profile?.display_name as string)?.charAt(0) || '?'}
                     </AvatarFallback>
                   </Avatar>
                   <span className={`flex-1 truncate ${isCurrentUser ? 'font-semibold' : ''}`}>
-                    {user.display_name || 'Usuário'}
+                    {(user as any).profile?.display_name || 'Usuário'}
                   </span>
                   <span className="text-sm font-medium text-muted-foreground">
                     {user.weekly_xp.toLocaleString()} XP
