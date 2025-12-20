@@ -647,9 +647,47 @@ export function TeamCompetencyDashboard() {
           </DialogHeader>
 
           {recommendationsMutation.isPending ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-4">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Analisando perfil e gerando recomendações...</p>
+            <div className="space-y-6 py-4">
+              <Card className="p-4 bg-muted/30 border-border/50 space-y-4">
+                <Skeleton className="h-5 w-32" />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-3 w-20" />
+                    <div className="flex flex-wrap gap-1">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-6 w-16 rounded-full" />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-3 w-24" />
+                    <div className="flex flex-wrap gap-1">
+                      {[1, 2].map((i) => (
+                        <Skeleton key={i} className="h-6 w-20 rounded-full" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="p-4 border-border/50 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-10 w-10 rounded-lg" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-48" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </Card>
+              ))}
+              <p className="text-center text-sm text-muted-foreground">Analisando perfil e gerando recomendações...</p>
             </div>
           ) : recommendations ? (
             <div className="space-y-6">
