@@ -402,66 +402,68 @@ const Profile = () => {
         )}
 
         {/* Achievements */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-gold" />
-              Conquistas
-            </h3>
-            <span className="text-sm text-muted-foreground">
-              {userAchievements.length}/{allAchievements.length}
-            </span>
-          </div>
+        <SectionErrorBoundary sectionName="Conquistas">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-gold" />
+                Conquistas
+              </h3>
+              <span className="text-sm text-muted-foreground">
+                {userAchievements.length}/{allAchievements.length}
+              </span>
+            </div>
 
-          {achievementsLoading ? (
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-24 rounded-xl" />
-              ))}
-            </div>
-          ) : allAchievements.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Trophy className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">Nenhuma conquista disponível</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-              {allAchievements.map((achievement, i) => {
-                const isUnlocked = userAchievements.some(ua => ua.achievement_id === achievement.id);
-                const rarity = (achievement.rarity || "common") as keyof typeof rarityColors;
-                
-                return (
-                  <motion.div
-                    key={achievement.id}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 + i * 0.05 }}
-                    whileHover={isUnlocked ? { scale: 1.1, y: -4 } : {}}
-                    className={`
-                      relative p-4 rounded-xl border text-center transition-all duration-200
-                      bg-gradient-to-b ${rarityColors[rarity] || rarityColors.common}
-                      ${!isUnlocked ? "opacity-40 grayscale" : ""}
-                    `}
-                  >
-                    <span className="text-2xl">{achievement.icon}</span>
-                    <p className="text-xs font-medium mt-2 truncate">{achievement.name}</p>
-                    {!isUnlocked && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
-                          <span className="text-xs">🔒</span>
+            {achievementsLoading ? (
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-xl" />
+                ))}
+              </div>
+            ) : allAchievements.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Trophy className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">Nenhuma conquista disponível</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                {allAchievements.map((achievement, i) => {
+                  const isUnlocked = userAchievements.some(ua => ua.achievement_id === achievement.id);
+                  const rarity = (achievement.rarity || "common") as keyof typeof rarityColors;
+                  
+                  return (
+                    <motion.div
+                      key={achievement.id}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.4 + i * 0.05 }}
+                      whileHover={isUnlocked ? { scale: 1.1, y: -4 } : {}}
+                      className={`
+                        relative p-4 rounded-xl border text-center transition-all duration-200
+                        bg-gradient-to-b ${rarityColors[rarity] || rarityColors.common}
+                        ${!isUnlocked ? "opacity-40 grayscale" : ""}
+                      `}
+                    >
+                      <span className="text-2xl">{achievement.icon}</span>
+                      <p className="text-xs font-medium mt-2 truncate">{achievement.name}</p>
+                      {!isUnlocked && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
+                            <span className="text-xs">🔒</span>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
-        </motion.div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
+          </motion.div>
+        </SectionErrorBoundary>
 
         {/* Certifications Panel */}
         <SectionErrorBoundary sectionName="Certificações">
@@ -469,10 +471,14 @@ const Profile = () => {
         </SectionErrorBoundary>
 
         {/* Sound Settings */}
-        <SoundSettingsCard />
+        <SectionErrorBoundary sectionName="Configurações de Som">
+          <SoundSettingsCard />
+        </SectionErrorBoundary>
 
         {/* Push Notifications */}
-        <PushNotificationToggle />
+        <SectionErrorBoundary sectionName="Notificações Push">
+          <PushNotificationToggle />
+        </SectionErrorBoundary>
 
         {/* Competency Radar */}
         {user?.id && (

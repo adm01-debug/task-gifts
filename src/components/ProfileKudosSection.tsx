@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AllSelectItem } from "@/components/ui/all-select-item";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useKudosReceived, useKudosBadges, useKudosCount } from "@/hooks/useKudos";
 import { useProfiles } from "@/hooks/useProfiles";
 import { cn } from "@/lib/utils";
@@ -172,9 +173,21 @@ export const ProfileKudosSection = ({ userId }: ProfileKudosSectionProps) => {
       {/* Kudos List */}
       <ScrollArea className="max-h-96">
         {isLoading ? (
-          <div className="p-8 text-center">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs text-muted-foreground mt-2">Carregando...</p>
+          <div className="p-4 space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+                <Skeleton className="w-8 h-8 rounded shrink-0" />
+              </div>
+            ))}
           </div>
         ) : filteredKudos.length === 0 ? (
           <div className="p-8 text-center">

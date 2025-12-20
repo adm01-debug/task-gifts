@@ -174,7 +174,7 @@ export const AttendanceCalendar = ({ records }: AttendanceCalendarProps) => {
             Calendário de Ponto
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={handlePrevMonth}>
+            <Button variant="ghost" size="icon" onClick={handlePrevMonth} aria-label="Mês anterior">
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <span className="text-sm font-medium min-w-[140px] text-center">
@@ -185,6 +185,7 @@ export const AttendanceCalendar = ({ records }: AttendanceCalendarProps) => {
               size="icon" 
               onClick={handleNextMonth}
               disabled={isSameMonth(currentMonth, new Date())}
+              aria-label="Próximo mês"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>

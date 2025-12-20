@@ -183,7 +183,7 @@ const Auth = () => {
                 />
               </div>
               {errors.email && (
-                <p className="text-xs text-destructive mt-1">{errors.email}</p>
+                <p className="text-xs text-destructive mt-1" role="alert">{errors.email}</p>
               )}
             </div>
 
@@ -258,7 +258,7 @@ const Auth = () => {
             />
           </div>
           {errors.email && (
-            <p className="text-xs text-destructive mt-1">{errors.email}</p>
+            <p className="text-xs text-destructive mt-1" role="alert">{errors.email}</p>
           )}
         </div>
 
@@ -292,7 +292,7 @@ const Auth = () => {
             </button>
           </div>
           {errors.password && (
-            <p className="text-xs text-destructive mt-1">{errors.password}</p>
+            <p className="text-xs text-destructive mt-1" role="alert">{errors.password}</p>
           )}
         </div>
 
