@@ -43,6 +43,12 @@ const QuizAdmin = lazy(() => import("./pages/QuizAdmin"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const Bitrix24CRM = lazy(() => import("./pages/Bitrix24CRM"));
 const BIDashboard = lazy(() => import("./pages/BIDashboard"));
+const Goals = lazy(() => import("./pages/Goals"));
+const Checkins = lazy(() => import("./pages/Checkins"));
+const Leagues = lazy(() => import("./pages/Leagues"));
+const Surveys = lazy(() => import("./pages/Surveys"));
+const Feedback = lazy(() => import("./pages/Feedback"));
+const Announcements = lazy(() => import("./pages/Announcements"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -105,6 +111,12 @@ const App = () => (
                       <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
                       <Route path="/bitrix24" element={<ProtectedRoute requiredRole="admin"><Bitrix24CRM /></ProtectedRoute>} />
                       <Route path="/bi" element={<ProtectedRoute requiredRole="manager"><BIDashboard /></ProtectedRoute>} />
+                      <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
+                      <Route path="/checkins" element={<ProtectedRoute requiredRole="manager"><Checkins /></ProtectedRoute>} />
+                      <Route path="/leagues" element={<ProtectedRoute><Leagues /></ProtectedRoute>} />
+                      <Route path="/surveys" element={<ProtectedRoute><Surveys /></ProtectedRoute>} />
+                      <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
+                      <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
                       <Route
                         path="/loja/admin"
                         element={

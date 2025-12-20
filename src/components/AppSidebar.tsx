@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import { Flame, Zap, Gift, Settings, Home, Medal } from "lucide-react";
+import { Flame, Zap, Gift, Settings, Home, Medal, Target, Trophy, TrendingUp, Clock, BookOpen, Gamepad2, ShoppingBag, MessageSquare, Swords, Heart, Award, ClipboardCheck, BarChart3, Megaphone } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 
@@ -9,11 +9,25 @@ interface NavItem {
   icon: React.ElementType;
   label: string;
   badge?: number;
-  active?: boolean;
+  path: string;
 }
 
 const navItems: NavItem[] = [
-  { icon: Home, label: "Dashboard", active: true },
+  { icon: Home, label: "Dashboard", path: "/" },
+  { icon: Target, label: "Metas & OKRs", path: "/goals" },
+  { icon: ClipboardCheck, label: "Check-ins 1:1", path: "/checkins" },
+  { icon: Award, label: "Ligas", path: "/leagues" },
+  { icon: BarChart3, label: "Pulse Surveys", path: "/surveys" },
+  { icon: MessageSquare, label: "Feedback 360°", path: "/feedback" },
+  { icon: Megaphone, label: "Anúncios", path: "/announcements" },
+  { icon: Trophy, label: "Conquistas", path: "/conquistas" },
+  { icon: TrendingUp, label: "Estatísticas", path: "/estatisticas" },
+  { icon: Clock, label: "Ponto", path: "/ponto" },
+  { icon: BookOpen, label: "Trilhas", path: "/trails" },
+  { icon: Gamepad2, label: "Quiz Diário", path: "/quiz" },
+  { icon: Swords, label: "Duelos", path: "/duelos" },
+  { icon: Heart, label: "Mentoria", path: "/mentoria" },
+  { icon: ShoppingBag, label: "Loja", path: "/loja", badge: 2 },
 ];
 
 interface AppSidebarProps {
@@ -23,7 +37,8 @@ interface AppSidebarProps {
 
 export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
   const navigate = useNavigate();
-  const [activeItem, setActiveItem] = useState("Dashboard");
+  const location = useLocation();
+  const currentPath = location.pathname;
   const { data: profile } = useCurrentProfile();
 
   const displayName = profile?.display_name || "Usuário";
@@ -48,7 +63,9 @@ export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
   }, [level, xp]);
 
   // Memoized handlers
-  const handleItemClick = useCallback((label: string) => setActiveItem(label), []);
+  const handleItemClick = useCallback((item: NavItem) => {
+    navigate(item.path);
+  }, [navigate]);
   const handleNavigateToProfile = useCallback(() => navigate("/profile"), [navigate]);
 
   return (
@@ -134,42 +151,45 @@ export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
 
       {/* Navigation */}
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-        {navItems.map((item) => (
-          <motion.button
-            key={item.label}
-            onClick={() => handleItemClick(item.label)}
-            whileHover={{ x: 4 }}
-            whileTap={{ scale: 0.98 }}
-            className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-              "hover:bg-sidebar-accent",
-              activeItem === item.label 
-                ? "bg-sidebar-accent text-sidebar-primary" 
-                : "text-sidebar-foreground/70"
-            )}
-          >
-            <div className="relative">
-              <item.icon className={cn(
-                "w-5 h-5 transition-colors",
-                activeItem === item.label && "text-primary"
-              )} />
-              {item.badge && (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground">
-                  {item.badge}
-                </span>
+        {navItems.map((item) => {
+          const isActive = currentPath === item.path || (item.path !== "/" && currentPath.startsWith(item.path));
+          return (
+            <motion.button
+              key={item.label}
+              onClick={() => handleItemClick(item)}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                "hover:bg-sidebar-accent",
+                isActive 
+                  ? "bg-sidebar-accent text-sidebar-primary" 
+                  : "text-sidebar-foreground/70"
               )}
-            </div>
-            {!collapsed && (
-              <span className="font-medium text-sm">{item.label}</span>
-            )}
-            {!collapsed && activeItem === item.label && (
-              <motion.div
-                layoutId="activeIndicator"
-                className="ml-auto w-1.5 h-1.5 rounded-full bg-primary"
-              />
-            )}
-          </motion.button>
-        ))}
+            >
+              <div className="relative">
+                <item.icon className={cn(
+                  "w-5 h-5 transition-colors",
+                  isActive && "text-primary"
+                )} />
+                {item.badge && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
+              {!collapsed && (
+                <span className="font-medium text-sm">{item.label}</span>
+              )}
+              {!collapsed && isActive && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="ml-auto w-1.5 h-1.5 rounded-full bg-primary"
+                />
+              )}
+            </motion.button>
+          );
+        })}
       </nav>
 
       {/* Quick Stats */}

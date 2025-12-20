@@ -4,13 +4,18 @@ import DepartmentMissions from "@/components/DepartmentMissions";
 import { DailyQuests } from "@/components/DailyQuests";
 import { PeerRecognition } from "@/components/PeerRecognition";
 import { TeamChallenges } from "@/components/TeamChallenges";
+import { GoalsWidget } from "@/components/GoalsWidget";
+import { MoodTrackerWidget } from "@/components/MoodTrackerWidget";
+import { CelebrationsBanner } from "@/components/CelebrationsBanner";
+import { PulseSurveyWidget } from "@/components/PulseSurveyWidget";
+import { AnnouncementsBoard } from "@/components/AnnouncementsBoard";
 import { StaggeredContainer, StaggeredItemLeft } from "@/components/StaggeredContainer";
 import { LazyWidget } from "./LazyWidget";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 
 /**
  * DashboardLeftColumn - Contains primary content widgets
- * Missions, Quests, Team & Recognition
+ * Missions, Quests, Team & Recognition + Goals, Mood, Celebrations, Surveys, Announcements
  * Each widget is wrapped with SectionErrorBoundary for fault isolation
  */
 export const DashboardLeftColumn = memo(function DashboardLeftColumn() {
@@ -20,10 +25,31 @@ export const DashboardLeftColumn = memo(function DashboardLeftColumn() {
       staggerDelay={0.12}
       initialDelay={0.1}
     >
+      {/* Celebrations Banner - Priority */}
+      <StaggeredItemLeft>
+        <SectionErrorBoundary sectionName="Celebrações">
+          <CelebrationsBanner />
+        </SectionErrorBoundary>
+      </StaggeredItemLeft>
+
+      {/* Announcements Board - Important for communication */}
+      <StaggeredItemLeft>
+        <SectionErrorBoundary sectionName="Anúncios">
+          <AnnouncementsBoard />
+        </SectionErrorBoundary>
+      </StaggeredItemLeft>
+
       {/* Social Feed - Above the fold, render immediately */}
       <StaggeredItemLeft>
         <SectionErrorBoundary sectionName="Feed Social">
           <SocialFeed limit={20} />
+        </SectionErrorBoundary>
+      </StaggeredItemLeft>
+
+      {/* Goals Widget - OKRs overview */}
+      <StaggeredItemLeft>
+        <SectionErrorBoundary sectionName="Metas & OKRs">
+          <GoalsWidget />
         </SectionErrorBoundary>
       </StaggeredItemLeft>
 
@@ -39,6 +65,15 @@ export const DashboardLeftColumn = memo(function DashboardLeftColumn() {
         <SectionErrorBoundary sectionName="Quests Diárias">
           <DailyQuests />
         </SectionErrorBoundary>
+      </StaggeredItemLeft>
+
+      {/* Pulse Survey Widget */}
+      <StaggeredItemLeft>
+        <LazyWidget fallbackHeight="200px">
+          <SectionErrorBoundary sectionName="Pulse Survey">
+            <PulseSurveyWidget />
+          </SectionErrorBoundary>
+        </LazyWidget>
       </StaggeredItemLeft>
 
       {/* Peer Recognition - Below the fold on most devices */}
