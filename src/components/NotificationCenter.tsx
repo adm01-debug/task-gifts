@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   useNotifications, 
   useMarkAsRead, 
@@ -216,9 +217,17 @@ export const NotificationCenter = () => {
         {/* Notifications List */}
         <ScrollArea className="max-h-80">
           {isLoading ? (
-            <div className="p-8 text-center">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs text-muted-foreground mt-2">Carregando...</p>
+            <div className="space-y-1">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="p-3 flex items-start gap-3">
+                  <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-2 w-16" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center">

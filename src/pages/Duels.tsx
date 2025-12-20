@@ -526,73 +526,77 @@ const Duels = () => {
 
       <main className="container max-w-4xl mx-auto px-6 py-8 space-y-8">
         {/* Active Duels */}
-        <section>
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-success" />
-            Duelos Ativos
-            {activeDuels.length > 0 && (
-              <span className="text-sm font-normal text-muted-foreground">
-                ({activeDuels.length})
-              </span>
-            )}
-          </h2>
+        <SectionErrorBoundary sectionName="Duelos Ativos">
+          <section>
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-success" />
+              Duelos Ativos
+              {activeDuels.length > 0 && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  ({activeDuels.length})
+                </span>
+              )}
+            </h2>
 
-          {loadingDuels ? (
-            <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-          ) : activeDuels.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-2xl border border-border">
-              <Swords className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">Nenhum duelo ativo</p>
-              <Button onClick={() => setDialogOpen(true)}>
-                Criar Primeiro Duelo
-              </Button>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {activeDuels.map(duel => {
-                const isChallenger = duel.challenger_id === user!.id;
-                const opponentName = isChallenger 
-                  ? (duel.opponent?.display_name || "Oponente")
-                  : (duel.challenger?.display_name || "Desafiante");
-                
-                return (
+            {loadingDuels ? (
+              <div className="text-center py-8 text-muted-foreground">Carregando...</div>
+            ) : activeDuels.length === 0 ? (
+              <div className="text-center py-12 bg-card rounded-2xl border border-border">
+                <Swords className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-4">Nenhum duelo ativo</p>
+                <Button onClick={() => setDialogOpen(true)}>
+                  Criar Primeiro Duelo
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {activeDuels.map(duel => {
+                  const isChallenger = duel.challenger_id === user!.id;
+                  const opponentName = isChallenger 
+                    ? (duel.opponent?.display_name || "Oponente")
+                    : (duel.challenger?.display_name || "Desafiante");
+                  
+                  return (
+                    <DuelCard
+                      key={duel.id}
+                      duel={duel}
+                      userId={user!.id}
+                      onAccept={() => {
+                        setPendingAction({ duelId: duel.id, type: 'accept' });
+                        acceptDuel.mutate({ duelId: duel.id, userId: user!.id }, {
+                          onSettled: () => setPendingAction(null),
+                        });
+                      }}
+                      onDecline={() => handleDeclineClick(duel.id, opponentName)}
+                      onCancel={() => handleCancelClick(duel.id, opponentName)}
+                      pendingAction={pendingAction}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </SectionErrorBoundary>
+
+        {/* History */}
+        {completedDuels.length > 0 && (
+          <SectionErrorBoundary sectionName="Histórico de Duelos">
+            <section>
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-gold" />
+                Histórico
+              </h2>
+              <div className="grid gap-4 md:grid-cols-2">
+                {completedDuels.slice(0, 6).map(duel => (
                   <DuelCard
                     key={duel.id}
                     duel={duel}
                     userId={user!.id}
-                    onAccept={() => {
-                      setPendingAction({ duelId: duel.id, type: 'accept' });
-                      acceptDuel.mutate({ duelId: duel.id, userId: user!.id }, {
-                        onSettled: () => setPendingAction(null),
-                      });
-                    }}
-                    onDecline={() => handleDeclineClick(duel.id, opponentName)}
-                    onCancel={() => handleCancelClick(duel.id, opponentName)}
-                    pendingAction={pendingAction}
                   />
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* History */}
-        {completedDuels.length > 0 && (
-          <section>
-            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-gold" />
-              Histórico
-            </h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              {completedDuels.slice(0, 6).map(duel => (
-                <DuelCard
-                  key={duel.id}
-                  duel={duel}
-                  userId={user!.id}
-                />
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
+          </SectionErrorBoundary>
         )}
       </main>
       </div>
