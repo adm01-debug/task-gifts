@@ -9,6 +9,7 @@ import { MoodTrackerWidget } from "@/components/MoodTrackerWidget";
 import { CelebrationsBanner } from "@/components/CelebrationsBanner";
 import { PulseSurveyWidget } from "@/components/PulseSurveyWidget";
 import { AnnouncementsBoard } from "@/components/AnnouncementsBoard";
+import { AutoChallengesWidget } from "@/components/AutoChallengesWidget";
 import { StaggeredContainer, StaggeredItemLeft } from "@/components/StaggeredContainer";
 import { LazyWidget } from "./LazyWidget";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
@@ -29,6 +30,13 @@ export const DashboardLeftColumn = memo(function DashboardLeftColumn() {
       <StaggeredItemLeft>
         <SectionErrorBoundary sectionName="Celebrações">
           <CelebrationsBanner />
+        </SectionErrorBoundary>
+      </StaggeredItemLeft>
+
+      {/* Auto Challenges Widget - Gamified weekly challenges */}
+      <StaggeredItemLeft>
+        <SectionErrorBoundary sectionName="Desafios Semanais">
+          <AutoChallengesWidget />
         </SectionErrorBoundary>
       </StaggeredItemLeft>
 

@@ -41,6 +41,7 @@ import { CompetencyRadar } from "@/components/CompetencyRadar";
 import { TeamCompetencyDashboard } from "@/components/manager/TeamCompetencyDashboard";
 import { PDIAlertsPanel } from "@/components/admin/PDIAlertsPanel";
 import { ManagerConsolidatedDashboard } from "@/components/manager/ManagerConsolidatedDashboard";
+import { AICopilotDashboard } from "@/components/manager/AICopilotDashboard";
 import { TeamCertificationsPanel } from "@/components/TeamCertificationsPanel";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -426,8 +427,12 @@ export default function ManagerDashboard() {
         </div>
 
         {/* Tabs for different sections */}
-        <Tabs defaultValue="consolidated" className="space-y-6">
-          <TabsList className="bg-muted/50">
+        <Tabs defaultValue="copilot" className="space-y-6">
+          <TabsList className="bg-muted/50 flex-wrap">
+            <TabsTrigger value="copilot" className="gap-2">
+              <Brain className="h-4 w-4" />
+              IA Copilot
+            </TabsTrigger>
             <TabsTrigger value="consolidated" className="gap-2">
               <BarChart3 className="h-4 w-4" />
               Consolidado
@@ -437,8 +442,8 @@ export default function ManagerDashboard() {
               Equipe
             </TabsTrigger>
             <TabsTrigger value="churn" className="gap-2">
-              <Brain className="h-4 w-4" />
-              Predição IA
+              <AlertTriangle className="h-4 w-4" />
+              Predição Churn
             </TabsTrigger>
             <TabsTrigger value="competencies" className="gap-2">
               <Target className="h-4 w-4" />
@@ -453,6 +458,13 @@ export default function ManagerDashboard() {
               Quests
             </TabsTrigger>
           </TabsList>
+
+          {/* AI Copilot Tab - NEW */}
+          <TabsContent value="copilot">
+            <SectionErrorBoundary sectionName="IA Copilot">
+              <AICopilotDashboard />
+            </SectionErrorBoundary>
+          </TabsContent>
 
           {/* Consolidated Tab */}
           <TabsContent value="consolidated">
