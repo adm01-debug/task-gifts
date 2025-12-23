@@ -1826,6 +1826,163 @@ export type Database = {
         }
         Relationships: []
       }
+      penalty_rules: {
+        Row: {
+          coin_penalty_fixed: number | null
+          coin_penalty_percent: number | null
+          created_at: string
+          description: string | null
+          escalation_multiplier: number | null
+          id: string
+          is_active: boolean
+          is_escalating: boolean
+          name: string
+          penalty_type: string
+          trigger_condition: string
+          updated_at: string
+          xp_penalty_fixed: number | null
+          xp_penalty_percent: number | null
+        }
+        Insert: {
+          coin_penalty_fixed?: number | null
+          coin_penalty_percent?: number | null
+          created_at?: string
+          description?: string | null
+          escalation_multiplier?: number | null
+          id?: string
+          is_active?: boolean
+          is_escalating?: boolean
+          name: string
+          penalty_type: string
+          trigger_condition: string
+          updated_at?: string
+          xp_penalty_fixed?: number | null
+          xp_penalty_percent?: number | null
+        }
+        Update: {
+          coin_penalty_fixed?: number | null
+          coin_penalty_percent?: number | null
+          created_at?: string
+          description?: string | null
+          escalation_multiplier?: number | null
+          id?: string
+          is_active?: boolean
+          is_escalating?: boolean
+          name?: string
+          penalty_type?: string
+          trigger_condition?: string
+          updated_at?: string
+          xp_penalty_fixed?: number | null
+          xp_penalty_percent?: number | null
+        }
+        Relationships: []
+      }
+      position_task_templates: {
+        Row: {
+          coin_reward: number
+          created_at: string
+          created_by: string
+          deadline_hours: number | null
+          description: string | null
+          expected_duration_minutes: number | null
+          frequency: string
+          id: string
+          is_active: boolean
+          position_id: string
+          priority: string
+          title: string
+          updated_at: string
+          xp_penalty_late: number
+          xp_penalty_rework: number
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          created_at?: string
+          created_by: string
+          deadline_hours?: number | null
+          description?: string | null
+          expected_duration_minutes?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          position_id: string
+          priority?: string
+          title: string
+          updated_at?: string
+          xp_penalty_late?: number
+          xp_penalty_rework?: number
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          created_at?: string
+          created_by?: string
+          deadline_hours?: number | null
+          description?: string | null
+          expected_duration_minutes?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          position_id?: string
+          priority?: string
+          title?: string
+          updated_at?: string
+          xp_penalty_late?: number
+          xp_penalty_rework?: number
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_task_templates_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      positions: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          level: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level?: number
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level?: number
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "positions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -2453,6 +2610,130 @@ export type Database = {
         }
         Relationships: []
       }
+      task_penalties: {
+        Row: {
+          applied_by: string | null
+          coins_deducted: number
+          created_at: string
+          id: string
+          penalty_type: string
+          reason: string | null
+          task_score_id: string | null
+          user_id: string
+          xp_deducted: number
+        }
+        Insert: {
+          applied_by?: string | null
+          coins_deducted?: number
+          created_at?: string
+          id?: string
+          penalty_type: string
+          reason?: string | null
+          task_score_id?: string | null
+          user_id: string
+          xp_deducted?: number
+        }
+        Update: {
+          applied_by?: string | null
+          coins_deducted?: number
+          created_at?: string
+          id?: string
+          penalty_type?: string
+          reason?: string | null
+          task_score_id?: string | null
+          user_id?: string
+          xp_deducted?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_penalties_task_score_id_fkey"
+            columns: ["task_score_id"]
+            isOneToOne: false
+            referencedRelation: "task_scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_scores: {
+        Row: {
+          assigned_at: string
+          bitrix_metadata: Json | null
+          bitrix_task_id: string | null
+          coins_earned: number
+          completed_at: string | null
+          created_at: string
+          deadline_at: string | null
+          description: string | null
+          id: string
+          is_late: boolean
+          late_hours: number | null
+          rework_count: number
+          source: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["task_completion_status"]
+          task_template_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          xp_earned: number
+          xp_penalty: number
+        }
+        Insert: {
+          assigned_at?: string
+          bitrix_metadata?: Json | null
+          bitrix_task_id?: string | null
+          coins_earned?: number
+          completed_at?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          description?: string | null
+          id?: string
+          is_late?: boolean
+          late_hours?: number | null
+          rework_count?: number
+          source?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["task_completion_status"]
+          task_template_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          xp_earned?: number
+          xp_penalty?: number
+        }
+        Update: {
+          assigned_at?: string
+          bitrix_metadata?: Json | null
+          bitrix_task_id?: string | null
+          coins_earned?: number
+          completed_at?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          description?: string | null
+          id?: string
+          is_late?: boolean
+          late_hours?: number | null
+          rework_count?: number
+          source?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["task_completion_status"]
+          task_template_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          xp_earned?: number
+          xp_penalty?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_scores_task_template_id_fkey"
+            columns: ["task_template_id"]
+            isOneToOne: false
+            referencedRelation: "position_task_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           department_id: string
@@ -2925,6 +3206,44 @@ export type Database = {
           },
         ]
       }
+      user_positions: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          is_primary: boolean
+          position_id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          is_primary?: boolean
+          position_id: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          is_primary?: boolean
+          position_id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_positions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -3046,6 +3365,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_task_penalty: {
+        Args: {
+          p_applied_by?: string
+          p_coins_deducted?: number
+          p_penalty_type: string
+          p_reason?: string
+          p_task_score_id: string
+          p_user_id: string
+          p_xp_deducted: number
+        }
+        Returns: string
+      }
+      complete_task_score: {
+        Args: {
+          p_status?: Database["public"]["Enums"]["task_completion_status"]
+          p_task_score_id: string
+        }
+        Returns: Json
+      }
       get_department_metrics: { Args: never; Returns: Json }
       get_executive_metrics: { Args: never; Returns: Json }
       get_monthly_trends: { Args: never; Returns: Json }
@@ -3112,6 +3450,12 @@ export type Database = {
       quest_status: "draft" | "active" | "archived"
       reward_category: "product" | "benefit" | "experience"
       reward_rarity: "common" | "rare" | "epic" | "legendary"
+      task_completion_status:
+        | "pending"
+        | "on_time"
+        | "late"
+        | "rejected"
+        | "rework"
       trail_status: "draft" | "published" | "archived"
     }
     CompositeTypes: {
@@ -3280,6 +3624,13 @@ export const Constants = {
       quest_status: ["draft", "active", "archived"],
       reward_category: ["product", "benefit", "experience"],
       reward_rarity: ["common", "rare", "epic", "legendary"],
+      task_completion_status: [
+        "pending",
+        "on_time",
+        "late",
+        "rejected",
+        "rework",
+      ],
       trail_status: ["draft", "published", "archived"],
     },
   },
