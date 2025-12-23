@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/services/loggingService";
 
 export interface HighPotentialScore {
   userId: string;
@@ -399,7 +400,7 @@ export const highPotentialService = {
           recommendation,
         });
       } catch (error) {
-        console.error(`Error processing user ${profile.id}:`, error);
+        logger.apiError(`Processing high potential user ${profile.id}`, error, "HighPotentialService");
       }
     }
 

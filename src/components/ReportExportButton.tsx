@@ -51,8 +51,7 @@ export function ReportExportButton({
       toast.success(`Relatório exportado como ${format.toUpperCase()}`, {
         description: "O download foi iniciado automaticamente.",
       });
-    } catch (error) {
-      console.error("Export error:", error);
+    } catch {
       toast.error("Erro ao exportar relatório", {
         description: "Tente novamente em alguns instantes.",
       });
