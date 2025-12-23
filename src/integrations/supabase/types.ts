@@ -245,6 +245,56 @@ export type Database = {
           },
         ]
       }
+      api_request_logs: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          duration_ms: number | null
+          endpoint: string
+          id: string
+          ip_address: string | null
+          method: string
+          request_body: Json | null
+          response_body: Json | null
+          response_status: number
+          user_agent: string | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          endpoint: string
+          id?: string
+          ip_address?: string | null
+          method: string
+          request_body?: Json | null
+          response_body?: Json | null
+          response_status: number
+          user_agent?: string | null
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          endpoint?: string
+          id?: string
+          ip_address?: string | null
+          method?: string
+          request_body?: Json | null
+          response_body?: Json | null
+          response_status?: number
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_request_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "external_api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_records: {
         Row: {
           check_in: string
@@ -1004,6 +1054,134 @@ export type Database = {
           xp_reward?: number
         }
         Relationships: []
+      }
+      external_api_keys: {
+        Row: {
+          api_key: string
+          api_secret: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          name: string
+          permissions: Json
+          rate_limit_per_minute: number
+          system_type: string
+          updated_at: string
+        }
+        Insert: {
+          api_key: string
+          api_secret: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name: string
+          permissions?: Json
+          rate_limit_per_minute?: number
+          system_type?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string
+          api_secret?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          permissions?: Json
+          rate_limit_per_minute?: number
+          system_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      external_tasks: {
+        Row: {
+          api_key_id: string | null
+          category: string | null
+          coin_reward: number
+          completed_at: string | null
+          created_at: string
+          deadline_at: string | null
+          description: string | null
+          external_id: string
+          external_system: string
+          id: string
+          metadata: Json | null
+          priority: string | null
+          started_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_email: string
+          user_id: string | null
+          xp_penalty_late: number
+          xp_penalty_rework: number
+          xp_reward: number
+        }
+        Insert: {
+          api_key_id?: string | null
+          category?: string | null
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          description?: string | null
+          external_id: string
+          external_system: string
+          id?: string
+          metadata?: Json | null
+          priority?: string | null
+          started_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_email: string
+          user_id?: string | null
+          xp_penalty_late?: number
+          xp_penalty_rework?: number
+          xp_reward?: number
+        }
+        Update: {
+          api_key_id?: string | null
+          category?: string | null
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          description?: string | null
+          external_id?: string
+          external_system?: string
+          id?: string
+          metadata?: Json | null
+          priority?: string | null
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string | null
+          xp_penalty_late?: number
+          xp_penalty_rework?: number
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_tasks_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "external_api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feedback_cycles: {
         Row: {
@@ -3306,6 +3484,115 @@ export type Database = {
           },
         ]
       }
+      webhook_delivery_logs: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          event_type: string
+          id: string
+          payload: Json
+          response_body: string | null
+          response_status: number | null
+          subscription_id: string | null
+          success: boolean
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          payload: Json
+          response_body?: string | null
+          response_status?: number | null
+          subscription_id?: string | null
+          success?: boolean
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          subscription_id?: string | null
+          success?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_delivery_logs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_subscriptions: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          events: string[]
+          headers: Json | null
+          id: string
+          is_active: boolean
+          last_status: number | null
+          last_triggered_at: string | null
+          name: string
+          retry_count: number
+          secret: string
+          timeout_seconds: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          events?: string[]
+          headers?: Json | null
+          id?: string
+          is_active?: boolean
+          last_status?: number | null
+          last_triggered_at?: string | null
+          name: string
+          retry_count?: number
+          secret: string
+          timeout_seconds?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          events?: string[]
+          headers?: Json | null
+          id?: string
+          is_active?: boolean
+          last_status?: number | null
+          last_triggered_at?: string | null
+          name?: string
+          retry_count?: number
+          secret?: string
+          timeout_seconds?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_subscriptions_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "external_api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weekly_challenges: {
         Row: {
           challenger_id: string
@@ -3377,6 +3664,15 @@ export type Database = {
         }
         Returns: string
       }
+      complete_external_task: {
+        Args: {
+          p_external_id: string
+          p_external_system: string
+          p_metadata?: Json
+          p_status?: string
+        }
+        Returns: Json
+      }
       complete_task_score: {
         Args: {
           p_status?: Database["public"]["Enums"]["task_completion_status"]
@@ -3386,6 +3682,10 @@ export type Database = {
       }
       get_department_metrics: { Args: never; Returns: Json }
       get_executive_metrics: { Args: never; Returns: Json }
+      get_leaderboard_api: {
+        Args: { p_department_id?: string; p_limit?: number }
+        Returns: Json
+      }
       get_monthly_trends: { Args: never; Returns: Json }
       get_quiz_category_stats: {
         Args: never
@@ -3398,6 +3698,7 @@ export type Database = {
           total_answers: number
         }[]
       }
+      get_user_stats_api: { Args: { p_user_email: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3409,7 +3710,21 @@ export type Database = {
         Args: { _department_id: string; _user_id: string }
         Returns: boolean
       }
+      process_external_task: {
+        Args: { p_external_task_id: string }
+        Returns: Json
+      }
       update_certification_statuses: { Args: never; Returns: undefined }
+      validate_api_key: {
+        Args: { p_api_key: string; p_api_secret: string }
+        Returns: {
+          id: string
+          name: string
+          permissions: Json
+          rate_limit_per_minute: number
+          system_type: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "manager" | "employee"
