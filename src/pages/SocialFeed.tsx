@@ -39,6 +39,9 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import { useSocialFeed } from "@/hooks/useSocialFeed";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -70,6 +73,7 @@ export default function SocialFeedPage() {
   const { user, loading: authLoading } = useAuth();
   const { activities, isLoading, refetch } = useSocialFeed(100);
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
+  const seoData = useSEO();
   
   // Filters
   const [activityType, setActivityType] = useState<ActivityType>("all");
@@ -139,7 +143,8 @@ export default function SocialFeedPage() {
   }), [filteredActivities]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Feed Social" className="min-h-screen bg-background">
+      <SEOHead {...seoData} />
       {/* Header */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
         <div className="flex items-center justify-between px-4 md:px-6 py-4">
@@ -469,6 +474,6 @@ export default function SocialFeedPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

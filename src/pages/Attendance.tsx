@@ -14,6 +14,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -51,6 +54,7 @@ import {
 
 const Attendance = () => {
   const navigate = useNavigate();
+  const seoData = useSEO();
   const [selectedMonth] = useState(new Date());
   
   const { data: streak } = useUserStreak();
@@ -138,7 +142,8 @@ const Attendance = () => {
     480; // 8:00 default
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Ponto" className="min-h-screen bg-background">
+      <SEOHead {...seoData} />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4">
@@ -536,7 +541,7 @@ const Attendance = () => {
           </CardContent>
         </Card>
       </main>
-    </div>
+    </PageWrapper>
   );
 };
 
