@@ -39,7 +39,7 @@ import { QuestsList } from "@/components/manager/QuestsList";
 import { ChurnPredictionPanel } from "@/components/ChurnPredictionPanel";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
 import { TeamCompetencyDashboard } from "@/components/manager/TeamCompetencyDashboard";
-import { CompetencyAlertsPanel } from "@/components/CompetencyAlertsPanel";
+import { PDIAlertsPanel } from "@/components/admin/PDIAlertsPanel";
 import { ManagerConsolidatedDashboard } from "@/components/manager/ManagerConsolidatedDashboard";
 import { TeamCertificationsPanel } from "@/components/TeamCertificationsPanel";
 import { cn } from "@/lib/utils";
@@ -528,8 +528,8 @@ export default function ManagerDashboard() {
                 </SectionErrorBoundary>
               </div>
               <div>
-                <SectionErrorBoundary sectionName="Alertas de Competências">
-                  <CompetencyAlertsPanel />
+                <SectionErrorBoundary sectionName="Alertas de PDI">
+                  <PDIAlertsPanel />
                 </SectionErrorBoundary>
               </div>
             </div>
