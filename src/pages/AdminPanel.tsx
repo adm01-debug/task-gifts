@@ -59,6 +59,7 @@ import { GamificationManager } from "@/components/admin/GamificationManager";
 import { NineBoxMatrix } from "@/components/admin/NineBoxMatrix";
 import { DevelopmentPlanManager } from "@/components/admin/DevelopmentPlanManager";
 import { ENPSDashboard } from "@/components/admin/ENPSDashboard";
+import { PDIAlertsPanel } from "@/components/admin/PDIAlertsPanel";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -238,7 +239,11 @@ function AdminPanelContent() {
             </TabsTrigger>
             <TabsTrigger value="alerts" className="gap-2">
               <AlertTriangle className="h-4 w-4" />
-              Alertas
+              Alertas Sistema
+            </TabsTrigger>
+            <TabsTrigger value="pdi-alerts" className="gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              Alertas PDI
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
@@ -400,6 +405,11 @@ function AdminPanelContent() {
           {/* Alerts Tab */}
           <TabsContent value="alerts">
             <AdminAlertsPanel />
+          </TabsContent>
+
+          {/* PDI Alerts Tab */}
+          <TabsContent value="pdi-alerts">
+            <PDIAlertsPanel />
           </TabsContent>
 
           {/* History Tab */}

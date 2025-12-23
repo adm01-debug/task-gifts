@@ -40,6 +40,7 @@ import { ChurnPredictionPanel } from "@/components/ChurnPredictionPanel";
 import { CompetencyRadar } from "@/components/CompetencyRadar";
 import { TeamCompetencyDashboard } from "@/components/manager/TeamCompetencyDashboard";
 import { CompetencyAlertsPanel } from "@/components/CompetencyAlertsPanel";
+import { ManagerConsolidatedDashboard } from "@/components/manager/ManagerConsolidatedDashboard";
 import { TeamCertificationsPanel } from "@/components/TeamCertificationsPanel";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -425,8 +426,12 @@ export default function ManagerDashboard() {
         </div>
 
         {/* Tabs for different sections */}
-        <Tabs defaultValue="team" className="space-y-6">
+        <Tabs defaultValue="consolidated" className="space-y-6">
           <TabsList className="bg-muted/50">
+            <TabsTrigger value="consolidated" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Consolidado
+            </TabsTrigger>
             <TabsTrigger value="team" className="gap-2">
               <Users className="h-4 w-4" />
               Equipe
@@ -448,6 +453,11 @@ export default function ManagerDashboard() {
               Quests
             </TabsTrigger>
           </TabsList>
+
+          {/* Consolidated Tab */}
+          <TabsContent value="consolidated">
+            <ManagerConsolidatedDashboard />
+          </TabsContent>
 
           <TabsContent value="team" className="space-y-6">
             <div className="grid lg:grid-cols-3 gap-6">
