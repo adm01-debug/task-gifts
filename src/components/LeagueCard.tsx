@@ -1,15 +1,23 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo, useCallback, memo } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLeagues } from "@/hooks/useLeagues";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { Trophy, TrendingUp, TrendingDown, Minus, Crown, Zap } from "lucide-react";
 
-export function LeagueCard() {
+interface LeaderboardUser {
+  user_id: string;
+  weekly_xp: number;
+  profile?: {
+    display_name?: string;
+    avatar_url?: string;
+  };
+}
+
+export const LeagueCard = memo(function LeagueCard() {
   const { leagues, myLeague, leaderboard, isLoading } = useLeagues();
   const { playAchievementSound, playLevelUpSound } = useSoundEffects();
   const previousPositionRef = useRef<number | null>(null);
@@ -67,23 +75,31 @@ export function LeagueCard() {
     );
   }
 
-  const currentLeague = leagues.find(l => l.id === myLeague.league_id);
-  const userPosition = leaderboard.findIndex(u => u.user_id === myLeague.user_id) + 1;
+  const currentLeague = useMemo(() => 
+    leagues.find(l => l.id === myLeague.league_id), 
+    [leagues, myLeague.league_id]
+  );
+  
+  const userPosition = useMemo(() => 
+    leaderboard.findIndex(u => u.user_id === myLeague.user_id) + 1,
+    [leaderboard, myLeague.user_id]
+  );
+  
   const promotionZone = currentLeague?.promotion_slots || 3;
   const demotionZone = leaderboard.length - (currentLeague?.demotion_slots || 3);
 
-  const getPositionStyle = (position: number) => {
+  const getPositionStyle = useCallback((position: number) => {
     if (position <= promotionZone) return "text-green-500 bg-green-500/10";
     if (position > demotionZone) return "text-red-500 bg-red-500/10";
     return "text-muted-foreground bg-muted";
-  };
+  }, [promotionZone, demotionZone]);
 
-  const getPositionIcon = (position: number) => {
+  const getPositionIcon = useCallback((position: number) => {
     if (position === 1) return <Crown className="h-4 w-4 text-amber-500" />;
     if (position <= promotionZone) return <TrendingUp className="h-4 w-4 text-green-500" />;
     if (position > demotionZone) return <TrendingDown className="h-4 w-4 text-red-500" />;
     return <Minus className="h-4 w-4 text-muted-foreground" />;
-  };
+  }, [promotionZone, demotionZone]);
 
   return (
     <Card>
@@ -155,13 +171,13 @@ export function LeagueCard() {
                     {position}
                   </div>
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={(user as any).profile?.avatar_url || undefined} />
+                    <AvatarImage src={(user as LeaderboardUser).profile?.avatar_url || undefined} />
                     <AvatarFallback>
-                      {((user as any).profile?.display_name as string)?.charAt(0) || '?'}
+                      {(user as LeaderboardUser).profile?.display_name?.charAt(0) || '?'}
                     </AvatarFallback>
                   </Avatar>
                   <span className={`flex-1 truncate ${isCurrentUser ? 'font-semibold' : ''}`}>
-                    {(user as any).profile?.display_name || 'Usuário'}
+                    {(user as LeaderboardUser).profile?.display_name || 'Usuário'}
                   </span>
                   <span className="text-sm font-medium text-muted-foreground">
                     {user.weekly_xp.toLocaleString()} XP
@@ -178,4 +194,4 @@ export function LeagueCard() {
       </CardContent>
     </Card>
   );
-}
+});
