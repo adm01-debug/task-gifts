@@ -6,13 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { CATEGORY_CONFIG, type Announcement } from "@/services/announcementsService";
 import { Megaphone, Pin, Plus, Eye, MessageCircle } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const REACTION_EMOJIS = ['👍', '❤️', '🎉', '🚀', '👀'];
 
@@ -113,8 +115,8 @@ export function AnnouncementsBoard() {
   if (isLoading) {
     return (
       <Card>
-        <CardContent className="p-8 text-center text-muted-foreground">
-          Carregando anúncios...
+        <CardContent className="p-0">
+          <LoadingState message="Carregando anúncios..." />
         </CardContent>
       </Card>
     );
@@ -140,6 +142,9 @@ export function AnnouncementsBoard() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Novo Anúncio</DialogTitle>
+              <DialogDescription>
+                Crie um novo anúncio para compartilhar com a equipe.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <Input

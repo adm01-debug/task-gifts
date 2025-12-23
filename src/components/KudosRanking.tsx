@@ -5,6 +5,7 @@ import { useRecentKudos, useKudosBadges } from "@/hooks/useKudos";
 import { useProfiles } from "@/hooks/useProfiles";
 import { subMonths, isAfter } from "date-fns";
 import { Skeleton, SkeletonRankingList } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface RankedUser {
   userId: string;
@@ -180,10 +181,12 @@ export const KudosRanking = () => {
       <div className="p-4 space-y-4">
         {/* Top Recognized Users */}
         {rankedUsers.length === 0 ? (
-          <div className="text-center py-6">
-            <Heart className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Nenhum reconhecimento este mês</p>
-          </div>
+          <EmptyState
+            icon={Heart}
+            title="Nenhum reconhecimento este mês"
+            description="Seja o primeiro a reconhecer um colega!"
+            compact
+          />
         ) : (
           <div className="space-y-2">
             {rankedUsers.map((user, index) => (

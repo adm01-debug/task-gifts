@@ -10,6 +10,7 @@ import { useProfiles } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { SkeletonKudosList } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { KudosBadge } from "@/services/kudosService";
@@ -305,11 +306,12 @@ export const PeerRecognition = () => {
       {isLoading ? (
           <SkeletonKudosList count={5} className="p-0" />
         ) : recentKudos.length === 0 ? (
-          <div className="p-8 text-center">
-            <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Nenhum reconhecimento ainda</p>
-            <p className="text-xs text-muted-foreground/70">Seja o primeiro a reconhecer um colega!</p>
-          </div>
+          <EmptyState
+            icon={Users}
+            title="Nenhum reconhecimento ainda"
+            description="Seja o primeiro a reconhecer um colega!"
+            compact
+          />
         ) : (
           <div className="divide-y divide-border">
             <AnimatePresence mode="popLayout">

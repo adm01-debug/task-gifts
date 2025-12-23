@@ -12,6 +12,9 @@ import { useSaveQuizScore } from "@/hooks/useQuizScores";
 import { useQuizQuestionsWithOptions } from "@/hooks/useQuizQuestions";
 import { QuizQuestion as DbQuizQuestion } from "@/services/quizQuestionsService";
 import { toast } from "sonner";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 
 // Transform database questions to MagicCardQuiz format
 function transformToMagicQuestions(dbQuestions: DbQuizQuestion[]): QuizQuestion[] {
@@ -61,6 +64,7 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export default function DailyQuiz() {
+  const seoConfig = useSEO();
   const navigate = useNavigate();
   const [activeQuiz, setActiveQuiz] = useState<"magic" | "millionaire" | null>(null);
   const [completedToday, setCompletedToday] = useState({
@@ -127,7 +131,8 @@ export default function DailyQuiz() {
   const hasMillionaireQuestions = millionaireQuestions.length >= 5;
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Quiz Diário" className="min-h-screen bg-background">
+      <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
       <div className="container max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
@@ -348,6 +353,6 @@ export default function DailyQuiz() {
           </motion.div>
         )}
       </div>
-    </div>
+    </PageWrapper>
   );
 }
