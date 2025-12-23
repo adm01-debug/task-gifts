@@ -19,10 +19,12 @@ import { usePulseSurveys } from "@/hooks/usePulseSurveys";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { SurveyQuestion } from "@/services/pulseSurveysService";
 
 export function SurveyCreator() {
-  const { activeSurveys: surveys, isLoading } = usePulseSurveys();
+  const { activeSurveys: surveys, isLoading, createSurvey, closeSurvey } = usePulseSurveys();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -31,29 +33,66 @@ export function SurveyCreator() {
     ends_at: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement create survey
-    toast.success("Survey criado com sucesso!");
-    setIsDialogOpen(false);
-    setFormData({
-      title: "",
-      description: "",
-      is_anonymous: true,
-      starts_at: "",
-      ends_at: "",
-    });
+    
+    if (!formData.title.trim()) {
+      toast.error("Título é obrigatório");
+      return;
+    }
+    
+    if (!formData.ends_at) {
+      toast.error("Data de término é obrigatória");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Create default questions for pulse survey
+      const defaultQuestions: SurveyQuestion[] = [
+        { id: crypto.randomUUID(), question: "Como você avalia seu nível de satisfação no trabalho hoje?", type: "rating", required: true },
+        { id: crypto.randomUUID(), question: "Em uma escala de 0-10, qual a probabilidade de você recomendar a empresa como um bom lugar para trabalhar?", type: "nps", required: true },
+        { id: crypto.randomUUID(), question: "Há algo que gostaria de compartilhar ou sugerir?", type: "text", required: false },
+      ];
+      
+      createSurvey({
+        title: formData.title,
+        description: formData.description || undefined,
+        questions: defaultQuestions,
+        is_anonymous: formData.is_anonymous,
+        starts_at: formData.starts_at || undefined,
+        ends_at: formData.ends_at,
+      });
+      
+      setIsDialogOpen(false);
+      setFormData({
+        title: "",
+        description: "",
+        is_anonymous: true,
+        starts_at: "",
+        ends_at: "",
+      });
+    } catch (error) {
+      toast.error("Erro ao criar pesquisa");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleToggleStatus = (surveyId: string, currentStatus: string) => {
-    // TODO: Implement toggle status
-    toast.success(currentStatus === "active" ? "Survey pausado!" : "Survey ativado!");
+    if (currentStatus === "active") {
+      closeSurvey(surveyId);
+    } else {
+      toast.info("Pesquisa já está encerrada");
+    }
   };
 
   const statusColors: Record<string, string> = {
     draft: "bg-gray-500/10 text-gray-500",
     active: "bg-green-500/10 text-green-500",
     completed: "bg-blue-500/10 text-blue-500",
+    closed: "bg-blue-500/10 text-blue-500",
     paused: "bg-yellow-500/10 text-yellow-500",
   };
 
@@ -140,9 +179,13 @@ export function SurveyCreator() {
                   <X className="w-4 h-4 mr-2" />
                   Cancelar
                 </Button>
-                <Button type="submit">
-                  <Save className="w-4 h-4 mr-2" />
-                  Criar
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <span className="animate-spin mr-2">⏳</span>
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  {isSubmitting ? "Criando..." : "Criar"}
                 </Button>
               </div>
             </form>

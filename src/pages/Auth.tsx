@@ -5,11 +5,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { Gift, Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-
-const emailSchema = z.string().email("Email inválido");
-const passwordSchema = z.string().min(6, "Senha deve ter pelo menos 6 caracteres");
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { 
+  emailSchema, 
+  passwordSchema, 
+  loginSchema, 
+  signupSchema 
+} from "@/lib/authValidations";
 
 type AuthView = "login" | "signup" | "forgot-password";
 
@@ -20,7 +23,7 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; displayName?: string }>({});
 
   const { signIn, signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -43,17 +46,29 @@ const Auth = () => {
   }
 
   const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string; displayName?: string } = {};
     
-    const emailResult = emailSchema.safeParse(email);
-    if (!emailResult.success) {
-      newErrors.email = emailResult.error.errors[0].message;
-    }
-
-    if (view !== "forgot-password") {
-      const passwordResult = passwordSchema.safeParse(password);
-      if (!passwordResult.success) {
-        newErrors.password = passwordResult.error.errors[0].message;
+    if (view === "forgot-password") {
+      const emailResult = emailSchema.safeParse(email);
+      if (!emailResult.success) {
+        newErrors.email = emailResult.error.errors[0].message;
+      }
+    } else if (view === "login") {
+      const result = loginSchema.safeParse({ email, password });
+      if (!result.success) {
+        result.error.errors.forEach((err) => {
+          if (err.path[0] === "email") newErrors.email = err.message;
+          if (err.path[0] === "password") newErrors.password = err.message;
+        });
+      }
+    } else {
+      const result = signupSchema.safeParse({ email, password, displayName: displayName || undefined });
+      if (!result.success) {
+        result.error.errors.forEach((err) => {
+          if (err.path[0] === "email") newErrors.email = err.message;
+          if (err.path[0] === "password") newErrors.password = err.message;
+          if (err.path[0] === "displayName") newErrors.displayName = err.message;
+        });
       }
     }
 
@@ -293,6 +308,9 @@ const Auth = () => {
           </div>
           {errors.password && (
             <p className="text-xs text-destructive mt-1" role="alert">{errors.password}</p>
+          )}
+          {view === "signup" && (
+            <PasswordStrengthIndicator password={password} className="mt-3" />
           )}
         </div>
 

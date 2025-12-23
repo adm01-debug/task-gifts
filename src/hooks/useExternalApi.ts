@@ -33,7 +33,7 @@ export function useCreateApiKey() {
       queryClient.invalidateQueries({ queryKey: ['external-api-keys'] });
       toast.success('API Key criada com sucesso');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao criar API Key: ' + error.message);
     }
   });
@@ -51,7 +51,7 @@ export function useUpdateApiKey() {
       queryClient.invalidateQueries({ queryKey: ['external-api-keys'] });
       toast.success('API Key atualizada');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao atualizar: ' + error.message);
     }
   });
@@ -66,7 +66,7 @@ export function useDeleteApiKey() {
       queryClient.invalidateQueries({ queryKey: ['external-api-keys'] });
       toast.success('API Key excluída');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao excluir: ' + error.message);
     }
   });
@@ -81,7 +81,7 @@ export function useRegenerateApiSecret() {
       queryClient.invalidateQueries({ queryKey: ['external-api-keys'] });
       toast.success('Secret regenerado. Novo secret: ' + newSecret.substring(0, 20) + '...');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao regenerar: ' + error.message);
     }
   });
@@ -116,7 +116,7 @@ export function useCreateWebhook() {
       queryClient.invalidateQueries({ queryKey: ['webhook-subscriptions'] });
       toast.success('Webhook criado com sucesso');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao criar webhook: ' + error.message);
     }
   });
@@ -134,7 +134,7 @@ export function useUpdateWebhook() {
       queryClient.invalidateQueries({ queryKey: ['webhook-subscriptions'] });
       toast.success('Webhook atualizado');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao atualizar: ' + error.message);
     }
   });
@@ -149,7 +149,7 @@ export function useDeleteWebhook() {
       queryClient.invalidateQueries({ queryKey: ['webhook-subscriptions'] });
       toast.success('Webhook excluído');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao excluir: ' + error.message);
     }
   });

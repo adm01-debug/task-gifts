@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, ArrowLeft, TrendingUp, Users, Crown } from "lucide-react";
+import { Trophy, ArrowLeft, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLeagues } from "@/hooks/useLeagues";
 import { useNavigate } from "react-router-dom";
 import { LeagueCard } from "@/components/LeagueCard";
+import type { LeagueHistory } from "@/services/leaguesService";
 
 export default function Leagues() {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export default function Leagues() {
                 <p className="text-muted-foreground text-center py-8">Nenhum histórico ainda</p>
               ) : (
                 <div className="space-y-2">
-                  {history.map((entry: any) => (
+                  {history.map((entry: LeagueHistory) => (
                     <div key={entry.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                       <span>{entry.change_type === "promotion" ? "⬆️ Promovido" : entry.change_type === "demotion" ? "⬇️ Rebaixado" : "➡️ Mantido"}</span>
                       <span className="text-sm text-muted-foreground">{entry.weekly_xp} XP</span>
