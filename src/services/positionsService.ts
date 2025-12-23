@@ -1,4 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
+
+type PositionInsert = Database["public"]["Tables"]["positions"]["Insert"];
+type TaskTemplateInsert = Database["public"]["Tables"]["position_task_templates"]["Insert"];
+type TaskScoreInsert = Database["public"]["Tables"]["task_scores"]["Insert"];
+type PenaltyRuleInsert = Database["public"]["Tables"]["penalty_rules"]["Insert"];
+type TaskScoreStatus = Database["public"]["Tables"]["task_scores"]["Row"]["status"];
 
 export interface Position {
   id: string;
@@ -122,9 +129,16 @@ export const positionsService = {
   },
 
   async createPosition(position: Partial<Position>): Promise<Position> {
+    const insertData: PositionInsert = {
+      name: position.name || "",
+      description: position.description,
+      department_id: position.department_id,
+      level: position.level,
+      is_active: position.is_active,
+    };
     const { data, error } = await supabase
       .from("positions")
-      .insert(position as any)
+      .insert(insertData)
       .select("*, departments(name, color)")
       .single();
     if (error) throw error;
@@ -169,9 +183,24 @@ export const positionsService = {
   },
 
   async createTaskTemplate(template: Partial<PositionTaskTemplate>): Promise<PositionTaskTemplate> {
+    const insertData: TaskTemplateInsert = {
+      position_id: template.position_id || "",
+      title: template.title || "",
+      description: template.description,
+      frequency: template.frequency,
+      priority: template.priority,
+      expected_duration_minutes: template.expected_duration_minutes,
+      xp_reward: template.xp_reward,
+      coin_reward: template.coin_reward,
+      xp_penalty_late: template.xp_penalty_late,
+      xp_penalty_rework: template.xp_penalty_rework,
+      deadline_hours: template.deadline_hours,
+      is_active: template.is_active,
+      created_by: template.created_by || "",
+    };
     const { data, error } = await supabase
       .from("position_task_templates")
-      .insert(template as any)
+      .insert(insertData)
       .select("*, positions(name)")
       .single();
     if (error) throw error;
@@ -255,7 +284,7 @@ export const positionsService = {
       query = query.eq("user_id", userId);
     }
     if (status) {
-      query = query.eq("status", status as any);
+      query = query.eq("status", status as TaskScoreStatus);
     }
     
     const { data, error } = await query;
@@ -271,9 +300,18 @@ export const positionsService = {
   },
 
   async createTaskScore(taskScore: Partial<TaskScore>): Promise<TaskScore> {
+    const insertData: TaskScoreInsert = {
+      user_id: taskScore.user_id || "",
+      task_template_id: taskScore.task_template_id,
+      bitrix_task_id: taskScore.bitrix_task_id,
+      title: taskScore.title || "",
+      description: taskScore.description,
+      deadline_at: taskScore.deadline_at,
+      source: taskScore.source,
+    };
     const { data, error } = await supabase
       .from("task_scores")
-      .insert(taskScore as any)
+      .insert(insertData)
       .select()
       .single();
     if (error) throw error;
@@ -356,9 +394,22 @@ export const positionsService = {
   },
 
   async createPenaltyRule(rule: Partial<PenaltyRule>): Promise<PenaltyRule> {
+    const insertData: PenaltyRuleInsert = {
+      penalty_type: rule.penalty_type || "",
+      name: rule.name || "",
+      description: rule.description,
+      trigger_condition: rule.trigger_condition,
+      xp_penalty_percent: rule.xp_penalty_percent,
+      xp_penalty_fixed: rule.xp_penalty_fixed,
+      coin_penalty_percent: rule.coin_penalty_percent,
+      coin_penalty_fixed: rule.coin_penalty_fixed,
+      is_escalating: rule.is_escalating,
+      escalation_multiplier: rule.escalation_multiplier,
+      is_active: rule.is_active,
+    };
     const { data, error } = await supabase
       .from("penalty_rules")
-      .insert(rule as any)
+      .insert(insertData)
       .select()
       .single();
     if (error) throw error;
@@ -407,17 +458,18 @@ export const positionsService = {
     deadlineAt: string | null,
     metadata: Record<string, unknown>
   ): Promise<TaskScore> {
+    const insertData: TaskScoreInsert = {
+      user_id: userId,
+      bitrix_task_id: bitrixTaskId,
+      title,
+      description,
+      deadline_at: deadlineAt,
+      source: 'bitrix24',
+      bitrix_metadata: metadata as unknown as Database["public"]["Tables"]["task_scores"]["Insert"]["bitrix_metadata"]
+    };
     const { data, error } = await supabase
       .from("task_scores")
-      .insert({
-        user_id: userId,
-        bitrix_task_id: bitrixTaskId,
-        title,
-        description,
-        deadline_at: deadlineAt,
-        source: 'bitrix24',
-        bitrix_metadata: metadata
-      } as any)
+      .insert(insertData)
       .select()
       .single();
     

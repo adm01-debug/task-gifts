@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useChurnPrediction } from "@/hooks/useChurnPrediction";
 import { useDevelopmentPlans } from "@/hooks/useDevelopmentPlans";
@@ -61,6 +62,7 @@ interface CopilotSuggestion {
 }
 
 export function AICopilotDashboard() {
+  const navigate = useNavigate();
   const { data: profiles } = useProfiles();
   const { predictions } = useChurnPrediction();
   const { data: plans } = useDevelopmentPlans();
@@ -90,7 +92,7 @@ export function AICopilotDashboard() {
             actions: [
               {
                 label: "Agendar 1-on-1",
-                onClick: () => console.log("Navigate to checkins"),
+                onClick: () => navigate("/checkins"),
                 variant: "default",
               },
             ],
@@ -120,7 +122,7 @@ export function AICopilotDashboard() {
           actions: [
             {
               label: "Ver PDI",
-              onClick: () => console.log("Navigate to PDI"),
+              onClick: () => navigate("/admin?tab=development"),
               variant: "outline",
             },
           ],
@@ -146,7 +148,7 @@ export function AICopilotDashboard() {
             actions: [
               {
                 label: "Criar PDI",
-                onClick: () => console.log("Create PDI"),
+                onClick: () => navigate("/admin?tab=development"),
                 variant: "default",
               },
             ],
@@ -175,7 +177,7 @@ export function AICopilotDashboard() {
           actions: [
             {
               label: "Ver OKR",
-              onClick: () => console.log("Navigate to goal"),
+              onClick: () => navigate("/goals"),
               variant: "outline",
             },
           ],
@@ -200,7 +202,7 @@ export function AICopilotDashboard() {
           actions: [
             {
               label: "Plano de Retenção",
-              onClick: () => console.log("Retention plan"),
+              onClick: () => navigate("/admin?tab=development"),
               variant: "outline",
             },
           ],

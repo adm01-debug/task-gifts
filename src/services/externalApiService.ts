@@ -1,4 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
+
+type ExternalApiKeyInsert = Database["public"]["Tables"]["external_api_keys"]["Insert"];
+type ExternalApiKeyUpdate = Database["public"]["Tables"]["external_api_keys"]["Update"];
+type WebhookSubscriptionInsert = Database["public"]["Tables"]["webhook_subscriptions"]["Insert"];
+type WebhookSubscriptionUpdate = Database["public"]["Tables"]["webhook_subscriptions"]["Update"];
 
 export interface ExternalApiKey {
   id: string;
@@ -128,18 +134,20 @@ export const externalApiService = {
     const apiKey = generateApiKey();
     const apiSecret = generateApiSecret();
 
+    const insertData: ExternalApiKeyInsert = {
+      name,
+      description,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      system_type: systemType,
+      permissions,
+      rate_limit_per_minute: rateLimitPerMinute,
+      created_by: createdBy
+    };
+
     const { data, error } = await supabase
       .from('external_api_keys')
-      .insert({
-        name,
-        description,
-        api_key: apiKey,
-        api_secret: apiSecret,
-        system_type: systemType,
-        permissions,
-        rate_limit_per_minute: rateLimitPerMinute,
-        created_by: createdBy
-      } as any)
+      .insert(insertData)
       .select()
       .single();
     
@@ -151,9 +159,10 @@ export const externalApiService = {
     id: string,
     updates: Partial<Pick<ExternalApiKey, 'name' | 'description' | 'system_type' | 'permissions' | 'is_active' | 'rate_limit_per_minute'>>
   ): Promise<void> {
+    const updateData: ExternalApiKeyUpdate = updates;
     const { error } = await supabase
       .from('external_api_keys')
-      .update(updates as any)
+      .update(updateData)
       .eq('id', id);
     
     if (error) throw error;
@@ -171,9 +180,10 @@ export const externalApiService = {
   async regenerateApiSecret(id: string): Promise<string> {
     const newSecret = generateApiSecret();
     
+    const updateData: ExternalApiKeyUpdate = { api_secret: newSecret };
     const { error } = await supabase
       .from('external_api_keys')
-      .update({ api_secret: newSecret } as any)
+      .update(updateData)
       .eq('id', id);
     
     if (error) throw error;
@@ -205,16 +215,18 @@ export const externalApiService = {
   ): Promise<WebhookSubscription> {
     const secret = generateApiSecret();
 
+    const insertData: WebhookSubscriptionInsert = {
+      api_key_id: apiKeyId,
+      name,
+      url,
+      secret,
+      events,
+      headers: headers || {}
+    };
+
     const { data, error } = await supabase
       .from('webhook_subscriptions')
-      .insert({
-        api_key_id: apiKeyId,
-        name,
-        url,
-        secret,
-        events,
-        headers: headers || {}
-      } as any)
+      .insert(insertData)
       .select()
       .single();
     
@@ -226,9 +238,10 @@ export const externalApiService = {
     id: string,
     updates: Partial<Pick<WebhookSubscription, 'name' | 'url' | 'events' | 'is_active' | 'retry_count' | 'timeout_seconds' | 'headers'>>
   ): Promise<void> {
+    const updateData: WebhookSubscriptionUpdate = updates;
     const { error } = await supabase
       .from('webhook_subscriptions')
-      .update(updates as any)
+      .update(updateData)
       .eq('id', id);
     
     if (error) throw error;

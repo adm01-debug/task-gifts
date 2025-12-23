@@ -569,8 +569,7 @@ function EvaluationCard({
       toast.success("PDI gerado com sucesso!", {
         description: `Plano "${plan.title}" criado para ${profile?.display_name}`,
       });
-    } catch (error) {
-      console.error("Erro ao gerar PDI:", error);
+    } catch {
       toast.error("Erro ao gerar PDI", {
         description: "Não foi possível criar o plano de desenvolvimento.",
       });

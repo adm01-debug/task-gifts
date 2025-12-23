@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { LeagueCard } from "@/components/LeagueCard";
 import type { LeagueHistory } from "@/services/leaguesService";
 import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function Leagues() {
   const navigate = useNavigate();
@@ -13,6 +14,10 @@ export default function Leagues() {
 
   return (
     <PageWrapper pageName="Ligas" className="min-h-screen bg-background">
+      <SEOHead
+        title="Ligas & Divisões | Gamify"
+        description="Participe das ligas semanais e avance nas divisões competindo com outros usuários."
+      />
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="h-5 w-5" />

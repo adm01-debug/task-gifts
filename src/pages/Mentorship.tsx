@@ -11,7 +11,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
 import { 
   Users, 
   Trophy, 
@@ -574,17 +575,25 @@ export default function Mentorship() {
 
   if (isMobile) {
     return (
-      <div className="flex flex-col h-screen">
+      <PageWrapper pageName="Mentoria" className="flex flex-col h-screen">
+        <SEOHead
+          title="Mentoria Gamificada | Gamify"
+          description="Participe de mentorias gamificadas e ganhe recompensas aprendendo e ensinando."
+        />
         <MobileDrawer open={mobileDrawerOpen} onClose={() => setMobileDrawerOpen(false)} />
         {content}
-      </div>
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="flex min-h-screen w-full">
+    <PageWrapper pageName="Mentoria" className="flex min-h-screen w-full">
+      <SEOHead
+        title="Mentoria Gamificada | Gamify"
+        description="Participe de mentorias gamificadas e ganhe recompensas aprendendo e ensinando."
+      />
       <AppSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
       {content}
-    </div>
+    </PageWrapper>
   );
 }

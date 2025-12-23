@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 export type AuditAction = 
   | 'user_signup'
@@ -64,7 +65,7 @@ export const auditService = {
 
       const { error } = await supabase
         .from("audit_logs")
-        .insert(insertData as any);
+        .insert(insertData as Database["public"]["Tables"]["audit_logs"]["Insert"]);
       
       // Fire and forget - no console.error in production
     } catch {

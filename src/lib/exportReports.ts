@@ -184,7 +184,6 @@ export function exportToPDF(report: ReportData, options: ExportOptions = { forma
   // Open in new window for printing
   const printWindow = window.open("", "_blank");
   if (!printWindow) {
-    console.error("Could not open print window");
     return;
   }
   
@@ -417,7 +416,7 @@ export function exportReport(report: ReportData, options: ExportOptions): void {
       exportToPDF(report, options);
       break;
     default:
-      console.error(`Unknown export format: ${options.format}`);
+      break;
   }
 }
 
