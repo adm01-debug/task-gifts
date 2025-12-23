@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, Lock, CheckCircle2, Flame, Sparkles, Star } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BehavioralBadgesWidget } from "@/components/BehavioralBadgesWidget";
+import { PageWrapper, SectionWrapper } from "@/components/PageWrapper";
 const rarityConfig = {
   common: {
     label: "Comum",
@@ -79,7 +80,7 @@ export default function Achievements() {
   }
 
   return (
-    <div className="container max-w-4xl py-8 space-y-6">
+    <PageWrapper pageName="Conquistas" className="container max-w-4xl py-8 space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -186,7 +187,7 @@ export default function Achievements() {
           </TabsContent>
         ))}
       </Tabs>
-    </div>
+    </PageWrapper>
   );
 }
 
