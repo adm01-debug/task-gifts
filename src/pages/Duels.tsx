@@ -13,7 +13,10 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { showUndoToast } from "@/components/UndoToast";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { PageTransition } from "@/components/PageTransition";
+import { PageWrapper } from "@/components/PageWrapper";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -465,9 +468,13 @@ const Duels = () => {
   const activeDuels = duels?.filter(d => ['pending', 'accepted', 'active'].includes(d.status)) || [];
   const completedDuels = duels?.filter(d => ['completed', 'declined', 'cancelled'].includes(d.status)) || [];
 
+  const seo = useSEO();
+
   return (
-    <PageTransition>
-      <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Duelos">
+      <SEOHead {...seo} />
+      <PageTransition>
+        <div className="min-h-screen bg-background">
         {/* Confirmation Dialog */}
         <ConfirmDialog
           open={confirmDialog.open}
@@ -599,8 +606,9 @@ const Duels = () => {
           </SectionErrorBoundary>
         )}
       </main>
-      </div>
-    </PageTransition>
+        </div>
+      </PageTransition>
+    </PageWrapper>
   );
 };
 

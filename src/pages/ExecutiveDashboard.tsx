@@ -22,6 +22,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import { 
   LineChart, 
   Line, 
@@ -280,8 +283,12 @@ const ExecutiveDashboard = () => {
     employees: d.employeeCount
   })) || [];
 
+  const seo = useSEO();
+
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Dashboard Executivo">
+      <SEOHead {...seo} />
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4">
@@ -729,7 +736,8 @@ const ExecutiveDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+      </div>
+    </PageWrapper>
   );
 };
 

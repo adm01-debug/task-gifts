@@ -31,6 +31,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import { useRecentAuditLogs, AuditAction } from "@/hooks/useAudit";
 import { useProfiles } from "@/hooks/useProfiles";
 import { supabase } from "@/integrations/supabase/client";
@@ -255,8 +258,12 @@ export default function RealTimeAnalytics() {
     };
   }, [auditLogs]);
 
+  const seo = useSEO();
+
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+    <PageWrapper pageName="Analytics em Tempo Real">
+      <SEOHead {...seo} />
+      <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <motion.div
@@ -644,6 +651,7 @@ export default function RealTimeAnalytics() {
           </motion.div>
         </div>
       </div>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }
