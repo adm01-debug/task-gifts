@@ -8,7 +8,7 @@ import { useAllAchievements, useUserAchievements } from "@/hooks/useAchievements
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
+import { BehavioralBadgesWidget } from "@/components/BehavioralBadgesWidget";
 const rarityConfig = {
   common: {
     label: "Comum",
@@ -145,6 +145,15 @@ export default function Achievements() {
             </div>
           </CardContent>
         </Card>
+      </motion.div>
+
+      {/* Behavioral Badges Widget */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <BehavioralBadgesWidget />
       </motion.div>
 
       {/* Tabs by Category */}
