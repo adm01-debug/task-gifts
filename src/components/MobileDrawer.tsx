@@ -163,7 +163,7 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-2" aria-label="Navegação mobile">
           {navItems.map((item, index) => (
             <motion.button
               key={item.label}
@@ -171,6 +171,8 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => handleItemClick(item)}
+              aria-label={item.label}
+              aria-current={activeItem === item.label ? "page" : undefined}
               className={cn(
                 "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all",
                 "active:scale-[0.98]",

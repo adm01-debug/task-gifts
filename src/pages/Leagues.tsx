@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Trophy, ArrowLeft, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,13 +5,14 @@ import { useLeagues } from "@/hooks/useLeagues";
 import { useNavigate } from "react-router-dom";
 import { LeagueCard } from "@/components/LeagueCard";
 import type { LeagueHistory } from "@/services/leaguesService";
+import { PageWrapper } from "@/components/PageWrapper";
 
 export default function Leagues() {
   const navigate = useNavigate();
   const { myLeague, leaderboard, history, isLoading } = useLeagues();
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Ligas" className="min-h-screen bg-background">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="h-5 w-5" />
@@ -49,6 +49,6 @@ export default function Leagues() {
           </Card>
         </div>
       </main>
-    </div>
+    </PageWrapper>
   );
 }

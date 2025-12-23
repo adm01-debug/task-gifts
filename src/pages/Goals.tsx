@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import type { Goal, KeyResult } from "@/types/goals";
+import { PageWrapper } from "@/components/PageWrapper";
 
 export default function Goals() {
   const navigate = useNavigate();
@@ -229,7 +230,7 @@ export default function Goals() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Goals" className="min-h-screen bg-background">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="h-5 w-5" />
@@ -437,6 +438,6 @@ export default function Goals() {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </PageWrapper>
   );
 }

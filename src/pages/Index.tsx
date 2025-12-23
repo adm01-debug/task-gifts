@@ -10,6 +10,7 @@ import { AchievementContainer, useAchievements } from "@/components/AchievementS
 import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
 import { SeasonalEventBanner } from "@/components/SeasonalEventBanner";
 import { DashboardHeader, DashboardLeftColumn, DashboardRightColumn, DashboardFooter } from "@/components/dashboard";
+import { SectionWrapper } from "@/components/PageWrapper";
 
 // Hooks
 import { useIsMobileWithHydration } from "@/hooks/use-mobile";
@@ -127,23 +128,31 @@ function Index() {
             <OnboardingWidget />
 
             {/* Stats Grid */}
-            <section aria-labelledby="stats-heading">
-              <h2 id="stats-heading" className="sr-only">Estatísticas do usuário</h2>
-              <StatsGrid />
-            </section>
+            <SectionWrapper sectionName="Estatísticas">
+              <section aria-labelledby="stats-heading">
+                <h2 id="stats-heading" className="sr-only">Estatísticas do usuário</h2>
+                <StatsGrid />
+              </section>
+            </SectionWrapper>
 
             {/* Quick Actions */}
-            <section className="flex flex-wrap items-center gap-2 md:gap-4" aria-label="Ações rápidas">
-              <QuickActions />
-            </section>
+            <SectionWrapper sectionName="Ações Rápidas">
+              <section className="flex flex-wrap items-center gap-2 md:gap-4" aria-label="Ações rápidas">
+                <QuickActions />
+              </section>
+            </SectionWrapper>
 
             {/* Main Grid - Split into semantic columns */}
             <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
               {/* Left Column - Missions, Quests, Team & Recognition */}
-              <DashboardLeftColumn />
+              <SectionWrapper sectionName="Coluna Principal">
+                <DashboardLeftColumn />
+              </SectionWrapper>
 
               {/* Right Column - Combo, Attendance, Rankings, Leaderboard, Analytics & Rewards */}
-              <DashboardRightColumn />
+              <SectionWrapper sectionName="Coluna Lateral">
+                <DashboardRightColumn />
+              </SectionWrapper>
             </div>
           </div>
 

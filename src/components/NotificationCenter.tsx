@@ -107,6 +107,7 @@ const NotificationItem = memo(({ notification, onMarkRead, onDelete }: Notificat
                 e.stopPropagation();
                 onMarkRead(notification.id);
               }}
+              aria-label="Marcar como lida"
             >
               <Check className="w-3 h-3" />
             </Button>
@@ -119,6 +120,7 @@ const NotificationItem = memo(({ notification, onMarkRead, onDelete }: Notificat
               e.stopPropagation();
               onDelete(notification.id);
             }}
+            aria-label="Excluir notificação"
           >
             <Trash2 className="w-3 h-3" />
           </Button>
