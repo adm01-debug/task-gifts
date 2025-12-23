@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Plus, Calendar, Clock, CheckCircle2, MessageSquare, ArrowLeft, Star } from "lucide-react";
+import { Users, Plus, Calendar, Clock, CheckCircle2, MessageSquare, ArrowLeft, Star, Brain, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,13 +18,17 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { useProfiles } from "@/hooks/useProfiles";
+import { useOneOnOnePreparationManual } from "@/hooks/useOneOnOnePreparation";
+import { OneOnOnePreparationPanel } from "@/components/checkins/OneOnOnePreparationPanel";
 
 export default function Checkins() {
   const navigate = useNavigate();
   const { templates, checkins, upcomingCheckins, isLoading, createCheckin, completeCheckin, addActionItem, toggleActionItem, isCreating } = useCheckins();
   const { data: profiles } = useProfiles();
   const { toast } = useToast();
+  const { preparation, isLoading: isPreparationLoading, prepare: prepareOneOnOne, clear: clearPreparation } = useOneOnOnePreparationManual();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPreparationDialogOpen, setIsPreparationDialogOpen] = useState(false);
   const [selectedCheckin, setSelectedCheckin] = useState<any>(null);
   const [newCheckin, setNewCheckin] = useState({
     employee_id: "",
@@ -35,6 +39,15 @@ export default function Checkins() {
   const [responses, setResponses] = useState<Record<string, string | number>>({});
   const [moodRating, setMoodRating] = useState<number>(3);
   const [newActionItem, setNewActionItem] = useState("");
+
+  const handlePrepareOneOnOne = async (employeeId: string) => {
+    try {
+      await prepareOneOnOne(employeeId);
+      setIsPreparationDialogOpen(true);
+    } catch (error) {
+      toast({ title: "Erro ao preparar 1:1", variant: "destructive" });
+    }
+  };
 
   const handleCreateCheckin = () => {
     if (!newCheckin.employee_id || !newCheckin.scheduled_at) {
@@ -141,6 +154,23 @@ export default function Checkins() {
               <Star className="h-4 w-4" />
               <span>{checkin.xp_reward} XP ao concluir</span>
             </div>
+
+            {checkin.status !== "completed" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mt-2 gap-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrepareOneOnOne(checkin.employee_id);
+                }}
+                disabled={isPreparationLoading}
+              >
+                <Brain className="h-4 w-4" />
+                {isPreparationLoading ? "Preparando..." : "Preparar com IA"}
+                <Sparkles className="h-3 w-3 text-primary" />
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -454,6 +484,25 @@ export default function Checkins() {
                 )}
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Preparation Dialog */}
+        <Dialog open={isPreparationDialogOpen} onOpenChange={(open) => {
+          setIsPreparationDialogOpen(open);
+          if (!open) clearPreparation();
+        }}>
+          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-primary" />
+                Preparação Inteligente para 1:1
+              </DialogTitle>
+            </DialogHeader>
+            <OneOnOnePreparationPanel 
+              preparation={preparation} 
+              isLoading={isPreparationLoading} 
+            />
           </DialogContent>
         </Dialog>
       </main>
