@@ -32,6 +32,9 @@ import {
 } from "@/components/ui/select";
 import { AllSelectItem } from "@/components/ui/all-select-item";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import { useAuth } from "@/hooks/useAuth";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { useProfiles } from "@/hooks/useProfiles";
@@ -341,8 +344,12 @@ export default function ManagerDashboard() {
   const avgStreak = teamMembers.length > 0 ? Math.round(teamMembers.reduce((acc, m) => acc + m.streak, 0) / totalMembers) : 0;
   const atRiskCount = teamMembers.filter(m => m.riskLevel === "high").length;
   
+  const seo = useSEO();
+
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Dashboard do Gestor">
+      <SEOHead {...seo} />
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
@@ -583,6 +590,7 @@ export default function ManagerDashboard() {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }

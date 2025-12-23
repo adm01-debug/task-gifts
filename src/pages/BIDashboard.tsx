@@ -28,6 +28,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import { useExecutiveMetrics, useMonthlyTrends, useDepartmentMetrics } from "@/hooks/useExecutiveMetrics";
 import { useCompletionTrend, useDepartmentPerformance, useWeeklyEngagement, useEngagementMetrics } from "@/hooks/useEngagementReports";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
@@ -234,8 +237,12 @@ export default function BIDashboard() {
     );
   }
 
+  const seo = useSEO();
+
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Business Intelligence">
+      <SEOHead {...seo} />
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 py-4">
@@ -808,6 +815,7 @@ export default function BIDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }

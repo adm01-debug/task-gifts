@@ -39,6 +39,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import { UsersManager } from "@/components/admin/UsersManager";
 import { DepartmentsManager } from "@/components/admin/DepartmentsManager";
 import { AdminChangeHistory } from "@/components/admin/AdminChangeHistory";
@@ -186,8 +189,12 @@ function AdminPanelContent() {
       link.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const seo = useSEO();
+
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Painel Administrativo">
+      <SEOHead {...seo} />
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -493,7 +500,8 @@ function AdminPanelContent() {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }
 
