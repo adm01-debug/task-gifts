@@ -794,6 +794,47 @@ export type Database = {
           },
         ]
       }
+      competencies: {
+        Row: {
+          category: string
+          created_at: string
+          department_id: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competencies_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_badges: {
         Row: {
           category: string | null
@@ -1187,6 +1228,141 @@ export type Database = {
         }
         Relationships: []
       }
+      development_plan_actions: {
+        Row: {
+          action_type: string
+          competency_id: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          evidence_url: string | null
+          id: string
+          notes: string | null
+          plan_id: string
+          priority: string
+          progress_percent: number
+          status: string
+          title: string
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          action_type?: string
+          competency_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          plan_id: string
+          priority?: string
+          progress_percent?: number
+          status?: string
+          title: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          action_type?: string
+          competency_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          plan_id?: string
+          priority?: string
+          progress_percent?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_plan_actions_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_plan_actions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "development_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      development_plans: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          linked_feedback_id: string | null
+          linked_nine_box_id: string | null
+          start_date: string
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          linked_feedback_id?: string | null
+          linked_nine_box_id?: string | null
+          start_date?: string
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          linked_feedback_id?: string | null
+          linked_nine_box_id?: string | null
+          start_date?: string
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_plans_linked_feedback_id_fkey"
+            columns: ["linked_feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_responses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_plans_linked_nine_box_id_fkey"
+            columns: ["linked_nine_box_id"]
+            isOneToOne: false
+            referencedRelation: "nine_box_evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       direct_duels: {
         Row: {
           challenger_id: string
@@ -1246,6 +1422,159 @@ export type Database = {
           xp_reward?: number
         }
         Relationships: []
+      }
+      engagement_snapshots: {
+        Row: {
+          active_users: number | null
+          created_at: string
+          department_id: string | null
+          enps_score: number | null
+          id: string
+          kudos_given: number | null
+          metadata: Json | null
+          mood_avg: number | null
+          participation_rate: number | null
+          period_type: string
+          punctuality_rate: number | null
+          quests_completed: number | null
+          snapshot_date: string
+          total_users: number | null
+          training_completion_rate: number | null
+        }
+        Insert: {
+          active_users?: number | null
+          created_at?: string
+          department_id?: string | null
+          enps_score?: number | null
+          id?: string
+          kudos_given?: number | null
+          metadata?: Json | null
+          mood_avg?: number | null
+          participation_rate?: number | null
+          period_type?: string
+          punctuality_rate?: number | null
+          quests_completed?: number | null
+          snapshot_date?: string
+          total_users?: number | null
+          training_completion_rate?: number | null
+        }
+        Update: {
+          active_users?: number | null
+          created_at?: string
+          department_id?: string | null
+          enps_score?: number | null
+          id?: string
+          kudos_given?: number | null
+          metadata?: Json | null
+          mood_avg?: number | null
+          participation_rate?: number | null
+          period_type?: string
+          punctuality_rate?: number | null
+          quests_completed?: number | null
+          snapshot_date?: string
+          total_users?: number | null
+          training_completion_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engagement_snapshots_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enps_responses: {
+        Row: {
+          category: string | null
+          created_at: string
+          follow_up_answer: string | null
+          id: string
+          score: number
+          survey_id: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          follow_up_answer?: string | null
+          id?: string
+          score: number
+          survey_id: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          follow_up_answer?: string | null
+          id?: string
+          score?: number
+          survey_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enps_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "enps_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enps_surveys: {
+        Row: {
+          created_at: string
+          created_by: string
+          department_id: string | null
+          description: string | null
+          ends_at: string
+          follow_up_question: string | null
+          id: string
+          is_anonymous: boolean
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          department_id?: string | null
+          description?: string | null
+          ends_at: string
+          follow_up_question?: string | null
+          id?: string
+          is_anonymous?: boolean
+          starts_at?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          ends_at?: string
+          follow_up_question?: string | null
+          id?: string
+          is_anonymous?: boolean
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enps_surveys_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       external_api_keys: {
         Row: {
@@ -2254,6 +2583,57 @@ export type Database = {
           mood_emoji?: string
           mood_score?: number
           note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      nine_box_evaluations: {
+        Row: {
+          box_position: number | null
+          created_at: string
+          development_areas: string[] | null
+          evaluation_period: string
+          evaluator_id: string
+          goals_for_next_period: string[] | null
+          id: string
+          performance_notes: string | null
+          performance_score: number
+          potential_notes: string | null
+          potential_score: number
+          strengths: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          box_position?: number | null
+          created_at?: string
+          development_areas?: string[] | null
+          evaluation_period: string
+          evaluator_id: string
+          goals_for_next_period?: string[] | null
+          id?: string
+          performance_notes?: string | null
+          performance_score: number
+          potential_notes?: string | null
+          potential_score: number
+          strengths?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          box_position?: number | null
+          created_at?: string
+          development_areas?: string[] | null
+          evaluation_period?: string
+          evaluator_id?: string
+          goals_for_next_period?: string[] | null
+          id?: string
+          performance_notes?: string | null
+          performance_score?: number
+          potential_notes?: string | null
+          potential_score?: number
+          strengths?: string[] | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -4022,6 +4402,7 @@ export type Database = {
         }
         Returns: string
       }
+      calculate_enps_score: { Args: { p_survey_id: string }; Returns: number }
       complete_external_task: {
         Args: {
           p_external_id: string
@@ -4038,6 +4419,10 @@ export type Database = {
         }
         Returns: Json
       }
+      generate_engagement_snapshot: {
+        Args: { p_department_id?: string; p_period_type?: string }
+        Returns: string
+      }
       get_department_metrics: { Args: never; Returns: Json }
       get_executive_metrics: { Args: never; Returns: Json }
       get_leaderboard_api: {
@@ -4045,6 +4430,10 @@ export type Database = {
         Returns: Json
       }
       get_monthly_trends: { Args: never; Returns: Json }
+      get_nine_box_distribution: {
+        Args: { p_department_id?: string; p_period?: string }
+        Returns: Json
+      }
       get_quiz_category_stats: {
         Args: never
         Returns: {
