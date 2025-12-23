@@ -255,7 +255,7 @@ export const positionsService = {
       query = query.eq("user_id", userId);
     }
     if (status) {
-      query = query.eq("status", status);
+      query = query.eq("status", status as any);
     }
     
     const { data, error } = await query;
@@ -417,7 +417,7 @@ export const positionsService = {
         deadline_at: deadlineAt,
         source: 'bitrix24',
         bitrix_metadata: metadata
-      })
+      } as any)
       .select()
       .single();
     
