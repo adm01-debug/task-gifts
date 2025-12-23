@@ -28,6 +28,9 @@ import {
   Scale,
   Plug,
   Sparkles,
+  Grid3X3,
+  FileText,
+  Gauge,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -53,6 +56,9 @@ import { PositionsManager } from "@/components/admin/PositionsManager";
 import { PenaltyRulesManager } from "@/components/admin/PenaltyRulesManager";
 import { ApiIntegrationManager } from "@/components/admin/ApiIntegrationManager";
 import { GamificationManager } from "@/components/admin/GamificationManager";
+import { NineBoxMatrix } from "@/components/admin/NineBoxMatrix";
+import { DevelopmentPlanManager } from "@/components/admin/DevelopmentPlanManager";
+import { ENPSDashboard } from "@/components/admin/ENPSDashboard";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -286,6 +292,18 @@ function AdminPanelContent() {
               <Sparkles className="h-4 w-4" />
               Gamificação
             </TabsTrigger>
+            <TabsTrigger value="ninebox" className="gap-2">
+              <Grid3X3 className="h-4 w-4" />
+              9-Box
+            </TabsTrigger>
+            <TabsTrigger value="pdi" className="gap-2">
+              <FileText className="h-4 w-4" />
+              PDI
+            </TabsTrigger>
+            <TabsTrigger value="enps" className="gap-2">
+              <Gauge className="h-4 w-4" />
+              eNPS
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -447,6 +465,21 @@ function AdminPanelContent() {
           {/* Gamification Tab */}
           <TabsContent value="gamification">
             <GamificationManager />
+          </TabsContent>
+
+          {/* 9-Box Tab */}
+          <TabsContent value="ninebox">
+            <NineBoxMatrix />
+          </TabsContent>
+
+          {/* PDI Tab */}
+          <TabsContent value="pdi">
+            <DevelopmentPlanManager />
+          </TabsContent>
+
+          {/* eNPS Tab */}
+          <TabsContent value="enps">
+            <ENPSDashboard />
           </TabsContent>
         </Tabs>
       </main>
