@@ -22,6 +22,33 @@ export const LeagueCard = memo(function LeagueCard() {
   const { playAchievementSound, playLevelUpSound } = useSoundEffects();
   const previousPositionRef = useRef<number | null>(null);
 
+  // All hooks MUST be called before any conditional returns (Rules of Hooks)
+  const currentLeague = useMemo(() => {
+    if (!myLeague) return null;
+    return leagues.find(l => l.id === myLeague.league_id);
+  }, [leagues, myLeague]);
+  
+  const userPosition = useMemo(() => {
+    if (!myLeague) return 0;
+    return leaderboard.findIndex(u => u.user_id === myLeague.user_id) + 1;
+  }, [leaderboard, myLeague]);
+  
+  const promotionZone = currentLeague?.promotion_slots || 3;
+  const demotionZone = leaderboard.length - (currentLeague?.demotion_slots || 3);
+
+  const getPositionStyle = useCallback((position: number) => {
+    if (position <= promotionZone) return "text-green-500 bg-green-500/10";
+    if (position > demotionZone) return "text-red-500 bg-red-500/10";
+    return "text-muted-foreground bg-muted";
+  }, [promotionZone, demotionZone]);
+
+  const getPositionIcon = useCallback((position: number) => {
+    if (position === 1) return <Crown className="h-4 w-4 text-amber-500" />;
+    if (position <= promotionZone) return <TrendingUp className="h-4 w-4 text-green-500" />;
+    if (position > demotionZone) return <TrendingDown className="h-4 w-4 text-red-500" />;
+    return <Minus className="h-4 w-4 text-muted-foreground" />;
+  }, [promotionZone, demotionZone]);
+
   // Detectar mudanças de posição e tocar sons
   useEffect(() => {
     if (!myLeague || leaderboard.length === 0) return;
@@ -51,6 +78,7 @@ export const LeagueCard = memo(function LeagueCard() {
     previousPositionRef.current = currentPosition;
   }, [leaderboard, myLeague, leagues, playAchievementSound, playLevelUpSound]);
 
+  // Conditional renders AFTER all hooks
   if (isLoading) {
     return (
       <Card>
@@ -74,32 +102,6 @@ export const LeagueCard = memo(function LeagueCard() {
       </Card>
     );
   }
-
-  const currentLeague = useMemo(() => 
-    leagues.find(l => l.id === myLeague.league_id), 
-    [leagues, myLeague.league_id]
-  );
-  
-  const userPosition = useMemo(() => 
-    leaderboard.findIndex(u => u.user_id === myLeague.user_id) + 1,
-    [leaderboard, myLeague.user_id]
-  );
-  
-  const promotionZone = currentLeague?.promotion_slots || 3;
-  const demotionZone = leaderboard.length - (currentLeague?.demotion_slots || 3);
-
-  const getPositionStyle = useCallback((position: number) => {
-    if (position <= promotionZone) return "text-green-500 bg-green-500/10";
-    if (position > demotionZone) return "text-red-500 bg-red-500/10";
-    return "text-muted-foreground bg-muted";
-  }, [promotionZone, demotionZone]);
-
-  const getPositionIcon = useCallback((position: number) => {
-    if (position === 1) return <Crown className="h-4 w-4 text-amber-500" />;
-    if (position <= promotionZone) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    if (position > demotionZone) return <TrendingDown className="h-4 w-4 text-red-500" />;
-    return <Minus className="h-4 w-4 text-muted-foreground" />;
-  }, [promotionZone, demotionZone]);
 
   return (
     <Card>
@@ -154,6 +156,7 @@ export const LeagueCard = memo(function LeagueCard() {
             {leaderboard.slice(0, 10).map((user, index) => {
               const position = index + 1;
               const isCurrentUser = user.user_id === myLeague.user_id;
+              const typedUser = user as LeaderboardUser;
 
               return (
                 <motion.div
@@ -171,13 +174,13 @@ export const LeagueCard = memo(function LeagueCard() {
                     {position}
                   </div>
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={(user as LeaderboardUser).profile?.avatar_url || undefined} />
+                    <AvatarImage src={typedUser.profile?.avatar_url || undefined} />
                     <AvatarFallback>
-                      {(user as LeaderboardUser).profile?.display_name?.charAt(0) || '?'}
+                      {typedUser.profile?.display_name?.charAt(0) || '?'}
                     </AvatarFallback>
                   </Avatar>
                   <span className={`flex-1 truncate ${isCurrentUser ? 'font-semibold' : ''}`}>
-                    {(user as LeaderboardUser).profile?.display_name || 'Usuário'}
+                    {typedUser.profile?.display_name || 'Usuário'}
                   </span>
                   <span className="text-sm font-medium text-muted-foreground">
                     {user.weekly_xp.toLocaleString()} XP
