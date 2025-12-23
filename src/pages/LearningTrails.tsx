@@ -6,6 +6,9 @@ import {
   CheckCircle2, Lock, ChevronRight, Sparkles, Filter, Award, Link2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -208,6 +211,7 @@ function TrailCard({
 export default function LearningTrails() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const seoData = useSEO();
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("all");
   const [enrollingTrailId, setEnrollingTrailId] = useState<string | null>(null);
@@ -333,7 +337,8 @@ export default function LearningTrails() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Trilhas" className="min-h-screen bg-background">
+      <SEOHead {...seoData} />
       <MobileHeader title="Trilhas" />
       <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
@@ -510,6 +515,6 @@ export default function LearningTrails() {
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

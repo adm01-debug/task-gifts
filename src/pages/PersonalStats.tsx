@@ -12,6 +12,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { WeeklyPerformanceComparison } from "@/components/WeeklyPerformanceComparison";
 import { ComboHistory } from "@/components/ComboHistory";
 import { AchievementRecord } from "@/types/charts";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 import {
   ChartContainer,
   ChartTooltip,
@@ -206,6 +209,7 @@ export default function PersonalStats() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const { user } = useAuth();
+  const seoData = useSEO();
   const { data: profile, isLoading: profileLoading } = useCurrentProfile();
   const { data: xpHistory, isLoading: xpLoading } = useXpHistory(user?.id, 30);
   const { data: achievementHistory } = useAchievementHistory(user?.id);
@@ -214,9 +218,9 @@ export default function PersonalStats() {
 
   if (profileLoading) {
     return (
-      <div className="min-h-screen bg-background p-4">
+      <PageWrapper pageName="Estatísticas" className="min-h-screen bg-background p-4">
         <Skeleton className="h-96 w-full" />
-      </div>
+      </PageWrapper>
     );
   }
 
@@ -288,7 +292,7 @@ export default function PersonalStats() {
 
   const content = (
     <main className="flex-1 overflow-auto">
-      {/* Header */}
+      <SEOHead {...seoData} />
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
         <div className="flex items-center gap-4 px-4 md:px-6 py-4">
           <motion.button
@@ -629,7 +633,7 @@ export default function PersonalStats() {
   );
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <PageWrapper pageName="Estatísticas" className="min-h-screen flex bg-background">
       {/* Mobile Drawer */}
       <MobileDrawer open={mobileDrawerOpen} onClose={() => setMobileDrawerOpen(false)} />
 
@@ -642,6 +646,6 @@ export default function PersonalStats() {
       )}
 
       {content}
-    </div>
+    </PageWrapper>
   );
 }

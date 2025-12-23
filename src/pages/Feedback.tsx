@@ -1,16 +1,31 @@
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft, MessageCircle, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useFeedback360 } from "@/hooks/useFeedback360";
 import { Badge } from "@/components/ui/badge";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
+import { LoadingState, EmptyState } from "@/components/ui/states";
+import type { FeedbackCycle, FeedbackRequest } from "@/services/feedbackService";
 
 export default function Feedback() {
   const navigate = useNavigate();
   const { cycles, pendingRequests, isLoading } = useFeedback360();
+  const seoData = useSEO();
+
+  if (isLoading) {
+    return (
+      <PageWrapper pageName="Feedback" className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingState message="Carregando feedbacks..." />
+      </PageWrapper>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageWrapper pageName="Feedback" className="min-h-screen bg-background">
+      <SEOHead {...seoData} />
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="h-5 w-5" />
@@ -26,10 +41,14 @@ export default function Feedback() {
           </CardHeader>
           <CardContent>
             {cycles.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">Nenhum ciclo ativo</p>
+              <EmptyState 
+                icon={Inbox}
+                title="Nenhum ciclo ativo"
+                description="Não há ciclos de feedback ativos no momento"
+              />
             ) : (
               <div className="space-y-3">
-                {cycles.map((cycle: any) => (
+                {cycles.map((cycle: FeedbackCycle) => (
                   <div key={cycle.id} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium">{cycle.name}</h3>
@@ -49,10 +68,14 @@ export default function Feedback() {
           </CardHeader>
           <CardContent>
             {pendingRequests.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">Nenhum feedback pendente</p>
+              <EmptyState 
+                icon={MessageCircle}
+                title="Nenhum feedback pendente"
+                description="Você não possui feedbacks para responder"
+              />
             ) : (
               <div className="space-y-2">
-                {pendingRequests.map((req: any) => (
+                {pendingRequests.map((req: FeedbackRequest) => (
                   <div key={req.id} className="p-3 border rounded-lg flex justify-between items-center">
                     <span>Feedback para {req.to_user_id}</span>
                     <Button size="sm">Responder</Button>
@@ -63,6 +86,6 @@ export default function Feedback() {
           </CardContent>
         </Card>
       </main>
-    </div>
+    </PageWrapper>
   );
 }
