@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { 
+import { SkeletonCertificationList, SkeletonStatCard } from '@/components/ui/skeleton';
+import {
   useUserCertifications, 
   useCertifications, 
   useExpiringCertifications,
@@ -229,11 +230,19 @@ export function CertificationsPanel() {
   if (loadingUserCerts || loadingAllCerts) {
     return (
       <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-muted rounded w-1/3" />
-            <div className="h-32 bg-muted rounded" />
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-primary" />
+            Minhas Certificações
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <SkeletonStatCard key={i} className="h-20" />
+            ))}
           </div>
+          <SkeletonCertificationList items={3} />
         </CardContent>
       </Card>
     );

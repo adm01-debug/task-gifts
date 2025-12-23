@@ -484,6 +484,153 @@ const SkeletonActivityList = forwardRef<HTMLDivElement, SkeletonProps & { count?
   }
 );
 
+// Skeleton for Widget header
+function SkeletonWidgetHeader({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("flex items-center justify-between p-4 border-b border-border", className)} {...props}>
+      <div className="flex items-center gap-2">
+        <Skeleton variant="glow" className="w-8 h-8 rounded-lg" />
+        <div className="space-y-1">
+          <Skeleton variant="shimmer" className="h-4 w-24" />
+          <Skeleton variant="shimmer" className="h-3 w-16" />
+        </div>
+      </div>
+      <Skeleton variant="shimmer" shape="pill" className="h-6 w-16" />
+    </div>
+  );
+}
+
+// Complete Widget Skeleton
+function SkeletonWidget({ 
+  className,
+  headerTitle = true,
+  items = 3,
+  ...props 
+}: SkeletonProps & { headerTitle?: boolean; items?: number }) {
+  return (
+    <div className={cn("bg-card rounded-2xl border border-border overflow-hidden", className)} {...props}>
+      {headerTitle && <SkeletonWidgetHeader />}
+      <div className="p-4 space-y-3">
+        {Array.from({ length: items }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3" style={{ animationDelay: `${i * 100}ms` }}>
+            <Skeleton variant="shimmer" shape="circle" className="w-10 h-10" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton variant="shimmer" className="h-4 w-3/4" />
+              <Skeleton variant="shimmer" className="h-3 w-1/2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Skeleton for Certification card
+function SkeletonCertification({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("p-4 rounded-xl border border-border bg-card/50", className)} {...props}>
+      <div className="flex items-start gap-4">
+        <Skeleton variant="glow" className="w-12 h-12 rounded-lg shrink-0" />
+        <div className="flex-1 space-y-3">
+          <div className="flex items-center gap-2">
+            <Skeleton variant="shimmer" className="h-5 w-32" />
+            <Skeleton variant="shimmer" shape="pill" className="h-5 w-16" />
+          </div>
+          <Skeleton variant="shimmer" className="h-4 w-full" />
+          <div className="flex items-center gap-3">
+            <Skeleton variant="shimmer" shape="pill" className="h-5 w-20" />
+            <Skeleton variant="shimmer" className="h-4 w-24" />
+            <Skeleton variant="shimmer" className="h-4 w-28" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCertificationList({ items = 3, className, ...props }: SkeletonProps & { items?: number }) {
+  return (
+    <div className={cn("space-y-3", className)} {...props}>
+      {Array.from({ length: items }).map((_, i) => (
+        <div key={i} style={{ animationDelay: `${i * 100}ms` }}>
+          <SkeletonCertification />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Skeleton for Notification item
+function SkeletonNotification({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("flex items-start gap-3 p-3", className)} {...props}>
+      <Skeleton variant="shimmer" shape="circle" className="w-8 h-8 shrink-0" />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton variant="shimmer" className="h-4 w-3/4" />
+        <Skeleton variant="shimmer" className="h-3 w-full" />
+        <Skeleton variant="shimmer" className="h-3 w-16" />
+      </div>
+    </div>
+  );
+}
+
+function SkeletonNotificationList({ items = 5, className, ...props }: SkeletonProps & { items?: number }) {
+  return (
+    <div className={cn("divide-y divide-border", className)} {...props}>
+      {Array.from({ length: items }).map((_, i) => (
+        <div key={i} style={{ animationDelay: `${i * 50}ms` }}>
+          <SkeletonNotification />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Skeleton for Shop/Reward item
+function SkeletonReward({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("p-3 rounded-xl border border-border", className)} {...props}>
+      <div className="flex justify-between items-start mb-2">
+        <Skeleton variant="shimmer" shape="pill" className="h-4 w-14" />
+        <Skeleton variant="glow" className="h-4 w-4" />
+      </div>
+      <Skeleton variant="shimmer" className="h-10 w-10 mx-auto mb-2" />
+      <Skeleton variant="shimmer" className="h-4 w-full mb-1" />
+      <Skeleton variant="shimmer" className="h-3 w-3/4 mx-auto mb-3" />
+      <Skeleton variant="shimmer" className="h-7 w-full rounded-lg" />
+    </div>
+  );
+}
+
+function SkeletonRewardGrid({ items = 4, className, ...props }: SkeletonProps & { items?: number }) {
+  return (
+    <div className={cn("grid grid-cols-2 gap-3 p-4", className)} {...props}>
+      {Array.from({ length: items }).map((_, i) => (
+        <div key={i} style={{ animationDelay: `${i * 75}ms` }}>
+          <SkeletonReward />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Skeleton for Profile header
+function SkeletonProfileHeader({ className, ...props }: SkeletonProps) {
+  return (
+    <div className={cn("flex items-center gap-4 p-4", className)} {...props}>
+      <Skeleton variant="glow" shape="circle" className="w-16 h-16" />
+      <div className="flex-1 space-y-2">
+        <Skeleton variant="shimmer" className="h-6 w-40" />
+        <Skeleton variant="shimmer" className="h-4 w-24" />
+        <div className="flex gap-2">
+          <Skeleton variant="shimmer" shape="pill" className="h-5 w-16" />
+          <Skeleton variant="shimmer" shape="pill" className="h-5 w-20" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export { 
   Skeleton,
   SkeletonText,
@@ -506,5 +653,14 @@ export {
   SkeletonRankingList,
   SkeletonActivity,
   SkeletonActivityList,
+  SkeletonWidgetHeader,
+  SkeletonWidget,
+  SkeletonCertification,
+  SkeletonCertificationList,
+  SkeletonNotification,
+  SkeletonNotificationList,
+  SkeletonReward,
+  SkeletonRewardGrid,
+  SkeletonProfileHeader,
   skeletonVariants,
 };
