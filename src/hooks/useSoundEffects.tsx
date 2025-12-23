@@ -18,10 +18,17 @@ const getSoundSettings = () => {
   return { enabled: true, volume: 0.7 };
 };
 
+// Extended Window interface for webkit compatibility
+interface WebkitWindow extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
+
 // Audio context for sound generation
 const createAudioContext = (): AudioContext | null => {
   if (typeof window === "undefined") return null;
-  return new (window.AudioContext || (window as any).webkitAudioContext)();
+  const win = window as WebkitWindow;
+  const AudioContextClass = window.AudioContext || win.webkitAudioContext;
+  return AudioContextClass ? new AudioContextClass() : null;
 };
 
 export const useSoundEffects = () => {

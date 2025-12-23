@@ -20,7 +20,14 @@ import { useNavigate } from "react-router-dom";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useOneOnOnePreparationManual } from "@/hooks/useOneOnOnePreparation";
 import { OneOnOnePreparationPanel } from "@/components/checkins/OneOnOnePreparationPanel";
-import type { Checkin } from "@/services/checkinsService";
+import type { Checkin, ActionItem, CheckinTemplate } from "@/services/checkinsService";
+
+interface Profile {
+  id: string;
+  display_name: string | null;
+  email: string;
+  avatar_url: string | null;
+}
 
 export default function Checkins() {
   const navigate = useNavigate();
@@ -101,7 +108,7 @@ export default function Checkins() {
 
   const moodEmojis = ["😢", "😕", "😐", "🙂", "😄"];
 
-  const CheckinCard = ({ checkin }: { checkin: any }) => (
+  const CheckinCard = ({ checkin }: { checkin: Checkin }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -142,11 +149,11 @@ export default function Checkins() {
               </div>
             )}
 
-            {checkin.action_items?.length > 0 && (
+            {checkin.action_items && checkin.action_items.length > 0 && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4" />
                 <span>
-                  {checkin.action_items.filter((a: any) => a.completed).length}/{checkin.action_items.length} ações concluídas
+                  {(checkin.action_items as ActionItem[]).filter((a) => a.completed).length}/{checkin.action_items.length} ações concluídas
                 </span>
               </div>
             )}
@@ -220,7 +227,7 @@ export default function Checkins() {
                 <div>
                   <p className="text-sm text-muted-foreground">Concluídos</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {checkins.filter((c: any) => c.status === "completed").length}
+                    {checkins.filter((c) => c.status === "completed").length}
                   </p>
                 </div>
                 <CheckCircle2 className="h-8 w-8 text-green-500/20" />
@@ -261,9 +268,9 @@ export default function Checkins() {
                       <SelectValue placeholder="Selecione um colaborador" />
                     </SelectTrigger>
                     <SelectContent>
-                      {profiles?.map((profile: any) => (
+                      {profiles?.map((profile) => (
                         <SelectItem key={profile.id} value={profile.id}>
-                          {profile.display_name || profile.email}
+                          {(profile as Profile).display_name || (profile as Profile).email}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -276,11 +283,11 @@ export default function Checkins() {
                       <SelectValue placeholder="Selecione um template" />
                     </SelectTrigger>
                     <SelectContent>
-                      {templates.map((template: any) => (
-                        <SelectItem key={template.id} value={template.id}>
-                          {template.name}
-                        </SelectItem>
-                      ))}
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {(template as CheckinTemplate).name}
+                      </SelectItem>
+                    ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -333,7 +340,7 @@ export default function Checkins() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {upcomingCheckins.map((checkin: any) => (
+                {upcomingCheckins.map((checkin) => (
                   <CheckinCard key={checkin.id} checkin={checkin} />
                 ))}
               </div>
@@ -351,7 +358,7 @@ export default function Checkins() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {checkins.map((checkin: any) => (
+                {checkins.map((checkin) => (
                   <CheckinCard key={checkin.id} checkin={checkin} />
                 ))}
               </div>
@@ -369,24 +376,27 @@ export default function Checkins() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {templates.map((template: any) => (
-                  <Card key={template.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">{template.name}</CardTitle>
-                        {template.is_default && <Badge>Padrão</Badge>}
-                      </div>
-                      {template.description && (
-                        <CardDescription>{template.description}</CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        {template.questions?.length || 0} perguntas
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
+                {templates.map((template) => {
+                  const t = template as CheckinTemplate;
+                  return (
+                    <Card key={t.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base">{t.name}</CardTitle>
+                          {t.is_default && <Badge>Padrão</Badge>}
+                        </div>
+                        {t.description && (
+                          <CardDescription>{t.description}</CardDescription>
+                        )}
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          {t.questions?.length || 0} perguntas
+                        </p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </TabsContent>
@@ -404,13 +414,13 @@ export default function Checkins() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={(selectedCheckin as any).employee?.avatar_url} />
+                      <AvatarImage src={selectedCheckin.employee?.avatar_url || undefined} />
                       <AvatarFallback>
-                        {(selectedCheckin as any).employee?.display_name?.charAt(0) || "?"}
+                        {selectedCheckin.employee?.display_name?.charAt(0) || "?"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{(selectedCheckin as any).employee?.display_name}</p>
+                      <p className="font-medium">{selectedCheckin.employee?.display_name}</p>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(selectedCheckin.scheduled_at), "dd MMM yyyy 'às' HH:mm", { locale: ptBR })}
                       </p>
@@ -443,7 +453,7 @@ export default function Checkins() {
                 <div>
                   <Label className="mb-2 block">Ações de Acompanhamento</Label>
                   <div className="space-y-2 mb-3">
-                    {selectedCheckin.action_items?.map((item: any) => (
+                    {(selectedCheckin.action_items as ActionItem[] | null)?.map((item) => (
                       <div key={item.id} className="flex items-center gap-2">
                         <Checkbox
                           checked={item.completed}
