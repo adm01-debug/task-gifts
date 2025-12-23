@@ -215,4 +215,36 @@ export const leaguesService = {
 
     return (allUsers ?? []) as unknown as UserLeague[];
   },
+
+  async createLeague(league: Omit<League, 'id' | 'created_at'>): Promise<League> {
+    const { data, error } = await supabase
+      .from("leagues")
+      .insert(league)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as League;
+  },
+
+  async updateLeague(id: string, league: Partial<Omit<League, 'id' | 'created_at'>>): Promise<League> {
+    const { data, error } = await supabase
+      .from("leagues")
+      .update(league)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as League;
+  },
+
+  async deleteLeague(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("leagues")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+  },
 };

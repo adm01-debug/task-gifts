@@ -11,11 +11,13 @@ import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
 import { SeasonalEventBanner } from "@/components/SeasonalEventBanner";
 import { DashboardHeader, DashboardLeftColumn, DashboardRightColumn, DashboardFooter } from "@/components/dashboard";
 import { SectionWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
 
 // Hooks
 import { useIsMobileWithHydration } from "@/hooks/use-mobile";
 import { useListenToRankChanges } from "@/hooks/useListenToRankChanges";
 import { useCompetencyAlerts } from "@/hooks/useCompetencyAlerts";
+import { useSEO } from "@/hooks/useSEO";
 
 const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";
 
@@ -30,6 +32,9 @@ const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";
  * - Sidebar state persists in localStorage
  */
 function Index() {
+  // SEO configuration
+  const seoConfig = useSEO();
+
   // Persist sidebar state in localStorage
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
@@ -87,6 +92,11 @@ function Index() {
 
   return (
     <PageTransition>
+      <SEOHead 
+        title={seoConfig.title}
+        description={seoConfig.description}
+        keywords={seoConfig.keywords}
+      />
       <div className="min-h-screen flex bg-background">
         {/* Achievement System */}
         <AchievementContainer
