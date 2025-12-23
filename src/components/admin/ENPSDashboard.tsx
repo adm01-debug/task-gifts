@@ -13,6 +13,7 @@ import {
   Clock,
   Eye,
   Edit2,
+  Sparkles,
   Trash2,
   Send,
   MessageSquare,
@@ -72,6 +73,7 @@ import {
   Bar,
   Legend,
 } from "recharts";
+import { ENPSTrendChart } from "./ENPSTrendChart";
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "bg-gray-100 text-gray-700",
@@ -260,6 +262,7 @@ export function ENPSDashboard() {
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="surveys">Pesquisas</TabsTrigger>
           <TabsTrigger value="trends">Tendências</TabsTrigger>
+          <TabsTrigger value="analytics">Análise Avançada</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -384,6 +387,11 @@ export function ENPSDashboard() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics">
+          <ENPSTrendChart />
         </TabsContent>
       </Tabs>
 
