@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useAllMissions, useClaimMissionReward } from "@/hooks/useMissions";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { SkeletonQuestList } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { MissionWithProgress } from "@/services/missionsService";
 
 export const DailyQuests = () => {
@@ -126,13 +127,14 @@ export const DailyQuests = () => {
         )}
       </div>
 
-      {/* Quest List */}
       <div className="divide-y divide-border">
         {dailyMissions.length === 0 ? (
-          <div className="p-8 text-center">
-            <Target className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Nenhuma quest diária disponível</p>
-          </div>
+          <EmptyState
+            icon={Target}
+            title="Nenhuma quest diária disponível"
+            description="Volte mais tarde para novas quests!"
+            compact
+          />
         ) : (
           dailyMissions.map((mission, i) => {
             const currentValue = mission.progress?.current_value || 0;

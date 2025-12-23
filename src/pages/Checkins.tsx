@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useOneOnOnePreparationManual } from "@/hooks/useOneOnOnePreparation";
 import { OneOnOnePreparationPanel } from "@/components/checkins/OneOnOnePreparationPanel";
+import type { Checkin } from "@/services/checkinsService";
 
 export default function Checkins() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function Checkins() {
   const { preparation, isLoading: isPreparationLoading, prepare: prepareOneOnOne, clear: clearPreparation } = useOneOnOnePreparationManual();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPreparationDialogOpen, setIsPreparationDialogOpen] = useState(false);
-  const [selectedCheckin, setSelectedCheckin] = useState<any>(null);
+  const [selectedCheckin, setSelectedCheckin] = useState<Checkin | null>(null);
   const [newCheckin, setNewCheckin] = useState({
     employee_id: "",
     template_id: "",
@@ -110,14 +111,14 @@ export default function Checkins() {
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={(checkin as any).employee?.avatar_url} />
+                <AvatarImage src={checkin.employee?.avatar_url || undefined} />
                 <AvatarFallback>
-                  {(checkin as any).employee?.display_name?.charAt(0) || "?"}
+                  {checkin.employee?.display_name?.charAt(0) || "?"}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <CardTitle className="text-base">
-                  1:1 com {(checkin as any).employee?.display_name || "Colaborador"}
+                  1:1 com {checkin.employee?.display_name || "Colaborador"}
                 </CardTitle>
                 <CardDescription className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />

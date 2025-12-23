@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useShopRewards } from "@/hooks/useShop";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useCallback } from "react";
 
@@ -107,10 +108,12 @@ export const RewardsShop = () => {
 
       {/* Rewards Grid */}
       {previewRewards.length === 0 ? (
-        <div className="p-8 text-center text-muted-foreground">
-          <Gift className="w-12 h-12 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">Nenhuma recompensa disponível</p>
-        </div>
+        <EmptyState
+          icon={Gift}
+          title="Nenhuma recompensa disponível"
+          description="Volte mais tarde!"
+          compact
+        />
       ) : (
         <div className="p-4 grid grid-cols-2 gap-3">
           {previewRewards.map((reward, i) => {

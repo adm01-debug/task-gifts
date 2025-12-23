@@ -25,6 +25,9 @@ import { shopService, type ShopReward, type RewardCategory } from "@/services/sh
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 
 function RewardCard({
   reward,
@@ -226,6 +229,7 @@ function PurchaseHistory() {
 }
 
 export default function Shop() {
+  const seoConfig = useSEO();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profile } = useProfile(user?.id ?? "");
@@ -277,7 +281,8 @@ export default function Shop() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <PageWrapper pageName="Loja" className="min-h-screen bg-background pb-20">
+      <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
       {/* Celebration Effect */}
       {celebration && (
         <CelebrationEffect
@@ -487,6 +492,6 @@ export default function Shop() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageWrapper>
   );
 }

@@ -79,7 +79,7 @@ export default function Goals() {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: string): "destructive" | "default" | "secondary" => {
     switch (priority) {
       case "high": return "destructive";
       case "medium": return "default";
@@ -100,7 +100,7 @@ export default function Goals() {
               {getStatusIcon(goal.status)}
               <CardTitle className="text-lg">{goal.title}</CardTitle>
             </div>
-            <Badge variant={getPriorityColor(goal.priority) as any}>
+            <Badge variant={getPriorityColor(goal.priority)}>
               {goal.priority === "high" ? "Alta" : goal.priority === "medium" ? "Média" : "Baixa"}
             </Badge>
           </div>
