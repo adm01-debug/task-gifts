@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   Filter,
   Brain,
+  Crown,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ import { PDIAlertsPanel } from "@/components/admin/PDIAlertsPanel";
 import { ManagerConsolidatedDashboard } from "@/components/manager/ManagerConsolidatedDashboard";
 import { AICopilotDashboard } from "@/components/manager/AICopilotDashboard";
 import { HighPotentialsPanel } from "@/components/manager/HighPotentialsPanel";
+import { SuccessionPanel } from "@/components/manager/SuccessionPanel";
 import { TeamCertificationsPanel } from "@/components/TeamCertificationsPanel";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -458,6 +460,10 @@ export default function ManagerDashboard() {
               <TrendingUp className="h-4 w-4" />
               High Potentials
             </TabsTrigger>
+            <TabsTrigger value="succession" className="gap-2">
+              <Crown className="h-4 w-4" />
+              Sucessão
+            </TabsTrigger>
             <TabsTrigger value="quests" className="gap-2">
               <Target className="h-4 w-4" />
               Quests
@@ -561,6 +567,12 @@ export default function ManagerDashboard() {
           <TabsContent value="hipotentials">
             <SectionErrorBoundary sectionName="High Potentials">
               <HighPotentialsPanel />
+            </SectionErrorBoundary>
+          </TabsContent>
+
+          <TabsContent value="succession">
+            <SectionErrorBoundary sectionName="Sucessão Inteligente">
+              <SuccessionPanel />
             </SectionErrorBoundary>
           </TabsContent>
 
