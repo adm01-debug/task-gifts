@@ -30,6 +30,8 @@ import { useAllAchievements, useUserAchievements } from "@/hooks/useAchievements
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 
 interface ProfileData {
   id: string;
@@ -244,8 +246,11 @@ const Profile = () => {
     { icon: Target, label: "Quests", value: profile?.quests_completed?.toLocaleString() || "0", color: "secondary" },
   ];
 
+  const seoConfig = useSEO();
+
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
       {/* Animated background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div

@@ -9,12 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useLeagues } from "@/hooks/useLeagues";
-import { toast } from "sonner";
+import { League } from "@/services/leaguesService";
 
 interface LeagueFormData {
   name: string;
@@ -39,21 +40,26 @@ const defaultFormData: LeagueFormData = {
 };
 
 export function LeaguesManager() {
-  const { leagues, isLoading } = useLeagues();
+  const { leagues, isLoading, createLeague, updateLeague, deleteLeague, isCreating, isUpdating, isDeleting } = useLeagues();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState<LeagueFormData>(defaultFormData);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement create/update league
-    toast.success(editingId ? "Liga atualizada!" : "Liga criada!");
+    
+    if (editingId) {
+      updateLeague({ id: editingId, data: formData });
+    } else {
+      createLeague(formData);
+    }
+    
     setIsDialogOpen(false);
     setFormData(defaultFormData);
     setEditingId(null);
   };
 
-  const handleEdit = (league: any) => {
+  const handleEdit = (league: League) => {
     setFormData({
       name: league.name,
       tier: league.tier,
@@ -69,8 +75,9 @@ export function LeaguesManager() {
   };
 
   const handleDelete = async (id: string) => {
-    // TODO: Implement delete league
-    toast.success("Liga removida!");
+    if (window.confirm("Tem certeza que deseja excluir esta liga?")) {
+      deleteLeague(id);
+    }
   };
 
   if (isLoading) {
@@ -100,6 +107,9 @@ export function LeaguesManager() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editingId ? "Editar Liga" : "Nova Liga"}</DialogTitle>
+              <DialogDescription>
+                {editingId ? "Atualize os detalhes da liga." : "Crie uma nova liga para o sistema de rankings."}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">

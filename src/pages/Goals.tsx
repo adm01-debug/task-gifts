@@ -18,8 +18,11 @@ import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import type { Goal, KeyResult } from "@/types/goals";
 import { PageWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 
 export default function Goals() {
+  const seoConfig = useSEO();
   const navigate = useNavigate();
   const { goals, teamGoals, companyGoals, isLoading, createGoal, updateGoal, createKeyResult, deleteGoal, isCreating } = useGoals();
   const { toast } = useToast();
@@ -231,6 +234,7 @@ export default function Goals() {
 
   return (
     <PageWrapper pageName="Goals" className="min-h-screen bg-background">
+      <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="h-5 w-5" />

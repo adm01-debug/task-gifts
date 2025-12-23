@@ -10,6 +10,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BehavioralBadgesWidget } from "@/components/BehavioralBadgesWidget";
 import { PageWrapper, SectionWrapper } from "@/components/PageWrapper";
+import { SEOHead } from "@/components/SEOHead";
+import { useSEO } from "@/hooks/useSEO";
 const rarityConfig = {
   common: {
     label: "Comum",
@@ -48,6 +50,7 @@ const categoryConfig: Record<string, { label: string; icon: React.ReactNode }> =
 };
 
 export default function Achievements() {
+  const seoConfig = useSEO();
   const { data: allAchievements, isLoading: loadingAll } = useAllAchievements();
   const { data: userAchievements, isLoading: loadingUser } = useUserAchievements();
 
@@ -81,6 +84,7 @@ export default function Achievements() {
 
   return (
     <PageWrapper pageName="Conquistas" className="container max-w-4xl py-8 space-y-6">
+      <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

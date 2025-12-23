@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { PartyPopper, Plus, Edit2, Trash2, Save, X, Calendar, Gift } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { PartyPopper, Plus, Calendar, X, Save } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -25,15 +26,14 @@ import {
 import { useCelebrations } from "@/hooks/useCelebrations";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { toast } from "sonner";
 
 export function CelebrationManager() {
-  const { upcomingCelebrations: celebrations, isLoading } = useCelebrations();
+  const { upcomingCelebrations: celebrations, isLoading, createCelebration, isCreating } = useCelebrations();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    celebration_type: "birthday",
+    celebration_type: "birthday" as "birthday" | "work_anniversary" | "milestone" | "custom",
     celebration_date: "",
     xp_reward: 50,
     coin_reward: 25,
@@ -42,8 +42,15 @@ export function CelebrationManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement create celebration
-    toast.success("Celebração criada!");
+    
+    createCelebration({
+      celebration_type: formData.celebration_type,
+      title: formData.title,
+      description: formData.description || undefined,
+      celebration_date: formData.celebration_date,
+      is_public: formData.is_public,
+    });
+    
     setIsDialogOpen(false);
     setFormData({
       title: "",
@@ -107,6 +114,9 @@ export function CelebrationManager() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Nova Celebração</DialogTitle>
+              <DialogDescription>
+                Crie uma celebração personalizada para reconhecer conquistas da equipe.
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -133,16 +143,17 @@ export function CelebrationManager() {
                   <Label htmlFor="type">Tipo</Label>
                   <Select
                     value={formData.celebration_type}
-                    onValueChange={(value) => setFormData({ ...formData, celebration_type: value })}
+                    onValueChange={(value: "birthday" | "work_anniversary" | "milestone" | "custom") => 
+                      setFormData({ ...formData, celebration_type: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="birthday">🎂 Aniversário</SelectItem>
-                      <SelectItem value="anniversary">🎉 Tempo de Casa</SelectItem>
-                      <SelectItem value="achievement">🏆 Conquista</SelectItem>
-                      <SelectItem value="promotion">⭐ Promoção</SelectItem>
+                      <SelectItem value="work_anniversary">🎉 Tempo de Casa</SelectItem>
+                      <SelectItem value="milestone">🏆 Marco</SelectItem>
                       <SelectItem value="custom">🎊 Personalizado</SelectItem>
                     </SelectContent>
                   </Select>

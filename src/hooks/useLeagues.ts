@@ -1,9 +1,11 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { leaguesService } from "@/services/leaguesService";
+import { leaguesService, League } from "@/services/leaguesService";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export function useLeagues() {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const leaguesQuery = useQuery({
@@ -66,11 +68,51 @@ export function useLeagues() {
     };
   }, [queryClient]);
 
+  const createLeagueMutation = useMutation({
+    mutationFn: (league: Omit<League, 'id' | 'created_at'>) => leaguesService.createLeague(league),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leagues"] });
+      toast({ title: "Liga criada com sucesso!" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao criar liga", variant: "destructive" });
+    },
+  });
+
+  const updateLeagueMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Omit<League, 'id' | 'created_at'>> }) => 
+      leaguesService.updateLeague(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leagues"] });
+      toast({ title: "Liga atualizada com sucesso!" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao atualizar liga", variant: "destructive" });
+    },
+  });
+
+  const deleteLeagueMutation = useMutation({
+    mutationFn: (id: string) => leaguesService.deleteLeague(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leagues"] });
+      toast({ title: "Liga removida com sucesso!" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao remover liga", variant: "destructive" });
+    },
+  });
+
   return {
     leagues: leaguesQuery.data ?? [],
     myLeague: myLeagueQuery.data,
     leaderboard: leaderboardQuery.data ?? [],
     history: historyQuery.data ?? [],
     isLoading: leaguesQuery.isLoading || myLeagueQuery.isLoading,
+    createLeague: createLeagueMutation.mutate,
+    updateLeague: updateLeagueMutation.mutate,
+    deleteLeague: deleteLeagueMutation.mutate,
+    isCreating: createLeagueMutation.isPending,
+    isUpdating: updateLeagueMutation.isPending,
+    isDeleting: deleteLeagueMutation.isPending,
   };
 }

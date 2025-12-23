@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { Flame, Zap, Gift, Settings, Home, Medal, Target, Trophy, TrendingUp, Clock, BookOpen, Gamepad2, ShoppingBag, MessageSquare, Swords, Heart, Award, ClipboardCheck, BarChart3, Megaphone } from "lucide-react";
+import { Flame, Zap, Gift, Settings, Home, Medal, Target, Trophy, TrendingUp, Clock, BookOpen, Gamepad2, ShoppingBag, MessageSquare, Swords, Heart, Award, ClipboardCheck, BarChart3, Megaphone, Globe } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useCurrentProfile } from "@/hooks/useProfiles";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 interface NavItem {
   icon: React.ElementType;
@@ -222,11 +223,23 @@ export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
         </motion.div>
       )}
 
+      {/* Language Selector */}
+      {!collapsed && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="px-3 pb-2"
+        >
+          <LanguageSelector compact={false} className="w-full" />
+        </motion.div>
+      )}
+
       {/* Settings */}
       <div className="p-2 border-t border-sidebar-border">
         <motion.button
           whileHover={{ x: 4 }}
           onClick={handleNavigateToProfile}
+          aria-label="Configurações"
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors"
         >
           <Settings className="w-5 h-5" />
