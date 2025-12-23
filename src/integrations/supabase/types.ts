@@ -794,6 +794,68 @@ export type Database = {
           },
         ]
       }
+      custom_badges: {
+        Row: {
+          category: string | null
+          coin_reward: number | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          order_index: number | null
+          rarity: string | null
+          theme_id: string | null
+          unlock_condition: Json | null
+          updated_at: string | null
+          xp_reward: number | null
+        }
+        Insert: {
+          category?: string | null
+          coin_reward?: number | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          order_index?: number | null
+          rarity?: string | null
+          theme_id?: string | null
+          unlock_condition?: Json | null
+          updated_at?: string | null
+          xp_reward?: number | null
+        }
+        Update: {
+          category?: string | null
+          coin_reward?: number | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          order_index?: number | null
+          rarity?: string | null
+          theme_id?: string | null
+          unlock_condition?: Json | null
+          updated_at?: string | null
+          xp_reward?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_badges_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_themes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_quests: {
         Row: {
           coin_reward: number
@@ -855,6 +917,136 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_ranks: {
+        Row: {
+          badge_url: string | null
+          coin_multiplier: number | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          max_level: number | null
+          min_level: number
+          name: string
+          order_index: number | null
+          special_perks: Json | null
+          theme_id: string | null
+          title: string
+          updated_at: string | null
+          xp_multiplier: number | null
+        }
+        Insert: {
+          badge_url?: string | null
+          coin_multiplier?: number | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          max_level?: number | null
+          min_level?: number
+          name: string
+          order_index?: number | null
+          special_perks?: Json | null
+          theme_id?: string | null
+          title: string
+          updated_at?: string | null
+          xp_multiplier?: number | null
+        }
+        Update: {
+          badge_url?: string | null
+          coin_multiplier?: number | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          max_level?: number | null
+          min_level?: number
+          name?: string
+          order_index?: number | null
+          special_perks?: Json | null
+          theme_id?: string | null
+          title?: string
+          updated_at?: string | null
+          xp_multiplier?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_ranks_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_themes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_titles: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_limited: boolean | null
+          max_holders: number | null
+          name: string
+          order_index: number | null
+          prefix: string | null
+          suffix: string | null
+          theme_id: string | null
+          unlock_requirement: Json | null
+          unlock_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_limited?: boolean | null
+          max_holders?: number | null
+          name: string
+          order_index?: number | null
+          prefix?: string | null
+          suffix?: string | null
+          theme_id?: string | null
+          unlock_requirement?: Json | null
+          unlock_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_limited?: boolean | null
+          max_holders?: number | null
+          name?: string
+          order_index?: number | null
+          prefix?: string | null
+          suffix?: string | null
+          theme_id?: string | null
+          unlock_requirement?: Json | null
+          unlock_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_titles_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_themes"
             referencedColumns: ["id"]
           },
         ]
@@ -1310,6 +1502,56 @@ export type Database = {
           },
         ]
       }
+      gamification_themes: {
+        Row: {
+          color_primary: string | null
+          color_secondary: string | null
+          created_at: string | null
+          created_by: string
+          department_id: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          color_primary?: string | null
+          color_secondary?: string | null
+          created_at?: string | null
+          created_by: string
+          department_id?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          color_primary?: string | null
+          color_secondary?: string | null
+          created_at?: string | null
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gamification_themes_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: true
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_updates: {
         Row: {
           created_at: string
@@ -1597,11 +1839,15 @@ export type Database = {
           color: string
           created_at: string
           demotion_slots: number
+          department_id: string | null
+          description: string | null
           icon: string
           id: string
           min_xp_weekly: number
           name: string
           promotion_slots: number
+          special_rewards: Json | null
+          theme_id: string | null
           tier: number
           xp_bonus_percent: number
         }
@@ -1609,11 +1855,15 @@ export type Database = {
           color?: string
           created_at?: string
           demotion_slots?: number
+          department_id?: string | null
+          description?: string | null
           icon?: string
           id?: string
           min_xp_weekly?: number
           name: string
           promotion_slots?: number
+          special_rewards?: Json | null
+          theme_id?: string | null
           tier: number
           xp_bonus_percent?: number
         }
@@ -1621,15 +1871,34 @@ export type Database = {
           color?: string
           created_at?: string
           demotion_slots?: number
+          department_id?: string | null
+          description?: string | null
           icon?: string
           id?: string
           min_xp_weekly?: number
           name?: string
           promotion_slots?: number
+          special_rewards?: Json | null
+          theme_id?: string | null
           tier?: number
           xp_bonus_percent?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "leagues_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leagues_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_themes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       learning_trails: {
         Row: {
@@ -1689,6 +1958,60 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      level_configs: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          icon: string | null
+          id: string
+          level: number
+          name: string | null
+          rank_id: string | null
+          rewards: Json | null
+          theme_id: string | null
+          xp_required: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          level: number
+          name?: string | null
+          rank_id?: string | null
+          rewards?: Json | null
+          theme_id?: string | null
+          xp_required: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          level?: number
+          name?: string | null
+          rank_id?: string | null
+          rewards?: Json | null
+          theme_id?: string | null
+          xp_required?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "level_configs_rank_id_fkey"
+            columns: ["rank_id"]
+            isOneToOne: false
+            referencedRelation: "custom_ranks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "level_configs_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_themes"
             referencedColumns: ["id"]
           },
         ]
@@ -3480,6 +3803,41 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "seasonal_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_titles: {
+        Row: {
+          earned_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          title_id: string | null
+          user_id: string
+        }
+        Insert: {
+          earned_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          title_id?: string | null
+          user_id: string
+        }
+        Update: {
+          earned_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          title_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_titles_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "custom_titles"
             referencedColumns: ["id"]
           },
         ]

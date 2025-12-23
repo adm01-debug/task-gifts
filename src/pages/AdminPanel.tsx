@@ -27,6 +27,7 @@ import {
   Briefcase,
   Scale,
   Plug,
+  Sparkles,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ import { MoodAnalytics } from "@/components/admin/MoodAnalytics";
 import { PositionsManager } from "@/components/admin/PositionsManager";
 import { PenaltyRulesManager } from "@/components/admin/PenaltyRulesManager";
 import { ApiIntegrationManager } from "@/components/admin/ApiIntegrationManager";
+import { GamificationManager } from "@/components/admin/GamificationManager";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -280,6 +282,10 @@ function AdminPanelContent() {
               <Plug className="h-4 w-4" />
               API
             </TabsTrigger>
+            <TabsTrigger value="gamification" className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              Gamificação
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -436,6 +442,11 @@ function AdminPanelContent() {
           {/* API Integration Tab */}
           <TabsContent value="api">
             <ApiIntegrationManager />
+          </TabsContent>
+
+          {/* Gamification Tab */}
+          <TabsContent value="gamification">
+            <GamificationManager />
           </TabsContent>
         </Tabs>
       </main>
