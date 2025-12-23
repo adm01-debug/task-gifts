@@ -66,6 +66,40 @@ export interface OneOnOnePreparation {
   followUpFromLast: string[];
 }
 
+interface ProfileWithRelations {
+  display_name: string | null;
+  avatar_url: string | null;
+  level: number;
+  xp: number;
+  department_id?: string | null;
+  position_id?: string | null;
+}
+
+interface GoalRecord {
+  title: string;
+  progress_percent: number | null;
+  status: string;
+  is_active?: boolean;
+}
+
+interface PlanActionRecord {
+  competency_id: string | null;
+  title: string | null;
+  status: string;
+  due_date: string | null;
+}
+
+interface KudosRecord {
+  message: string;
+  created_at: string;
+}
+
+interface MoodEntry {
+  created_at: string;
+  mood_score: number;
+  note: string | null;
+}
+
 export const oneOnOnePreparationService = {
   async getEmployeeContext(employeeId: string): Promise<OneOnOneContext> {
     const { data: { user } } = await supabase.auth.getUser();
@@ -74,7 +108,7 @@ export const oneOnOnePreparationService = {
     // Fetch employee profile
     const { data: profile } = await supabase
       .from("profiles")
-      .select("*, departments(name), positions(title)")
+      .select("*")
       .eq("id", employeeId)
       .single();
 
@@ -101,7 +135,8 @@ export const oneOnOnePreparationService = {
       .from("goals")
       .select("*")
       .eq("user_id", employeeId);
-    const goals = (goalsData || []).filter((g: any) => g.is_active !== false);
+    const typedGoals = goalsData as GoalRecord[] | null;
+    const goals = (typedGoals || []).filter((g) => g.is_active !== false);
 
     // Fetch PDI
     const { data: pdiData } = await supabase
@@ -113,19 +148,19 @@ export const oneOnOnePreparationService = {
       .limit(1);
 
     const pdi = pdiData?.[0];
-    let pdiActions: any[] = [];
+    let pdiActions: PlanActionRecord[] = [];
     if (pdi) {
       const { data: actions } = await supabase
         .from("development_plan_actions")
         .select("*")
         .eq("plan_id", pdi.id);
-      pdiActions = actions || [];
+      pdiActions = (actions || []) as PlanActionRecord[];
     }
 
     // Fetch recent kudos
     const { data: kudos } = await supabase
       .from("kudos")
-      .select("*, from_profile:profiles!kudos_from_user_id_fkey(display_name)")
+      .select("message, created_at, from_user_id")
       .eq("to_user_id", employeeId)
       .order("created_at", { ascending: false })
       .limit(5);
@@ -141,52 +176,61 @@ export const oneOnOnePreparationService = {
 
     // Get competency gaps from development plan actions
     const competencyGaps: string[] = [];
-    pdiActions.forEach((a: any) => {
+    pdiActions.forEach((a) => {
       if (a.competency_id && a.status !== 'completed') {
         competencyGaps.push(a.title || "Competência a desenvolver");
       }
     });
+
+    const typedKudos = kudos || [];
+    const typedPulses = (pulses || []) as MoodEntry[];
+
+    // Fetch display names for kudos senders
+    const kudosWithNames = await Promise.all(
+      typedKudos.map(async (k) => {
+        let fromName = "Alguém";
+        if (k.from_user_id) {
+          const { data: fromProfile } = await supabase.from("profiles").select("display_name").eq("id", k.from_user_id).single();
+          fromName = fromProfile?.display_name || "Alguém";
+        }
+        return { message: k.message, from: fromName, date: k.created_at };
+      })
+    );
 
     // Build context
     const context: OneOnOneContext = {
       employee: {
         id: employeeId,
         name: profile?.display_name || "Colaborador",
-        avatar_url: profile?.avatar_url,
+        avatar_url: profile?.avatar_url ?? undefined,
         level: profile?.level,
         xp: profile?.xp,
-        department: (profile as any)?.departments?.name,
-        position: (profile as any)?.positions?.title,
       },
       lastCheckin: lastCheckin ? {
         date: lastCheckin.completed_at || lastCheckin.scheduled_at,
         mood: lastCheckin.mood_rating || 3,
-        notes: lastCheckin.notes,
-        actionItems: (lastCheckin.action_items as any[]) || [],
+        notes: lastCheckin.notes ?? undefined,
+        actionItems: (lastCheckin.action_items as { text: string; completed: boolean }[]) || [],
       } : null,
-      recentPulses: (pulses || []).map((p: any) => ({
+      recentPulses: typedPulses.map((p) => ({
         date: p.created_at,
         mood: p.mood_score,
-        comment: p.notes,
+        comment: p.note ?? undefined,
       })),
-      goals: (goals || []).map((g: any) => ({
+      goals: goals.map((g) => ({
         title: g.title,
-        progress: g.progress || 0,
+        progress: g.progress_percent || 0,
         status: g.status,
       })),
       pdiProgress: pdi ? {
         planTitle: pdi.title,
-        completedActions: pdiActions.filter((a: any) => a.status === 'completed').length,
+        completedActions: pdiActions.filter((a) => a.status === 'completed').length,
         totalActions: pdiActions.length,
-        overdueActions: pdiActions.filter((a: any) => 
+        overdueActions: pdiActions.filter((a) => 
           a.status !== 'completed' && a.due_date && new Date(a.due_date) < new Date()
         ).length,
       } : null,
-      recentKudos: (kudos || []).map((k: any) => ({
-        message: k.message,
-        from: k.from_profile?.display_name || "Alguém",
-        date: k.created_at,
-      })),
+      recentKudos: kudosWithNames,
       nineBoxPosition: nineBox ? {
         performance: nineBox.performance_score,
         potential: nineBox.potential_score,

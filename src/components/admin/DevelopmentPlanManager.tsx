@@ -661,7 +661,7 @@ function PlanDetailView({
           <Label className="min-w-fit">Status:</Label>
           <Select
             value={plan.status}
-            onValueChange={(status) => updatePlan.mutate({ id: planId, status: status as any })}
+            onValueChange={(status) => updatePlan.mutate({ id: planId, status: status as "draft" | "active" | "completed" | "cancelled" })}
           >
             <SelectTrigger className="w-[150px]">
               <SelectValue />
