@@ -139,12 +139,12 @@ export const LeagueCard = memo(function LeagueCard() {
             <span className="text-green-500">Promoção (Top {promotionZone})</span>
             <span className="text-red-500">Rebaixamento (Últimos {currentLeague?.demotion_slots})</span>
           </div>
-          <div className="h-2 rounded-full bg-gradient-to-r from-green-500/20 via-muted to-red-500/20">
+        <div className="h-2 rounded-full bg-gradient-to-r from-green-500/20 via-muted to-red-500/20">
             <motion.div
               className="h-full w-2 bg-primary rounded-full"
               initial={{ marginLeft: "0%" }}
               animate={{ 
-                marginLeft: `${Math.min(100, ((userPosition - 1) / leaderboard.length) * 100)}%` 
+                marginLeft: `${leaderboard.length > 0 ? Math.min(100, ((userPosition - 1) / leaderboard.length) * 100) : 0}%` 
               }}
               transition={{ duration: 0.5 }}
             />
