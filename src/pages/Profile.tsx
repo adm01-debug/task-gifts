@@ -21,6 +21,8 @@ import { ProfileAvatarSection } from "@/components/ProfileAvatarSection";
 import { SoundSettingsCard } from "@/components/SoundSettingsCard";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { MyNineBoxWidget } from "@/components/MyNineBoxWidget";
+import { MyDevelopmentPlanWidget } from "@/components/MyDevelopmentPlanWidget";
 import { useAvatarConfig } from "@/hooks/useAvatar";
 import { useUserRank } from "@/hooks/useUserRank";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
@@ -486,6 +488,16 @@ const Profile = () => {
             <CompetencyRadar userId={user.id} />
           </SectionErrorBoundary>
         )}
+
+        {/* 9-Box Widget */}
+        <SectionErrorBoundary sectionName="Avaliação 9-Box">
+          <MyNineBoxWidget />
+        </SectionErrorBoundary>
+
+        {/* Development Plan Widget */}
+        <SectionErrorBoundary sectionName="Plano de Desenvolvimento">
+          <MyDevelopmentPlanWidget />
+        </SectionErrorBoundary>
 
         {/* Kudos Received Section */}
         {user?.id && (

@@ -12,6 +12,7 @@ import { RewardsShop } from "@/components/RewardsShop";
 import { LeagueCard } from "@/components/LeagueCard";
 import { ActivityHeatmap, useActivityHeatmapData } from "@/components/ActivityHeatmap";
 import { MoodTrackerWidget } from "@/components/MoodTrackerWidget";
+import { ENPSSurveyWidget } from "@/components/ENPSSurveyWidget";
 import { StaggeredContainer, StaggeredItemRight } from "@/components/StaggeredContainer";
 import { LazyWidget } from "./LazyWidget";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
@@ -50,6 +51,13 @@ export const DashboardRightColumn = memo(function DashboardRightColumn() {
       <StaggeredItemRight>
         <SectionErrorBoundary sectionName="Humor do Dia">
           <MoodTrackerWidget />
+        </SectionErrorBoundary>
+      </StaggeredItemRight>
+
+      {/* eNPS Survey Widget - High visibility for active surveys */}
+      <StaggeredItemRight>
+        <SectionErrorBoundary sectionName="Pesquisa eNPS">
+          <ENPSSurveyWidget />
         </SectionErrorBoundary>
       </StaggeredItemRight>
 
