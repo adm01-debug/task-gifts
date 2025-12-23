@@ -194,11 +194,13 @@ export function AnnouncementsBoard() {
               .filter(a => !a.is_pinned)
               .map(renderAnnouncement)
             }
-            {announcements.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>Nenhum anúncio publicado</p>
-              </div>
+            {announcements.length === 0 && pinnedAnnouncements.length === 0 && (
+              <EmptyState
+                icon={MessageCircle}
+                title="Nenhum anúncio publicado"
+                description="Seja o primeiro a compartilhar uma novidade com a equipe"
+                compact
+              />
             )}
           </div>
         </ScrollArea>
