@@ -1,20 +1,28 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lightbulb } from "lucide-react";
-import { Sparkles, Send, X, Trash2, Bot, User, Loader2, BookOpen, Clock, Zap } from "lucide-react";
+import { Lightbulb, Copy, Check, Volume2, VolumeX, RotateCcw, Maximize2, Minimize2 } from "lucide-react";
+import { Sparkles, Send, X, Trash2, Bot, User, Loader2, BookOpen, Clock, Zap, Target, Trophy, Flame, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { useAICoach } from "@/hooks/useAICoach";
 import { usePublishedTrails } from "@/hooks/useTrails";
+import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const QUICK_PROMPTS = [
-  "Como ganhar mais XP?",
-  "Sugira trilhas para mim",
-  "Explique o sistema de combo",
-  "Dicas para subir no ranking",
+  { icon: "🎯", text: "Como ganhar mais XP?", category: "xp" },
+  { icon: "📚", text: "Sugira trilhas para mim", category: "trails" },
+  { icon: "🔥", text: "Explique o sistema de combo", category: "combo" },
+  { icon: "🏆", text: "Dicas para subir no ranking", category: "ranking" },
+  { icon: "💪", text: "Quais competências desenvolver?", category: "skills" },
+  { icon: "🎮", text: "Como funcionam os duelos?", category: "duels" },
+  { icon: "📊", text: "Analise minha performance", category: "performance" },
+  { icon: "🎁", text: "Como ganhar mais moedas?", category: "coins" },
 ];
 
 interface TrailCardProps {
@@ -72,8 +80,12 @@ interface AICoachDialogProps {
 export function AICoachDialog({ trigger }: AICoachDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<"chat" | "stats">("chat");
   const { messages, suggestions, isLoading, error, sendMessage, clearMessages } = useAICoach();
   const { data: trails } = usePublishedTrails();
+  const { data: profile } = useCurrentProfile();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,6 +117,27 @@ export function AICoachDialog({ trigger }: AICoachDialogProps = {}) {
   const handleNavigateToTrail = (trailId: string) => {
     setOpen(false);
     navigate(`/trails/${trailId}`);
+  };
+
+  const handleCopyMessage = async (content: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedIndex(index);
+      toast.success("Copiado para a área de transferência!");
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch {
+      toast.error("Erro ao copiar");
+    }
+  };
+
+  const handleRetryMessage = () => {
+    if (messages.length > 0) {
+      const lastUserMessage = [...messages].reverse().find(m => m.role === "user");
+      if (lastUserMessage) {
+        clearMessages();
+        setTimeout(() => sendMessage(lastUserMessage.content), 100);
+      }
+    }
   };
 
   // Find trails mentioned in a message
@@ -206,13 +239,14 @@ export function AICoachDialog({ trigger }: AICoachDialogProps = {}) {
                 <div className="flex flex-wrap justify-center gap-2 pt-2">
                   {QUICK_PROMPTS.map((prompt) => (
                     <Button
-                      key={prompt}
+                      key={prompt.text}
                       variant="outline"
                       size="sm"
-                      className="text-xs"
-                      onClick={() => handleQuickPrompt(prompt)}
+                      className="text-xs gap-1"
+                      onClick={() => handleQuickPrompt(prompt.text)}
                     >
-                      {prompt}
+                      <span>{prompt.icon}</span>
+                      {prompt.text}
                     </Button>
                   ))}
                 </div>
