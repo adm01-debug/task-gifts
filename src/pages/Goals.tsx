@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import type { Goal, KeyResult } from "@/types/goals";
 
 export default function Goals() {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ export default function Goals() {
     }
   };
 
-  const GoalCard = ({ goal }: { goal: any }) => (
+  const GoalCard = ({ goal }: { goal: Goal }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -178,7 +179,7 @@ export default function Goals() {
               
               {goal.key_results?.length > 0 ? (
                 <div className="space-y-2">
-                  {goal.key_results.map((kr: any) => (
+                  {goal.key_results.map((kr: KeyResult) => (
                     <div key={kr.id} className="flex items-center gap-2 text-sm">
                       <div className="flex-1">
                         <div className="flex justify-between">
@@ -258,7 +259,7 @@ export default function Goals() {
                 <div>
                   <p className="text-sm text-muted-foreground">Concluídos</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {goals.filter((g: any) => g.status === "completed").length}
+                    {goals.filter((g) => g.status === "completed").length}
                   </p>
                 </div>
                 <CheckCircle2 className="h-8 w-8 text-green-500/20" />
@@ -271,7 +272,7 @@ export default function Goals() {
                 <div>
                   <p className="text-sm text-muted-foreground">Em Progresso</p>
                   <p className="text-2xl font-bold text-yellow-600">
-                    {goals.filter((g: any) => g.status === "active").length}
+                    {goals.filter((g) => g.status === "active").length}
                   </p>
                 </div>
                 <Clock className="h-8 w-8 text-yellow-500/20" />
@@ -284,7 +285,7 @@ export default function Goals() {
                 <div>
                   <p className="text-sm text-muted-foreground">XP Potencial</p>
                   <p className="text-2xl font-bold text-primary">
-                    {goals.reduce((acc: number, g: any) => acc + g.xp_reward, 0)}
+                    {goals.reduce((acc, g) => acc + g.xp_reward, 0)}
                   </p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-primary/20" />
@@ -392,7 +393,7 @@ export default function Goals() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {goals.map((goal: any) => (
+                {goals.map((goal) => (
                   <GoalCard key={goal.id} goal={goal} />
                 ))}
               </div>
@@ -410,7 +411,7 @@ export default function Goals() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {teamGoals.map((goal: any) => (
+                {teamGoals.map((goal) => (
                   <GoalCard key={goal.id} goal={goal} />
                 ))}
               </div>
@@ -428,7 +429,7 @@ export default function Goals() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {companyGoals.map((goal: any) => (
+                {companyGoals.map((goal) => (
                   <GoalCard key={goal.id} goal={goal} />
                 ))}
               </div>
