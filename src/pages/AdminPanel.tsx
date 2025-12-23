@@ -24,6 +24,9 @@ import {
   Megaphone,
   PartyPopper,
   Heart,
+  Briefcase,
+  Scale,
+  Plug,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -45,6 +48,9 @@ import { FeedbackCycleManager } from "@/components/admin/FeedbackCycleManager";
 import { AnnouncementPublisher } from "@/components/admin/AnnouncementPublisher";
 import { CelebrationManager } from "@/components/admin/CelebrationManager";
 import { MoodAnalytics } from "@/components/admin/MoodAnalytics";
+import { PositionsManager } from "@/components/admin/PositionsManager";
+import { PenaltyRulesManager } from "@/components/admin/PenaltyRulesManager";
+import { ApiIntegrationManager } from "@/components/admin/ApiIntegrationManager";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -262,6 +268,18 @@ function AdminPanelContent() {
               <Heart className="h-4 w-4" />
               Mood
             </TabsTrigger>
+            <TabsTrigger value="positions" className="gap-2">
+              <Briefcase className="h-4 w-4" />
+              Cargos
+            </TabsTrigger>
+            <TabsTrigger value="penalties" className="gap-2">
+              <Scale className="h-4 w-4" />
+              Penalidades
+            </TabsTrigger>
+            <TabsTrigger value="api" className="gap-2">
+              <Plug className="h-4 w-4" />
+              API
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -403,6 +421,21 @@ function AdminPanelContent() {
           {/* Mood Tab */}
           <TabsContent value="mood">
             <MoodAnalytics />
+          </TabsContent>
+
+          {/* Positions Tab */}
+          <TabsContent value="positions">
+            <PositionsManager />
+          </TabsContent>
+
+          {/* Penalties Tab */}
+          <TabsContent value="penalties">
+            <PenaltyRulesManager />
+          </TabsContent>
+
+          {/* API Integration Tab */}
+          <TabsContent value="api">
+            <ApiIntegrationManager />
           </TabsContent>
         </Tabs>
       </main>
