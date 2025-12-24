@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lightbulb, Copy, Check, Volume2, VolumeX, RotateCcw, Maximize2, Minimize2 } from "lucide-react";
-import { Sparkles, Send, X, Trash2, Bot, User, Loader2, BookOpen, Clock, Zap, Target, Trophy, Flame, TrendingUp } from "lucide-react";
+import { Sparkles, Send, X, Trash2, Bot, User, Loader2, BookOpen, Clock, Zap, Target, Trophy, Flame, TrendingUp, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,6 +13,7 @@ import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { aiCoachMessageSchema } from "@/lib/validations";
 
 const QUICK_PROMPTS = [
   { icon: "🎯", text: "Como ganhar mais XP?", category: "xp" },
