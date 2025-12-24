@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { duelsService, DuelWithProfiles } from "@/services/duelsService";
 import { toast } from "sonner";
+import { showErrorToast } from "@/lib/errorMessages";
 
 export const duelKeys = {
   all: ["duels"] as const,
@@ -90,8 +91,8 @@ export function useCreateDuel() {
       queryClient.invalidateQueries({ queryKey: duelKeys.active(variables.challengerId) });
       toast.success("Desafio enviado!", { description: "Aguardando resposta do oponente" });
     },
-    onError: () => {
-      toast.error("Erro ao criar desafio");
+    onError: (error: Error) => {
+      showErrorToast(error, "criar desafio");
     },
   });
 }
@@ -106,8 +107,8 @@ export function useAcceptDuel() {
       queryClient.invalidateQueries({ queryKey: duelKeys.all });
       toast.success("Duelo aceito!", { description: "Que vença o melhor!" });
     },
-    onError: () => {
-      toast.error("Erro ao aceitar duelo");
+    onError: (error: Error) => {
+      showErrorToast(error, "aceitar duelo");
     },
   });
 }
@@ -122,8 +123,8 @@ export function useDeclineDuel() {
       queryClient.invalidateQueries({ queryKey: duelKeys.all });
       toast.info("Desafio recusado");
     },
-    onError: () => {
-      toast.error("Erro ao recusar duelo");
+    onError: (error: Error) => {
+      showErrorToast(error, "recusar duelo");
     },
   });
 }

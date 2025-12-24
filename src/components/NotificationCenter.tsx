@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { 
   useNotifications, 
   useMarkAsRead, 
@@ -232,13 +233,12 @@ export const NotificationCenter = () => {
               ))}
             </div>
           ) : notifications.length === 0 ? (
-            <div className="p-8 text-center">
-              <Bell className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">Sem notificações</p>
-              <p className="text-xs text-muted-foreground/70">
-                Novas atualizações aparecerão aqui
-              </p>
-            </div>
+            <EmptyState
+              icon={Bell}
+              title="Sem notificações"
+              description="Novas atualizações aparecerão aqui"
+              compact
+            />
           ) : (
             <AnimatePresence mode="popLayout">
               {notifications.map((notification) => (

@@ -13,6 +13,8 @@ import {
 import { useMoodTracker } from "@/hooks/useMoodTracker";
 import { format, subDays, startOfWeek, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { LoadingStateCard } from "@/components/ui/loading-state";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const moodEmojis = ["😢", "😕", "😐", "🙂", "😄"];
 const moodLabels = ["Muito mal", "Mal", "Neutro", "Bem", "Muito bem"];
@@ -56,13 +58,7 @@ export function MoodAnalytics() {
   };
 
   if (isLoading) {
-    return (
-      <Card className="animate-pulse">
-        <CardContent className="p-8">
-          <div className="h-40 bg-muted rounded-lg" />
-        </CardContent>
-      </Card>
-    );
+    return <LoadingStateCard message="Carregando análise de humor..." />;
   }
 
   return (
@@ -247,9 +243,11 @@ export function MoodAnalytics() {
         </CardHeader>
         <CardContent>
           {weeklyMoods.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhum registro de humor ainda
-            </p>
+            <EmptyState
+              icon={Heart}
+              title="Nenhum registro de humor ainda"
+              compact
+            />
           ) : (
             <div className="space-y-3">
               {weeklyMoods.slice(0, 10).map((mood, index) => (

@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useAllMissions } from "@/hooks/useMissions";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface RankingMetric {
   key: string;
@@ -247,10 +248,11 @@ export default function DepartmentRankings() {
 
       <CardContent className="space-y-3">
         {rankings.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>Nenhum dado de ranking disponível</p>
-          </div>
+          <EmptyState
+            icon={Users}
+            title="Nenhum dado de ranking disponível"
+            compact
+          />
         ) : (
           rankings.map((user, index) => (
             <RankingCard
