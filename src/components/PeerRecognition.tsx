@@ -1,6 +1,6 @@
 import { useState, forwardRef, useCallback, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Send, Users, Sparkles, X, Search } from "lucide-react";
+import { Heart, Send, Users, Sparkles, X, Search, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -13,6 +13,7 @@ import { SkeletonKudosList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { kudosMessageSchema } from "@/lib/validations";
 import type { KudosBadge } from "@/services/kudosService";
 
 interface GiveKudosFormProps {
@@ -28,6 +29,7 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
   const [selectedBadge, setSelectedBadge] = useState<KudosBadge | null>(null);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const otherUsers = useMemo(() => profiles.filter(p => p.id !== user?.id), [profiles, user?.id]);
@@ -36,8 +38,22 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
     p.email?.toLowerCase().includes(searchQuery.toLowerCase())
   ), [otherUsers, searchQuery]);
 
+  // Validate message with Zod schema
+  const validateMessage = useCallback((value: string) => {
+    const result = kudosMessageSchema.safeParse(value);
+    if (!result.success) {
+      setMessageError(result.error.errors[0].message);
+      return false;
+    }
+    setMessageError(null);
+    return true;
+  }, []);
+
   const handleSubmit = useCallback(() => {
-    if (!user?.id || !selectedUser || !message.trim()) return;
+    if (!user?.id || !selectedUser) return;
+    
+    // Validate before submitting
+    if (!validateMessage(message)) return;
 
     giveKudos.mutate({
       from_user_id: user.id,
@@ -50,10 +66,11 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
         setSelectedBadge(null);
         setSelectedUser(null);
         setMessage("");
+        setMessageError(null);
         onSuccess();
       },
     });
-  }, [user?.id, selectedUser, message, selectedBadge?.id, giveKudos, onSuccess]);
+  }, [user?.id, selectedUser, message, selectedBadge?.id, giveKudos, onSuccess, validateMessage]);
 
   const selectedProfile = useMemo(() => profiles.find(p => p.id === selectedUser), [profiles, selectedUser]);
 
@@ -156,13 +173,28 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
         <Textarea
           placeholder="Escreva uma mensagem de reconhecimento..."
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            if (messageError) setMessageError(null);
+          }}
+          onBlur={() => message.trim() && validateMessage(message)}
           rows={3}
           maxLength={500}
+          className={cn(messageError && "border-destructive focus-visible:ring-destructive")}
         />
-        <p className="text-[10px] text-muted-foreground text-right mt-1">
-          {message.length}/500
-        </p>
+        <div className="flex items-center justify-between mt-1">
+          {messageError ? (
+            <p className="text-xs text-destructive flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              {messageError}
+            </p>
+          ) : (
+            <span />
+          )}
+          <p className="text-[10px] text-muted-foreground">
+            {message.length}/500
+          </p>
+        </div>
       </div>
 
       {/* Submit */}

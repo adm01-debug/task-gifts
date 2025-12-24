@@ -66,6 +66,7 @@ import { toast } from "sonner";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useUserRoles, type AppRole } from "@/hooks/useUserRoles";
+import { useDebounce } from "@/hooks/useDebounce";
 import { 
   useAllUserRoles, 
   useAssignRole, 
@@ -101,6 +102,9 @@ export function UsersManager() {
   const [selectedDept, setSelectedDept] = useState<string>("");
   const [removeRoleConfirm, setRemoveRoleConfirm] = useState<{ userId: string; role: AppRole } | null>(null);
   const [removingDeptMemberId, setRemovingDeptMemberId] = useState<string | null>(null);
+  
+  // Debounce search query for better performance
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   
   // Bulk action states
   const [bulkRoleDialog, setBulkRoleDialog] = useState(false);
@@ -144,11 +148,11 @@ export function UsersManager() {
     }
   });
 
-  // Filter and paginate
+  // Filter and paginate using debounced search
   const filteredUsers = (profiles || []).filter((user) => {
     const matchesSearch =
-      user.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase());
+      user.display_name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
 
     const userRoles = userRolesMap.get(user.id) || [];
     const matchesRole = filterRole === "all" || userRoles.includes(filterRole as AppRole);

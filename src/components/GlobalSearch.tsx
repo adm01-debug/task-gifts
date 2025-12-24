@@ -26,6 +26,7 @@ import { usePublishedTrails } from "@/hooks/useTrails";
 import { useQuests } from "@/hooks/useQuests";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
+import { useDebounce } from "@/hooks/useDebounce";
 import { cn } from "@/lib/utils";
 
 interface GlobalSearchProps {
@@ -105,6 +106,9 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+  
+  // Debounce search query for better performance
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   
   const navigate = useNavigate();
   const { data: trails } = usePublishedTrails();
