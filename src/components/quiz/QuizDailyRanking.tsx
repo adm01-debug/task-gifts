@@ -5,7 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useDailyQuizRanking } from "@/hooks/useQuizScores";
 import { useAuth } from "@/hooks/useAuth";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonList } from "@/components/ui/loading-state";
+import { EmptyState } from "@/components/ui/empty-state";
 import { memo, useCallback, useMemo } from "react";
 
 interface RankingEntry {
@@ -145,10 +146,8 @@ export function QuizDailyRanking() {
             Ranking do Dia
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-16 w-full" />
-          ))}
+        <CardContent>
+          <SkeletonList count={3} />
         </CardContent>
       </Card>
     );
@@ -164,11 +163,12 @@ export function QuizDailyRanking() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Gamepad2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">Nenhuma pontuação ainda hoje.</p>
-            <p className="text-xs mt-1">Seja o primeiro a jogar!</p>
-          </div>
+          <EmptyState
+            icon={Gamepad2}
+            title="Nenhuma pontuação ainda hoje"
+            description="Seja o primeiro a jogar!"
+            compact
+          />
         </CardContent>
       </Card>
     );

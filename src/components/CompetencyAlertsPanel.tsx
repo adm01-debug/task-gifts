@@ -20,6 +20,7 @@ import {
 import { useCompetencyAlerts } from "@/hooks/useCompetencyAlerts";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { SkeletonList } from "@/components/ui/loading-state";
 
 interface TeamMemberCompetency {
   userId: string;
@@ -176,11 +177,7 @@ export function CompetencyAlertsPanel() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />
-            ))}
-          </div>
+          <SkeletonList count={3} />
         </CardContent>
       </Card>
     );

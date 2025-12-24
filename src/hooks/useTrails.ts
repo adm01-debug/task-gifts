@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { trailsService, type LearningTrail, type TrailModule, type TrailPrerequisite, type CreateTrailInput, type CreateModuleInput } from "@/services/trailsService";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import { showErrorToast } from "@/lib/errorMessages";
 
 export const trailKeys = {
   all: ["trails"] as const,
@@ -66,8 +67,8 @@ export function useEnrollInTrail() {
       queryClient.invalidateQueries({ queryKey: trailKeys.enrollments(user!.id) });
       toast.success("Inscrição realizada com sucesso!");
     },
-    onError: () => {
-      toast.error("Erro ao se inscrever na trilha");
+    onError: (error: Error) => {
+      showErrorToast(error, "inscrever na trilha");
     },
   });
 }
