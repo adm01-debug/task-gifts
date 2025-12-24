@@ -12,6 +12,7 @@ import { SeasonalEventBanner } from "@/components/SeasonalEventBanner";
 import { DashboardHeader, DashboardLeftColumn, DashboardRightColumn, DashboardFooter } from "@/components/dashboard";
 import { SectionWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
+import { MobileBottomNav } from "@/components/mobile";
 
 // Hooks
 import { useIsMobileWithHydration } from "@/hooks/use-mobile";
@@ -125,7 +126,7 @@ function Index() {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto" aria-label="Dashboard principal">
+        <main className={`flex-1 overflow-auto ${isMobile ? 'pb-bottom-nav' : ''}`} aria-label="Dashboard principal">
           {/* Top Header */}
           <DashboardHeader onMenuClick={handleMenuClick} />
 
@@ -169,6 +170,9 @@ function Index() {
           {/* Footer */}
           <DashboardFooter />
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        {isMobile && <MobileBottomNav />}
       </div>
     </PageTransition>
   );
