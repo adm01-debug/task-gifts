@@ -1994,6 +1994,72 @@ export type Database = {
           },
         ]
       }
+      ip_access_logs: {
+        Row: {
+          created_at: string | null
+          endpoint: string | null
+          id: string
+          ip_address: unknown
+          reason: string | null
+          user_agent: string | null
+          user_id: string | null
+          was_allowed: boolean
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint?: string | null
+          id?: string
+          ip_address: unknown
+          reason?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          was_allowed: boolean
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string | null
+          id?: string
+          ip_address?: unknown
+          reason?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          was_allowed?: boolean
+        }
+        Relationships: []
+      }
+      ip_whitelist: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          ip_address: unknown
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          ip_address: unknown
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       key_results: {
         Row: {
           completed_at: string | null
@@ -4456,6 +4522,18 @@ export type Database = {
       is_department_manager: {
         Args: { _department_id: string; _user_id: string }
         Returns: boolean
+      }
+      is_ip_whitelisted: { Args: { p_ip_address: unknown }; Returns: boolean }
+      log_ip_access: {
+        Args: {
+          p_endpoint: string
+          p_ip_address: unknown
+          p_reason: string
+          p_user_agent: string
+          p_user_id: string
+          p_was_allowed: boolean
+        }
+        Returns: string
       }
       process_external_task: {
         Args: { p_external_task_id: string }

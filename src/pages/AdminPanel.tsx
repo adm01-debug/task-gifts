@@ -31,6 +31,7 @@ import {
   Grid3X3,
   FileText,
   Gauge,
+  Globe,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,7 @@ import { NineBoxMatrix } from "@/components/admin/NineBoxMatrix";
 import { DevelopmentPlanManager } from "@/components/admin/DevelopmentPlanManager";
 import { ENPSDashboard } from "@/components/admin/ENPSDashboard";
 import { PDIAlertsPanel } from "@/components/admin/PDIAlertsPanel";
+import { IpWhitelistManager } from "@/components/admin/IpWhitelistManager";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -316,6 +318,10 @@ function AdminPanelContent() {
               <Gauge className="h-4 w-4" />
               eNPS
             </TabsTrigger>
+            <TabsTrigger value="ip-whitelist" className="gap-2">
+              <Globe className="h-4 w-4" />
+              IP Whitelist
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -497,6 +503,11 @@ function AdminPanelContent() {
           {/* eNPS Tab */}
           <TabsContent value="enps">
             <ENPSDashboard />
+          </TabsContent>
+
+          {/* IP Whitelist Tab */}
+          <TabsContent value="ip-whitelist">
+            <IpWhitelistManager />
           </TabsContent>
         </Tabs>
       </main>
