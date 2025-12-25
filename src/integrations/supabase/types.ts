@@ -53,6 +53,217 @@ export type Database = {
         }
         Relationships: []
       }
+      action_plan_items: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          how_method: string | null
+          how_much_cost: number | null
+          how_much_currency: string | null
+          id: string
+          impact_notes: string | null
+          impact_score: number | null
+          order_index: number
+          plan_id: string
+          priority: string
+          progress_percent: number
+          status: string
+          updated_at: string
+          what_description: string | null
+          what_title: string
+          when_end: string | null
+          when_start: string | null
+          where_location: string | null
+          who_participants: Json | null
+          who_responsible_id: string
+          why_reason: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          how_method?: string | null
+          how_much_cost?: number | null
+          how_much_currency?: string | null
+          id?: string
+          impact_notes?: string | null
+          impact_score?: number | null
+          order_index?: number
+          plan_id: string
+          priority?: string
+          progress_percent?: number
+          status?: string
+          updated_at?: string
+          what_description?: string | null
+          what_title: string
+          when_end?: string | null
+          when_start?: string | null
+          where_location?: string | null
+          who_participants?: Json | null
+          who_responsible_id: string
+          why_reason?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          how_method?: string | null
+          how_much_cost?: number | null
+          how_much_currency?: string | null
+          id?: string
+          impact_notes?: string | null
+          impact_score?: number | null
+          order_index?: number
+          plan_id?: string
+          priority?: string
+          progress_percent?: number
+          status?: string
+          updated_at?: string
+          what_description?: string | null
+          what_title?: string
+          when_end?: string | null
+          when_start?: string | null
+          where_location?: string | null
+          who_participants?: Json | null
+          who_responsible_id?: string
+          why_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_plan_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "action_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      action_plan_updates: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          plan_id: string
+          update_type: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          plan_id: string
+          update_type?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          plan_id?: string
+          update_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_plan_updates_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "action_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      action_plans: {
+        Row: {
+          coin_reward: number
+          completed_at: string | null
+          created_at: string
+          current_score: number | null
+          department_id: string | null
+          description: string | null
+          id: string
+          initial_score: number | null
+          owner_id: string
+          pillar: Database["public"]["Enums"]["climate_pillar"] | null
+          progress_percent: number
+          related_survey_id: string | null
+          reviewer_id: string | null
+          root_cause_summary: string | null
+          root_causes: Json
+          status: string
+          target_date: string
+          target_score: number | null
+          title: string
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          current_score?: number | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          initial_score?: number | null
+          owner_id: string
+          pillar?: Database["public"]["Enums"]["climate_pillar"] | null
+          progress_percent?: number
+          related_survey_id?: string | null
+          reviewer_id?: string | null
+          root_cause_summary?: string | null
+          root_causes?: Json
+          status?: string
+          target_date: string
+          target_score?: number | null
+          title: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          current_score?: number | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          initial_score?: number | null
+          owner_id?: string
+          pillar?: Database["public"]["Enums"]["climate_pillar"] | null
+          progress_percent?: number
+          related_survey_id?: string | null
+          reviewer_id?: string | null
+          root_cause_summary?: string | null
+          root_causes?: Json
+          status?: string
+          target_date?: string
+          target_score?: number | null
+          title?: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_plans_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "action_plans_related_survey_id_fkey"
+            columns: ["related_survey_id"]
+            isOneToOne: false
+            referencedRelation: "climate_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_comments: {
         Row: {
           activity_id: string
@@ -790,6 +1001,309 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "checkin_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      climate_benchmarks: {
+        Row: {
+          average_score: number
+          company_size: string
+          created_at: string
+          id: string
+          industry: string
+          period: string
+          pillar: Database["public"]["Enums"]["climate_pillar"]
+          region: string
+          sample_size: number
+          top_10_percent_score: number
+          top_quartile_score: number
+          updated_at: string
+        }
+        Insert: {
+          average_score: number
+          company_size?: string
+          created_at?: string
+          id?: string
+          industry?: string
+          period: string
+          pillar: Database["public"]["Enums"]["climate_pillar"]
+          region?: string
+          sample_size?: number
+          top_10_percent_score: number
+          top_quartile_score: number
+          updated_at?: string
+        }
+        Update: {
+          average_score?: number
+          company_size?: string
+          created_at?: string
+          id?: string
+          industry?: string
+          period?: string
+          pillar?: Database["public"]["Enums"]["climate_pillar"]
+          region?: string
+          sample_size?: number
+          top_10_percent_score?: number
+          top_quartile_score?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      climate_pillar_scores: {
+        Row: {
+          calculated_at: string
+          department_id: string | null
+          id: string
+          pillar: Database["public"]["Enums"]["climate_pillar"]
+          previous_score: number | null
+          response_count: number
+          score: number
+          survey_id: string
+          trend: string | null
+        }
+        Insert: {
+          calculated_at?: string
+          department_id?: string | null
+          id?: string
+          pillar: Database["public"]["Enums"]["climate_pillar"]
+          previous_score?: number | null
+          response_count?: number
+          score: number
+          survey_id: string
+          trend?: string | null
+        }
+        Update: {
+          calculated_at?: string
+          department_id?: string | null
+          id?: string
+          pillar?: Database["public"]["Enums"]["climate_pillar"]
+          previous_score?: number | null
+          response_count?: number
+          score?: number
+          survey_id?: string
+          trend?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "climate_pillar_scores_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "climate_pillar_scores_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "climate_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      climate_question_answers: {
+        Row: {
+          created_at: string
+          id: string
+          question_id: string
+          response_id: string
+          score: number | null
+          selected_options: Json | null
+          skipped: boolean
+          text_answer: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question_id: string
+          response_id: string
+          score?: number | null
+          selected_options?: Json | null
+          skipped?: boolean
+          text_answer?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question_id?: string
+          response_id?: string
+          score?: number | null
+          selected_options?: Json | null
+          skipped?: boolean
+          text_answer?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "climate_question_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "climate_survey_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "climate_question_answers_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "climate_survey_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      climate_survey_questions: {
+        Row: {
+          created_at: string
+          id: string
+          is_required: boolean
+          options: Json | null
+          order_index: number
+          pillar: Database["public"]["Enums"]["climate_pillar"]
+          question_text: string
+          question_text_en: string | null
+          question_text_es: string | null
+          question_type: string
+          survey_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          options?: Json | null
+          order_index?: number
+          pillar: Database["public"]["Enums"]["climate_pillar"]
+          question_text: string
+          question_text_en?: string | null
+          question_text_es?: string | null
+          question_type?: string
+          survey_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          options?: Json | null
+          order_index?: number
+          pillar?: Database["public"]["Enums"]["climate_pillar"]
+          question_text?: string
+          question_text_en?: string | null
+          question_text_es?: string | null
+          question_type?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "climate_survey_questions_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "climate_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      climate_survey_responses: {
+        Row: {
+          completed_at: string | null
+          completion_time_seconds: number | null
+          created_at: string
+          id: string
+          is_complete: boolean
+          started_at: string
+          survey_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completion_time_seconds?: number | null
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          started_at?: string
+          survey_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completion_time_seconds?: number | null
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          started_at?: string
+          survey_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "climate_survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "climate_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      climate_surveys: {
+        Row: {
+          allow_skip: boolean
+          created_at: string
+          created_by: string
+          department_id: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          is_anonymous: boolean
+          is_recurring: boolean
+          recurrence_pattern: string | null
+          reminder_frequency: string | null
+          send_reminders: boolean
+          starts_at: string
+          status: string
+          survey_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allow_skip?: boolean
+          created_at?: string
+          created_by: string
+          department_id?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          is_anonymous?: boolean
+          is_recurring?: boolean
+          recurrence_pattern?: string | null
+          reminder_frequency?: string | null
+          send_reminders?: boolean
+          starts_at: string
+          status?: string
+          survey_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allow_skip?: boolean
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          is_anonymous?: boolean
+          is_recurring?: boolean
+          recurrence_pattern?: string | null
+          reminder_frequency?: string | null
+          send_reminders?: boolean
+          starts_at?: string
+          status?: string
+          survey_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "climate_surveys_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
         ]
@@ -2881,6 +3395,121 @@ export type Database = {
         }
         Relationships: []
       }
+      opinion_responses: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_internal: boolean
+          opinion_id: string
+          responder_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          opinion_id: string
+          responder_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          opinion_id?: string
+          responder_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opinion_responses_opinion_id_fkey"
+            columns: ["opinion_id"]
+            isOneToOne: false
+            referencedRelation: "opinions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opinion_tags: {
+        Row: {
+          created_at: string
+          id: string
+          opinion_id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opinion_id: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opinion_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opinion_tags_opinion_id_fkey"
+            columns: ["opinion_id"]
+            isOneToOne: false
+            referencedRelation: "opinions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opinions: {
+        Row: {
+          category: Database["public"]["Enums"]["opinion_category"]
+          content: string
+          created_at: string
+          id: string
+          is_anonymous: boolean
+          read_at: string | null
+          read_by: string | null
+          recipient_id: string | null
+          recipient_type: string
+          sender_id: string
+          status: Database["public"]["Enums"]["opinion_status"]
+          subject: string | null
+          updated_at: string
+          urgency: Database["public"]["Enums"]["opinion_urgency"]
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["opinion_category"]
+          content: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean
+          read_at?: string | null
+          read_by?: string | null
+          recipient_id?: string | null
+          recipient_type: string
+          sender_id: string
+          status?: Database["public"]["Enums"]["opinion_status"]
+          subject?: string | null
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["opinion_urgency"]
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["opinion_category"]
+          content?: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean
+          read_at?: string | null
+          read_by?: string | null
+          recipient_id?: string | null
+          recipient_type?: string
+          sender_id?: string
+          status?: Database["public"]["Enums"]["opinion_status"]
+          subject?: string | null
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["opinion_urgency"]
+        }
+        Relationships: []
+      }
       penalty_rules: {
         Row: {
           coin_penalty_fixed: number | null
@@ -4808,6 +5437,17 @@ export type Database = {
         | "team_member_removed"
         | "role_assigned"
         | "role_removed"
+      climate_pillar:
+        | "recognition"
+        | "autonomy"
+        | "growth"
+        | "leadership"
+        | "peers"
+        | "purpose"
+        | "environment"
+        | "communication"
+        | "benefits"
+        | "balance"
       mission_frequency: "daily" | "weekly" | "monthly"
       module_content_type:
         | "video"
@@ -4817,6 +5457,14 @@ export type Database = {
         | "infographic"
         | "simulation"
         | "checklist"
+      opinion_category:
+        | "suggestion"
+        | "complaint"
+        | "compliment"
+        | "question"
+        | "other"
+      opinion_status: "new" | "read" | "in_progress" | "resolved" | "archived"
+      opinion_urgency: "low" | "normal" | "high" | "critical"
       purchase_status: "pending" | "approved" | "delivered" | "cancelled"
       quest_difficulty: "easy" | "medium" | "hard" | "expert"
       quest_status: "draft" | "active" | "archived"
@@ -4981,6 +5629,18 @@ export const Constants = {
         "role_assigned",
         "role_removed",
       ],
+      climate_pillar: [
+        "recognition",
+        "autonomy",
+        "growth",
+        "leadership",
+        "peers",
+        "purpose",
+        "environment",
+        "communication",
+        "benefits",
+        "balance",
+      ],
       mission_frequency: ["daily", "weekly", "monthly"],
       module_content_type: [
         "video",
@@ -4991,6 +5651,15 @@ export const Constants = {
         "simulation",
         "checklist",
       ],
+      opinion_category: [
+        "suggestion",
+        "complaint",
+        "compliment",
+        "question",
+        "other",
+      ],
+      opinion_status: ["new", "read", "in_progress", "resolved", "archived"],
+      opinion_urgency: ["low", "normal", "high", "critical"],
       purchase_status: ["pending", "approved", "delivered", "cancelled"],
       quest_difficulty: ["easy", "medium", "hard", "expert"],
       quest_status: ["draft", "active", "archived"],
