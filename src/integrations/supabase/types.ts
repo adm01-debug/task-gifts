@@ -3488,6 +3488,9 @@ export type Database = {
       }
       notification_preferences: {
         Row: {
+          channel_email: boolean | null
+          channel_in_app: boolean | null
+          channel_push: boolean | null
           created_at: string
           digest_enabled: boolean
           digest_frequency: string
@@ -3497,15 +3500,21 @@ export type Database = {
           do_not_disturb_start: string | null
           do_not_disturb_weekends: boolean
           email_enabled: boolean
+          frequency: string | null
           id: string
           in_app_enabled: boolean
           language: string
           push_enabled: boolean
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
           type_preferences: Json
           updated_at: string
           user_id: string
         }
         Insert: {
+          channel_email?: boolean | null
+          channel_in_app?: boolean | null
+          channel_push?: boolean | null
           created_at?: string
           digest_enabled?: boolean
           digest_frequency?: string
@@ -3515,15 +3524,21 @@ export type Database = {
           do_not_disturb_start?: string | null
           do_not_disturb_weekends?: boolean
           email_enabled?: boolean
+          frequency?: string | null
           id?: string
           in_app_enabled?: boolean
           language?: string
           push_enabled?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           type_preferences?: Json
           updated_at?: string
           user_id: string
         }
         Update: {
+          channel_email?: boolean | null
+          channel_in_app?: boolean | null
+          channel_push?: boolean | null
           created_at?: string
           digest_enabled?: boolean
           digest_frequency?: string
@@ -3533,13 +3548,64 @@ export type Database = {
           do_not_disturb_start?: string | null
           do_not_disturb_weekends?: boolean
           email_enabled?: boolean
+          frequency?: string | null
           id?: string
           in_app_enabled?: boolean
           language?: string
           push_enabled?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           type_preferences?: Json
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      notification_templates: {
+        Row: {
+          body_template: string
+          body_template_html: string | null
+          category: string | null
+          channels: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          key: string
+          name: string
+          subject_template: string | null
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          body_template: string
+          body_template_html?: string | null
+          category?: string | null
+          channels?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          key: string
+          name: string
+          subject_template?: string | null
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          body_template?: string
+          body_template_html?: string | null
+          category?: string | null
+          channels?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          key?: string
+          name?: string
+          subject_template?: string | null
+          updated_at?: string
+          variables?: Json | null
         }
         Relationships: []
       }
@@ -3935,6 +4001,39 @@ export type Database = {
           name?: string
           permissions?: Json
           updated_at?: string
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_system: boolean | null
+          key: string
+          module: string
+          name: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean | null
+          key: string
+          module: string
+          name: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean | null
+          key?: string
+          module?: string
+          name?: string
         }
         Relationships: []
       }
@@ -4491,6 +4590,72 @@ export type Database = {
           time_bonus?: number
           total_questions?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_id: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_system: boolean | null
+          key: string
+          level: number | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean | null
+          key: string
+          level?: number | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean | null
+          key?: string
+          level?: number | null
+          name?: string
         }
         Relationships: []
       }
