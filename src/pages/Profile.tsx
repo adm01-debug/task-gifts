@@ -189,6 +189,7 @@ const Profile = () => {
   const { data: allAchievements = [], isLoading: achievementsLoading } = useAllAchievements();
   const { data: userAchievements = [] } = useUserAchievements();
   const isScrolled = useScrollHeader(10);
+  const seoConfig = useSEO();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -246,7 +247,6 @@ const Profile = () => {
     { icon: Target, label: "Quests", value: profile?.quests_completed?.toLocaleString() || "0", color: "secondary" },
   ];
 
-  const seoConfig = useSEO();
 
   return (
     <div className="min-h-screen bg-background">
