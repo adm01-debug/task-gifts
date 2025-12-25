@@ -11,7 +11,8 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
-import { MobileBottomNav, ScrollToTopFAB } from "@/components/mobile";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { MobileBottomNav, ScrollToTopFAB, NetworkStatusBar } from "@/components/mobile";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { lazy, Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
@@ -88,6 +89,8 @@ function MobileGlobalComponents() {
     <>
       {!hideBottomNav && <MobileBottomNav />}
       <ScrollToTopFAB />
+      <NetworkStatusBar />
+      <PWAInstallPrompt />
     </>
   );
 }
