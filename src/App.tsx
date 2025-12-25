@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AchievementNotificationProvider } from "@/contexts/AchievementNotificationContext";
@@ -11,6 +11,8 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { MobileBottomNav, ScrollToTopFAB } from "@/components/mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { lazy, Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -72,6 +74,24 @@ function PageLoader() {
   );
 }
 
+// Global mobile components wrapper
+function MobileGlobalComponents() {
+  const isMobile = useIsMobile();
+  const location = useLocation();
+  
+  // Don't show bottom nav on auth page
+  const hideBottomNav = location.pathname === "/auth";
+  
+  if (!isMobile) return null;
+  
+  return (
+    <>
+      {!hideBottomNav && <MobileBottomNav />}
+      <ScrollToTopFAB />
+    </>
+  );
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -86,6 +106,7 @@ const App = () => (
                   <Suspense fallback={<PageLoader />}>
                     <OfflineIndicator />
                     <KeyboardShortcutsHelp />
+                    <MobileGlobalComponents />
                     <Routes>
                       <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                       <Route path="/auth" element={<Auth />} />
