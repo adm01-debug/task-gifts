@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "placeholder.svg"],
+      includeAssets: ["favicon.ico", "placeholder.svg", "splash/*.png"],
       manifest: {
         name: "Task Gifts - Gamificação Corporativa",
         short_name: "Task Gifts",
@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => ({
         orientation: "portrait",
         scope: "/",
         start_url: "/",
+        categories: ["productivity", "education", "business"],
         icons: [
           {
             src: "/favicon.ico",
@@ -43,6 +44,45 @@ export default defineConfig(({ mode }) => ({
             type: "image/png",
             purpose: "any maskable",
           },
+        ],
+        screenshots: [
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            form_factor: "wide",
+            label: "Task Gifts Dashboard"
+          },
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            form_factor: "narrow",
+            label: "Task Gifts Mobile"
+          }
+        ],
+        shortcuts: [
+          {
+            name: "Minhas Metas",
+            short_name: "Metas",
+            description: "Visualizar metas e OKRs",
+            url: "/goals",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }]
+          },
+          {
+            name: "Ranking",
+            short_name: "Ranking",
+            description: "Ver classificação da liga",
+            url: "/leagues",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }]
+          },
+          {
+            name: "Trilhas",
+            short_name: "Trilhas",
+            description: "Continuar aprendizado",
+            url: "/trails",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }]
+          }
         ],
       },
       workbox: {
