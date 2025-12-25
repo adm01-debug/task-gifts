@@ -1401,3 +1401,131 @@
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
 }
+
+/* ========================================
+   TOUCH RIPPLE EFFECT
+   Material-like ripple on touch
+   ======================================== */
+.touch-ripple {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), hsl(var(--foreground) / 0.15) 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+}
+
+.touch-ripple:active::after {
+  opacity: 1;
+  transform: scale(2.5);
+  transition: transform 0s, opacity 0s;
+}
+
+/* Alternative ripple for light surfaces */
+.touch-ripple-light::after {
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), hsl(0 0% 100% / 0.25) 0%, transparent 70%);
+}
+
+/* ========================================
+   PRESS SCALE EFFECT
+   Subtle scale down on press
+   ======================================== */
+.press-scale {
+  transition: transform 0.15s ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.press-scale:active {
+  transform: scale(0.97);
+}
+
+.press-scale-sm:active {
+  transform: scale(0.98);
+}
+
+.press-scale-lg:active {
+  transform: scale(0.95);
+}
+
+/* ========================================
+   MOBILE TOUCH TARGETS
+   Ensure minimum 44px touch targets
+   ======================================== */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.touch-target-sm {
+  min-height: 36px;
+  min-width: 36px;
+}
+
+.touch-target-lg {
+  min-height: 52px;
+  min-width: 52px;
+}
+
+/* Expand touch area without changing visual size */
+.touch-expand {
+  position: relative;
+}
+
+.touch-expand::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+/* ========================================
+   MOMENTUM SCROLLING
+   Smooth native-like scrolling
+   ======================================== */
+.momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.momentum-scroll-x {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+}
+
+.momentum-scroll-y {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ========================================
+   PREVENT TEXT SELECTION ON MOBILE
+   For interactive elements
+   ======================================== */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Allow text selection */
+.allow-select {
+  -webkit-user-select: text;
+  user-select: text;
+}
