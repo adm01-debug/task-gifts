@@ -2274,9 +2274,17 @@ export type Database = {
           created_at: string
           created_by: string
           cycle_type: string
+          department_id: string | null
           description: string | null
           ends_at: string
+          grace_period_days: number | null
           id: string
+          include_direct_report_evaluation: boolean | null
+          include_manager_evaluation: boolean | null
+          include_peer_evaluation: boolean | null
+          include_self_evaluation: boolean | null
+          is_anonymous: boolean | null
+          min_evaluators: number | null
           name: string
           questions: Json
           starts_at: string
@@ -2287,9 +2295,17 @@ export type Database = {
           created_at?: string
           created_by: string
           cycle_type?: string
+          department_id?: string | null
           description?: string | null
           ends_at: string
+          grace_period_days?: number | null
           id?: string
+          include_direct_report_evaluation?: boolean | null
+          include_manager_evaluation?: boolean | null
+          include_peer_evaluation?: boolean | null
+          include_self_evaluation?: boolean | null
+          is_anonymous?: boolean | null
+          min_evaluators?: number | null
           name: string
           questions?: Json
           starts_at: string
@@ -2300,16 +2316,151 @@ export type Database = {
           created_at?: string
           created_by?: string
           cycle_type?: string
+          department_id?: string | null
           description?: string | null
           ends_at?: string
+          grace_period_days?: number | null
           id?: string
+          include_direct_report_evaluation?: boolean | null
+          include_manager_evaluation?: boolean | null
+          include_peer_evaluation?: boolean | null
+          include_self_evaluation?: boolean | null
+          is_anonymous?: boolean | null
+          min_evaluators?: number | null
           name?: string
           questions?: Json
           starts_at?: string
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "feedback_cycles_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_evaluations: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          cycle_id: string
+          evaluatee_id: string
+          evaluator_id: string
+          evaluator_type: string | null
+          id: string
+          reminder_sent_at: string | null
+          started_at: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          cycle_id: string
+          evaluatee_id: string
+          evaluator_id: string
+          evaluator_type?: string | null
+          id?: string
+          reminder_sent_at?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          cycle_id?: string
+          evaluatee_id?: string
+          evaluator_id?: string
+          evaluator_type?: string | null
+          id?: string
+          reminder_sent_at?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_evaluations_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_questions: {
+        Row: {
+          competency_id: string | null
+          created_at: string
+          cycle_id: string
+          id: string
+          is_required: boolean | null
+          options: Json | null
+          order_index: number | null
+          question_text: string
+          question_text_en: string | null
+          question_text_es: string | null
+          question_type: string | null
+          scale_labels: Json | null
+          scale_max: number | null
+          scale_min: number | null
+          weight: number | null
+        }
+        Insert: {
+          competency_id?: string | null
+          created_at?: string
+          cycle_id: string
+          id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          order_index?: number | null
+          question_text: string
+          question_text_en?: string | null
+          question_text_es?: string | null
+          question_type?: string | null
+          scale_labels?: Json | null
+          scale_max?: number | null
+          scale_min?: number | null
+          weight?: number | null
+        }
+        Update: {
+          competency_id?: string | null
+          created_at?: string
+          cycle_id?: string
+          id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          order_index?: number | null
+          question_text?: string
+          question_text_en?: string | null
+          question_text_es?: string | null
+          question_type?: string | null
+          scale_labels?: Json | null
+          scale_max?: number | null
+          scale_min?: number | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_questions_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_questions_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feedback_requests: {
         Row: {
@@ -2392,6 +2543,72 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "feedback_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_results: {
+        Row: {
+          blind_spots: Json | null
+          calculated_at: string | null
+          competency_id: string | null
+          created_at: string
+          cycle_id: string
+          direct_report_score: number | null
+          hidden_strengths: Json | null
+          id: string
+          manager_score: number | null
+          overall_score: number | null
+          peer_score: number | null
+          response_count: number | null
+          self_score: number | null
+          user_id: string
+        }
+        Insert: {
+          blind_spots?: Json | null
+          calculated_at?: string | null
+          competency_id?: string | null
+          created_at?: string
+          cycle_id: string
+          direct_report_score?: number | null
+          hidden_strengths?: Json | null
+          id?: string
+          manager_score?: number | null
+          overall_score?: number | null
+          peer_score?: number | null
+          response_count?: number | null
+          self_score?: number | null
+          user_id: string
+        }
+        Update: {
+          blind_spots?: Json | null
+          calculated_at?: string | null
+          competency_id?: string | null
+          created_at?: string
+          cycle_id?: string
+          direct_report_score?: number | null
+          hidden_strengths?: Json | null
+          id?: string
+          manager_score?: number | null
+          overall_score?: number | null
+          peer_score?: number | null
+          response_count?: number | null
+          self_score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_results_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_results_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_cycles"
             referencedColumns: ["id"]
           },
         ]
@@ -3510,6 +3727,136 @@ export type Database = {
         }
         Relationships: []
       }
+      pdi_checkins: {
+        Row: {
+          blockers: string | null
+          checkin_date: string
+          created_at: string
+          created_by: string
+          id: string
+          manager_feedback: string | null
+          mood_rating: number | null
+          next_steps: string | null
+          plan_id: string
+          progress_summary: string | null
+        }
+        Insert: {
+          blockers?: string | null
+          checkin_date: string
+          created_at?: string
+          created_by: string
+          id?: string
+          manager_feedback?: string | null
+          mood_rating?: number | null
+          next_steps?: string | null
+          plan_id: string
+          progress_summary?: string | null
+        }
+        Update: {
+          blockers?: string | null
+          checkin_date?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          manager_feedback?: string | null
+          mood_rating?: number | null
+          next_steps?: string | null
+          plan_id?: string
+          progress_summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdi_checkins_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "development_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdi_mentors: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          notes: string | null
+          plan_id: string
+          role: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          notes?: string | null
+          plan_id: string
+          role?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          notes?: string | null
+          plan_id?: string
+          role?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdi_mentors_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "development_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdi_templates: {
+        Row: {
+          actions_template: Json
+          category: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          estimated_duration_months: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          target_level: string | null
+          target_role: string | null
+          updated_at: string
+        }
+        Insert: {
+          actions_template?: Json
+          category?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          estimated_duration_months?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          target_level?: string | null
+          target_role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actions_template?: Json
+          category?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          estimated_duration_months?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          target_level?: string | null
+          target_role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       penalty_rules: {
         Row: {
           coin_penalty_fixed: number | null
@@ -3590,6 +3937,54 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      position_competencies: {
+        Row: {
+          competency_id: string
+          created_at: string
+          id: string
+          is_mandatory: boolean | null
+          position_id: string
+          required_level: number
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          competency_id: string
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean | null
+          position_id: string
+          required_level: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          competency_id?: string
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean | null
+          position_id?: string
+          required_level?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_competencies_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_competencies_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       position_task_templates: {
         Row: {
@@ -4850,6 +5245,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_competency_assessments: {
+        Row: {
+          assessed_level: number
+          assessment_type: string | null
+          assessor_id: string | null
+          competency_id: string
+          created_at: string
+          evidence: string | null
+          feedback_cycle_id: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          assessed_level: number
+          assessment_type?: string | null
+          assessor_id?: string | null
+          competency_id: string
+          created_at?: string
+          evidence?: string | null
+          feedback_cycle_id?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          assessed_level?: number
+          assessment_type?: string | null
+          assessor_id?: string | null
+          competency_id?: string
+          created_at?: string
+          evidence?: string | null
+          feedback_cycle_id?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_competency_assessments_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_competency_assessments_feedback_cycle_id_fkey"
+            columns: ["feedback_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_demographic_values: {
         Row: {
           attribute_id: string
@@ -5448,6 +5900,14 @@ export type Database = {
         | "communication"
         | "benefits"
         | "balance"
+      evaluator_type: "self" | "manager" | "peer" | "direct_report" | "external"
+      feedback_cycle_status:
+        | "draft"
+        | "active"
+        | "collecting"
+        | "processing"
+        | "completed"
+        | "cancelled"
       mission_frequency: "daily" | "weekly" | "monthly"
       module_content_type:
         | "video"
@@ -5640,6 +6100,15 @@ export const Constants = {
         "communication",
         "benefits",
         "balance",
+      ],
+      evaluator_type: ["self", "manager", "peer", "direct_report", "external"],
+      feedback_cycle_status: [
+        "draft",
+        "active",
+        "collecting",
+        "processing",
+        "completed",
+        "cancelled",
       ],
       mission_frequency: ["daily", "weekly", "monthly"],
       module_content_type: [
