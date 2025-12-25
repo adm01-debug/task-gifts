@@ -13,6 +13,7 @@ import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { MobileBottomNav, ScrollToTopFAB, NetworkStatusBar } from "@/components/mobile";
+import { IpAccessGuard } from "@/components/IpAccessGuard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { lazy, Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
@@ -100,62 +101,64 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <SoundSettingsProvider>
-          <AuthProvider>
-            <AchievementNotificationProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                  <Suspense fallback={<PageLoader />}>
-                    <OfflineIndicator />
-                    <KeyboardShortcutsHelp />
-                    <MobileGlobalComponents />
-                    <Routes>
-                      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                      <Route path="/manager" element={<ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>} />
-                      <Route path="/quest-builder" element={<ProtectedRoute requiredRole="manager"><QuestBuilder /></ProtectedRoute>} />
-                      <Route path="/reports" element={<ProtectedRoute requiredRole="manager"><EngagementReports /></ProtectedRoute>} />
-                      <Route path="/audit" element={<ProtectedRoute requiredRole="admin"><AuditLogs /></ProtectedRoute>} />
-                      <Route path="/analytics" element={<ProtectedRoute><RealTimeAnalytics /></ProtectedRoute>} />
-                      <Route path="/trails" element={<ProtectedRoute><LearningTrails /></ProtectedRoute>} />
-                      <Route path="/trails/:id" element={<ProtectedRoute><TrailDetail /></ProtectedRoute>} />
-                      <Route path="/ponto" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
-                      <Route path="/executivo" element={<ProtectedRoute requiredRole="admin"><ExecutiveDashboard /></ProtectedRoute>} />
-                      <Route path="/feed" element={<ProtectedRoute><SocialFeed /></ProtectedRoute>} />
-                      <Route path="/conquistas" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
-                      <Route path="/estatisticas" element={<ProtectedRoute><PersonalStats /></ProtectedRoute>} />
-                      <Route path="/loja" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
-                      <Route path="/eventos/:eventId" element={<ProtectedRoute><SeasonalEventDetail /></ProtectedRoute>} />
-                      <Route path="/mentoria" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
-                      <Route path="/duelos" element={<ProtectedRoute><Duels /></ProtectedRoute>} />
-                      <Route path="/quiz" element={<ProtectedRoute><DailyQuiz /></ProtectedRoute>} />
-                      <Route path="/quiz/admin" element={<ProtectedRoute requiredRole="manager"><QuizAdmin /></ProtectedRoute>} />
-                      <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
-                      <Route path="/bitrix24" element={<ProtectedRoute requiredRole="admin"><Bitrix24CRM /></ProtectedRoute>} />
-                      <Route path="/bi" element={<ProtectedRoute requiredRole="manager"><BIDashboard /></ProtectedRoute>} />
-                      <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
-                      <Route path="/checkins" element={<ProtectedRoute requiredRole="manager"><Checkins /></ProtectedRoute>} />
-                      <Route path="/leagues" element={<ProtectedRoute><Leagues /></ProtectedRoute>} />
-                      <Route path="/surveys" element={<ProtectedRoute><Surveys /></ProtectedRoute>} />
-                      <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
-                      <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
-                      <Route
-                        path="/loja/admin"
-                        element={
-                          <ProtectedRoute requiredRole="admin">
-                            <ShopAdmin />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </BrowserRouter>
-              </TooltipProvider>
-            </AchievementNotificationProvider>
-          </AuthProvider>
+          <IpAccessGuard>
+            <AuthProvider>
+              <AchievementNotificationProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <Suspense fallback={<PageLoader />}>
+                      <OfflineIndicator />
+                      <KeyboardShortcutsHelp />
+                      <MobileGlobalComponents />
+                      <Routes>
+                        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                        <Route path="/auth" element={<Auth />} />
+                        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                        <Route path="/manager" element={<ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>} />
+                        <Route path="/quest-builder" element={<ProtectedRoute requiredRole="manager"><QuestBuilder /></ProtectedRoute>} />
+                        <Route path="/reports" element={<ProtectedRoute requiredRole="manager"><EngagementReports /></ProtectedRoute>} />
+                        <Route path="/audit" element={<ProtectedRoute requiredRole="admin"><AuditLogs /></ProtectedRoute>} />
+                        <Route path="/analytics" element={<ProtectedRoute><RealTimeAnalytics /></ProtectedRoute>} />
+                        <Route path="/trails" element={<ProtectedRoute><LearningTrails /></ProtectedRoute>} />
+                        <Route path="/trails/:id" element={<ProtectedRoute><TrailDetail /></ProtectedRoute>} />
+                        <Route path="/ponto" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+                        <Route path="/executivo" element={<ProtectedRoute requiredRole="admin"><ExecutiveDashboard /></ProtectedRoute>} />
+                        <Route path="/feed" element={<ProtectedRoute><SocialFeed /></ProtectedRoute>} />
+                        <Route path="/conquistas" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+                        <Route path="/estatisticas" element={<ProtectedRoute><PersonalStats /></ProtectedRoute>} />
+                        <Route path="/loja" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
+                        <Route path="/eventos/:eventId" element={<ProtectedRoute><SeasonalEventDetail /></ProtectedRoute>} />
+                        <Route path="/mentoria" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
+                        <Route path="/duelos" element={<ProtectedRoute><Duels /></ProtectedRoute>} />
+                        <Route path="/quiz" element={<ProtectedRoute><DailyQuiz /></ProtectedRoute>} />
+                        <Route path="/quiz/admin" element={<ProtectedRoute requiredRole="manager"><QuizAdmin /></ProtectedRoute>} />
+                        <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
+                        <Route path="/bitrix24" element={<ProtectedRoute requiredRole="admin"><Bitrix24CRM /></ProtectedRoute>} />
+                        <Route path="/bi" element={<ProtectedRoute requiredRole="manager"><BIDashboard /></ProtectedRoute>} />
+                        <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
+                        <Route path="/checkins" element={<ProtectedRoute requiredRole="manager"><Checkins /></ProtectedRoute>} />
+                        <Route path="/leagues" element={<ProtectedRoute><Leagues /></ProtectedRoute>} />
+                        <Route path="/surveys" element={<ProtectedRoute><Surveys /></ProtectedRoute>} />
+                        <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
+                        <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
+                        <Route
+                          path="/loja/admin"
+                          element={
+                            <ProtectedRoute requiredRole="admin">
+                              <ShopAdmin />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </BrowserRouter>
+                </TooltipProvider>
+              </AchievementNotificationProvider>
+            </AuthProvider>
+          </IpAccessGuard>
         </SoundSettingsProvider>
       </ThemeProvider>
     </QueryClientProvider>

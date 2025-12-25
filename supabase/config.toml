@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.webhook-dispatcher]
 verify_jwt = true
+
+[functions.verify-ip]
+verify_jwt = false
