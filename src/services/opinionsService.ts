@@ -47,29 +47,31 @@ export const opinionsService = {
     recipientId?: string;
     departmentId?: string;
   }): Promise<Opinion[]> {
-    let query = supabase
+    const { data, error } = await supabase
       .from('opinions')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (filters?.status) query = query.eq('status', filters.status);
-    if (filters?.category) query = query.eq('category', filters.category);
-    if (filters?.urgency) query = query.eq('urgency', filters.urgency);
-    if (filters?.recipientId) query = query.eq('recipient_id', filters.recipientId);
-    if (filters?.departmentId) query = query.eq('department_id', filters.departmentId);
-
-    const { data, error } = await query;
     if (error) {
       logger.error('Failed to fetch opinions', 'OpinionsService', error);
       throw error;
     }
-    return (data || []) as unknown as Opinion[];
+    
+    let opinions = (data || []) as unknown as Opinion[];
+    
+    if (filters?.status) opinions = opinions.filter(o => o.status === filters.status);
+    if (filters?.category) opinions = opinions.filter(o => o.category === filters.category);
+    if (filters?.urgency) opinions = opinions.filter(o => o.urgency === filters.urgency);
+    if (filters?.recipientId) opinions = opinions.filter(o => o.recipient_id === filters.recipientId);
+    if (filters?.departmentId) opinions = opinions.filter(o => o.department_id === filters.departmentId);
+
+    return opinions;
   },
 
   async getMyOpinions(userId: string): Promise<Opinion[]> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase
       .from('opinions')
-      .select('*')
+      .select('*') as any)
       .eq('author_id', userId)
       .order('created_at', { ascending: false });
 
@@ -77,13 +79,13 @@ export const opinionsService = {
       logger.error('Failed to fetch my opinions', 'OpinionsService', error);
       throw error;
     }
-    return (data || []) as unknown as Opinion[];
+    return (data || []) as Opinion[];
   },
 
   async getReceivedOpinions(userId: string): Promise<Opinion[]> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase
       .from('opinions')
-      .select('*')
+      .select('*') as any)
       .eq('recipient_id', userId)
       .order('created_at', { ascending: false });
 
@@ -91,7 +93,7 @@ export const opinionsService = {
       logger.error('Failed to fetch received opinions', 'OpinionsService', error);
       throw error;
     }
-    return (data || []) as unknown as Opinion[];
+    return (data || []) as Opinion[];
   },
 
   async createOpinion(opinion: {
@@ -206,16 +208,17 @@ export const opinionsService = {
     byCategory: Record<OpinionCategory, number>;
     byUrgency: Record<OpinionUrgency, number>;
   }> {
-    let query = supabase.from('opinions').select('*');
-    if (departmentId) query = query.eq('department_id', departmentId);
+    const { data, error } = await (supabase
+      .from('opinions')
+      .select('*') as any);
 
-    const { data, error } = await query;
     if (error) {
       logger.error('Failed to fetch opinion stats', 'OpinionsService', error);
       throw error;
     }
 
-    const opinions = (data || []) as unknown as Opinion[];
+    let opinions = (data || []) as Opinion[];
+    if (departmentId) opinions = opinions.filter(o => o.department_id === departmentId);
     const total = opinions.length;
     const pending = opinions.filter(o => o.status === 'new').length;
     const resolved = opinions.filter(o => o.status === 'resolved').length;
