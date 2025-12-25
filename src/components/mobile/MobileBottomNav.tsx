@@ -15,7 +15,7 @@ const navItems: NavItem[] = [
   { icon: Home, label: "Início", path: "/" },
   { icon: Target, label: "Metas", path: "/goals" },
   { icon: Trophy, label: "Ranking", path: "/leagues" },
-  { icon: BookOpen, label: "Trilhas", path: "/learning" },
+  { icon: BookOpen, label: "Trilhas", path: "/trails" },
   { icon: User, label: "Perfil", path: "/profile" },
 ];
 

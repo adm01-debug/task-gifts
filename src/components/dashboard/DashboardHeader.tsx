@@ -19,6 +19,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRank } from "@/hooks/useUserRank";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useHiddenHeader } from "@/hooks/useScrollDirection";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Utils
 import { toast } from "sonner";
@@ -40,6 +42,8 @@ export const DashboardHeader = memo(function DashboardHeader({
   const navigate = useNavigate();
   const { data: rankData } = useUserRank();
   const isScrolled = useScrollHeader(10);
+  const isHidden = useHiddenHeader(15);
+  const isMobile = useIsMobile();
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Jogador";
 
@@ -61,7 +65,16 @@ export const DashboardHeader = memo(function DashboardHeader({
   }, [navigate]);
 
   return (
-    <header 
+    <motion.header 
+      initial={{ y: 0 }}
+      animate={{ 
+        y: isMobile && isHidden ? "-100%" : 0,
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 400,
+        damping: 40,
+      }}
       className={cn(
         "header-sticky border-b border-border",
         isScrolled && "scrolled"
@@ -158,6 +171,6 @@ export const DashboardHeader = memo(function DashboardHeader({
           </div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 });
