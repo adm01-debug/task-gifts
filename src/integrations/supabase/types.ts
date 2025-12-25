@@ -1092,6 +1092,57 @@ export type Database = {
           },
         ]
       }
+      demographic_attributes: {
+        Row: {
+          allow_prefer_not_answer: boolean
+          attribute_type: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_required: boolean
+          is_restricted: boolean
+          is_visible_in_reports: boolean
+          name: string
+          name_en: string | null
+          name_es: string | null
+          options: Json | null
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          allow_prefer_not_answer?: boolean
+          attribute_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          is_restricted?: boolean
+          is_visible_in_reports?: boolean
+          name: string
+          name_en?: string | null
+          name_es?: string | null
+          options?: Json | null
+          order_index?: number
+          updated_at?: string
+        }
+        Update: {
+          allow_prefer_not_answer?: boolean
+          attribute_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          is_restricted?: boolean
+          is_visible_in_reports?: boolean
+          name?: string
+          name_en?: string | null
+          name_es?: string | null
+          options?: Json | null
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       department_missions: {
         Row: {
           coin_reward: number | null
@@ -2704,6 +2755,63 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          digest_enabled: boolean
+          digest_frequency: string
+          digest_time: string | null
+          do_not_disturb_enabled: boolean
+          do_not_disturb_end: string | null
+          do_not_disturb_start: string | null
+          do_not_disturb_weekends: boolean
+          email_enabled: boolean
+          id: string
+          in_app_enabled: boolean
+          language: string
+          push_enabled: boolean
+          type_preferences: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          digest_enabled?: boolean
+          digest_frequency?: string
+          digest_time?: string | null
+          do_not_disturb_enabled?: boolean
+          do_not_disturb_end?: string | null
+          do_not_disturb_start?: string | null
+          do_not_disturb_weekends?: boolean
+          email_enabled?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          language?: string
+          push_enabled?: boolean
+          type_preferences?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          digest_enabled?: boolean
+          digest_frequency?: string
+          digest_time?: string | null
+          do_not_disturb_enabled?: boolean
+          do_not_disturb_end?: string | null
+          do_not_disturb_start?: string | null
+          do_not_disturb_weekends?: boolean
+          email_enabled?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          language?: string
+          push_enabled?: boolean
+          type_preferences?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -2824,6 +2932,36 @@ export type Database = {
         }
         Relationships: []
       }
+      permission_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_system: boolean
+          name: string
+          permissions: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name: string
+          permissions?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name?: string
+          permissions?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       position_task_templates: {
         Row: {
           coin_reward: number
@@ -2936,13 +3074,20 @@ export type Database = {
           best_streak: number
           birth_date: string | null
           coins: number
+          contract_type: string | null
+          cpf: string | null
           created_at: string
           display_name: string | null
           email: string | null
+          employee_id: string | null
           hire_date: string | null
           id: string
+          last_access_at: string | null
           level: number
+          personal_email: string | null
+          phone: string | null
           quests_completed: number
+          status: string
           streak: number
           updated_at: string
           xp: number
@@ -2952,13 +3097,20 @@ export type Database = {
           best_streak?: number
           birth_date?: string | null
           coins?: number
+          contract_type?: string | null
+          cpf?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
+          employee_id?: string | null
           hire_date?: string | null
           id: string
+          last_access_at?: string | null
           level?: number
+          personal_email?: string | null
+          phone?: string | null
           quests_completed?: number
+          status?: string
           streak?: number
           updated_at?: string
           xp?: number
@@ -2968,13 +3120,20 @@ export type Database = {
           best_streak?: number
           birth_date?: string | null
           coins?: number
+          contract_type?: string | null
+          cpf?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
+          employee_id?: string | null
           hire_date?: string | null
           id?: string
+          last_access_at?: string | null
           level?: number
+          personal_email?: string | null
+          phone?: string | null
           quests_completed?: number
+          status?: string
           streak?: number
           updated_at?: string
           xp?: number
@@ -4062,6 +4221,50 @@ export type Database = {
         }
         Relationships: []
       }
+      user_demographic_values: {
+        Row: {
+          attribute_id: string
+          created_at: string
+          date_value: string | null
+          id: string
+          number_value: number | null
+          updated_at: string
+          user_id: string
+          value: string | null
+          values_array: Json | null
+        }
+        Insert: {
+          attribute_id: string
+          created_at?: string
+          date_value?: string | null
+          id?: string
+          number_value?: number | null
+          updated_at?: string
+          user_id: string
+          value?: string | null
+          values_array?: Json | null
+        }
+        Update: {
+          attribute_id?: string
+          created_at?: string
+          date_value?: string | null
+          id?: string
+          number_value?: number | null
+          updated_at?: string
+          user_id?: string
+          value?: string | null
+          values_array?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_demographic_values_attribute_id_fkey"
+            columns: ["attribute_id"]
+            isOneToOne: false
+            referencedRelation: "demographic_attributes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_leagues: {
         Row: {
           created_at: string
@@ -4149,6 +4352,35 @@ export type Database = {
             columns: ["mission_id"]
             isOneToOne: false
             referencedRelation: "department_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_permission_groups: {
+        Row: {
+          created_at: string
+          id: string
+          permission_group_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_group_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_group_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permission_groups_permission_group_id_fkey"
+            columns: ["permission_group_id"]
+            isOneToOne: false
+            referencedRelation: "permission_groups"
             referencedColumns: ["id"]
           },
         ]
