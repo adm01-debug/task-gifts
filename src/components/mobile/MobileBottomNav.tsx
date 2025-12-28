@@ -98,48 +98,62 @@ export const MobileBottomNav = memo(function MobileBottomNav({ className }: Mobi
               className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-[28px] shadow-2xl touch-none"
               style={{ paddingBottom: "max(env(safe-area-inset-bottom), 20px)" }}
             >
-              {/* Drag handle */}
-              <div 
-                className="flex justify-center pt-3 pb-4 cursor-grab active:cursor-grabbing"
+              {/* Drag handle with animation */}
+              <motion.div 
+                className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
                 onPointerDown={(e) => dragControls.start(e)}
               >
-                <div className="w-12 h-1.5 bg-muted-foreground/40 rounded-full" />
+                <motion.div 
+                  className="w-10 h-1 bg-muted-foreground/30 rounded-full"
+                  whileHover={{ width: 48 }}
+                />
+              </motion.div>
+
+              {/* Title */}
+              <div className="px-5 pb-4">
+                <h3 className="text-base font-semibold text-foreground">Menu rápido</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Acesse suas funcionalidades favoritas</p>
               </div>
               
               {/* Quick access grid */}
               <div className="px-4 pb-6">
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-4 gap-2.5">
                   {moreNavItems.map((item, index) => {
                     const active = isActive(item.path);
                     const Icon = item.icon;
                     return (
                       <motion.button
                         key={item.path}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.03, type: "spring", stiffness: 400, damping: 25 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.04, type: "spring", stiffness: 300, damping: 24 }}
                         onClick={() => handleNavClick(item.path)}
-                        whileTap={{ scale: 0.9 }}
+                        whileTap={{ scale: 0.92 }}
+                        whileHover={{ y: -2 }}
                         className={cn(
-                          "flex flex-col items-center justify-center gap-2 py-4 rounded-2xl transition-all",
+                          "flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl transition-all",
                           active 
-                            ? "bg-primary text-primary-foreground" 
-                            : "bg-muted/60 text-foreground active:bg-muted"
+                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/25" 
+                            : "bg-muted/40 text-foreground active:bg-muted"
                         )}
                       >
-                        <div className={cn(
-                          "w-11 h-11 rounded-xl flex items-center justify-center transition-all",
-                          active 
-                            ? "bg-primary-foreground/20" 
-                            : "bg-background shadow-sm"
-                        )}>
+                        <motion.div 
+                          className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                            active 
+                              ? "bg-primary-foreground/20" 
+                              : "bg-background/80 shadow-sm border border-border/30"
+                          )}
+                          whileTap={{ rotate: [0, -10, 10, 0] }}
+                          transition={{ duration: 0.3 }}
+                        >
                           <Icon className={cn(
                             "w-5 h-5",
                             active ? "text-primary-foreground" : item.color || "text-foreground"
                           )} />
-                        </div>
+                        </motion.div>
                         <span className={cn(
-                          "text-[11px] font-medium",
+                          "text-[10px] font-medium leading-tight",
                           active && "font-semibold"
                         )}>
                           {item.label}
@@ -180,11 +194,12 @@ export const MobileBottomNav = memo(function MobileBottomNav({ className }: Mobi
                 <motion.button
                   key={item.path}
                   onClick={() => handleNavClick(item.path)}
-                  whileTap={{ scale: 0.85 }}
+                  whileTap={{ scale: 0.88, y: 2 }}
                   className={cn(
                     "relative flex flex-col items-center justify-center",
                     "w-[58px] h-[50px] rounded-xl",
-                    "transition-colors duration-200"
+                    "transition-colors duration-200",
+                    "active:bg-muted/50"
                   )}
                   aria-label={item.label}
                   aria-current={active ? "page" : undefined}
@@ -192,25 +207,29 @@ export const MobileBottomNav = memo(function MobileBottomNav({ className }: Mobi
                   {active && (
                     <motion.div
                       layoutId="navPill"
-                      className="absolute inset-0 bg-primary/15 rounded-xl"
-                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                      className="absolute inset-1 bg-primary/12 rounded-lg"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     />
                   )}
                   <motion.div 
                     className="relative z-10"
-                    animate={{ scale: active ? 1.15 : 1 }}
+                    animate={{ 
+                      scale: active ? 1.1 : 1,
+                      y: active ? -1 : 0
+                    }}
                     transition={{ type: "spring", stiffness: 400, damping: 20 }}
                   >
                     <Icon className={cn(
-                      "w-[22px] h-[22px] transition-colors duration-200",
+                      "w-[21px] h-[21px] transition-colors duration-200",
                       active ? "text-primary" : "text-muted-foreground"
                     )} />
                   </motion.div>
                   <motion.span 
                     className={cn(
-                      "relative z-10 text-[10px] font-medium mt-1 transition-colors duration-200",
-                      active ? "text-primary font-semibold" : "text-muted-foreground"
+                      "relative z-10 text-[10px] mt-0.5 transition-all duration-200",
+                      active ? "text-primary font-semibold" : "text-muted-foreground font-medium"
                     )}
+                    animate={{ opacity: active ? 1 : 0.75 }}
                   >
                     {item.label}
                   </motion.span>
