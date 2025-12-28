@@ -14,9 +14,9 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: Home, label: "Início", path: "/" },
   { icon: Target, label: "Metas", path: "/goals" },
-  { icon: Trophy, label: "Ranking", path: "/leagues" },
+  { icon: Trophy, label: "Ligas", path: "/leagues" },
   { icon: BookOpen, label: "Trilhas", path: "/trails" },
-  { icon: User, label: "Perfil", path: "/profile" },
+  { icon: User, label: "Eu", path: "/profile" },
 ];
 
 interface MobileBottomNavProps {
@@ -44,13 +44,14 @@ export const MobileBottomNav = memo(function MobileBottomNav({ className }: Mobi
     <nav
       className={cn(
         "fixed bottom-0 left-0 right-0 z-50",
-        "bg-background/95 backdrop-blur-xl border-t border-border/50",
-        "pb-[env(safe-area-inset-bottom)]",
+        "bg-background/95 backdrop-blur-xl",
+        "border-t border-border/40",
+        "shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]",
         className
       )}
-      style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)" }}
+      style={{ paddingBottom: "max(env(safe-area-inset-bottom), 8px)" }}
     >
-      <div className="flex items-center justify-around h-16 px-2">
+      <div className="flex items-center justify-around h-14 px-1">
         {navItems.map((item) => {
           const active = isActive(item.path);
           const Icon = item.icon;
@@ -59,34 +60,34 @@ export const MobileBottomNav = memo(function MobileBottomNav({ className }: Mobi
             <motion.button
               key={item.path}
               onClick={() => handleNavClick(item.path)}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.85 }}
               className={cn(
-                "flex flex-col items-center justify-center",
-                "min-w-[56px] min-h-[44px] px-3 py-2 rounded-xl",
-                "transition-colors duration-200",
+                "relative flex flex-col items-center justify-center",
+                "min-w-[60px] min-h-[48px] px-2 py-1.5 rounded-2xl",
+                "transition-all duration-200",
                 active 
                   ? "text-primary" 
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground active:text-foreground"
               )}
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
             >
-              <div className="relative">
+              {active && (
+                <motion.div
+                  layoutId="bottomNavBg"
+                  className="absolute inset-0 bg-primary/10 rounded-2xl"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <div className="relative z-10">
                 <Icon className={cn(
-                  "w-5 h-5 transition-transform duration-200",
+                  "w-5 h-5 transition-all duration-200",
                   active && "scale-110"
                 )} />
-                {active && (
-                  <motion.div
-                    layoutId="bottomNavIndicator"
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                )}
               </div>
               <span className={cn(
-                "text-[10px] font-medium mt-1 transition-colors duration-200",
-                active ? "text-primary" : "text-muted-foreground"
+                "relative z-10 text-[10px] font-medium mt-0.5 transition-all duration-200",
+                active ? "text-primary font-semibold" : "text-muted-foreground"
               )}>
                 {item.label}
               </span>
