@@ -108,15 +108,15 @@ export const MobilePageLayout = memo(function MobilePageLayout({
           headerGradient && "text-white"
         )}
       >
-        <div className="flex items-center justify-between h-14 px-3">
+        <div className="flex items-center justify-between h-14 px-3 gap-2">
           {/* Left: Back button */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             {showBackButton ? (
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={handleBack}
                 className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-xl transition-colors",
+                  "flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl transition-colors",
                   headerGradient 
                     ? "hover:bg-white/20 active:bg-white/30" 
                     : "hover:bg-muted active:bg-muted/80"
@@ -126,14 +126,14 @@ export const MobilePageLayout = memo(function MobilePageLayout({
                 <ArrowLeft className="w-5 h-5" />
               </motion.button>
             ) : (
-              <div className="w-10" />
+              <div className="w-10 flex-shrink-0" />
             )}
             
             {/* Title with optional icon */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               {Icon && (
                 <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center",
+                  "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
                   headerGradient 
                     ? "bg-white/20" 
                     : "bg-primary/10"
@@ -144,9 +144,9 @@ export const MobilePageLayout = memo(function MobilePageLayout({
                   )} />
                 </div>
               )}
-              <div>
+              <div className="min-w-0">
                 <motion.h1 
-                  className="font-semibold text-base truncate max-w-[180px]"
+                  className="font-semibold text-base truncate"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                 >
@@ -154,7 +154,7 @@ export const MobilePageLayout = memo(function MobilePageLayout({
                 </motion.h1>
                 {subtitle && (
                   <p className={cn(
-                    "text-xs truncate max-w-[180px]",
+                    "text-xs truncate",
                     headerGradient ? "text-white/70" : "text-muted-foreground"
                   )}>
                     {subtitle}
@@ -165,7 +165,7 @@ export const MobilePageLayout = memo(function MobilePageLayout({
           </div>
 
           {/* Right: Custom actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-shrink-0">
             {headerActions}
           </div>
         </div>

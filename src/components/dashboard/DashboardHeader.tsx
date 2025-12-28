@@ -64,17 +64,67 @@ export const DashboardHeader = memo(function DashboardHeader({
     navigate("/profile");
   }, [navigate]);
 
+  // Simplified mobile header
+  if (isMobile) {
+    return (
+      <motion.header 
+        initial={{ y: 0 }}
+        animate={{ y: isHidden ? "-100%" : 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 40 }}
+        className={cn(
+          "sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/50",
+          isScrolled && "shadow-sm"
+        )}
+        role="banner"
+      >
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Left: Menu + Greeting */}
+          <div className="flex items-center gap-3">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={onMenuClick}
+              className="flex items-center justify-center w-10 h-10 rounded-xl bg-muted/60 hover:bg-muted active:bg-muted/80 transition-colors"
+              aria-label="Abrir menu"
+            >
+              <Menu className="w-5 h-5" />
+            </motion.button>
+            
+            <div>
+              <h1 className="text-base font-bold truncate max-w-[140px]">
+                Olá, {displayName.split(" ")[0]}! 👋
+              </h1>
+              {rankData?.rank && (
+                <p className="text-xs text-muted-foreground">
+                  Rank <span className="text-primary font-semibold">#{rankData.rank}</span>
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Essential actions only */}
+          <div className="flex items-center gap-2">
+            <ComboIndicator variant="compact" />
+            <NotificationCenter />
+            
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={handleNavigateToProfile}
+              className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center font-bold text-xs text-primary-foreground"
+              aria-label="Meu perfil"
+            >
+              {displayName.charAt(0).toUpperCase()}
+            </motion.button>
+          </div>
+        </div>
+      </motion.header>
+    );
+  }
+
+  // Desktop header
   return (
     <motion.header 
       initial={{ y: 0 }}
-      animate={{ 
-        y: isMobile && isHidden ? "-100%" : 0,
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 400,
-        damping: 40,
-      }}
+      animate={{ y: 0 }}
       className={cn(
         "header-sticky border-b border-border",
         isScrolled && "scrolled"
@@ -96,7 +146,7 @@ export const DashboardHeader = memo(function DashboardHeader({
           
           <div>
             <h1 className="text-lg md:text-xl font-bold">Olá, {displayName}! 👋</h1>
-            <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
+            <p className="text-xs md:text-sm text-muted-foreground">
               {rankData?.rank ? (
                 <>Você está no <span className="text-primary font-semibold">#{rankData.rank}</span> lugar. Continue assim!</>
               ) : (
