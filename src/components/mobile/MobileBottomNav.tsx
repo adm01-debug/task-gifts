@@ -1,7 +1,7 @@
-import { memo, useCallback, useState, useEffect } from "react";
+import { memo, useCallback, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Target, Trophy, User, BookOpen, MoreHorizontal, Gamepad2, BarChart3, MessageSquare, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Home, Target, Trophy, User, BookOpen, MoreHorizontal, Gamepad2, BarChart3, MessageSquare, Sparkles, Settings, Bell, HelpCircle } from "lucide-react";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 
@@ -9,7 +9,7 @@ interface NavItem {
   icon: React.ElementType;
   label: string;
   path: string;
-  badge?: number;
+  color?: string;
 }
 
 const mainNavItems: NavItem[] = [
@@ -20,10 +20,14 @@ const mainNavItems: NavItem[] = [
 ];
 
 const moreNavItems: NavItem[] = [
-  { icon: Gamepad2, label: "Duelos", path: "/duels" },
-  { icon: BarChart3, label: "Stats", path: "/personal-stats" },
-  { icon: MessageSquare, label: "Feed", path: "/social-feed" },
-  { icon: User, label: "Perfil", path: "/profile" },
+  { icon: Gamepad2, label: "Duelos", path: "/duels", color: "text-orange-500" },
+  { icon: BarChart3, label: "Stats", path: "/personal-stats", color: "text-blue-500" },
+  { icon: MessageSquare, label: "Feed", path: "/social-feed", color: "text-green-500" },
+  { icon: User, label: "Perfil", path: "/profile", color: "text-purple-500" },
+  { icon: Sparkles, label: "Conquistas", path: "/achievements", color: "text-amber-500" },
+  { icon: Bell, label: "Avisos", path: "/announcements", color: "text-pink-500" },
+  { icon: Settings, label: "Config", path: "/admin", color: "text-slate-500" },
+  { icon: HelpCircle, label: "Ajuda", path: "/feedback", color: "text-cyan-500" },
 ];
 
 interface MobileBottomNavProps {
@@ -35,6 +39,8 @@ export const MobileBottomNav = memo(function MobileBottomNav({ className }: Mobi
   const location = useLocation();
   const haptic = useHapticFeedback();
   const [showMore, setShowMore] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const dragControls = useDragControls();
 
   // Close more menu when route changes
   useEffect(() => {
@@ -63,7 +69,7 @@ export const MobileBottomNav = memo(function MobileBottomNav({ className }: Mobi
 
   return (
     <>
-      {/* More menu - slides up from bottom */}
+      {/* More menu - draggable bottom sheet */}
       <AnimatePresence>
         {showMore && (
           <>
@@ -71,170 +77,195 @@ export const MobileBottomNav = memo(function MobileBottomNav({ className }: Mobi
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
               onClick={() => setShowMore(false)}
             />
             <motion.div
+              ref={sheetRef}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 400, damping: 35 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-3xl shadow-2xl"
-              style={{ paddingBottom: "max(env(safe-area-inset-bottom), 16px)" }}
+              transition={{ type: "spring", stiffness: 400, damping: 40 }}
+              drag="y"
+              dragControls={dragControls}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.5 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 100 || info.velocity.y > 500) {
+                  setShowMore(false);
+                }
+              }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-[28px] shadow-2xl touch-none"
+              style={{ paddingBottom: "max(env(safe-area-inset-bottom), 20px)" }}
             >
-              {/* Handle bar */}
-              <div className="flex justify-center pt-3 pb-2">
-                <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+              {/* Drag handle */}
+              <div 
+                className="flex justify-center pt-3 pb-4 cursor-grab active:cursor-grabbing"
+                onPointerDown={(e) => dragControls.start(e)}
+              >
+                <div className="w-12 h-1.5 bg-muted-foreground/40 rounded-full" />
               </div>
               
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 pb-3">
-                <h3 className="text-sm font-semibold text-foreground">Mais opções</h3>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowMore(false)}
-                  className="w-8 h-8 rounded-full bg-muted flex items-center justify-center"
-                >
-                  <X className="w-4 h-4 text-muted-foreground" />
-                </motion.button>
-              </div>
-              
-              {/* Grid of options */}
-              <div className="px-4 pb-4 grid grid-cols-4 gap-2">
-                {moreNavItems.map((item, index) => {
-                  const active = isActive(item.path);
-                  const Icon = item.icon;
-                  return (
-                    <motion.button
-                      key={item.path}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => handleNavClick(item.path)}
-                      whileTap={{ scale: 0.92 }}
-                      className={cn(
-                        "flex flex-col items-center justify-center gap-2 p-4 rounded-2xl transition-all",
-                        active 
-                          ? "bg-primary text-primary-foreground shadow-lg" 
-                          : "bg-muted/50 text-foreground hover:bg-muted"
-                      )}
-                    >
-                      <Icon className={cn("w-6 h-6", active && "scale-110")} />
-                      <span className="text-xs font-medium">{item.label}</span>
-                    </motion.button>
-                  );
-                })}
+              {/* Quick access grid */}
+              <div className="px-4 pb-6">
+                <div className="grid grid-cols-4 gap-3">
+                  {moreNavItems.map((item, index) => {
+                    const active = isActive(item.path);
+                    const Icon = item.icon;
+                    return (
+                      <motion.button
+                        key={item.path}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.03, type: "spring", stiffness: 400, damping: 25 }}
+                        onClick={() => handleNavClick(item.path)}
+                        whileTap={{ scale: 0.9 }}
+                        className={cn(
+                          "flex flex-col items-center justify-center gap-2 py-4 rounded-2xl transition-all",
+                          active 
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-muted/60 text-foreground active:bg-muted"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-11 h-11 rounded-xl flex items-center justify-center transition-all",
+                          active 
+                            ? "bg-primary-foreground/20" 
+                            : "bg-background shadow-sm"
+                        )}>
+                          <Icon className={cn(
+                            "w-5 h-5",
+                            active ? "text-primary-foreground" : item.color || "text-foreground"
+                          )} />
+                        </div>
+                        <span className={cn(
+                          "text-[11px] font-medium",
+                          active && "font-semibold"
+                        )}>
+                          {item.label}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Main bottom nav */}
+      {/* Main bottom nav with floating pill style */}
       <nav
         className={cn(
           "fixed bottom-0 left-0 right-0 z-30",
-          "bg-background/98 backdrop-blur-xl",
-          "border-t border-border/30",
-          "shadow-[0_-2px_20px_-4px_rgba(0,0,0,0.1)]",
-          showMore && "pointer-events-none opacity-0",
+          "transition-all duration-300",
+          showMore && "pointer-events-none translate-y-full",
           className
         )}
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 8px)" }}
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 4px)" }}
       >
-        <div className="flex items-center justify-around h-[60px] px-1">
-          {mainNavItems.map((item) => {
-            const active = isActive(item.path);
-            const Icon = item.icon;
+        <div className="mx-3 mb-2">
+          <div className={cn(
+            "flex items-center justify-around h-[62px] px-2",
+            "bg-card/95 backdrop-blur-xl",
+            "rounded-2xl",
+            "border border-border/50",
+            "shadow-lg shadow-black/10"
+          )}>
+            {mainNavItems.map((item) => {
+              const active = isActive(item.path);
+              const Icon = item.icon;
 
-            return (
-              <motion.button
-                key={item.path}
-                onClick={() => handleNavClick(item.path)}
-                whileTap={{ scale: 0.88 }}
-                className={cn(
-                  "relative flex flex-col items-center justify-center",
-                  "min-w-[60px] min-h-[48px] px-2 py-1.5 rounded-xl",
-                  "transition-all duration-200"
-                )}
-                aria-label={item.label}
-                aria-current={active ? "page" : undefined}
-              >
-                {active && (
-                  <motion.div
-                    layoutId="bottomNavIndicator"
-                    className="absolute inset-x-3 -top-1.5 h-1 bg-primary rounded-full"
-                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                  />
-                )}
-                <motion.div 
-                  className="relative z-10"
-                  animate={{ 
-                    y: active ? -2 : 0,
-                    scale: active ? 1.1 : 1 
-                  }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                >
-                  <Icon className={cn(
-                    "w-[22px] h-[22px] transition-colors duration-200",
-                    active ? "text-primary" : "text-muted-foreground"
-                  )} />
-                </motion.div>
-                <motion.span 
+              return (
+                <motion.button
+                  key={item.path}
+                  onClick={() => handleNavClick(item.path)}
+                  whileTap={{ scale: 0.85 }}
                   className={cn(
-                    "relative z-10 text-[10px] font-medium mt-0.5 transition-colors duration-200",
-                    active ? "text-primary" : "text-muted-foreground"
+                    "relative flex flex-col items-center justify-center",
+                    "w-[58px] h-[50px] rounded-xl",
+                    "transition-colors duration-200"
                   )}
-                  animate={{ opacity: active ? 1 : 0.8 }}
+                  aria-label={item.label}
+                  aria-current={active ? "page" : undefined}
                 >
-                  {item.label}
-                </motion.span>
-              </motion.button>
-            );
-          })}
+                  {active && (
+                    <motion.div
+                      layoutId="navPill"
+                      className="absolute inset-0 bg-primary/15 rounded-xl"
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <motion.div 
+                    className="relative z-10"
+                    animate={{ scale: active ? 1.15 : 1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  >
+                    <Icon className={cn(
+                      "w-[22px] h-[22px] transition-colors duration-200",
+                      active ? "text-primary" : "text-muted-foreground"
+                    )} />
+                  </motion.div>
+                  <motion.span 
+                    className={cn(
+                      "relative z-10 text-[10px] font-medium mt-1 transition-colors duration-200",
+                      active ? "text-primary font-semibold" : "text-muted-foreground"
+                    )}
+                  >
+                    {item.label}
+                  </motion.span>
+                </motion.button>
+              );
+            })}
 
-          {/* More button */}
-          <motion.button
-            onClick={toggleMore}
-            whileTap={{ scale: 0.88 }}
-            className={cn(
-              "relative flex flex-col items-center justify-center",
-              "min-w-[60px] min-h-[48px] px-2 py-1.5 rounded-xl",
-              "transition-all duration-200"
-            )}
-            aria-label="Mais opções"
-            aria-expanded={showMore}
-          >
-            {isMoreActive && (
-              <motion.div
-                className="absolute inset-x-3 -top-1.5 h-1 bg-primary rounded-full"
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
-              />
-            )}
-            <motion.div 
-              className="relative z-10"
-              animate={{ 
-                y: isMoreActive ? -2 : 0,
-                scale: isMoreActive ? 1.1 : 1,
-                rotate: showMore ? 90 : 0
-              }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            >
-              <MoreHorizontal className={cn(
-                "w-[22px] h-[22px] transition-colors duration-200",
-                isMoreActive ? "text-primary" : "text-muted-foreground"
-              )} />
-            </motion.div>
-            <motion.span 
+            {/* More button with dot indicator */}
+            <motion.button
+              onClick={toggleMore}
+              whileTap={{ scale: 0.85 }}
               className={cn(
-                "relative z-10 text-[10px] font-medium mt-0.5 transition-colors duration-200",
-                isMoreActive ? "text-primary" : "text-muted-foreground"
+                "relative flex flex-col items-center justify-center",
+                "w-[58px] h-[50px] rounded-xl",
+                "transition-colors duration-200"
               )}
-              animate={{ opacity: isMoreActive ? 1 : 0.8 }}
+              aria-label="Mais opções"
+              aria-expanded={showMore}
             >
-              Mais
-            </motion.span>
-          </motion.button>
+              {isMoreActive && (
+                <motion.div
+                  className="absolute inset-0 bg-primary/15 rounded-xl"
+                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                />
+              )}
+              <motion.div 
+                className="relative z-10"
+                animate={{ 
+                  scale: isMoreActive ? 1.15 : 1,
+                  rotate: showMore ? 45 : 0
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              >
+                <MoreHorizontal className={cn(
+                  "w-[22px] h-[22px] transition-colors duration-200",
+                  isMoreActive ? "text-primary" : "text-muted-foreground"
+                )} />
+                {/* Notification dot */}
+                <motion.div 
+                  className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-destructive rounded-full"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5 }}
+                />
+              </motion.div>
+              <motion.span 
+                className={cn(
+                  "relative z-10 text-[10px] font-medium mt-1 transition-colors duration-200",
+                  isMoreActive ? "text-primary font-semibold" : "text-muted-foreground"
+                )}
+              >
+                Mais
+              </motion.span>
+            </motion.button>
+          </div>
         </div>
       </nav>
     </>
