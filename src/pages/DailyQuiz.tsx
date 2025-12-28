@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { PageWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
+import { MobilePageLayout } from "@/components/mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Transform database questions to MagicCardQuiz format
 function transformToMagicQuestions(dbQuestions: DbQuizQuestion[]): QuizQuestion[] {
@@ -66,6 +68,7 @@ function shuffleArray<T>(array: T[]): T[] {
 export default function DailyQuiz() {
   const seoConfig = useSEO();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [activeQuiz, setActiveQuiz] = useState<"magic" | "millionaire" | null>(null);
   const [completedToday, setCompletedToday] = useState({
     magic: false,
@@ -131,36 +134,39 @@ export default function DailyQuiz() {
   const hasMillionaireQuestions = millionaireQuestions.length >= 5;
 
   return (
-    <PageWrapper pageName="Quiz Diário" className="min-h-screen bg-background">
-      <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
-      <div className="container max-w-5xl mx-auto px-4 py-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <Button 
-            variant="ghost" 
-            className="mb-4 gap-2"
-            onClick={() => activeQuiz ? setActiveQuiz(null) : navigate(-1)}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {activeQuiz ? "Voltar aos Quiz" : "Voltar"}
-          </Button>
-          
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-xl bg-primary/10">
-              <Gamepad2 className="h-6 w-6 text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold">Quiz Diário</h1>
-          </div>
-          <p className="text-muted-foreground">
-            Dedique 10 minutos do seu dia para aprender jogando!
-          </p>
-        </motion.div>
+    <MobilePageLayout title="Quiz Diário" icon={Gamepad2} backPath="/">
+      <PageWrapper pageName="Quiz Diário" className="min-h-screen bg-background pb-24">
+        <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
+        <div className="container max-w-5xl mx-auto px-4 py-6 md:py-8">
+          {/* Header - Desktop only */}
+          {!isMobile && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <Button 
+                variant="ghost" 
+                className="mb-4 gap-2"
+                onClick={() => activeQuiz ? setActiveQuiz(null) : navigate(-1)}
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {activeQuiz ? "Voltar aos Quiz" : "Voltar"}
+              </Button>
+              
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-xl bg-primary/10">
+                  <Gamepad2 className="h-6 w-6 text-primary" />
+                </div>
+                <h1 className="text-3xl font-bold">Quiz Diário</h1>
+              </div>
+              <p className="text-muted-foreground">
+                Dedique 10 minutos do seu dia para aprender jogando!
+              </p>
+            </motion.div>
+          )}
 
-        {isLoading ? (
+          {isLoading ? (
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 grid md:grid-cols-2 gap-6">
               {[1, 2].map((i) => (
@@ -352,7 +358,8 @@ export default function DailyQuiz() {
             />
           </motion.div>
         )}
-      </div>
-    </PageWrapper>
+        </div>
+      </PageWrapper>
+    </MobilePageLayout>
   );
 }

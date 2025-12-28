@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import { MobileDrawer } from "@/components/MobileDrawer";
+import { MobilePageLayout } from "@/components/mobile";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
@@ -575,14 +575,15 @@ export default function Mentorship() {
 
   if (isMobile) {
     return (
-      <PageWrapper pageName="Mentoria" className="flex flex-col h-screen">
-        <SEOHead
-          title="Mentoria Gamificada | Gamify"
-          description="Participe de mentorias gamificadas e ganhe recompensas aprendendo e ensinando."
-        />
-        <MobileDrawer open={mobileDrawerOpen} onClose={() => setMobileDrawerOpen(false)} />
-        {content}
-      </PageWrapper>
+      <MobilePageLayout title="Mentoria" icon={Users} backPath="/">
+        <PageWrapper pageName="Mentoria" className="flex flex-col min-h-screen pb-24">
+          <SEOHead
+            title="Mentoria Gamificada | Gamify"
+            description="Participe de mentorias gamificadas e ganhe recompensas aprendendo e ensinando."
+          />
+          {content}
+        </PageWrapper>
+      </MobilePageLayout>
     );
   }
 

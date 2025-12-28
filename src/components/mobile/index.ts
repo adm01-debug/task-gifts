@@ -1,5 +1,6 @@
 // Mobile-specific components
 export { MobileBottomNav } from "./MobileBottomNav";
+export { MobilePageLayout } from "./MobilePageLayout";
 export { PullToRefresh } from "./PullToRefresh";
 export { MobileHidingHeader } from "./MobileHidingHeader";
 export { SwipeablePage } from "./SwipeablePage";

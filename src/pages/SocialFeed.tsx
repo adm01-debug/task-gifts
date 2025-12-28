@@ -143,7 +143,7 @@ export default function SocialFeedPage() {
   }), [filteredActivities]);
 
   return (
-    <PageWrapper pageName="Feed Social" className="min-h-screen bg-background">
+    <PageWrapper pageName="Feed Social" className="min-h-screen bg-background pb-24">
       <SEOHead {...seoData} />
       {/* Header */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
