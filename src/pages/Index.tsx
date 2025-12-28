@@ -5,6 +5,7 @@ import { useState, useCallback, useEffect } from "react";
 import { PageTransition } from "@/components/PageTransition";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileDrawer } from "@/components/MobileDrawer";
+import { MobileBottomNav } from "@/components/mobile";
 import { StatsGrid, QuickActions } from "@/components/StatsGrid";
 import { AchievementContainer, useAchievements } from "@/components/AchievementSystem";
 import { OnboardingWidget } from "@/components/onboarding/OnboardingWidget";
@@ -125,7 +126,7 @@ function Index() {
         )}
 
         {/* Main Content */}
-        <main className={`flex-1 overflow-auto ${isMobile ? 'pb-bottom-nav' : ''}`} aria-label="Dashboard principal">
+        <main className={`flex-1 overflow-auto ${isMobile ? 'pb-20' : ''}`} aria-label="Dashboard principal">
           {/* Top Header */}
           <DashboardHeader onMenuClick={handleMenuClick} />
 
@@ -169,6 +170,9 @@ function Index() {
           {/* Footer */}
           <DashboardFooter />
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        {isMobile && <MobileBottomNav />}
       </div>
     </PageTransition>
   );

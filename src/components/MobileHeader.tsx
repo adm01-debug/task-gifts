@@ -1,17 +1,27 @@
 import { useState, useCallback } from "react";
-import { Menu, Gift } from "lucide-react";
+import { Menu, Gift, Bell } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { MobileDrawer } from "./MobileDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface MobileHeaderProps {
   title?: string;
   showTitle?: boolean;
+  showNotifications?: boolean;
+  className?: string;
 }
 
-export function MobileHeader({ title, showTitle = true }: MobileHeaderProps) {
+export function MobileHeader({ 
+  title, 
+  showTitle = true, 
+  showNotifications = true,
+  className 
+}: MobileHeaderProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
@@ -20,30 +30,51 @@ export function MobileHeader({ title, showTitle = true }: MobileHeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="container flex h-14 items-center justify-between px-4">
+      <header className={cn(
+        "sticky top-0 z-40 w-full",
+        "bg-background/80 backdrop-blur-xl",
+        "border-b border-border/30",
+        "shadow-sm",
+        className
+      )}>
+        <div className="flex h-14 items-center justify-between px-4">
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={openDrawer}
-            className="flex items-center justify-center w-10 h-10 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+            className="flex items-center justify-center w-10 h-10 rounded-xl bg-muted/60 hover:bg-muted active:bg-muted/80 transition-colors"
             aria-label="Abrir menu"
           >
             <Menu className="h-5 w-5" />
           </motion.button>
 
           {showTitle && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Gift className="w-4 h-4 text-primary-foreground" />
+            <motion.div 
+              className="flex items-center gap-2"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-sm">
+                <Gift className="w-3.5 h-3.5 text-primary-foreground" />
               </div>
               <span className="font-semibold text-sm">
                 {title || "Task Gifts"}
               </span>
-            </div>
+            </motion.div>
           )}
 
-          {/* Placeholder for right side actions */}
-          <div className="w-10" />
+          {showNotifications ? (
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => navigate("/profile")}
+              className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-muted/60 hover:bg-muted active:bg-muted/80 transition-colors"
+              aria-label="Notificações"
+            >
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
+            </motion.button>
+          ) : (
+            <div className="w-10" />
+          )}
         </div>
       </header>
 
