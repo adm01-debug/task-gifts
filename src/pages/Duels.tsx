@@ -471,10 +471,10 @@ const Duels = () => {
   const seo = useSEO();
 
   return (
-    <PageWrapper pageName="Duelos">
+    <PageWrapper pageName="Duelos" className="pb-24">
       <SEOHead {...seo} />
       <PageTransition>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background pb-24">
         {/* Confirmation Dialog */}
         <ConfirmDialog
           open={confirmDialog.open}

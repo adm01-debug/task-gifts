@@ -1,9 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Lock, CheckCircle2, Flame, Sparkles, Star } from "lucide-react";
+import { Trophy, Lock, CheckCircle2, Flame, Sparkles, Star, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { useAllAchievements, useUserAchievements } from "@/hooks/useAchievements";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -12,6 +14,8 @@ import { BehavioralBadgesWidget } from "@/components/BehavioralBadgesWidget";
 import { PageWrapper, SectionWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobilePageLayout } from "@/components/mobile";
 const rarityConfig = {
   common: {
     label: "Comum",
@@ -50,6 +54,8 @@ const categoryConfig: Record<string, { label: string; icon: React.ReactNode }> =
 };
 
 export default function Achievements() {
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const seoConfig = useSEO();
   const { data: allAchievements, isLoading: loadingAll } = useAllAchievements();
   const { data: userAchievements, isLoading: loadingUser } = useUserAchievements();
@@ -70,38 +76,43 @@ export default function Achievements() {
 
   if (isLoading) {
     return (
-      <div className="container max-w-4xl py-8 space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-32 w-full" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-40" />
-          ))}
+      <MobilePageLayout title="Conquistas" icon={Trophy} backPath="/">
+        <div className="container max-w-4xl py-8 space-y-6 px-4">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-32 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-40" />
+            ))}
+          </div>
         </div>
-      </div>
+      </MobilePageLayout>
     );
   }
 
-  return (
-    <PageWrapper pageName="Conquistas" className="container max-w-4xl py-8 space-y-6">
-      <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3"
-      >
-        <div className="p-3 rounded-xl bg-amber-500/10">
-          <Trophy className="w-8 h-8 text-amber-500" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold">Conquistas</h1>
-          <p className="text-muted-foreground">
-            Desbloqueie conquistas completando ações na plataforma
-          </p>
-        </div>
-      </motion.div>
-
+  const mainContent = (
+    <div className="space-y-6">
+      {/* Header - Desktop only */}
+      {!isMobile && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3"
+        >
+          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="p-3 rounded-xl bg-amber-500/10">
+            <Trophy className="w-8 h-8 text-amber-500" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Conquistas</h1>
+            <p className="text-muted-foreground">
+              Desbloqueie conquistas completando ações na plataforma
+            </p>
+          </div>
+        </motion.div>
+      )}
       {/* Progress Overview */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -163,7 +174,7 @@ export default function Achievements() {
 
       {/* Tabs by Category */}
       <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="all">Todas</TabsTrigger>
           {categories.map((cat) => (
             <TabsTrigger key={cat} value={cat} className="flex items-center gap-1">
@@ -191,7 +202,16 @@ export default function Achievements() {
           </TabsContent>
         ))}
       </Tabs>
-    </PageWrapper>
+    </div>
+  );
+
+  return (
+    <MobilePageLayout title="Conquistas" icon={Trophy} backPath="/">
+      <PageWrapper pageName="Conquistas" className="container max-w-4xl py-6 px-4 space-y-6 pb-24">
+        <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
+        {mainContent}
+      </PageWrapper>
+    </MobilePageLayout>
   );
 }
 

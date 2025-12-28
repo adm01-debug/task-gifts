@@ -337,10 +337,10 @@ export default function LearningTrails() {
   }
 
   return (
-    <PageWrapper pageName="Trilhas" className="min-h-screen bg-background">
+    <PageWrapper pageName="Trilhas" className="min-h-screen bg-background pb-24">
       <SEOHead {...seoData} />
       <MobileHeader title="Trilhas" />
-      <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8">
+      <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8 pb-24">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
