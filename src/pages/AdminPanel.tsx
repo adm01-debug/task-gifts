@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Shield,
   LayoutDashboard,
+  Key,
   Award,
   ChevronRight,
   Search,
@@ -66,6 +67,7 @@ import { ENPSDashboard } from "@/components/admin/ENPSDashboard";
 import { PDIAlertsPanel } from "@/components/admin/PDIAlertsPanel";
 import { IpWhitelistManager } from "@/components/admin/IpWhitelistManager";
 import { RBACDashboard } from "@/components/rbac";
+import { PasswordResetApprovalPanel } from "@/components/admin/PasswordResetApprovalPanel";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -327,6 +329,10 @@ function AdminPanelContent() {
               <Shield className="h-4 w-4" />
               RBAC
             </TabsTrigger>
+            <TabsTrigger value="password-reset" className="gap-2">
+              <Key className="h-4 w-4" />
+              Reset Senha
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -518,6 +524,11 @@ function AdminPanelContent() {
           {/* RBAC Tab */}
           <TabsContent value="rbac">
             <RBACDashboard />
+          </TabsContent>
+
+          {/* Password Reset Tab */}
+          <TabsContent value="password-reset">
+            <PasswordResetApprovalPanel />
           </TabsContent>
         </Tabs>
       </main>
