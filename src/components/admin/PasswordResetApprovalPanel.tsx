@@ -37,13 +37,17 @@ import {
   User,
   Calendar,
   MessageSquare,
+  Bell,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { passwordResetService, type PasswordResetRequest } from "@/services/passwordResetService";
 import { toast } from "sonner";
+import { usePasswordResetRealtime } from "@/hooks/usePasswordResetRealtime";
 
 export function PasswordResetApprovalPanel() {
+  // Enable realtime notifications
+  usePasswordResetRealtime();
   const [activeTab, setActiveTab] = useState("pending");
   const [selectedRequest, setSelectedRequest] = useState<PasswordResetRequest | null>(null);
   const [notes, setNotes] = useState("");
@@ -51,12 +55,12 @@ export function PasswordResetApprovalPanel() {
   const queryClient = useQueryClient();
 
   const { data: pendingRequests = [], isLoading: pendingLoading } = useQuery({
-    queryKey: ["password-reset-pending-team"],
+    queryKey: ["password-reset-requests", "pending"],
     queryFn: () => passwordResetService.getPendingTeamRequests(),
   });
 
   const { data: allRequests = [], isLoading: allLoading } = useQuery({
-    queryKey: ["password-reset-all"],
+    queryKey: ["password-reset-requests", "all"],
     queryFn: () => passwordResetService.getAllRequests(),
   });
 
@@ -65,7 +69,7 @@ export function PasswordResetApprovalPanel() {
       passwordResetService.approveRequest(requestId, notes),
     onSuccess: (result) => {
       if (result.success) {
-        queryClient.invalidateQueries({ queryKey: ["password-reset"] });
+        queryClient.invalidateQueries({ queryKey: ["password-reset-requests"] });
         toast.success("Solicitação aprovada!");
         closeDialog();
       } else {
@@ -80,7 +84,7 @@ export function PasswordResetApprovalPanel() {
       passwordResetService.rejectRequest(requestId, notes),
     onSuccess: (result) => {
       if (result.success) {
-        queryClient.invalidateQueries({ queryKey: ["password-reset"] });
+        queryClient.invalidateQueries({ queryKey: ["password-reset-requests"] });
         toast.success("Solicitação rejeitada");
         closeDialog();
       } else {
@@ -215,6 +219,12 @@ export function PasswordResetApprovalPanel() {
           <CardTitle className="flex items-center gap-2">
             <Key className="h-5 w-5 text-primary" />
             Aprovação de Reset de Senha
+            {pendingRequests.length > 0 && (
+              <Badge variant="destructive" className="ml-2 animate-pulse">
+                <Bell className="h-3 w-3 mr-1" />
+                {pendingRequests.length} nova{pendingRequests.length > 1 ? "s" : ""}
+              </Badge>
+            )}
           </CardTitle>
           <CardDescription>
             Gerencie as solicitações de redefinição de senha da sua equipe
