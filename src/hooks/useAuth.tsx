@@ -1,6 +1,7 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useDeviceDetection } from "./useDeviceDetection";
 
 interface AuthContextType {
   user: User | null;
@@ -38,11 +39,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const { registerDevice } = useDeviceDetection();
+
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    
+    // Registrar dispositivo após login bem-sucedido
+    if (!error && data?.user) {
+      registerDevice(data.user.id).catch(console.error);
+    }
+    
     return { error };
   };
 
