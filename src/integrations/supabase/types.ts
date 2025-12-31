@@ -808,6 +808,51 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_ips: {
+        Row: {
+          block_type: string
+          blocked_at: string
+          blocked_by: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          ip_address: unknown
+          is_permanent: boolean
+          metadata: Json | null
+          reason: string
+          updated_at: string
+          violation_count: number
+        }
+        Insert: {
+          block_type?: string
+          blocked_at?: string
+          blocked_by?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          ip_address: unknown
+          is_permanent?: boolean
+          metadata?: Json | null
+          reason: string
+          updated_at?: string
+          violation_count?: number
+        }
+        Update: {
+          block_type?: string
+          blocked_at?: string
+          blocked_by?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_permanent?: boolean
+          metadata?: Json | null
+          reason?: string
+          updated_at?: string
+          violation_count?: number
+        }
+        Relationships: []
+      }
       celebrations: {
         Row: {
           auto_generated: boolean
@@ -3193,6 +3238,36 @@ export type Database = {
           },
         ]
       }
+      login_attempts: {
+        Row: {
+          attempt_type: string
+          created_at: string
+          email: string
+          error_message: string | null
+          id: string
+          ip_address: unknown
+          user_agent: string | null
+        }
+        Insert: {
+          attempt_type?: string
+          created_at?: string
+          email: string
+          error_message?: string | null
+          id?: string
+          ip_address: unknown
+          user_agent?: string | null
+        }
+        Update: {
+          attempt_type?: string
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       mentorship_mission_progress: {
         Row: {
           apprentice_completed_at: string | null
@@ -4641,6 +4716,93 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_logs: {
+        Row: {
+          country_code: string | null
+          created_at: string
+          endpoint: string
+          id: string
+          ip_address: unknown
+          method: string
+          request_count: number
+          user_agent: string | null
+          user_id: string | null
+          was_blocked: boolean
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          country_code?: string | null
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip_address: unknown
+          method?: string
+          request_count?: number
+          user_agent?: string | null
+          user_id?: string | null
+          was_blocked?: boolean
+          window_end?: string
+          window_start?: string
+        }
+        Update: {
+          country_code?: string | null
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip_address?: unknown
+          method?: string
+          request_count?: number
+          user_agent?: string | null
+          user_id?: string | null
+          was_blocked?: boolean
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      rate_limit_rules: {
+        Row: {
+          applies_to_anonymous: boolean
+          applies_to_authenticated: boolean
+          block_duration_minutes: number
+          created_at: string
+          endpoint_pattern: string
+          id: string
+          is_active: boolean
+          name: string
+          requests_per_hour: number
+          requests_per_minute: number
+          updated_at: string
+        }
+        Insert: {
+          applies_to_anonymous?: boolean
+          applies_to_authenticated?: boolean
+          block_duration_minutes?: number
+          created_at?: string
+          endpoint_pattern: string
+          id?: string
+          is_active?: boolean
+          name: string
+          requests_per_hour?: number
+          requests_per_minute?: number
+          updated_at?: string
+        }
+        Update: {
+          applies_to_anonymous?: boolean
+          applies_to_authenticated?: boolean
+          block_duration_minutes?: number
+          created_at?: string
+          endpoint_pattern?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          requests_per_hour?: number
+          requests_per_minute?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           created_at: string
@@ -4805,6 +4967,108 @@ export type Database = {
           title?: string
           updated_at?: string
           xp_multiplier?: number
+        }
+        Relationships: []
+      }
+      security_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string | null
+          id: string
+          ip_address: unknown
+          is_resolved: boolean
+          metadata: Json | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: unknown
+          is_resolved?: boolean
+          metadata?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: unknown
+          is_resolved?: boolean
+          metadata?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      session_logs: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          id: string
+          ip_address: unknown
+          is_active: boolean
+          last_activity_at: string
+          login_at: string
+          logout_at: string | null
+          os: string | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: unknown
+          is_active?: boolean
+          last_activity_at?: string
+          login_at?: string
+          logout_at?: string | null
+          os?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: unknown
+          is_active?: boolean
+          last_activity_at?: string
+          login_at?: string
+          logout_at?: string | null
+          os?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -6031,7 +6295,20 @@ export type Database = {
         Args: { p_notes?: string; p_request_id: string }
         Returns: Json
       }
+      auto_block_ip: {
+        Args: {
+          p_block_type?: string
+          p_duration_minutes?: number
+          p_ip_address: unknown
+          p_reason: string
+        }
+        Returns: string
+      }
       calculate_enps_score: { Args: { p_survey_id: string }; Returns: number }
+      cleanup_old_security_logs: {
+        Args: { p_days_to_keep?: number }
+        Returns: Json
+      }
       complete_external_task: {
         Args: {
           p_external_id: string
@@ -6074,6 +6351,7 @@ export type Database = {
           total_answers: number
         }[]
       }
+      get_security_stats: { Args: { p_hours?: number }; Returns: Json }
       get_user_stats_api: { Args: { p_user_email: string }; Returns: Json }
       has_role: {
         Args: {
@@ -6086,6 +6364,7 @@ export type Database = {
         Args: { _department_id: string; _user_id: string }
         Returns: boolean
       }
+      is_ip_blocked: { Args: { p_ip_address: unknown }; Returns: boolean }
       is_ip_whitelisted: { Args: { p_ip_address: unknown }; Returns: boolean }
       log_ip_access: {
         Args: {
@@ -6095,6 +6374,16 @@ export type Database = {
           p_user_agent: string
           p_user_id: string
           p_was_allowed: boolean
+        }
+        Returns: string
+      }
+      log_login_attempt: {
+        Args: {
+          p_attempt_type?: string
+          p_email: string
+          p_error_message?: string
+          p_ip_address: unknown
+          p_user_agent: string
         }
         Returns: string
       }
