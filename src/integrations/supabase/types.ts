@@ -6203,6 +6203,78 @@ export type Database = {
         }
         Relationships: []
       }
+      webauthn_challenges: {
+        Row: {
+          challenge: string
+          created_at: string
+          expires_at: string
+          id: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          challenge: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          challenge?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      webauthn_credentials: {
+        Row: {
+          aaguid: string | null
+          counter: number
+          created_at: string
+          credential_id: string
+          device_name: string | null
+          device_type: string | null
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          public_key: string
+          transports: string[] | null
+          user_id: string
+        }
+        Insert: {
+          aaguid?: string | null
+          counter?: number
+          created_at?: string
+          credential_id: string
+          device_name?: string | null
+          device_type?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          public_key: string
+          transports?: string[] | null
+          user_id: string
+        }
+        Update: {
+          aaguid?: string | null
+          counter?: number
+          created_at?: string
+          credential_id?: string
+          device_name?: string | null
+          device_type?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          public_key?: string
+          transports?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       webhook_delivery_logs: {
         Row: {
           attempt_count: number
@@ -6397,6 +6469,7 @@ export type Database = {
         Returns: string
       }
       calculate_enps_score: { Args: { p_survey_id: string }; Returns: number }
+      cleanup_expired_challenges: { Args: never; Returns: undefined }
       cleanup_old_security_logs: {
         Args: { p_days_to_keep?: number }
         Returns: Json
@@ -6431,6 +6504,13 @@ export type Database = {
       get_nine_box_distribution: {
         Args: { p_department_id?: string; p_period?: string }
         Returns: Json
+      }
+      get_passkeys_by_email: {
+        Args: { p_email: string }
+        Returns: {
+          credential_id: string
+          user_id: string
+        }[]
       }
       get_quiz_category_stats: {
         Args: never
@@ -6501,6 +6581,7 @@ export type Database = {
       }
       request_password_reset: { Args: { p_user_id: string }; Returns: string }
       update_certification_statuses: { Args: never; Returns: undefined }
+      user_has_passkeys: { Args: { p_user_id: string }; Returns: boolean }
       validate_api_key: {
         Args: { p_api_key: string; p_api_secret: string }
         Returns: {

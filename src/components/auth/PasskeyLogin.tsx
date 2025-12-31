@@ -1,0 +1,87 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { webauthnService, isWebAuthnSupported } from "@/services/webauthnService";
+import { supabase } from "@/integrations/supabase/client";
+import { Fingerprint, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+interface PasskeyLoginProps {
+  onSuccess: () => void;
+  defaultEmail?: string;
+}
+
+export function PasskeyLogin({ onSuccess, defaultEmail = "" }: PasskeyLoginProps) {
+  const [email, setEmail] = useState(defaultEmail);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showEmailInput, setShowEmailInput] = useState(!defaultEmail);
+
+  const handlePasskeyLogin = async () => {
+    if (!isWebAuthnSupported()) {
+      toast.error("Seu navegador não suporta login com passkey");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await webauthnService.authenticate(email || undefined);
+      
+      if (!result.success) {
+        toast.error(result.error || "Falha na autenticação");
+        return;
+      }
+
+      if (!result.userId) {
+        toast.error("Usuário não encontrado");
+        return;
+      }
+
+      // Criar sessão usando função administrativa ou token customizado
+      // Por enquanto, vamos apenas notificar sucesso e deixar o backend lidar
+      toast.success("Autenticação biométrica bem-sucedida!");
+      onSuccess();
+      
+    } catch (error: any) {
+      console.error("Erro no login com passkey:", error);
+      toast.error(error.message || "Erro ao fazer login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!isWebAuthnSupported()) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-3">
+      {showEmailInput && (
+        <Input
+          type="email"
+          placeholder="seu@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={isLoading}
+        />
+      )}
+      
+      <Button
+        variant="outline"
+        className="w-full gap-2"
+        onClick={handlePasskeyLogin}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Fingerprint className="h-4 w-4" />
+        )}
+        {isLoading ? "Autenticando..." : "Entrar com Passkey"}
+      </Button>
+      
+      <p className="text-xs text-center text-muted-foreground">
+        Use sua impressão digital, Face ID ou chave de segurança
+      </p>
+    </div>
+  );
+}
