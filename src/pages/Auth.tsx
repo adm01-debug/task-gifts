@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Gift, Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight, ArrowLeft, Clock, CheckCircle, ShieldX, Globe, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -528,13 +528,12 @@ const Auth = () => {
 
         {view === "login" && (
           <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setView("forgot-password")}
+            <Link
+              to="/forgot-password"
               className="text-sm text-primary hover:text-primary/80 transition-colors"
             >
               Esqueceu sua senha?
-            </button>
+            </Link>
           </div>
         )}
 

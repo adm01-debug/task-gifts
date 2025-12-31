@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flame, Zap, Gift, Settings, Home, Medal, Target, Trophy, TrendingUp, Clock, BookOpen, Gamepad2, ShoppingBag, MessageSquare, Swords, Heart, Award, ClipboardCheck, BarChart3, Megaphone, Globe } from "lucide-react";
+import { Flame, Zap, Gift, Settings, Home, Medal, Target, Trophy, TrendingUp, Clock, BookOpen, Gamepad2, ShoppingBag, MessageSquare, Swords, Heart, Award, ClipboardCheck, BarChart3, Megaphone, Globe, Shield } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -234,8 +234,17 @@ export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
         </motion.div>
       )}
 
-      {/* Settings */}
-      <div className="p-2 border-t border-sidebar-border">
+      {/* Admin Links */}
+      <div className="p-2 border-t border-sidebar-border space-y-1">
+        <motion.button
+          whileHover={{ x: 4 }}
+          onClick={() => navigate("/security")}
+          aria-label="Segurança"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors"
+        >
+          <Shield className="w-5 h-5" />
+          {!collapsed && <span className="font-medium text-sm">Segurança</span>}
+        </motion.button>
         <motion.button
           whileHover={{ x: 4 }}
           onClick={handleNavigateToProfile}

@@ -54,6 +54,11 @@ const Surveys = lazy(() => import("./pages/Surveys"));
 const Feedback = lazy(() => import("./pages/Feedback"));
 const Announcements = lazy(() => import("./pages/Announcements"));
 
+// Security pages
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const RateLimitDashboard = lazy(() => import("./pages/RateLimitDashboard"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -81,8 +86,10 @@ function MobileGlobalComponents() {
   const isMobile = useIsMobile();
   const location = useLocation();
   
-  // Don't show bottom nav on auth page
-  const hideBottomNav = location.pathname === "/auth";
+  // Don't show bottom nav on auth pages
+  const hideBottomNav = location.pathname === "/auth" || 
+                        location.pathname === "/forgot-password" || 
+                        location.pathname === "/reset-password";
   
   if (!isMobile) return null;
   
@@ -115,6 +122,9 @@ const App = () => (
                       <Routes>
                         <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                         <Route path="/auth" element={<Auth />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/security" element={<ProtectedRoute requiredRole="admin"><RateLimitDashboard /></ProtectedRoute>} />
                         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                         <Route path="/manager" element={<ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>} />
                         <Route path="/quest-builder" element={<ProtectedRoute requiredRole="manager"><QuestBuilder /></ProtectedRoute>} />
