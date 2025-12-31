@@ -35,3 +35,9 @@ verify_jwt = true
 
 [functions.verify-ip]
 verify_jwt = false
+
+[functions.cleanup-rate-limit-logs]
+verify_jwt = true
+
+[functions.send-rate-limit-alert]
+verify_jwt = false

@@ -4,3 +4,4 @@ export { SecurityAlertsPanel } from "./SecurityAlertsPanel";
 export { RateLimitRulesPanel } from "./RateLimitRulesPanel";
 export { LoginAttemptsPanel } from "./LoginAttemptsPanel";
 export { SessionsPanel } from "./SessionsPanel";
+export { ReauthProvider, useReauth } from "./ReauthProvider";
