@@ -7,3 +7,4 @@ export { SessionsPanel } from "./SessionsPanel";
 export { DevicesPanel } from "./DevicesPanel";
 export { ReauthProvider, useReauth } from "./ReauthProvider";
 export { SecurityNotificationsToggle } from "./SecurityNotificationsToggle";
+export { PasskeysPanel } from "./PasskeysPanel";

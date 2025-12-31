@@ -23,8 +23,10 @@ import { LoginAttemptsPanel } from "@/components/security/LoginAttemptsPanel";
 import { SessionsPanel } from "@/components/security/SessionsPanel";
 import { DevicesPanel } from "@/components/security/DevicesPanel";
 import { SecurityNotificationsToggle } from "@/components/security/SecurityNotificationsToggle";
+import { PasskeysPanel } from "@/components/security/PasskeysPanel";
 import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
 import { useTwoFactor } from "@/hooks/useTwoFactor";
+import { useWebAuthn } from "@/hooks/useWebAuthn";
 import { useAuth } from "@/hooks/useAuth";
 import { useSecurityPushNotifications } from "@/hooks/useSecurityPushNotifications";
 
@@ -53,6 +55,7 @@ export default function SecurityDashboard() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { isEnabled: is2FAEnabled, isLoading: is2FALoading } = useTwoFactor();
+  const { hasPasskeys, isLoading: passkeysLoading } = useWebAuthn();
   const [activeTab, setActiveTab] = useState("overview");
   
   // Initialize security push notifications listener
@@ -119,10 +122,13 @@ export default function SecurityDashboard() {
 
   // Calculate security score
   const calculateSecurityScore = () => {
-    let score = 50; // Base score
+    let score = 40; // Base score
     
-    // MFA enabled adds 25 points
-    if (is2FAEnabled) score += 25;
+    // MFA enabled adds 20 points
+    if (is2FAEnabled) score += 20;
+    
+    // Passkeys enabled adds 15 points
+    if (hasPasskeys) score += 15;
     
     // Trusted devices add up to 15 points
     const trustedDevices = devices?.filter(d => d.is_trusted)?.length || 0;
@@ -176,10 +182,15 @@ export default function SecurityDashboard() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
               Visão Geral
+            </TabsTrigger>
+            <TabsTrigger value="passkeys" className="flex items-center gap-2">
+              <Fingerprint className="w-4 h-4" />
+              Passkeys
+              {hasPasskeys && <CheckCircle className="w-3 h-3 text-green-500" />}
             </TabsTrigger>
             <TabsTrigger value="mfa" className="flex items-center gap-2">
               <Key className="w-4 h-4" />
@@ -359,6 +370,21 @@ export default function SecurityDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
+                  {!hasPasskeys && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                      <Fingerprint className="w-5 h-5 text-primary" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Configure login biométrico</p>
+                        <p className="text-xs text-muted-foreground">
+                          Use sua impressão digital ou Face ID para fazer login
+                        </p>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => setActiveTab("passkeys")}>
+                        Configurar
+                      </Button>
+                    </div>
+                  )}
+                  
                   {!is2FAEnabled && (
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                       <ShieldAlert className="w-5 h-5 text-yellow-500" />
@@ -404,7 +430,7 @@ export default function SecurityDashboard() {
                     </div>
                   )}
 
-                  {is2FAEnabled && (!devices || devices.filter(d => !d.is_trusted).length === 0) && !stats?.unresolved_alerts && (
+                  {is2FAEnabled && hasPasskeys && (!devices || devices.filter(d => !d.is_trusted).length === 0) && !stats?.unresolved_alerts && (
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
                       <CheckCircle className="w-5 h-5 text-green-500" />
                       <div className="flex-1">
@@ -543,6 +569,11 @@ export default function SecurityDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Passkeys Tab */}
+          <TabsContent value="passkeys" className="space-y-6">
+            <PasskeysPanel />
           </TabsContent>
 
           {/* MFA Tab */}
