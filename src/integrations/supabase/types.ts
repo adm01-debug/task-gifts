@@ -6706,7 +6706,7 @@ export type Database = {
           p_ip_address: unknown
           p_user_agent: string
         }
-        Returns: string
+        Returns: Json
       }
       process_external_task: {
         Args: { p_external_task_id: string }
@@ -6729,6 +6729,7 @@ export type Database = {
         Returns: Json
       }
       request_password_reset: { Args: { p_user_id: string }; Returns: string }
+      reset_login_attempts: { Args: { p_email: string }; Returns: undefined }
       update_certification_statuses: { Args: never; Returns: undefined }
       user_has_passkeys: { Args: { p_user_id: string }; Returns: boolean }
       validate_api_key: {
