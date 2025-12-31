@@ -4882,27 +4882,36 @@ export type Database = {
       }
       roles: {
         Row: {
+          color: string | null
           created_at: string
           description: string | null
+          icon: string | null
           id: string
+          is_active: boolean
           is_system: boolean | null
           key: string
           level: number | null
           name: string
         }
         Insert: {
+          color?: string | null
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
+          is_active?: boolean
           is_system?: boolean | null
           key: string
           level?: number | null
           name: string
         }
         Update: {
+          color?: string | null
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
+          is_active?: boolean
           is_system?: boolean | null
           key?: string
           level?: number | null
