@@ -2708,6 +2708,132 @@ export type Database = {
           },
         ]
       }
+      geo_access_logs: {
+        Row: {
+          country_code: string | null
+          country_name: string | null
+          created_at: string
+          endpoint: string | null
+          id: string
+          ip_address: unknown
+          reason: string | null
+          user_agent: string | null
+          user_id: string | null
+          was_allowed: boolean
+        }
+        Insert: {
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          ip_address: unknown
+          reason?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          was_allowed: boolean
+        }
+        Update: {
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          ip_address?: unknown
+          reason?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          was_allowed?: boolean
+        }
+        Relationships: []
+      }
+      geo_allowed_countries: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      geo_blocking_rules: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_allowed: boolean
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_allowed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_allowed?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      geo_settings: {
+        Row: {
+          block_unknown_countries: boolean
+          id: string
+          is_enabled: boolean
+          log_all_access: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          block_unknown_countries?: boolean
+          id?: string
+          is_enabled?: boolean
+          log_all_access?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          block_unknown_countries?: boolean
+          id?: string
+          is_enabled?: boolean
+          log_all_access?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       goal_updates: {
         Row: {
           created_at: string
@@ -6541,12 +6667,26 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_country_allowed: { Args: { p_country_code: string }; Returns: boolean }
       is_department_manager: {
         Args: { _department_id: string; _user_id: string }
         Returns: boolean
       }
       is_ip_blocked: { Args: { p_ip_address: unknown }; Returns: boolean }
       is_ip_whitelisted: { Args: { p_ip_address: unknown }; Returns: boolean }
+      log_geo_access: {
+        Args: {
+          p_country_code: string
+          p_country_name: string
+          p_endpoint?: string
+          p_ip_address: unknown
+          p_reason: string
+          p_user_agent: string
+          p_user_id: string
+          p_was_allowed: boolean
+        }
+        Returns: string
+      }
       log_ip_access: {
         Args: {
           p_endpoint: string
