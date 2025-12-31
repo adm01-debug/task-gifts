@@ -22,9 +22,11 @@ import { RateLimitRulesPanel } from "@/components/security/RateLimitRulesPanel";
 import { LoginAttemptsPanel } from "@/components/security/LoginAttemptsPanel";
 import { SessionsPanel } from "@/components/security/SessionsPanel";
 import { DevicesPanel } from "@/components/security/DevicesPanel";
+import { SecurityNotificationsToggle } from "@/components/security/SecurityNotificationsToggle";
 import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
 import { useTwoFactor } from "@/hooks/useTwoFactor";
 import { useAuth } from "@/hooks/useAuth";
+import { useSecurityPushNotifications } from "@/hooks/useSecurityPushNotifications";
 
 interface SecurityStats {
   rate_limit_violations: number;
@@ -52,6 +54,9 @@ export default function SecurityDashboard() {
   const { user } = useAuth();
   const { isEnabled: is2FAEnabled, isLoading: is2FALoading } = useTwoFactor();
   const [activeTab, setActiveTab] = useState("overview");
+  
+  // Initialize security push notifications listener
+  useSecurityPushNotifications();
 
   // Fetch security stats
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery({
@@ -541,8 +546,9 @@ export default function SecurityDashboard() {
           </TabsContent>
 
           {/* MFA Tab */}
-          <TabsContent value="mfa">
+          <TabsContent value="mfa" className="space-y-6">
             <TwoFactorSetup />
+            <SecurityNotificationsToggle />
           </TabsContent>
 
           {/* Devices Tab */}
