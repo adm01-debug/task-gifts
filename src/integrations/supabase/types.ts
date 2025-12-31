@@ -3793,6 +3793,54 @@ export type Database = {
         }
         Relationships: []
       }
+      password_reset_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          requested_at: string
+          reset_token: string | null
+          reset_token_expires_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          requested_at?: string
+          reset_token?: string | null
+          reset_token_expires_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          requested_at?: string
+          reset_token?: string | null
+          reset_token_expires_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pdi_checkins: {
         Row: {
           blockers: string | null
@@ -5946,6 +5994,10 @@ export type Database = {
         }
         Returns: string
       }
+      approve_password_reset: {
+        Args: { p_notes?: string; p_request_id: string }
+        Returns: Json
+      }
       calculate_enps_score: { Args: { p_survey_id: string }; Returns: number }
       complete_external_task: {
         Args: {
@@ -6017,6 +6069,11 @@ export type Database = {
         Args: { p_external_task_id: string }
         Returns: Json
       }
+      reject_password_reset: {
+        Args: { p_notes?: string; p_request_id: string }
+        Returns: Json
+      }
+      request_password_reset: { Args: { p_user_id: string }; Returns: string }
       update_certification_statuses: { Args: never; Returns: undefined }
       validate_api_key: {
         Args: { p_api_key: string; p_api_secret: string }

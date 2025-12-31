@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Gift, Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight, ArrowLeft } from "lucide-react";
+import { Gift, Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight, ArrowLeft, Clock, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { passwordResetService } from "@/services/passwordResetService";
 import { 
   emailSchema, 
   passwordSchema, 
@@ -85,18 +86,33 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth`,
-      });
+      // Primeiro, verificar se o usuário existe e obter o ID
+      const { data: userData, error: userError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .single();
 
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
-        setView("login");
+      if (userError || !userData) {
+        toast.error("Email não encontrado no sistema");
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      toast.error("Erro ao enviar email. Tente novamente.");
+
+      // Solicitar reset com aprovação do gestor
+      await passwordResetService.requestPasswordReset();
+      
+      toast.success(
+        "Solicitação enviada! Aguarde a aprovação do seu gestor para redefinir a senha.",
+        { duration: 6000 }
+      );
+      setView("login");
+    } catch (err: any) {
+      if (err.message?.includes("pendente")) {
+        toast.info("Você já possui uma solicitação pendente. Aguarde a aprovação do seu gestor.");
+      } else {
+        toast.error("Erro ao solicitar reset de senha. Tente novamente.");
+      }
     } finally {
       setLoading(false);
     }
@@ -168,9 +184,12 @@ const Auth = () => {
           </button>
 
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold mb-2">Esqueceu sua senha?</h3>
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <Clock className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Redefinir senha</h3>
             <p className="text-sm text-muted-foreground">
-              Digite seu email e enviaremos um link para redefinir sua senha.
+              Por segurança, a redefinição de senha requer aprovação do seu gestor.
             </p>
           </div>
 
@@ -212,7 +231,7 @@ const Auth = () => {
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  Enviar link de recuperação
+                  Solicitar redefinição
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
