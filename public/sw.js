@@ -142,6 +142,13 @@ self.addEventListener('notificationclick', (event) => {
     case 'churn_alert':
       url = '/manager';
       break;
+    // Security notifications
+    case 'security_alert':
+    case 'new_device':
+    case 'ip_blocked':
+    case 'failed_login':
+      url = notificationData.url || '/security';
+      break;
     default:
       url = notificationData.url || '/';
   }
