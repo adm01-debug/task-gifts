@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Gift, Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight, ArrowLeft, Clock, CheckCircle, ShieldX, Globe, AlertTriangle, RefreshCw } from "lucide-react";
+import { useLoginLockout } from "@/hooks/useLoginLockout";
+import { Gift, Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight, ArrowLeft, Clock, CheckCircle, ShieldX, Globe, AlertTriangle, RefreshCw, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +12,7 @@ import { passwordResetService } from "@/services/passwordResetService";
 import { twoFactorService } from "@/services/twoFactorService";
 import { TwoFactorVerify } from "@/components/auth/TwoFactorVerify";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   emailSchema, 
   passwordSchema, 
@@ -45,6 +47,17 @@ const Auth = () => {
 
   const { signIn, signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  
+  // Login lockout hook
+  const { 
+    isLocked, 
+    failedAttempts, 
+    remainingTime,
+    checkLockout, 
+    logFailedAttempt, 
+    resetAttempts,
+    formatRemainingTime 
+  } = useLoginLockout(email);
 
   // Check IP access on mount
   const checkIpAccess = async () => {
@@ -256,6 +269,16 @@ const Auth = () => {
 
     if (!validateForm()) return;
 
+    // Check lockout before attempting login
+    if (view === "login") {
+      const lockoutStatus = await checkLockout();
+      if (lockoutStatus?.is_locked) {
+        const minutes = Math.ceil(lockoutStatus.remaining_seconds / 60);
+        toast.error(`Conta temporariamente bloqueada. Tente novamente em ${minutes} minuto(s).`);
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -266,12 +289,25 @@ const Auth = () => {
         });
         
         if (error) {
+          // Log failed attempt
+          const lockoutResult = await logFailedAttempt(error.message);
+          
           if (error.message.includes("Invalid login credentials")) {
-            toast.error("Email ou senha incorretos");
+            if (lockoutResult?.is_locked) {
+              const minutes = Math.ceil(lockoutResult.remaining_seconds / 60);
+              toast.error(`Conta bloqueada por ${minutes} minuto(s) após ${lockoutResult.failed_attempts} tentativas.`);
+            } else if (lockoutResult && lockoutResult.failed_attempts >= 3) {
+              toast.error(`Email ou senha incorretos. ${5 - lockoutResult.failed_attempts} tentativa(s) restante(s).`);
+            } else {
+              toast.error("Email ou senha incorretos");
+            }
           } else {
             toast.error(error.message);
           }
         } else if (data.user) {
+          // Reset failed attempts on successful login
+          await resetAttempts();
+          
           // Check if 2FA is enabled
           const is2FAEnabled = await twoFactorService.isTwoFactorEnabled(data.user.id);
           
@@ -537,14 +573,54 @@ const Auth = () => {
           </div>
         )}
 
+        {/* Lockout warning */}
+        {view === "login" && isLocked && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+              <Timer className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>
+                  Conta bloqueada após {failedAttempts} tentativas.
+                </span>
+                <span className="font-mono font-bold text-lg">
+                  {formatRemainingTime()}
+                </span>
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+
+        {/* Warning for approaching lockout */}
+        {view === "login" && !isLocked && failedAttempts >= 3 && failedAttempts < 5 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Alert className="border-amber-500/50 bg-amber-500/10">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <AlertDescription className="text-amber-600 dark:text-amber-400">
+                Atenção: {5 - failedAttempts} tentativa(s) restante(s) antes do bloqueio temporário.
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || (view === "login" && isLocked)}
           className="w-full h-12 text-base"
           variant="hero"
         >
           {loading ? (
             <Loader2 className="w-5 h-5 animate-spin" />
+          ) : isLocked && view === "login" ? (
+            <>
+              <Timer className="w-5 h-5 mr-2" />
+              Aguarde {formatRemainingTime()}
+            </>
           ) : (
             <>
               {view === "login" ? "Entrar" : "Criar conta"}
