@@ -59,6 +59,7 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const RateLimitDashboard = lazy(() => import("./pages/RateLimitDashboard"));
 const SecurityDashboard = lazy(() => import("./pages/SecurityDashboard"));
+const PermissionsAdmin = lazy(() => import("./pages/PermissionsAdmin"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -155,6 +156,7 @@ const App = () => (
                         <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
                         <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
                         <Route path="/security" element={<ProtectedRoute><SecurityDashboard /></ProtectedRoute>} />
+                        <Route path="/admin/permissions" element={<ProtectedRoute requiredRole="admin"><PermissionsAdmin /></ProtectedRoute>} />
                         <Route
                           path="/loja/admin"
                           element={

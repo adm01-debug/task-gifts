@@ -16,8 +16,11 @@ export interface Role {
   key: string;
   name: string;
   description?: string;
+  color?: string;
+  icon?: string;
   level: number;
   is_system: boolean;
+  is_active: boolean;
 }
 
 export interface RolePermission {
