@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -24,6 +24,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
@@ -61,9 +62,16 @@ serve(async (req) => {
     
     console.log(`Device registration result:`, data);
     
-    // If new device, log security event
+    // If new device, send email notification and log security event
     if (data?.is_new_device) {
       console.log(`New device detected for user ${userId}: ${browser} on ${os}`);
+      
+      // Get user email
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email, display_name")
+        .eq("id", userId)
+        .single();
       
       // Insert security alert
       await supabase.from("security_alerts").insert({
@@ -81,6 +89,94 @@ serve(async (req) => {
           fingerprint: fingerprint.substring(0, 8) + "..."
         }
       });
+      
+      // Send email notification via Resend API
+      if (resendApiKey && profile?.email) {
+        try {
+          const currentDate = new Date().toLocaleString("pt-BR", {
+            timeZone: "America/Sao_Paulo"
+          });
+          
+          const emailHtml = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px;">🔐 Alerta de Segurança</h1>
+              </div>
+              
+              <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; border-top: none;">
+                <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+                  Olá <strong>${profile.display_name || "usuário"}</strong>,
+                </p>
+                
+                <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+                  Detectamos um login na sua conta a partir de um novo dispositivo:
+                </p>
+                
+                <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 20px;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Navegador:</td>
+                      <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 500;">${browser || "Desconhecido"}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Sistema:</td>
+                      <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 500;">${os || "Desconhecido"}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Endereço IP:</td>
+                      <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 500;">${ipAddress}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Data/Hora:</td>
+                      <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 500;">${currentDate}</td>
+                    </tr>
+                  </table>
+                </div>
+                
+                <p style="font-size: 14px; color: #6b7280; margin-bottom: 20px;">
+                  Se foi você quem fez este login, pode ignorar este email. 
+                  Caso não reconheça esta atividade, recomendamos que altere sua senha imediatamente.
+                </p>
+                
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px;">
+                  <p style="margin: 0; color: #92400e; font-size: 14px;">
+                    <strong>⚠️ Dica de segurança:</strong> Nunca compartilhe sua senha com terceiros e 
+                    ative a autenticação de dois fatores para maior proteção.
+                  </p>
+                </div>
+              </div>
+              
+              <p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 20px;">
+                Este é um email automático do sistema Task Gifts. Por favor, não responda.
+              </p>
+            </div>
+          `;
+          
+          const emailResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${resendApiKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              from: "Task Gifts <onboarding@resend.dev>",
+              to: [profile.email],
+              subject: "🔐 Novo dispositivo detectado na sua conta",
+              html: emailHtml
+            })
+          });
+          
+          if (emailResponse.ok) {
+            console.log(`Email notification sent to ${profile.email}`);
+          } else {
+            const errorData = await emailResponse.text();
+            console.error("Resend API error:", errorData);
+          }
+        } catch (emailError) {
+          console.error("Error sending email notification:", emailError);
+          // Don't throw - email is optional
+        }
+      }
     }
     
     return new Response(
