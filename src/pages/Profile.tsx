@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, Trophy, Zap, Flame, Star, Target, Users, Calendar,
-  Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart, Wand2, GraduationCap
+  Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart, Wand2, GraduationCap, Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecentAuditLogs } from "@/hooks/useAudit";
@@ -21,6 +21,7 @@ import { ProfileAvatarSection } from "@/components/ProfileAvatarSection";
 import { SoundSettingsCard } from "@/components/SoundSettingsCard";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
 import { MyNineBoxWidget } from "@/components/MyNineBoxWidget";
 import { MyDevelopmentPlanWidget } from "@/components/MyDevelopmentPlanWidget";
 import { useAvatarConfig } from "@/hooks/useAvatar";
@@ -510,6 +511,17 @@ const Profile = () => {
             <ProfileKudosSection userId={user.id} />
           </SectionErrorBoundary>
         )}
+
+        {/* Security Settings - 2FA */}
+        <SectionErrorBoundary sectionName="Segurança">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <TwoFactorSetup />
+          </motion.div>
+        </SectionErrorBoundary>
 
         {/* Activity Timeline */}
         <SectionErrorBoundary sectionName="Linha do Tempo">

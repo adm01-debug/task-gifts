@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { passwordResetService } from "@/services/passwordResetService";
+import { twoFactorService } from "@/services/twoFactorService";
+import { TwoFactorVerify } from "@/components/auth/TwoFactorVerify";
 import { 
   emailSchema, 
   passwordSchema, 
@@ -15,7 +17,7 @@ import {
   signupSchema 
 } from "@/lib/authValidations";
 
-type AuthView = "login" | "signup" | "forgot-password";
+type AuthView = "login" | "signup" | "forgot-password" | "2fa-verify";
 
 const Auth = () => {
   const [view, setView] = useState<AuthView>("login");
@@ -25,6 +27,8 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; displayName?: string }>({});
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [verifying2FA, setVerifying2FA] = useState(false);
 
   const { signIn, signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -132,16 +136,30 @@ const Auth = () => {
 
     try {
       if (view === "login") {
-        const { error } = await signIn(email, password);
+        const { error, data } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
         if (error) {
           if (error.message.includes("Invalid login credentials")) {
             toast.error("Email ou senha incorretos");
           } else {
             toast.error(error.message);
           }
-        } else {
-          toast.success("Bem-vindo de volta! 🎮");
-          navigate("/");
+        } else if (data.user) {
+          // Check if 2FA is enabled
+          const is2FAEnabled = await twoFactorService.isTwoFactorEnabled(data.user.id);
+          
+          if (is2FAEnabled) {
+            // Sign out and require 2FA
+            await supabase.auth.signOut();
+            setPendingUserId(data.user.id);
+            setView("2fa-verify");
+          } else {
+            toast.success("Bem-vindo de volta! 🎮");
+            navigate("/");
+          }
         }
       } else {
         const { error } = await signUp(email, password, displayName || undefined);
@@ -163,7 +181,58 @@ const Auth = () => {
     }
   };
 
+  const handle2FAVerify = async (code: string): Promise<boolean> => {
+    if (!pendingUserId) return false;
+    
+    setVerifying2FA(true);
+    try {
+      const isValid = await twoFactorService.verifyToken(pendingUserId, code);
+      
+      if (isValid) {
+        // Now sign in properly
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast.error("Erro ao finalizar login");
+          return false;
+        }
+        toast.success("Bem-vindo de volta! 🎮");
+        navigate("/");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("2FA verification error:", error);
+      return false;
+    } finally {
+      setVerifying2FA(false);
+    }
+  };
+
+  const handleCancel2FA = () => {
+    setPendingUserId(null);
+    setView("login");
+    setPassword("");
+  };
+
   const renderFormContent = () => {
+    if (view === "2fa-verify") {
+      return (
+        <motion.div
+          key="2fa-verify"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.2 }}
+        >
+          <TwoFactorVerify
+            onVerify={handle2FAVerify}
+            onCancel={handleCancel2FA}
+            isLoading={verifying2FA}
+          />
+        </motion.div>
+      );
+    }
+
     if (view === "forgot-password") {
       return (
         <motion.div
