@@ -65,6 +65,7 @@ import { DevelopmentPlanManager } from "@/components/admin/DevelopmentPlanManage
 import { ENPSDashboard } from "@/components/admin/ENPSDashboard";
 import { PDIAlertsPanel } from "@/components/admin/PDIAlertsPanel";
 import { IpWhitelistManager } from "@/components/admin/IpWhitelistManager";
+import { RBACDashboard } from "@/components/rbac";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
@@ -322,6 +323,10 @@ function AdminPanelContent() {
               <Globe className="h-4 w-4" />
               IP Whitelist
             </TabsTrigger>
+            <TabsTrigger value="rbac" className="gap-2">
+              <Shield className="h-4 w-4" />
+              RBAC
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -508,6 +513,11 @@ function AdminPanelContent() {
           {/* IP Whitelist Tab */}
           <TabsContent value="ip-whitelist">
             <IpWhitelistManager />
+          </TabsContent>
+
+          {/* RBAC Tab */}
+          <TabsContent value="rbac">
+            <RBACDashboard />
           </TabsContent>
         </Tabs>
       </main>
