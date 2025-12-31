@@ -3510,6 +3510,47 @@ export type Database = {
         }
         Relationships: []
       }
+      new_device_alerts: {
+        Row: {
+          created_at: string
+          device_id: string | null
+          id: string
+          ip_address: unknown
+          is_acknowledged: boolean | null
+          is_read: boolean | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          ip_address?: unknown
+          is_acknowledged?: boolean | null
+          is_read?: boolean | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          ip_address?: unknown
+          is_acknowledged?: boolean | null
+          is_read?: boolean | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "new_device_alerts_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "user_devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nine_box_evaluations: {
         Row: {
           box_position: number | null
@@ -5823,6 +5864,57 @@ export type Database = {
           },
         ]
       }
+      user_devices: {
+        Row: {
+          browser: string | null
+          created_at: string
+          device_fingerprint: string
+          device_type: string | null
+          first_seen_at: string
+          id: string
+          ip_address: unknown
+          is_trusted: boolean | null
+          last_seen_at: string
+          location_city: string | null
+          location_country: string | null
+          os: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          browser?: string | null
+          created_at?: string
+          device_fingerprint: string
+          device_type?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_address?: unknown
+          is_trusted?: boolean | null
+          last_seen_at?: string
+          location_city?: string | null
+          location_country?: string | null
+          os?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          browser?: string | null
+          created_at?: string
+          device_fingerprint?: string
+          device_type?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_address?: unknown
+          is_trusted?: boolean | null
+          last_seen_at?: string
+          location_city?: string | null
+          location_country?: string | null
+          os?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_leagues: {
         Row: {
           created_at: string
@@ -6389,6 +6481,18 @@ export type Database = {
       }
       process_external_task: {
         Args: { p_external_task_id: string }
+        Returns: Json
+      }
+      register_device: {
+        Args: {
+          p_browser?: string
+          p_device_type?: string
+          p_fingerprint: string
+          p_ip_address: unknown
+          p_os?: string
+          p_user_agent: string
+          p_user_id: string
+        }
         Returns: Json
       }
       reject_password_reset: {
