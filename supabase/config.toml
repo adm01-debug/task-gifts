@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.send-email-notifications]
 verify_jwt = true
+
+[functions.verify-geo]
+verify_jwt = false
