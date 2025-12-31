@@ -43,17 +43,78 @@ export function getPasswordStrength(password: string): {
   score: number;
   label: string;
   color: string;
+  checks: {
+    minLength: boolean;
+    hasUppercase: boolean;
+    hasLowercase: boolean;
+    hasNumber: boolean;
+    hasSpecial: boolean;
+    hasMinLength12: boolean;
+  };
 } {
+  const checks = {
+    minLength: password.length >= 8,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecial: /[^A-Za-z0-9]/.test(password),
+    hasMinLength12: password.length >= 12,
+  };
+  
   let score = 0;
+  if (checks.minLength) score++;
+  if (checks.hasMinLength12) score++;
+  if (checks.hasUppercase) score++;
+  if (checks.hasLowercase) score++;
+  if (checks.hasNumber) score++;
+  if (checks.hasSpecial) score++;
   
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[a-z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-  
-  if (score <= 2) return { score, label: "Fraca", color: "bg-destructive" };
-  if (score <= 4) return { score, label: "Média", color: "bg-yellow-500" };
-  return { score, label: "Forte", color: "bg-green-500" };
+  if (score <= 2) return { score, label: "Fraca", color: "bg-destructive", checks };
+  if (score <= 4) return { score, label: "Média", color: "bg-yellow-500", checks };
+  return { score, label: "Forte", color: "bg-green-500", checks };
+}
+
+// Check if password has been leaked using Have I Been Pwned API (k-anonymity)
+export async function checkPasswordLeaked(password: string): Promise<{
+  isLeaked: boolean;
+  occurrences: number;
+}> {
+  try {
+    // Create SHA-1 hash of the password
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    
+    // Use k-anonymity: only send first 5 characters of hash
+    const prefix = hashHex.substring(0, 5);
+    const suffix = hashHex.substring(5);
+    
+    const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+      headers: {
+        'Add-Padding': 'true', // Extra security
+      },
+    });
+    
+    if (!response.ok) {
+      console.error('HIBP API error:', response.status);
+      return { isLeaked: false, occurrences: 0 };
+    }
+    
+    const text = await response.text();
+    const lines = text.split('\n');
+    
+    for (const line of lines) {
+      const [hashSuffix, count] = line.split(':');
+      if (hashSuffix.trim() === suffix) {
+        return { isLeaked: true, occurrences: parseInt(count.trim(), 10) };
+      }
+    }
+    
+    return { isLeaked: false, occurrences: 0 };
+  } catch (error) {
+    console.error('Error checking leaked password:', error);
+    return { isLeaked: false, occurrences: 0 };
+  }
 }
