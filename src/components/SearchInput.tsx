@@ -10,9 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Search, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface SearchInputProps {
+export interface SearchInputProps {
   value?: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+  onSearch?: (value: string) => void;
   placeholder?: string;
   isLoading?: boolean;
   debounceMs?: number;
@@ -24,6 +25,7 @@ interface SearchInputProps {
 export function SearchInput({
   value: externalValue,
   onChange,
+  onSearch,
   placeholder = 'Buscar...',
   isLoading = false,
   debounceMs = 300,
@@ -32,6 +34,9 @@ export function SearchInput({
   autoFocus = false,
 }: SearchInputProps) {
   const [internalValue, setInternalValue] = useState(externalValue ?? '');
+  
+  // Handler unificado
+  const handleChange = onChange ?? onSearch;
 
   // Sincronizar valor externo
   useEffect(() => {
@@ -42,18 +47,20 @@ export function SearchInput({
 
   // Debounce
   useEffect(() => {
+    if (!handleChange) return;
+    
     const timer = setTimeout(() => {
       if (internalValue !== externalValue) {
-        onChange(internalValue);
+        handleChange(internalValue);
       }
     }, debounceMs);
 
     return () => clearTimeout(timer);
-  }, [internalValue, debounceMs, onChange, externalValue]);
+  }, [internalValue, debounceMs, handleChange, externalValue]);
 
   const handleClear = () => {
     setInternalValue('');
-    onChange('');
+    handleChange?.('');
   };
 
   return (

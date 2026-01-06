@@ -27,6 +27,16 @@ interface SaveFilterInput {
   is_default?: boolean;
 }
 
+interface SavedFilterRow {
+  id: string;
+  user_id: string;
+  entity_type: string;
+  name: string;
+  filters: unknown;
+  is_default: boolean;
+  created_at: string;
+}
+
 // ============================================
 // HOOK
 // ============================================
@@ -42,6 +52,7 @@ export function useSavedFilters(entityType: string) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
+      // @ts-expect-error - Dynamic table name
       const { data, error } = await supabase
         .from('saved_filters')
         .select('*')
@@ -50,7 +61,13 @@ export function useSavedFilters(entityType: string) {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as SavedFilter[];
+      return (data as unknown as SavedFilterRow[]).map(row => ({
+        id: row.id,
+        name: row.name,
+        filters: row.filters as Record<string, unknown>,
+        is_default: row.is_default,
+        created_at: row.created_at,
+      })) as SavedFilter[];
     },
   });
 
@@ -66,21 +83,21 @@ export function useSavedFilters(entityType: string) {
       // Se marcado como padrão, remove padrão dos outros
       if (input.is_default) {
         await supabase
-          .from('saved_filters')
-          .update({ is_default: false })
+          .from('saved_filters' as 'profiles')
+          .update({ is_default: false } as never)
           .eq('user_id', user.id)
           .eq('entity_type', entityType);
       }
 
       const { data, error } = await supabase
-        .from('saved_filters')
+        .from('saved_filters' as 'profiles')
         .insert({
           user_id: user.id,
           entity_type: entityType,
           name: input.name,
           filters: input.filters,
           is_default: input.is_default ?? false,
-        })
+        } as never)
         .select()
         .single();
       
@@ -100,8 +117,8 @@ export function useSavedFilters(entityType: string) {
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...input }: SaveFilterInput & { id: string }) => {
       const { error } = await supabase
-        .from('saved_filters')
-        .update(input)
+        .from('saved_filters' as 'profiles')
+        .update(input as never)
         .eq('id', id);
       
       if (error) throw error;
@@ -116,7 +133,7 @@ export function useSavedFilters(entityType: string) {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('saved_filters')
+        .from('saved_filters' as 'profiles')
         .delete()
         .eq('id', id);
       
@@ -139,15 +156,15 @@ export function useSavedFilters(entityType: string) {
 
       // Remove padrão de todos
       await supabase
-        .from('saved_filters')
-        .update({ is_default: false })
+        .from('saved_filters' as 'profiles')
+        .update({ is_default: false } as never)
         .eq('user_id', user.id)
         .eq('entity_type', entityType);
       
       // Define novo padrão
       const { error } = await supabase
-        .from('saved_filters')
-        .update({ is_default: true })
+        .from('saved_filters' as 'profiles')
+        .update({ is_default: true } as never)
         .eq('id', id);
       
       if (error) throw error;

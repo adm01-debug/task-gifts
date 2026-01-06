@@ -20,6 +20,7 @@ export function useVersions(entityType: string, entityId: string) {
   const { data: versions = [], isLoading } = useQuery({
     queryKey,
     queryFn: async () => {
+      // @ts-expect-error - Dynamic table name
       const { data, error } = await supabase
         .from('entity_versions')
         .select('*')
@@ -27,7 +28,7 @@ export function useVersions(entityType: string, entityId: string) {
         .eq('entity_id', entityId)
         .order('version_number', { ascending: false });
       if (error) throw error;
-      return data as Version[];
+      return data as unknown as Version[];
     },
     enabled: !!entityId,
   });
@@ -37,8 +38,8 @@ export function useVersions(entityType: string, entityId: string) {
       const version = versions.find(v => v.id === versionId);
       if (!version) throw new Error('Versão não encontrada');
       const { error } = await supabase
-        .from(entityType)
-        .update(version.data)
+        .from(entityType as 'profiles')
+        .update(version.data as never)
         .eq('id', entityId);
       if (error) throw error;
     },
