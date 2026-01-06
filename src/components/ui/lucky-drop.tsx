@@ -238,3 +238,69 @@ export function useLuckyDrop(probability: number = 0.05) {
   
   return { isOpen, triggerCheck, closeDrop, openDrop: () => setIsOpen(true) };
 }
+
+// Componente de trigger para o dashboard
+export function LuckyDropTrigger() {
+  const { isOpen, closeDrop, openDrop } = useLuckyDrop();
+  
+  const handleClaim = (reward: LuckyDropReward) => {
+    console.log("Reward claimed:", reward);
+    // Aqui você pode integrar com o sistema de gamificação
+  };
+
+  return (
+    <div data-tour="lucky-drop">
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 border border-amber-500/20 p-4 cursor-pointer"
+        onClick={openDrop}
+      >
+        <div className="flex items-center gap-4">
+          <motion.div
+            animate={{ 
+              rotate: [0, -5, 5, -5, 0],
+              scale: [1, 1.05, 1],
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="p-3 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-amber-500/30"
+          >
+            <Gift className="w-6 h-6" />
+          </motion.div>
+          
+          <div className="flex-1">
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
+              Lucky Drop Disponível!
+              <motion.span
+                animate={{ opacity: [1, 0.5, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="text-xs bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full"
+              >
+                NOVO
+              </motion.span>
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Clique para tentar sua sorte! 🎁
+            </p>
+          </div>
+          
+          <motion.div
+            animate={{ x: [0, 5, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <Sparkles className="w-5 h-5 text-amber-500" />
+          </motion.div>
+        </div>
+        
+        {/* Shimmer effect */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+          animate={{ x: ["-100%", "100%"] }}
+          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+        />
+      </motion.div>
+      
+      <LuckyDrop isOpen={isOpen} onClose={closeDrop} onClaim={handleClaim} />
+    </div>
+  );
+}

@@ -30,6 +30,13 @@ export const dashboardTour: Tour = {
       placement: "bottom",
     },
     {
+      id: "micro-quests",
+      target: "[data-tour='micro-quests']",
+      title: "Micro Quests ⚡",
+      content: "Tarefas rápidas de 2-5 minutos! Perfeitas para ganhar XP nos intervalos. Complete várias ao longo do dia!",
+      placement: "right",
+    },
+    {
       id: "missions",
       target: "[data-tour='missions']",
       title: "Missões do Dia",
@@ -42,6 +49,13 @@ export const dashboardTour: Tour = {
       title: "Quests Ativas",
       content: "Quests são desafios maiores com recompensas especiais. Complete-as para subir de nível mais rápido!",
       placement: "right",
+    },
+    {
+      id: "lucky-drops",
+      target: "[data-tour='lucky-drop']",
+      title: "Lucky Drops 🎁",
+      content: "Clique para tentar a sorte! Drops aleatórios podem dar XP, moedas, badges ou multiplicadores. Tente sua sorte!",
+      placement: "bottom",
     },
     {
       id: "leaderboard",
