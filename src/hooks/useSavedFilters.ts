@@ -1,5 +1,5 @@
 /**
- * FINANCE HUB - Hook para Filtros Salvos
+ * Hook para Filtros Salvos
  * 
  * @module hooks/useSavedFilters
  * @description Gerencia filtros salvos por usuário e entidade
@@ -37,6 +37,10 @@ interface SavedFilterRow {
   created_at: string;
 }
 
+// Helper para acessar tabela dinâmica
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getFiltersTable = () => (supabase as any).from('saved_filters');
+
 // ============================================
 // HOOK
 // ============================================
@@ -52,16 +56,14 @@ export function useSavedFilters(entityType: string) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      // @ts-expect-error - Dynamic table name
-      const { data, error } = await supabase
-        .from('saved_filters')
+      const { data, error } = await getFiltersTable()
         .select('*')
         .eq('user_id', user.id)
         .eq('entity_type', entityType)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return (data as unknown as SavedFilterRow[]).map(row => ({
+      return (data as SavedFilterRow[]).map(row => ({
         id: row.id,
         name: row.name,
         filters: row.filters as Record<string, unknown>,
@@ -82,22 +84,20 @@ export function useSavedFilters(entityType: string) {
 
       // Se marcado como padrão, remove padrão dos outros
       if (input.is_default) {
-        await supabase
-          .from('saved_filters' as 'profiles')
-          .update({ is_default: false } as never)
+        await getFiltersTable()
+          .update({ is_default: false })
           .eq('user_id', user.id)
           .eq('entity_type', entityType);
       }
 
-      const { data, error } = await supabase
-        .from('saved_filters' as 'profiles')
+      const { data, error } = await getFiltersTable()
         .insert({
           user_id: user.id,
           entity_type: entityType,
           name: input.name,
           filters: input.filters,
           is_default: input.is_default ?? false,
-        } as never)
+        })
         .select()
         .single();
       
@@ -116,9 +116,8 @@ export function useSavedFilters(entityType: string) {
   // Atualizar filtro
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...input }: SaveFilterInput & { id: string }) => {
-      const { error } = await supabase
-        .from('saved_filters' as 'profiles')
-        .update(input as never)
+      const { error } = await getFiltersTable()
+        .update(input)
         .eq('id', id);
       
       if (error) throw error;
@@ -132,8 +131,7 @@ export function useSavedFilters(entityType: string) {
   // Deletar filtro
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('saved_filters' as 'profiles')
+      const { error } = await getFiltersTable()
         .delete()
         .eq('id', id);
       
@@ -155,16 +153,14 @@ export function useSavedFilters(entityType: string) {
       if (!user) throw new Error('Usuário não autenticado');
 
       // Remove padrão de todos
-      await supabase
-        .from('saved_filters' as 'profiles')
-        .update({ is_default: false } as never)
+      await getFiltersTable()
+        .update({ is_default: false })
         .eq('user_id', user.id)
         .eq('entity_type', entityType);
       
       // Define novo padrão
-      const { error } = await supabase
-        .from('saved_filters' as 'profiles')
-        .update({ is_default: true } as never)
+      const { error } = await getFiltersTable()
+        .update({ is_default: true })
         .eq('id', id);
       
       if (error) throw error;

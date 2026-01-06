@@ -13,6 +13,10 @@ export interface Version {
   change_summary: string | null;
 }
 
+// Helper para acessar tabelas dinâmicas
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getTable = (tableName: string) => (supabase as any).from(tableName);
+
 export function useVersions(entityType: string, entityId: string) {
   const queryClient = useQueryClient();
   const queryKey = ['versions', entityType, entityId];
@@ -20,15 +24,13 @@ export function useVersions(entityType: string, entityId: string) {
   const { data: versions = [], isLoading } = useQuery({
     queryKey,
     queryFn: async () => {
-      // @ts-expect-error - Dynamic table name
-      const { data, error } = await supabase
-        .from('entity_versions')
+      const { data, error } = await getTable('entity_versions')
         .select('*')
         .eq('entity_type', entityType)
         .eq('entity_id', entityId)
         .order('version_number', { ascending: false });
       if (error) throw error;
-      return data as unknown as Version[];
+      return data as Version[];
     },
     enabled: !!entityId,
   });
@@ -37,9 +39,8 @@ export function useVersions(entityType: string, entityId: string) {
     mutationFn: async (versionId: string) => {
       const version = versions.find(v => v.id === versionId);
       if (!version) throw new Error('Versão não encontrada');
-      const { error } = await supabase
-        .from(entityType as 'profiles')
-        .update(version.data as never)
+      const { error } = await getTable(entityType)
+        .update(version.data)
         .eq('id', entityId);
       if (error) throw error;
     },
