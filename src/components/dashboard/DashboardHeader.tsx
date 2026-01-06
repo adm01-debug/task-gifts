@@ -13,6 +13,7 @@ import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { ComboIndicator } from "@/components/ComboIndicator";
 import { RankingBadge } from "@/components/RankingBadge";
+import { MiniStreakTracker } from "@/components/ui/streak-tracker";
 
 // Hooks
 import { useAuth } from "@/hooks/useAuth";
@@ -157,6 +158,7 @@ export const DashboardHeader = memo(function DashboardHeader({
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
+          <MiniStreakTracker streak={7} />
           <GlobalSearch />
           <ThemeToggle />
           <NotificationCenter />
