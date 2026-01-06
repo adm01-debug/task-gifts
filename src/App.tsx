@@ -17,6 +17,7 @@ import { MobileBottomNav, ScrollToTopFAB, NetworkStatusBar } from "@/components/
 import { IpAccessGuard } from "@/components/IpAccessGuard";
 import { AccessibilityProvider, SkipLinks } from "@/components/accessibility";
 import { TourSpotlight, TourLauncher } from "@/components/onboarding";
+import { CommandPalette } from "@/components/CommandPalette";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { lazy, Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
@@ -126,6 +127,7 @@ const App = () => (
                           <SkipLinks />
                           <OfflineIndicator />
                           <KeyboardShortcutsHelp />
+                          <CommandPalette />
                           <TourSpotlight />
                           <TourLauncher />
                           <MobileGlobalComponents />

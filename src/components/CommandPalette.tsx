@@ -1,0 +1,175 @@
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
+import {
+  Home, Target, Trophy, TrendingUp, Clock, BookOpen,
+  Gamepad2, ShoppingBag, Swords, Heart, Award,
+  ClipboardCheck, BarChart3, Megaphone, MessageSquare,
+  User, Settings, Shield, LogOut, Search, Zap, Bell,
+  Moon, Sun, Palette
+} from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
+import { toast } from "sonner";
+
+interface CommandItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  action: () => void;
+  keywords?: string[];
+  category: "navigation" | "actions" | "settings";
+}
+
+export function CommandPalette() {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
+
+  // Toggle with keyboard shortcut
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
+
+  const handleNavigate = useCallback((path: string) => {
+    navigate(path);
+    setOpen(false);
+  }, [navigate]);
+
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    toast.success("Até logo! 👋");
+    navigate("/auth");
+    setOpen(false);
+  }, [signOut, navigate]);
+
+  const handleToggleTheme = useCallback(() => {
+    setTheme(theme === "dark" ? "light" : "dark");
+    toast.success(`Tema ${theme === "dark" ? "claro" : "escuro"} ativado`);
+    setOpen(false);
+  }, [theme, setTheme]);
+
+  const commands: CommandItem[] = useMemo(() => [
+    // Navigation
+    { id: "home", label: "Dashboard", icon: Home, action: () => handleNavigate("/"), keywords: ["início", "home"], category: "navigation" },
+    { id: "stats", label: "Estatísticas", icon: TrendingUp, action: () => handleNavigate("/estatisticas"), keywords: ["stats", "números"], category: "navigation" },
+    { id: "achievements", label: "Conquistas", icon: Trophy, action: () => handleNavigate("/conquistas"), keywords: ["badges", "troféus"], category: "navigation" },
+    { id: "goals", label: "Metas & OKRs", icon: Target, action: () => handleNavigate("/goals"), keywords: ["objetivos", "okr"], category: "navigation" },
+    { id: "checkins", label: "Check-ins 1:1", icon: ClipboardCheck, action: () => handleNavigate("/checkins"), keywords: ["reunião", "one on one"], category: "navigation" },
+    { id: "attendance", label: "Ponto", icon: Clock, action: () => handleNavigate("/ponto"), keywords: ["registro", "hora"], category: "navigation" },
+    { id: "trails", label: "Trilhas de Aprendizado", icon: BookOpen, action: () => handleNavigate("/trails"), keywords: ["cursos", "learning"], category: "navigation" },
+    { id: "quiz", label: "Quiz Diário", icon: Gamepad2, action: () => handleNavigate("/quiz"), keywords: ["perguntas", "game"], category: "navigation" },
+    { id: "mentorship", label: "Mentoria", icon: Heart, action: () => handleNavigate("/mentoria"), keywords: ["mentor", "coach"], category: "navigation" },
+    { id: "leagues", label: "Ligas", icon: Award, action: () => handleNavigate("/leagues"), keywords: ["competição", "ranking"], category: "navigation" },
+    { id: "duels", label: "Duelos", icon: Swords, action: () => handleNavigate("/duelos"), keywords: ["batalha", "1v1"], category: "navigation" },
+    { id: "surveys", label: "Pulse Surveys", icon: BarChart3, action: () => handleNavigate("/surveys"), keywords: ["pesquisa", "opinião"], category: "navigation" },
+    { id: "feedback", label: "Feedback 360°", icon: MessageSquare, action: () => handleNavigate("/feedback"), keywords: ["avaliação", "review"], category: "navigation" },
+    { id: "announcements", label: "Anúncios", icon: Megaphone, action: () => handleNavigate("/announcements"), keywords: ["comunicados", "news"], category: "navigation" },
+    { id: "shop", label: "Loja de Recompensas", icon: ShoppingBag, action: () => handleNavigate("/loja"), keywords: ["comprar", "rewards", "coins"], category: "navigation" },
+    
+    // Actions
+    { id: "search", label: "Buscar...", icon: Search, action: () => { setOpen(false); document.querySelector<HTMLButtonElement>('[data-search-trigger]')?.click(); }, keywords: ["pesquisar", "find"], category: "actions" },
+    { id: "notifications", label: "Notificações", icon: Bell, action: () => { setOpen(false); document.querySelector<HTMLButtonElement>('[data-notifications-trigger]')?.click(); }, keywords: ["alertas", "mensagens"], category: "actions" },
+    
+    // Settings
+    { id: "profile", label: "Meu Perfil", icon: User, action: () => handleNavigate("/profile"), keywords: ["conta", "avatar"], category: "settings" },
+    { id: "settings", label: "Configurações", icon: Settings, action: () => handleNavigate("/profile"), keywords: ["preferências", "config"], category: "settings" },
+    { id: "security", label: "Segurança", icon: Shield, action: () => handleNavigate("/security"), keywords: ["senha", "2fa"], category: "settings" },
+    { id: "theme", label: `Tema ${theme === "dark" ? "Claro" : "Escuro"}`, icon: theme === "dark" ? Sun : Moon, action: handleToggleTheme, keywords: ["dark", "light", "modo"], category: "settings" },
+    { id: "logout", label: "Sair", icon: LogOut, action: handleSignOut, keywords: ["logout", "desconectar"], category: "settings" },
+  ], [handleNavigate, handleSignOut, handleToggleTheme, theme]);
+
+  const navigationCommands = commands.filter(c => c.category === "navigation");
+  const actionCommands = commands.filter(c => c.category === "actions");
+  const settingsCommands = commands.filter(c => c.category === "settings");
+
+  return (
+    <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandInput placeholder="Digite um comando ou busque..." />
+      <CommandList>
+        <CommandEmpty>
+          <div className="flex flex-col items-center gap-2 py-6">
+            <Search className="w-10 h-10 text-muted-foreground/50" />
+            <p>Nenhum resultado encontrado.</p>
+            <p className="text-sm text-muted-foreground">Tente buscar por outra palavra</p>
+          </div>
+        </CommandEmpty>
+        
+        <CommandGroup heading="Navegação">
+          {navigationCommands.map((command) => (
+            <CommandItem
+              key={command.id}
+              onSelect={command.action}
+              keywords={command.keywords}
+            >
+              <command.icon className="mr-2 h-4 w-4" />
+              <span>{command.label}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+        
+        <CommandSeparator />
+        
+        <CommandGroup heading="Ações Rápidas">
+          {actionCommands.map((command) => (
+            <CommandItem
+              key={command.id}
+              onSelect={command.action}
+              keywords={command.keywords}
+            >
+              <command.icon className="mr-2 h-4 w-4" />
+              <span>{command.label}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+        
+        <CommandSeparator />
+        
+        <CommandGroup heading="Configurações">
+          {settingsCommands.map((command) => (
+            <CommandItem
+              key={command.id}
+              onSelect={command.action}
+              keywords={command.keywords}
+            >
+              <command.icon className="mr-2 h-4 w-4" />
+              <span>{command.label}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </CommandList>
+      
+      <div className="border-t border-border px-3 py-2 text-xs text-muted-foreground flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">↵</kbd>
+          <span>selecionar</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">↑↓</kbd>
+          <span>navegar</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">esc</kbd>
+          <span>fechar</span>
+        </div>
+      </div>
+    </CommandDialog>
+  );
+}
