@@ -307,6 +307,7 @@ export const StatsGrid = () => {
       />
 
       <motion.div 
+        data-tour="stats-grid"
         className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         variants={containerVariants}
         initial="hidden"
@@ -366,6 +367,7 @@ export const QuickActions = memo(function QuickActions() {
 
   return (
     <motion.div
+      data-tour="quick-actions"
       variants={quickActionsContainerVariants}
       initial="hidden"
       animate="visible"
