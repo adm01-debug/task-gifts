@@ -9,6 +9,10 @@ interface UseDuplicateOptions {
   transformData?: (data: Record<string, unknown>) => Record<string, unknown>; 
 }
 
+// Helper para acessar tabelas dinâmicas
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getTable = (tableName: string) => (supabase as any).from(tableName);
+
 export function useDuplicate<T extends { id: string }>({ 
   tableName, 
   queryKey, 
@@ -24,13 +28,12 @@ export function useDuplicate<T extends { id: string }>({
       if (duplicateData.name) duplicateData.name = `${duplicateData.name} (Cópia)`;
       if (duplicateData.titulo) duplicateData.titulo = `${duplicateData.titulo} (Cópia)`;
       const finalData = transformData ? transformData(duplicateData) : duplicateData;
-      const { data, error } = await supabase
-        .from(tableName as 'profiles')
-        .insert(finalData as never)
+      const { data, error } = await getTable(tableName)
+        .insert(finalData)
         .select()
         .single();
       if (error) throw error;
-      return data as unknown as T;
+      return data as T;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey });

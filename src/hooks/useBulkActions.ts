@@ -1,5 +1,5 @@
 /**
- * FINANCE HUB - Hook para Ações em Massa
+ * Hook para Ações em Massa
  * 
  * @module hooks/useBulkActions
  * @description Gerenciamento de seleção e ações em múltiplos itens
@@ -53,6 +53,10 @@ interface UseBulkActionsResult<T> {
   hasSelection: boolean;
   selectionCount: number;
 }
+
+// Helper para acessar tabelas dinâmicas
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getTable = (tableName: string) => (supabase as any).from(tableName);
 
 // ============================================
 // HOOK
@@ -128,8 +132,7 @@ export function useBulkActions<T extends { id: string }>(
         },
         action: async (items: T[]) => {
           const ids = items.map((i) => i.id);
-          const { error } = await supabase
-            .from(tableName as 'profiles')
+          const { error } = await getTable(tableName)
             .delete()
             .in('id', ids);
           
@@ -143,9 +146,8 @@ export function useBulkActions<T extends { id: string }>(
         variant: 'outline' as const,
         action: async (items: T[]) => {
           const ids = items.map((i) => i.id);
-          const { error } = await supabase
-            .from(tableName as 'profiles')
-            .update({ status: 'archived', updated_at: new Date().toISOString() } as never)
+          const { error } = await getTable(tableName)
+            .update({ status: 'archived', updated_at: new Date().toISOString() })
             .in('id', ids);
           
           if (error) throw error;

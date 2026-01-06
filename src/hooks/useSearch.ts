@@ -1,5 +1,5 @@
 /**
- * FINANCE HUB - Hook para Busca Fulltext
+ * Hook para Busca Fulltext
  * 
  * @module hooks/useSearch
  * @description Busca em múltiplas colunas com debounce
@@ -38,6 +38,10 @@ interface UseSearchResult<T> {
   clearSearch: () => void;
   hasResults: boolean;
 }
+
+// Helper para acessar tabelas dinâmicas
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getTable = (tableName: string) => (supabase as any).from(tableName);
 
 // ============================================
 // HOOK DE DEBOUNCE
@@ -90,8 +94,7 @@ export function useSearch<T extends Record<string, unknown>>(
         .map((col) => `${col}.ilike.%${debouncedTerm}%`)
         .join(',');
 
-      let query = supabase
-        .from(tableName as 'profiles')
+      let query = getTable(tableName)
         .select('*')
         .or(orConditions)
         .limit(limit);
@@ -103,7 +106,7 @@ export function useSearch<T extends Record<string, unknown>>(
       const { data, error } = await query;
       
       if (error) throw error;
-      return data as unknown as T[];
+      return data as T[];
     },
     enabled: shouldSearch,
     staleTime: 1000 * 60, // 1 minuto

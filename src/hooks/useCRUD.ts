@@ -12,6 +12,12 @@ export interface CRUDConfig<T> {
   messages?: { createSuccess?: string; updateSuccess?: string; deleteSuccess?: string; error?: string };
 }
 
+// Helper para acessar tabelas dinâmicas
+const getTable = (tableName: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (supabase as any).from(tableName);
+};
+
 export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
   const { tableName, orderBy, softDeleteColumn = 'deleted_at', defaultFilters = {}, messages = {} } = config;
   const queryClient = useQueryClient();
@@ -22,8 +28,7 @@ export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
     return useQuery({
       queryKey: [...queryKey, 'list', { search, filters, page, pageSize }],
       queryFn: async (): Promise<PaginatedResult<T>> => {
-        // @ts-expect-error - Dynamic table name
-        let query = supabase.from(tableName).select('*', { count: 'exact' });
+        let query = getTable(tableName).select('*', { count: 'exact' });
         if (softDeleteColumn) query = query.is(softDeleteColumn, null);
         Object.entries({ ...defaultFilters, ...filters }).forEach(([key, value]) => {
           if (value !== undefined && value !== null && value !== '') query = query.eq(key, value);
@@ -37,7 +42,7 @@ export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
         query = query.range(from, from + pageSize - 1);
         const { data, error, count } = await query;
         if (error) throw error;
-        return { data: (data || []) as unknown as T[], total: count || 0, page, pageSize, totalPages: Math.ceil((count || 0) / pageSize) };
+        return { data: (data || []) as T[], total: count || 0, page, pageSize, totalPages: Math.ceil((count || 0) / pageSize) };
       },
     });
   };
@@ -45,18 +50,18 @@ export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
   const useGetById = (id: string) => useQuery({
     queryKey: [...queryKey, id],
     queryFn: async () => {
-      const { data, error } = await supabase.from(tableName as 'profiles').select('*').eq('id', id).single();
+      const { data, error } = await getTable(tableName).select('*').eq('id', id).single();
       if (error) throw error;
-      return data as unknown as T;
+      return data as T;
     },
     enabled: !!id,
   });
 
   const createMutation = useMutation({
     mutationFn: async (newData: Partial<T>) => {
-      const { data, error } = await supabase.from(tableName as 'profiles').insert(newData as never).select().single();
+      const { data, error } = await getTable(tableName).insert(newData).select().single();
       if (error) throw error;
-      return data as unknown as T;
+      return data as T;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success(messages.createSuccess || 'Registro criado!'); },
     onError: () => toast.error(messages.error || 'Erro ao criar registro'),
@@ -64,9 +69,9 @@ export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data: updateData }: { id: string; data: Partial<T> }) => {
-      const { data, error } = await supabase.from(tableName as 'profiles').update(updateData as never).eq('id', id).select().single();
+      const { data, error } = await getTable(tableName).update(updateData).eq('id', id).select().single();
       if (error) throw error;
-      return data as unknown as T;
+      return data as T;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success(messages.updateSuccess || 'Registro atualizado!'); },
     onError: () => toast.error(messages.error || 'Erro ao atualizar registro'),
@@ -74,7 +79,7 @@ export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from(tableName as 'profiles').delete().eq('id', id);
+      const { error } = await getTable(tableName).delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success(messages.deleteSuccess || 'Registro removido!'); },
@@ -83,14 +88,14 @@ export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
 
   const softDeleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from(tableName as 'profiles').update({ [softDeleteColumn]: new Date().toISOString() } as never).eq('id', id);
+      const { error } = await getTable(tableName).update({ [softDeleteColumn]: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Registro arquivado!'); },
   });
 
   const bulkDelete = async (ids: string[]) => {
-    const { error } = await supabase.from(tableName as 'profiles').delete().in('id', ids);
+    const { error } = await getTable(tableName).delete().in('id', ids);
     if (error) throw error;
     queryClient.invalidateQueries({ queryKey });
     toast.success(`${ids.length} registros removidos!`);
