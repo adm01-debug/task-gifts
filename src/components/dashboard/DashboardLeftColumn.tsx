@@ -5,7 +5,6 @@ import { DailyQuests } from "@/components/DailyQuests";
 import { PeerRecognition } from "@/components/PeerRecognition";
 import { TeamChallenges } from "@/components/TeamChallenges";
 import { GoalsWidget } from "@/components/GoalsWidget";
-import { MoodTrackerWidget } from "@/components/MoodTrackerWidget";
 import { CelebrationsBanner } from "@/components/CelebrationsBanner";
 import { PulseSurveyWidget } from "@/components/PulseSurveyWidget";
 import { AnnouncementsBoard } from "@/components/AnnouncementsBoard";
@@ -13,6 +12,8 @@ import { AutoChallengesWidget } from "@/components/AutoChallengesWidget";
 import { StaggeredContainer, StaggeredItemLeft } from "@/components/StaggeredContainer";
 import { LazyWidget } from "./LazyWidget";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { MicroQuestsList } from "@/components/ui/micro-quest-card";
+import { LuckyDropTrigger } from "@/components/ui/lucky-drop";
 
 /**
  * DashboardLeftColumn - Contains primary content widgets
@@ -27,10 +28,22 @@ export const DashboardLeftColumn = memo(function DashboardLeftColumn() {
       initialDelay={0.1}
       data-tour="missions"
     >
+      {/* Lucky Drop Trigger - Gamification surprise */}
+      <StaggeredItemLeft>
+        <LuckyDropTrigger />
+      </StaggeredItemLeft>
+
       {/* Celebrations Banner - Priority */}
       <StaggeredItemLeft>
         <SectionErrorBoundary sectionName="Celebrações">
           <CelebrationsBanner />
+        </SectionErrorBoundary>
+      </StaggeredItemLeft>
+
+      {/* Micro Quests - Quick 2-5 min tasks */}
+      <StaggeredItemLeft>
+        <SectionErrorBoundary sectionName="Micro Quests">
+          <MicroQuestsList />
         </SectionErrorBoundary>
       </StaggeredItemLeft>
 

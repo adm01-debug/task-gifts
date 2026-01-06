@@ -252,11 +252,14 @@ export function MicroQuestsList({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-tour="micro-quests">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold flex items-center gap-2">
           <Zap className="w-4 h-4 text-primary" />
           Micro-Quests
+          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+            Novo!
+          </span>
         </h3>
         <span className="text-xs text-muted-foreground">2-5 min cada</span>
       </div>
