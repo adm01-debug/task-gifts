@@ -91,7 +91,7 @@ export function useSearch<T extends Record<string, unknown>>(
         .join(',');
 
       let query = supabase
-        .from(tableName)
+        .from(tableName as 'profiles')
         .select('*')
         .or(orConditions)
         .limit(limit);
@@ -103,7 +103,7 @@ export function useSearch<T extends Record<string, unknown>>(
       const { data, error } = await query;
       
       if (error) throw error;
-      return data as T[];
+      return data as unknown as T[];
     },
     enabled: shouldSearch,
     staleTime: 1000 * 60, // 1 minuto

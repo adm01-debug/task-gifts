@@ -37,21 +37,37 @@ import {
 } from 'lucide-react';
 import { useImportData } from '@/hooks/useImportData';
 
-interface DataImporterProps<T> {
+export interface ImportColumn {
+  key: string;
+  label: string;
+  example?: string;
+}
+
+export interface DataImporterProps<T> {
   schema: z.ZodSchema<T>;
   onImport: (data: T[]) => Promise<void>;
   templateUrl?: string;
-  entityName: string;
+  templateName?: string;
+  entityName?: string;
+  title?: string;
   trigger?: React.ReactNode;
+  columns?: ImportColumn[];
+  onSuccess?: () => void;
 }
 
 export function DataImporter<T>({
   schema,
   onImport,
   templateUrl,
+  templateName,
   entityName,
+  title,
   trigger,
+  columns,
+  onSuccess,
 }: DataImporterProps<T>) {
+  const displayName = entityName || title || templateName || 'Dados';
+  
   const {
     status,
     progress,
@@ -60,7 +76,13 @@ export function DataImporter<T>({
     confirmImport,
     reset,
     isProcessing,
-  } = useImportData({ schema, onImport });
+  } = useImportData({ 
+    schema, 
+    onImport: async (data) => {
+      await onImport(data);
+      onSuccess?.();
+    }
+  });
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +108,7 @@ export function DataImporter<T>({
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Importar {entityName}</DialogTitle>
+          <DialogTitle>Importar {displayName}</DialogTitle>
           <DialogDescription>
             Faça upload de um arquivo CSV ou Excel para importar dados.
           </DialogDescription>
@@ -113,6 +135,20 @@ export function DataImporter<T>({
               </Button>
             )}
           </div>
+
+          {/* Columns Info */}
+          {columns && columns.length > 0 && !result && (
+            <div className="rounded-md border p-3">
+              <p className="text-sm font-medium mb-2">Colunas esperadas:</p>
+              <div className="flex flex-wrap gap-2">
+                {columns.map((col) => (
+                  <span key={col.key} className="text-xs bg-muted px-2 py-1 rounded">
+                    {col.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Progress */}
           {isProcessing && (

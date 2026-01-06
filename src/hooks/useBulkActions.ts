@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -129,7 +129,7 @@ export function useBulkActions<T extends { id: string }>(
         action: async (items: T[]) => {
           const ids = items.map((i) => i.id);
           const { error } = await supabase
-            .from(tableName)
+            .from(tableName as 'profiles')
             .delete()
             .in('id', ids);
           
@@ -144,8 +144,8 @@ export function useBulkActions<T extends { id: string }>(
         action: async (items: T[]) => {
           const ids = items.map((i) => i.id);
           const { error } = await supabase
-            .from(tableName)
-            .update({ status: 'archived', updated_at: new Date().toISOString() })
+            .from(tableName as 'profiles')
+            .update({ status: 'archived', updated_at: new Date().toISOString() } as never)
             .in('id', ids);
           
           if (error) throw error;

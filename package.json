@@ -45,6 +45,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
+    "@types/papaparse": "^5.5.2",
     "@types/qrcode": "^1.5.6",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
@@ -55,9 +56,12 @@
     "framer-motion": "^11.18.2",
     "input-otp": "^1.4.2",
     "jsdom": "^27.3.0",
+    "jspdf": "^4.0.0",
+    "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
     "otpauth": "^9.4.1",
+    "papaparse": "^5.5.3",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
@@ -72,6 +76,7 @@
     "vaul": "^0.9.9",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.0.16",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
