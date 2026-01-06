@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AchievementNotificationProvider } from "@/contexts/AchievementNotificationContext";
 import { SoundSettingsProvider } from "@/contexts/SoundSettingsContext";
 import { OnboardingTourProvider } from "@/contexts/OnboardingTourContext";
+import { GamificationProvider } from "@/contexts/GamificationContext";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
@@ -117,12 +118,13 @@ const App = () => (
           <SoundSettingsProvider>
             <IpAccessGuard>
               <AuthProvider>
-                <AchievementNotificationProvider>
-                  <TooltipProvider>
-                    <Toaster />
-                    <Sonner />
-                    <BrowserRouter>
-                      <OnboardingTourProvider>
+                <GamificationProvider>
+                  <AchievementNotificationProvider>
+                    <TooltipProvider>
+                      <Toaster />
+                      <Sonner />
+                      <BrowserRouter>
+                        <OnboardingTourProvider>
                         <Suspense fallback={<PageLoader />}>
                           <SkipLinks />
                           <OfflineIndicator />
@@ -178,10 +180,11 @@ const App = () => (
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </Suspense>
-                      </OnboardingTourProvider>
-                    </BrowserRouter>
-                  </TooltipProvider>
-                </AchievementNotificationProvider>
+                        </OnboardingTourProvider>
+                      </BrowserRouter>
+                    </TooltipProvider>
+                  </AchievementNotificationProvider>
+                </GamificationProvider>
               </AuthProvider>
             </IpAccessGuard>
           </SoundSettingsProvider>

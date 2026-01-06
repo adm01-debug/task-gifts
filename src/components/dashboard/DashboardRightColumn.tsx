@@ -16,6 +16,8 @@ import { ENPSSurveyWidget } from "@/components/ENPSSurveyWidget";
 import { StaggeredContainer, StaggeredItemRight } from "@/components/StaggeredContainer";
 import { LazyWidget } from "./LazyWidget";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
+import { StreakTracker } from "@/components/ui/streak-tracker";
+import { DailyChallengesWidget } from "@/components/ui/daily-challenges";
 
 /**
  * DashboardRightColumn - Contains secondary content widgets
@@ -34,6 +36,24 @@ export const DashboardRightColumn = memo(function DashboardRightColumn() {
       initialDelay={0.2}
       data-tour="leaderboard"
     >
+      {/* Streak Tracker - High priority gamification */}
+      <StaggeredItemRight>
+        <SectionErrorBoundary sectionName="Streak Tracker">
+          <div data-tour="streak-tracker">
+            <StreakTracker />
+          </div>
+        </SectionErrorBoundary>
+      </StaggeredItemRight>
+
+      {/* Daily Challenges - Gamification priority */}
+      <StaggeredItemRight>
+        <SectionErrorBoundary sectionName="Desafios Diários">
+          <div data-tour="daily-challenges">
+            <DailyChallengesWidget />
+          </div>
+        </SectionErrorBoundary>
+      </StaggeredItemRight>
+
       {/* League Card - Gamification priority */}
       <StaggeredItemRight>
         <SectionErrorBoundary sectionName="Liga">

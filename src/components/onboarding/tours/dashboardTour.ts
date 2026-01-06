@@ -58,6 +58,20 @@ export const dashboardTour: Tour = {
       placement: "bottom",
     },
     {
+      id: "streak-tracker",
+      target: "[data-tour='streak-tracker']",
+      title: "Streak de Fogo 🔥",
+      content: "Mantenha sua sequência ativa! Quanto mais dias seguidos você participar, maiores as recompensas e multiplicadores.",
+      placement: "left",
+    },
+    {
+      id: "daily-challenges",
+      target: "[data-tour='daily-challenges']",
+      title: "Desafios Diários 🎯",
+      content: "Complete desafios diários para ganhar XP e moedas extras! Novos desafios são gerados todos os dias.",
+      placement: "left",
+    },
+    {
       id: "leaderboard",
       target: "[data-tour='leaderboard']",
       title: "Ranking & Ligas",
