@@ -12,6 +12,10 @@ interface EmptyStateProps {
     label: string;
     onClick: () => void;
   };
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
   className?: string;
   compact?: boolean;
 }
@@ -21,6 +25,7 @@ export function EmptyState({
   title,
   description,
   action,
+  secondaryAction,
   className,
   compact = false,
 }: EmptyStateProps) {
@@ -35,7 +40,10 @@ export function EmptyState({
         className
       )}
     >
-      <div
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
         className={cn(
           "rounded-full bg-muted flex items-center justify-center mb-4",
           compact ? "w-10 h-10" : "w-16 h-16"
@@ -47,33 +55,57 @@ export function EmptyState({
             compact ? "w-5 h-5" : "w-8 h-8"
           )}
         />
-      </div>
-      <h3
+      </motion.div>
+      <motion.h3
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.15 }}
         className={cn(
           "font-semibold text-foreground",
           compact ? "text-sm mb-1" : "text-lg mb-2"
         )}
       >
         {title}
-      </h3>
+      </motion.h3>
       {description && (
-        <p
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
           className={cn(
             "text-muted-foreground max-w-sm",
             compact ? "text-xs mb-3" : "text-sm mb-4"
           )}
         >
           {description}
-        </p>
+        </motion.p>
       )}
-      {action && (
-        <Button
-          onClick={action.onClick}
-          variant="outline"
-          size={compact ? "sm" : "default"}
+      {(action || secondaryAction) && (
+        <motion.div 
+          className="flex flex-wrap gap-2 justify-center"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
         >
-          {action.label}
-        </Button>
+          {action && (
+            <Button
+              onClick={action.onClick}
+              variant="outline"
+              size={compact ? "sm" : "default"}
+            >
+              {action.label}
+            </Button>
+          )}
+          {secondaryAction && (
+            <Button
+              onClick={secondaryAction.onClick}
+              variant="ghost"
+              size={compact ? "sm" : "default"}
+            >
+              {secondaryAction.label}
+            </Button>
+          )}
+        </motion.div>
       )}
     </motion.div>
   );
@@ -85,10 +117,13 @@ interface EmptyStateCardProps extends EmptyStateProps {
 
 export function EmptyStateCard({ cardClassName, ...props }: EmptyStateCardProps) {
   return (
-    <Card className={cn("border-dashed", cardClassName)}>
+    <Card className={cn("border-dashed border-2", cardClassName)}>
       <CardContent className="p-0">
         <EmptyState {...props} />
       </CardContent>
     </Card>
   );
 }
+
+// Re-export illustrated version
+export { IllustratedEmptyState, IllustratedEmptyStateCard } from "./illustrated-empty-state";

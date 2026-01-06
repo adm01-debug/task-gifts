@@ -114,3 +114,21 @@ export function SkeletonStats({ count = 4, className }: SkeletonListProps) {
     </div>
   );
 }
+
+// Re-export specific skeletons
+export {
+  StatCardSkeleton,
+  StatsGridSkeleton,
+  LeaderboardSkeleton,
+  QuestListSkeleton,
+  AchievementGridSkeleton,
+  ProfileCardSkeleton,
+  TrailCardSkeleton,
+  NotificationListSkeleton,
+  ActivityFeedSkeleton,
+  TableRowSkeleton,
+  ChartSkeleton,
+  CalendarSkeleton,
+  KPIDashboardSkeleton,
+  FullPageSkeleton,
+} from "./specific-skeletons";
