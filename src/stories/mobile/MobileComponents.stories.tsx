@@ -69,6 +69,7 @@ export const SwipeableCardDemo: Story = {
       <SwipeableCard
         leftActions={[
           {
+            action: "complete",
             icon: <Check className="h-5 w-5" />,
             label: "Completar",
             color: "bg-success",
@@ -77,6 +78,7 @@ export const SwipeableCardDemo: Story = {
         ]}
         rightActions={[
           {
+            action: "delete",
             icon: <Trash2 className="h-5 w-5" />,
             label: "Excluir",
             color: "bg-destructive",
@@ -95,6 +97,7 @@ export const SwipeableCardDemo: Story = {
       <SwipeableCard
         leftActions={[
           {
+            action: "custom",
             icon: <Star className="h-5 w-5" />,
             label: "Favoritar",
             color: "bg-warning",
@@ -103,6 +106,7 @@ export const SwipeableCardDemo: Story = {
         ]}
         rightActions={[
           {
+            action: "custom",
             icon: <Bell className="h-5 w-5" />,
             label: "Lembrar",
             color: "bg-primary",
