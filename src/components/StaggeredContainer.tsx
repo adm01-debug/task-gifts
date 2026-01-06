@@ -7,6 +7,7 @@ interface StaggeredContainerProps {
   className?: string;
   staggerDelay?: number;
   initialDelay?: number;
+  [key: string]: any; // Allow data-* attributes
 }
 
 interface StaggeredItemProps {
@@ -49,6 +50,7 @@ export function StaggeredContainer({
   className,
   staggerDelay = 0.1,
   initialDelay = 0.1,
+  ...rest
 }: StaggeredContainerProps) {
   return (
     <motion.div
@@ -65,6 +67,7 @@ export function StaggeredContainer({
         },
       }}
       className={cn("", className)}
+      {...rest}
     >
       {children}
     </motion.div>

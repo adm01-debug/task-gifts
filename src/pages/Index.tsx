@@ -13,12 +13,15 @@ import { SeasonalEventBanner } from "@/components/SeasonalEventBanner";
 import { DashboardHeader, DashboardLeftColumn, DashboardRightColumn, DashboardFooter } from "@/components/dashboard";
 import { SectionWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
+import { GlobalBreadcrumbs } from "@/components/navigation";
 
 // Hooks
 import { useIsMobileWithHydration } from "@/hooks/use-mobile";
 import { useListenToRankChanges } from "@/hooks/useListenToRankChanges";
 import { useCompetencyAlerts } from "@/hooks/useCompetencyAlerts";
 import { useSEO } from "@/hooks/useSEO";
+import { useTour } from "@/contexts/OnboardingTourContext";
+import { dashboardTour } from "@/components/onboarding";
 
 const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";
 
@@ -61,6 +64,9 @@ function Index() {
   // Side-effect listeners - explicitly named for clarity
   useListenToRankChanges();
   useCompetencyAlerts();
+  
+  // Register dashboard tour
+  useTour(dashboardTour);
 
   // Persist sidebar state to localStorage
   useEffect(() => {
@@ -126,7 +132,10 @@ function Index() {
         )}
 
         {/* Main Content */}
-        <main className={`flex-1 overflow-auto ${isMobile ? 'pb-20' : ''}`} aria-label="Dashboard principal">
+        <main id="main-content" className={`flex-1 overflow-auto ${isMobile ? 'pb-20' : ''}`} aria-label="Dashboard principal">
+          {/* Breadcrumbs */}
+          <GlobalBreadcrumbs className="px-4 md:px-6 pt-4" />
+          
           {/* Top Header */}
           <DashboardHeader onMenuClick={handleMenuClick} />
 

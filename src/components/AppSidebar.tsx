@@ -71,6 +71,8 @@ export const AppSidebar = ({ collapsed, onToggle }: AppSidebarProps) => {
 
   return (
     <motion.aside
+      data-tour="sidebar"
+      id="main-nav"
       initial={false}
       animate={{ width: collapsed ? 72 : 240 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}

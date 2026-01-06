@@ -164,7 +164,7 @@ export const DashboardHeader = memo(function DashboardHeader({
           <AICoachDialog />
 
           {/* User Menu with Click Outside */}
-          <div className="relative flex items-center gap-2" ref={userMenuRef}>
+          <div className="relative flex items-center gap-2" ref={userMenuRef} data-tour="user-menu">
             {rankData?.rank && (
               <RankingBadge rank={rankData.rank} size="sm" />
             )}

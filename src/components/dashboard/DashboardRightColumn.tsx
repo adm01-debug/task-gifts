@@ -32,6 +32,7 @@ export const DashboardRightColumn = memo(function DashboardRightColumn() {
       className="space-y-4 md:space-y-6"
       staggerDelay={0.1}
       initialDelay={0.2}
+      data-tour="leaderboard"
     >
       {/* League Card - Gamification priority */}
       <StaggeredItemRight>
