@@ -14,6 +14,7 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 import { ComboIndicator } from "@/components/ComboIndicator";
 import { RankingBadge } from "@/components/RankingBadge";
 import { MiniStreakTracker } from "@/components/ui/streak-tracker";
+import { CommandTrigger } from "@/components/ui/command-trigger";
 
 // Hooks
 import { useAuth } from "@/hooks/useAuth";
@@ -159,6 +160,7 @@ export const DashboardHeader = memo(function DashboardHeader({
 
         <div className="flex items-center gap-2 md:gap-3">
           <MiniStreakTracker streak={7} />
+          <CommandTrigger variant="compact" />
           <GlobalSearch />
           <ThemeToggle />
           <NotificationCenter />
