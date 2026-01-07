@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, forwardRef } from "react";
 
 interface SoundSettings {
   enabled: boolean;
@@ -33,35 +33,37 @@ const getStoredSettings = (): SoundSettings => {
 
 const SoundSettingsContext = createContext<SoundSettingsContextType | undefined>(undefined);
 
-export const SoundSettingsProvider = ({ children }: { children: ReactNode }) => {
-  const [settings, setSettings] = useState<SoundSettings>(getStoredSettings);
+export const SoundSettingsProvider = forwardRef<HTMLDivElement, { children: ReactNode }>(
+  function SoundSettingsProvider({ children }, _ref) {
+    const [settings, setSettings] = useState<SoundSettings>(getStoredSettings);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    } catch (e) {
-      // Ignore errors
-    }
-  }, [settings]);
+    useEffect(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      } catch (e) {
+        // Ignore errors
+      }
+    }, [settings]);
 
-  const setEnabled = (enabled: boolean) => {
-    setSettings(prev => ({ ...prev, enabled }));
-  };
+    const setEnabled = (enabled: boolean) => {
+      setSettings(prev => ({ ...prev, enabled }));
+    };
 
-  const setVolume = (volume: number) => {
-    setSettings(prev => ({ ...prev, volume: Math.max(0, Math.min(1, volume)) }));
-  };
+    const setVolume = (volume: number) => {
+      setSettings(prev => ({ ...prev, volume: Math.max(0, Math.min(1, volume)) }));
+    };
 
-  const toggleSound = () => {
-    setSettings(prev => ({ ...prev, enabled: !prev.enabled }));
-  };
+    const toggleSound = () => {
+      setSettings(prev => ({ ...prev, enabled: !prev.enabled }));
+    };
 
-  return (
-    <SoundSettingsContext.Provider value={{ settings, setEnabled, setVolume, toggleSound }}>
-      {children}
-    </SoundSettingsContext.Provider>
-  );
-};
+    return (
+      <SoundSettingsContext.Provider value={{ settings, setEnabled, setVolume, toggleSound }}>
+        {children}
+      </SoundSettingsContext.Provider>
+    );
+  }
+);
 
 export const useSoundSettings = () => {
   const context = useContext(SoundSettingsContext);

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, forwardRef } from "react";
 
 interface AccessibilitySettings {
   reducedMotion: boolean;
@@ -31,136 +31,138 @@ const STORAGE_KEY = "accessibility-settings";
 
 const AccessibilityContext = createContext<AccessibilityContextType | null>(null);
 
-export function AccessibilityProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<AccessibilitySettings>(() => {
-    try {
+export const AccessibilityProvider = forwardRef<HTMLDivElement, { children: ReactNode }>(
+  function AccessibilityProvider({ children }, _ref) {
+    const [settings, setSettings] = useState<AccessibilitySettings>(() => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? { ...defaultSettings, ...JSON.parse(stored) } : defaultSettings;
+      } catch {
+        return defaultSettings;
+      }
+    });
+
+    // Detect system preferences
+    useEffect(() => {
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const prefersHighContrast = window.matchMedia("(prefers-contrast: more)");
+
+      const handleMotionChange = (e: MediaQueryListEvent) => {
+        setSettings((prev) => ({ ...prev, reducedMotion: e.matches }));
+      };
+
+      const handleContrastChange = (e: MediaQueryListEvent) => {
+        setSettings((prev) => ({ ...prev, highContrast: e.matches }));
+      };
+
+      // Set initial values from system preferences if no stored settings
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? { ...defaultSettings, ...JSON.parse(stored) } : defaultSettings;
-    } catch {
-      return defaultSettings;
-    }
-  });
+      if (!stored) {
+        setSettings((prev) => ({
+          ...prev,
+          reducedMotion: prefersReducedMotion.matches,
+          highContrast: prefersHighContrast.matches,
+        }));
+      }
 
-  // Detect system preferences
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const prefersHighContrast = window.matchMedia("(prefers-contrast: more)");
+      prefersReducedMotion.addEventListener("change", handleMotionChange);
+      prefersHighContrast.addEventListener("change", handleContrastChange);
 
-    const handleMotionChange = (e: MediaQueryListEvent) => {
-      setSettings((prev) => ({ ...prev, reducedMotion: e.matches }));
-    };
+      return () => {
+        prefersReducedMotion.removeEventListener("change", handleMotionChange);
+        prefersHighContrast.removeEventListener("change", handleContrastChange);
+      };
+    }, []);
 
-    const handleContrastChange = (e: MediaQueryListEvent) => {
-      setSettings((prev) => ({ ...prev, highContrast: e.matches }));
-    };
+    // Persist settings
+    useEffect(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      } catch {
+        // Ignore storage errors
+      }
+    }, [settings]);
 
-    // Set initial values from system preferences if no stored settings
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      setSettings((prev) => ({
-        ...prev,
-        reducedMotion: prefersReducedMotion.matches,
-        highContrast: prefersHighContrast.matches,
-      }));
-    }
+    // Apply settings to document
+    useEffect(() => {
+      const root = document.documentElement;
 
-    prefersReducedMotion.addEventListener("change", handleMotionChange);
-    prefersHighContrast.addEventListener("change", handleContrastChange);
+      // Reduced motion
+      if (settings.reducedMotion) {
+        root.classList.add("reduce-motion");
+      } else {
+        root.classList.remove("reduce-motion");
+      }
 
-    return () => {
-      prefersReducedMotion.removeEventListener("change", handleMotionChange);
-      prefersHighContrast.removeEventListener("change", handleContrastChange);
-    };
-  }, []);
+      // High contrast
+      if (settings.highContrast) {
+        root.classList.add("high-contrast");
+      } else {
+        root.classList.remove("high-contrast");
+      }
 
-  // Persist settings
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    } catch {
-      // Ignore storage errors
-    }
-  }, [settings]);
+      // Font size
+      root.classList.remove("font-large", "font-larger");
+      if (settings.fontSize === "large") {
+        root.classList.add("font-large");
+      } else if (settings.fontSize === "larger") {
+        root.classList.add("font-larger");
+      }
 
-  // Apply settings to document
-  useEffect(() => {
-    const root = document.documentElement;
+      // Focus visible
+      if (settings.focusVisible) {
+        root.classList.add("focus-visible-enabled");
+      } else {
+        root.classList.remove("focus-visible-enabled");
+      }
+    }, [settings]);
 
-    // Reduced motion
-    if (settings.reducedMotion) {
-      root.classList.add("reduce-motion");
-    } else {
-      root.classList.remove("reduce-motion");
-    }
+    const updateSetting = useCallback(<K extends keyof AccessibilitySettings>(
+      key: K,
+      value: AccessibilitySettings[K]
+    ) => {
+      setSettings((prev) => ({ ...prev, [key]: value }));
+    }, []);
 
-    // High contrast
-    if (settings.highContrast) {
-      root.classList.add("high-contrast");
-    } else {
-      root.classList.remove("high-contrast");
-    }
+    const toggleSetting = useCallback((key: keyof Omit<AccessibilitySettings, "fontSize">) => {
+      setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+    }, []);
 
-    // Font size
-    root.classList.remove("font-large", "font-larger");
-    if (settings.fontSize === "large") {
-      root.classList.add("font-large");
-    } else if (settings.fontSize === "larger") {
-      root.classList.add("font-larger");
-    }
+    const resetSettings = useCallback(() => {
+      setSettings(defaultSettings);
+      localStorage.removeItem(STORAGE_KEY);
+    }, []);
 
-    // Focus visible
-    if (settings.focusVisible) {
-      root.classList.add("focus-visible-enabled");
-    } else {
-      root.classList.remove("focus-visible-enabled");
-    }
-  }, [settings]);
+    const announceToScreenReader = useCallback((message: string, priority: "polite" | "assertive" = "polite") => {
+      const announcement = document.createElement("div");
+      announcement.setAttribute("role", "status");
+      announcement.setAttribute("aria-live", priority);
+      announcement.setAttribute("aria-atomic", "true");
+      announcement.className = "sr-only";
+      announcement.textContent = message;
+      
+      document.body.appendChild(announcement);
+      
+      setTimeout(() => {
+        document.body.removeChild(announcement);
+      }, 1000);
+    }, []);
 
-  const updateSetting = useCallback(<K extends keyof AccessibilitySettings>(
-    key: K,
-    value: AccessibilitySettings[K]
-  ) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  }, []);
-
-  const toggleSetting = useCallback((key: keyof Omit<AccessibilitySettings, "fontSize">) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
-
-  const resetSettings = useCallback(() => {
-    setSettings(defaultSettings);
-    localStorage.removeItem(STORAGE_KEY);
-  }, []);
-
-  const announceToScreenReader = useCallback((message: string, priority: "polite" | "assertive" = "polite") => {
-    const announcement = document.createElement("div");
-    announcement.setAttribute("role", "status");
-    announcement.setAttribute("aria-live", priority);
-    announcement.setAttribute("aria-atomic", "true");
-    announcement.className = "sr-only";
-    announcement.textContent = message;
-    
-    document.body.appendChild(announcement);
-    
-    setTimeout(() => {
-      document.body.removeChild(announcement);
-    }, 1000);
-  }, []);
-
-  return (
-    <AccessibilityContext.Provider
-      value={{
-        settings,
-        updateSetting,
-        toggleSetting,
-        resetSettings,
-        announceToScreenReader,
-      }}
-    >
-      {children}
-    </AccessibilityContext.Provider>
-  );
-}
+    return (
+      <AccessibilityContext.Provider
+        value={{
+          settings,
+          updateSetting,
+          toggleSetting,
+          resetSettings,
+          announceToScreenReader,
+        }}
+      >
+        {children}
+      </AccessibilityContext.Provider>
+    );
+  }
+);
 
 export function useAccessibility() {
   const context = useContext(AccessibilityContext);
