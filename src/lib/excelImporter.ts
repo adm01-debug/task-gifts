@@ -1,147 +1,147 @@
 /**
- * Excel Importer/Exporter Utility
- * 
- * @module lib/excelImporter
- * @description Import/Export Excel and CSV files
+ * Excel/CSV Import/Export Utilities
+ * Utilities for importing and exporting data in Excel and CSV formats
  */
 
 import * as XLSX from 'xlsx';
 
-// ============================================
-// TIPOS
-// ============================================
-
-export interface ExportColumn<T> {
+export interface ColumnConfig<T> {
   key: keyof T;
   label: string;
-  format?: (value: unknown) => string;
 }
 
-// ============================================
-// EXPORT TO EXCEL
-// ============================================
-
+/**
+ * Export data to Excel file
+ */
 export function exportToExcel<T extends Record<string, unknown>>(
   data: T[],
-  columns: ExportColumn<T>[],
-  fileName: string,
+  columns: ColumnConfig<T>[],
+  filename: string,
   sheetName: string = 'Dados'
 ): void {
   if (data.length === 0) return;
 
-  // Prepare data with formatted values
-  const formattedData = data.map(row => {
-    const formatted: Record<string, unknown> = {};
-    columns.forEach(col => {
-      const value = row[col.key];
-      formatted[col.label] = col.format ? col.format(value) : value;
-    });
-    return formatted;
-  });
+  // Create worksheet data with headers
+  const headers = columns.map(col => col.label);
+  const rows = data.map(item =>
+    columns.map(col => {
+      const value = item[col.key];
+      if (value === null || value === undefined) return '';
+      if (value instanceof Date) return value.toISOString().split('T')[0];
+      return String(value);
+    })
+  );
 
-  const worksheet = XLSX.utils.json_to_sheet(formattedData);
-  
-  // Adjust column widths
-  const colWidths = columns.map(col => ({
-    wch: Math.max(col.label.length, 15),
-  }));
-  worksheet['!cols'] = colWidths;
-
+  const wsData = [headers, ...rows];
+  const worksheet = XLSX.utils.aoa_to_sheet(wsData);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-  XLSX.writeFile(workbook, `${fileName}.xlsx`);
+
+  // Generate and download file
+  XLSX.writeFile(workbook, `${filename}.xlsx`);
 }
 
-// ============================================
-// IMPORT EXCEL
-// ============================================
-
-export async function importExcel<T>(file: File): Promise<T[]> {
+/**
+ * Import data from Excel file
+ */
+export async function importExcel<T>(
+  file: File,
+  columnMapping: Record<string, keyof T>
+): Promise<T[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(sheet, {
-          defval: '',
-          raw: false,
-        }) as T[];
-        
-        resolve(jsonData);
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet);
+
+        // Map columns
+        const mappedData = jsonData.map(row => {
+          const mapped: Partial<T> = {};
+          for (const [excelCol, targetKey] of Object.entries(columnMapping)) {
+            if (row[excelCol] !== undefined) {
+              mapped[targetKey as keyof T] = row[excelCol] as T[keyof T];
+            }
+          }
+          return mapped as T;
+        });
+
+        resolve(mappedData);
       } catch (error) {
         reject(error);
       }
     };
-    
-    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+
+    reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsArrayBuffer(file);
   });
 }
 
-// ============================================
-// GENERATE CSV TEMPLATE
-// ============================================
+/**
+ * Generate CSV template for import
+ */
+export function generateCSVTemplate(
+  columns: { key: string; label: string; example?: string }[],
+  filename: string
+): void {
+  const headers = columns.map(col => col.label).join(',');
+  const examples = columns.map(col => col.example || '').join(',');
+  const content = `${headers}\n${examples}`;
 
-export function generateCSVTemplate(columns: { key: string; label: string; example?: string }[]): void {
-  const headers = columns.map(c => c.label);
-  const examples = columns.map(c => c.example || '');
-  
-  const csvContent = [
-    headers.join(','),
-    examples.join(','),
-  ].join('\n');
-
-  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
-  link.href = url;
-  link.download = 'template.csv';
+  link.href = URL.createObjectURL(blob);
+  link.download = `${filename}_template.csv`;
   link.click();
-  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(link.href);
 }
 
-// ============================================
-// IMPORT CSV
-// ============================================
-
-export async function importCSV<T>(file: File): Promise<T[]> {
+/**
+ * Import data from CSV file
+ */
+export async function importCSV<T>(
+  file: File,
+  columnMapping: Record<string, keyof T>
+): Promise<T[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       try {
         const text = e.target?.result as string;
         const lines = text.split('\n').filter(line => line.trim());
-        
         if (lines.length < 2) {
           resolve([]);
           return;
         }
-        
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
-        const results: T[] = [];
-        
+
+        const headers = lines[0].split(',').map(h => h.trim());
+        const data: T[] = [];
+
         for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(',');
-          const row: Record<string, string> = {};
-          
+          const values = lines[i].split(',').map(v => v.trim());
+          const row: Partial<T> = {};
+
           headers.forEach((header, index) => {
-            row[header] = values[index]?.trim() || '';
+            const targetKey = columnMapping[header];
+            if (targetKey && values[index] !== undefined) {
+              row[targetKey as keyof T] = values[index] as T[keyof T];
+            }
           });
-          
-          results.push(row as T);
+
+          data.push(row as T);
         }
-        
-        resolve(results);
+
+        resolve(data);
       } catch (error) {
         reject(error);
       }
     };
-    
-    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-    reader.readAsText(file, 'utf-8');
+
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsText(file);
   });
 }
