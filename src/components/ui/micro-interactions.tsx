@@ -107,6 +107,7 @@ export const PressableButton = memo(function PressableButton({
         createRipple(e);
         onClick?.(e);
       }}
+    >
       {children}
       <RippleContainer />
     </motion.button>
