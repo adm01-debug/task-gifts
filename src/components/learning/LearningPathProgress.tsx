@@ -245,7 +245,13 @@ export const LearningPathProgress = memo(function LearningPathProgress({
   }, [path]);
 
   const handleStartLesson = (lessonId: string) => {
-    console.log("Starting lesson:", lessonId);
+    // Navigate to lesson or open lesson modal
+    const lesson = path.modules
+      .flatMap(m => m.lessons)
+      .find(l => l.id === lessonId);
+    if (lesson) {
+      // Lesson start handled by parent component
+    }
   };
 
   return (

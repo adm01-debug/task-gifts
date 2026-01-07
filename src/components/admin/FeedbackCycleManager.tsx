@@ -27,20 +27,26 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
 export function FeedbackCycleManager() {
-  const { cycles, isLoading } = useFeedback360();
+  const { cycles, isLoading, createCycle } = useFeedback360();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    cycle_type: "360",
+    cycle_type: "360" as "360" | "manager" | "peer" | "self",
     starts_at: "",
     ends_at: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement create cycle
-    toast.success("Ciclo de feedback criado!");
+    createCycle({
+      name: formData.name,
+      description: formData.description,
+      cycle_type: formData.cycle_type,
+      starts_at: formData.starts_at,
+      ends_at: formData.ends_at,
+      questions: [],
+    });
     setIsDialogOpen(false);
     setFormData({
       name: "",
@@ -117,16 +123,16 @@ export function FeedbackCycleManager() {
                 <Label htmlFor="cycle_type">Tipo de Avaliação</Label>
                 <Select
                   value={formData.cycle_type}
-                  onValueChange={(value) => setFormData({ ...formData, cycle_type: value })}
+                  onValueChange={(value: "360" | "manager" | "peer" | "self") => setFormData({ ...formData, cycle_type: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="360">360° Completo</SelectItem>
-                    <SelectItem value="180">180° (Gestor + Pares)</SelectItem>
-                    <SelectItem value="90">90° (Apenas Gestor)</SelectItem>
+                    <SelectItem value="manager">Avaliação do Gestor</SelectItem>
                     <SelectItem value="peer">Apenas Pares</SelectItem>
+                    <SelectItem value="self">Auto-avaliação</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

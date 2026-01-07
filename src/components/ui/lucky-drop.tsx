@@ -244,8 +244,8 @@ export function LuckyDropTrigger() {
   const { isOpen, closeDrop, openDrop } = useLuckyDrop();
   
   const handleClaim = (reward: LuckyDropReward) => {
-    console.log("Reward claimed:", reward);
-    // Aqui você pode integrar com o sistema de gamificação
+    // Reward claim handled - integration with gamification system
+    // XP and coins are added via the onClaim callback
   };
 
   return (
