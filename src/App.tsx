@@ -169,7 +169,7 @@ const App = () => (
                             <Route path="/surveys" element={<ProtectedRoute><Surveys /></ProtectedRoute>} />
                             <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
                             <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
-                            <Route path="/security" element={<ProtectedRoute><SecurityDashboard /></ProtectedRoute>} />
+                            <Route path="/security-dashboard" element={<ProtectedRoute><SecurityDashboard /></ProtectedRoute>} />
                             <Route path="/admin/permissions" element={<ProtectedRoute requiredRole="admin"><PermissionsAdmin /></ProtectedRoute>} />
                             <Route
                               path="/loja/admin"
