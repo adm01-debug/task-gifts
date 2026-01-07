@@ -18,6 +18,7 @@ import { LazyWidget } from "./LazyWidget";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { StreakTracker } from "@/components/ui/streak-tracker";
 import { DailyChallengesWidget } from "@/components/ui/daily-challenges";
+import { WeeklyGoalsTracker } from "@/components/ui/weekly-goals-tracker";
 
 /**
  * DashboardRightColumn - Contains secondary content widgets
@@ -51,6 +52,13 @@ export const DashboardRightColumn = memo(function DashboardRightColumn() {
           <div data-tour="daily-challenges">
             <DailyChallengesWidget />
           </div>
+        </SectionErrorBoundary>
+      </StaggeredItemRight>
+
+      {/* Weekly Goals Tracker - New gamification widget */}
+      <StaggeredItemRight>
+        <SectionErrorBoundary sectionName="Metas Semanais">
+          <WeeklyGoalsTracker />
         </SectionErrorBoundary>
       </StaggeredItemRight>
 
