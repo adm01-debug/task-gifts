@@ -367,7 +367,7 @@ export const QuestLog = memo(() => {
                   <TabsTrigger value="completed" className="flex-1">
                     Completas ({stats.completed})
                   </TabsTrigger>
-                </Tabs>
+                </TabsList>
 
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-3 pr-2">
