@@ -14,6 +14,9 @@ import { LazyWidget } from "./LazyWidget";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { MicroQuestsList } from "@/components/ui/micro-quest-card";
 import { LuckyDropTrigger } from "@/components/ui/lucky-drop";
+import { DailyLoginBonus } from "@/components/ui/daily-login-bonus";
+import { PowerUps } from "@/components/ui/power-ups";
+import { TeamChallenges as TeamChallengesNew } from "@/components/ui/team-challenges";
 
 /**
  * DashboardLeftColumn - Contains primary content widgets
@@ -44,6 +47,27 @@ export const DashboardLeftColumn = memo(function DashboardLeftColumn() {
       <StaggeredItemLeft>
         <SectionErrorBoundary sectionName="Micro Quests">
           <MicroQuestsList />
+        </SectionErrorBoundary>
+      </StaggeredItemLeft>
+
+      {/* Daily Login Bonus */}
+      <StaggeredItemLeft>
+        <SectionErrorBoundary sectionName="Bônus Diário">
+          <DailyLoginBonus />
+        </SectionErrorBoundary>
+      </StaggeredItemLeft>
+
+      {/* Power-Ups */}
+      <StaggeredItemLeft>
+        <SectionErrorBoundary sectionName="Power-Ups">
+          <PowerUps />
+        </SectionErrorBoundary>
+      </StaggeredItemLeft>
+
+      {/* Team Challenges - New */}
+      <StaggeredItemLeft>
+        <SectionErrorBoundary sectionName="Desafios em Equipe">
+          <TeamChallengesNew />
         </SectionErrorBoundary>
       </StaggeredItemLeft>
 
