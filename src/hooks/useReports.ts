@@ -60,8 +60,10 @@ export const useExportReport = () => {
       reportsService.exportReport(reportId, format),
     onSuccess: (url) => {
       toast.success('Exportação iniciada!');
-      // Em produção, abriria o download
-      console.log('Download URL:', url);
+      // Open download in new tab
+      if (url) {
+        window.open(url, '_blank');
+      }
     },
   });
 };
