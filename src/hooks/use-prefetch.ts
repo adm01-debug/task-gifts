@@ -14,17 +14,17 @@ const prefetchPromises = new Map<string, Promise<unknown>>();
 // Route to module mapping - adjust based on your actual routes
 const routeModuleMap: Record<string, () => Promise<unknown>> = {
   "/": () => import("@/pages/Index"),
-  "/login": () => import("@/pages/Login"),
-  "/dashboard": () => import("@/pages/Dashboard"),
+  "/auth": () => import("@/pages/Auth"),
   "/profile": () => import("@/pages/Profile"),
-  "/leaderboard": () => import("@/pages/Leaderboard"),
-  "/quests": () => import("@/pages/Quests"),
+  "/leagues": () => import("@/pages/Leagues"),
   "/achievements": () => import("@/pages/Achievements"),
-  "/store": () => import("@/pages/Store"),
-  "/quiz": () => import("@/pages/Quiz"),
-  "/training": () => import("@/pages/Training"),
-  "/settings": () => import("@/pages/Settings"),
-  "/admin": () => import("@/pages/Admin"),
+  "/shop": () => import("@/pages/Shop"),
+  "/daily-quiz": () => import("@/pages/DailyQuiz"),
+  "/learning-trails": () => import("@/pages/LearningTrails"),
+  "/goals": () => import("@/pages/Goals"),
+  "/admin": () => import("@/pages/AdminPanel"),
+  "/duels": () => import("@/pages/Duels"),
+  "/social": () => import("@/pages/SocialFeed"),
 };
 
 // Prefetch a single route
@@ -129,14 +129,14 @@ export function usePrefetchAdjacent() {
   useEffect(() => {
     // Define adjacent routes for each page
     const adjacentRoutes: Record<string, string[]> = {
-      "/": ["/dashboard", "/login"],
-      "/dashboard": ["/profile", "/quests", "/leaderboard"],
-      "/profile": ["/dashboard", "/achievements", "/settings"],
-      "/quests": ["/dashboard", "/achievements"],
-      "/leaderboard": ["/dashboard", "/profile"],
-      "/achievements": ["/profile", "/quests"],
-      "/store": ["/dashboard", "/profile"],
-      "/training": ["/dashboard", "/quests"],
+      "/": ["/auth", "/profile", "/leagues"],
+      "/profile": ["/achievements", "/goals", "/shop"],
+      "/leagues": ["/profile", "/duels"],
+      "/achievements": ["/profile", "/leagues"],
+      "/shop": ["/profile", "/achievements"],
+      "/learning-trails": ["/daily-quiz", "/goals"],
+      "/goals": ["/profile", "/learning-trails"],
+      "/social": ["/profile", "/duels"],
     };
 
     const routesToPrefetch = adjacentRoutes[location.pathname];
@@ -207,6 +207,6 @@ export function prefetchOnIdle(routes: string[]): void {
 // Hook to prefetch critical routes on app load
 export function usePrefetchCriticalRoutes() {
   useEffect(() => {
-    prefetchOnIdle(["/dashboard", "/profile", "/quests"]);
+    prefetchOnIdle(["/profile", "/leagues", "/achievements"]);
   }, []);
 }
