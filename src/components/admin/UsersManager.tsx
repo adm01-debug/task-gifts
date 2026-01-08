@@ -65,7 +65,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
-import { useUserRoles, type AppRole } from "@/hooks/useUserRoles";
+import { type AppRole } from "@/hooks/useRBAC";
 import { useDebounce } from "@/hooks/useDebounce";
 import { 
   useAllUserRoles, 
