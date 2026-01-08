@@ -112,7 +112,7 @@ export const pulseSurveysService = {
       .from("pulse_surveys")
       .select("*")
       .eq("id", surveyId)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     if (!data) return null;
@@ -175,7 +175,7 @@ export const pulseSurveysService = {
       .from("pulse_surveys")
       .select("questions")
       .eq("id", surveyId)
-      .single();
+      .maybeSingle();
 
     const { data: responses } = await supabase
       .from("pulse_responses")

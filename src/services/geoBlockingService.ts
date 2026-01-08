@@ -249,13 +249,13 @@ class GeoBlockingService {
       .from('geo_settings')
       .select('*')
       .limit(1)
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error('Error fetching geo settings:', error);
       return null;
     }
-    return data as GeoSettings;
+    return data as GeoSettings | null;
   }
 
   async updateSettings(input: UpdateSettingsInput): Promise<GeoSettings> {
