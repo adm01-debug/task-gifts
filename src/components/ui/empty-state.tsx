@@ -125,5 +125,3 @@ export function EmptyStateCard({ cardClassName, ...props }: EmptyStateCardProps)
   );
 }
 
-// Re-export illustrated version
-export { IllustratedEmptyState, IllustratedEmptyStateCard } from "./illustrated-empty-state";
