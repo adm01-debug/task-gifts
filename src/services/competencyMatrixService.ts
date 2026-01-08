@@ -47,8 +47,9 @@ export const competencyMatrixService = {
       required_level: requiredLevel,
       weight,
       is_mandatory: isMandatory,
-    }, { onConflict: 'position_id,competency_id' }).select().single();
+    }, { onConflict: 'position_id,competency_id' }).select().maybeSingle();
     if (error) { logger.error('Failed to set position competency', 'CompetencyMatrix', error); throw error; }
+    if (!data) throw new Error('Failed to set position competency');
     return data as unknown as PositionCompetency;
   },
 
@@ -70,8 +71,9 @@ export const competencyMatrixService = {
   },
 
   async createAssessment(assessment: Omit<UserCompetencyAssessment, 'id' | 'created_at'>): Promise<UserCompetencyAssessment> {
-    const { data, error } = await supabase.from('user_competency_assessments').insert(assessment).select().single();
+    const { data, error } = await supabase.from('user_competency_assessments').insert(assessment).select().maybeSingle();
     if (error) { logger.error('Failed to create assessment', 'CompetencyMatrix', error); throw error; }
+    if (!data) throw new Error('Failed to create assessment');
     return data as unknown as UserCompetencyAssessment;
   },
 

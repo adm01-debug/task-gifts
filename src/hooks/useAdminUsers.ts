@@ -79,9 +79,10 @@ export function useAssignRole() {
         .from("user_roles")
         .insert({ user_id: userId, role })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Failed to assign role');
       return data;
     },
     onSuccess: () => {
@@ -142,9 +143,10 @@ export function useAssignDepartment() {
           is_manager: isManager,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Failed to assign department');
       return data;
     },
     onSuccess: () => {
@@ -185,9 +187,10 @@ export function useSetDepartmentManager() {
         .update({ is_manager: isManager })
         .eq("id", memberId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Team member not found');
       return data;
     },
     onSuccess: () => {
@@ -223,7 +226,7 @@ export function useBulkAssignRole() {
             .from("user_roles")
             .insert({ user_id: userId, role })
             .select()
-            .single();
+            .maybeSingle();
 
           if (error) throw error;
           return { userId, data };
@@ -297,7 +300,7 @@ export function useBulkAssignDepartment() {
             .from("team_members")
             .insert({ user_id: userId, department_id: departmentId, is_manager: false })
             .select()
-            .single();
+            .maybeSingle();
 
           if (error) throw error;
           return { userId, data };

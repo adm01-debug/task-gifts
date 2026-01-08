@@ -94,14 +94,16 @@ export const feedback360Service = {
       created_by: cycle.created_by,
       department_id: cycle.department_id,
       status: 'draft',
-    }).select().single();
+    }).select().maybeSingle();
     if (error) { logger.error('Failed to create cycle', 'Feedback360', error); throw error; }
+    if (!data) throw new Error('Failed to create feedback cycle');
     return data as unknown as FeedbackCycle;
   },
 
   async updateCycle(id: string, updates: Record<string, unknown>): Promise<FeedbackCycle> {
-    const { data, error } = await supabase.from('feedback_cycles').update(updates as never).eq('id', id).select().single();
+    const { data, error } = await supabase.from('feedback_cycles').update(updates as never).eq('id', id).select().maybeSingle();
     if (error) { logger.error('Failed to update cycle', 'Feedback360', error); throw error; }
+    if (!data) throw new Error('Feedback cycle not found');
     return data as unknown as FeedbackCycle;
   },
 
@@ -130,8 +132,9 @@ export const feedback360Service = {
       evaluatee_id: evaluation.evaluatee_id,
       evaluator_type: evaluation.evaluator_type,
       status: 'pending',
-    }).select().single();
+    }).select().maybeSingle();
     if (error) { logger.error('Failed to create evaluation', 'Feedback360', error); throw error; }
+    if (!data) throw new Error('Failed to create evaluation');
     return data as unknown as FeedbackEvaluation;
   },
 

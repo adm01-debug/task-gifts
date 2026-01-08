@@ -65,9 +65,10 @@ export const activityCommentsService = {
         content: content.trim(),
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Failed to add comment");
     return data;
   },
 

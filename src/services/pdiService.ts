@@ -48,14 +48,15 @@ export const pdiService = {
   },
 
   async getTemplateById(id: string): Promise<PDITemplate | null> {
-    const { data, error } = await supabase.from('pdi_templates').select('*').eq('id', id).single();
+    const { data, error } = await supabase.from('pdi_templates').select('*').eq('id', id).maybeSingle();
     if (error) { logger.error('Failed to fetch template', 'PDIService', error); return null; }
     return data as unknown as PDITemplate;
   },
 
   async createTemplate(template: Omit<PDITemplate, 'id' | 'created_at'>): Promise<PDITemplate> {
-    const { data, error } = await supabase.from('pdi_templates').insert(template).select().single();
+    const { data, error } = await supabase.from('pdi_templates').insert(template).select().maybeSingle();
     if (error) { logger.error('Failed to create template', 'PDIService', error); throw error; }
+    if (!data) throw new Error('Failed to create template');
     return data as unknown as PDITemplate;
   },
 
@@ -66,8 +67,9 @@ export const pdiService = {
   },
 
   async addMentor(mentor: Omit<PDIMentor, 'id' | 'created_at'>): Promise<PDIMentor> {
-    const { data, error } = await supabase.from('pdi_mentors').insert(mentor).select().single();
+    const { data, error } = await supabase.from('pdi_mentors').insert(mentor).select().maybeSingle();
     if (error) { logger.error('Failed to add mentor', 'PDIService', error); throw error; }
+    if (!data) throw new Error('Failed to add mentor');
     return data as unknown as PDIMentor;
   },
 
@@ -83,8 +85,9 @@ export const pdiService = {
   },
 
   async createCheckin(checkin: Omit<PDICheckin, 'id' | 'created_at'>): Promise<PDICheckin> {
-    const { data, error } = await supabase.from('pdi_checkins').insert(checkin).select().single();
+    const { data, error } = await supabase.from('pdi_checkins').insert(checkin).select().maybeSingle();
     if (error) { logger.error('Failed to create checkin', 'PDIService', error); throw error; }
+    if (!data) throw new Error('Failed to create checkin');
     return data as unknown as PDICheckin;
   },
 
