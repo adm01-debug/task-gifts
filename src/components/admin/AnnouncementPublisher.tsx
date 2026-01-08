@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Megaphone, Plus, Edit2, Trash2, Save, X, Pin, Eye, EyeOff } from "lucide-react";
+import { Megaphone, Plus, Edit2, Trash2, Save, X, Pin, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,10 +25,10 @@ import {
 import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { toast } from "sonner";
+
 
 export function AnnouncementPublisher() {
-  const { announcements, isLoading } = useAnnouncements();
+  const { announcements, isLoading, createAnnouncement, isCreating } = useAnnouncements();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -40,16 +40,27 @@ export function AnnouncementPublisher() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement create announcement
-    toast.success("Anúncio publicado!");
-    setIsDialogOpen(false);
-    setFormData({
-      title: "",
-      content: "",
-      category: "general",
-      is_pinned: false,
-      expires_at: "",
-    });
+    createAnnouncement(
+      {
+        title: formData.title,
+        content: formData.content,
+        category: formData.category as "general" | "urgent" | "event" | "policy" | "achievement",
+        is_pinned: formData.is_pinned,
+        expires_at: formData.expires_at || null,
+      },
+      {
+        onSuccess: () => {
+          setIsDialogOpen(false);
+          setFormData({
+            title: "",
+            content: "",
+            category: "general",
+            is_pinned: false,
+            expires_at: "",
+          });
+        },
+      }
+    );
   };
 
   const categoryColors: Record<string, string> = {
@@ -160,9 +171,9 @@ export function AnnouncementPublisher() {
                   <X className="w-4 h-4 mr-2" />
                   Cancelar
                 </Button>
-                <Button type="submit">
+                <Button type="submit" disabled={isCreating}>
                   <Save className="w-4 h-4 mr-2" />
-                  Publicar
+                  {isCreating ? "Publicando..." : "Publicar"}
                 </Button>
               </div>
             </form>
