@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { LucideIcon, Inbox } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,7 +21,7 @@ interface EmptyStateProps {
   compact?: boolean;
 }
 
-export function EmptyState({
+export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function EmptyState({
   icon: Icon = Inbox,
   title,
   description,
@@ -28,7 +29,7 @@ export function EmptyState({
   secondaryAction,
   className,
   compact = false,
-}: EmptyStateProps) {
+}, ref) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -109,7 +110,7 @@ export function EmptyState({
       )}
     </motion.div>
   );
-}
+});
 
 interface EmptyStateCardProps extends EmptyStateProps {
   cardClassName?: string;

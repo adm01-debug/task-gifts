@@ -1,7 +1,5 @@
 /**
  * Componente de Input de Busca
- * 
- * @module components/SearchInput
  */
 
 import { useState, useEffect } from 'react';
@@ -35,17 +33,14 @@ export function SearchInput({
 }: SearchInputProps) {
   const [internalValue, setInternalValue] = useState(externalValue ?? '');
   
-  // Handler unificado
   const handleChange = onChange ?? onSearch;
 
-  // Sincronizar valor externo
   useEffect(() => {
     if (externalValue !== undefined) {
       setInternalValue(externalValue);
     }
   }, [externalValue]);
 
-  // Debounce
   useEffect(() => {
     if (!handleChange) return;
     

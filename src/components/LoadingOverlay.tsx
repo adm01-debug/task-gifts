@@ -51,7 +51,6 @@ export function LoadingOverlay({
   );
 }
 
-// Inline loading indicator for buttons and small areas
 export function LoadingSpinner({
   size = "sm",
   className,
@@ -71,7 +70,6 @@ export function LoadingSpinner({
   );
 }
 
-// Skeleton pulse animation wrapper
 export function SkeletonPulse({ className }: { className?: string }) {
   return (
     <div className={cn("animate-pulse bg-muted rounded", className)} />

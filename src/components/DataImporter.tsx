@@ -1,11 +1,9 @@
 /**
  * Componente de Importação de Dados
- * 
- * @module components/DataImporter
  */
 
-import { useCallback } from 'react';
-import { z } from 'zod';
+import { useState, useCallback, ReactNode } from 'react';
+import { z, ZodSchema } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
@@ -27,213 +25,265 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Upload,
-  FileSpreadsheet,
-  AlertCircle,
-  CheckCircle2,
-  Download,
-  Loader2,
-} from 'lucide-react';
-import { useImportData } from '@/hooks/useImportData';
+import { Upload, AlertCircle, CheckCircle2, Download, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { importExcel, generateCSVTemplate } from '@/lib/excelImporter';
 
-export interface ImportColumn {
+interface ColumnConfig {
   key: string;
   label: string;
-  example?: string;
+  required?: boolean;
 }
 
-export interface DataImporterProps<T> {
-  schema: z.ZodSchema<T>;
+interface DataImporterProps<T> {
+  schema: ZodSchema<T>;
+  columns: ColumnConfig[];
   onImport: (data: T[]) => Promise<void>;
-  templateUrl?: string;
   templateName?: string;
-  entityName?: string;
   title?: string;
-  trigger?: React.ReactNode;
-  columns?: ImportColumn[];
+  description?: string;
+  trigger?: ReactNode;
   onSuccess?: () => void;
+}
+
+interface ValidationError {
+  row: number;
+  column: string;
+  message: string;
+}
+
+interface ParsedRow {
+  data: Record<string, unknown>;
+  errors: ValidationError[];
+  isValid: boolean;
 }
 
 export function DataImporter<T>({
   schema,
-  onImport,
-  templateUrl,
-  templateName,
-  entityName,
-  title,
-  trigger,
   columns,
+  onImport,
+  templateName = 'template',
+  title = 'Importar Dados',
+  description = 'Faça upload de um arquivo Excel ou CSV para importar dados.',
+  trigger,
   onSuccess,
 }: DataImporterProps<T>) {
-  const displayName = entityName || title || templateName || 'Dados';
-  
-  const {
-    status,
-    progress,
-    result,
-    processFile,
-    confirmImport,
-    reset,
-    isProcessing,
-  } = useImportData({ 
-    schema, 
-    onImport: async (data) => {
-      await onImport(data);
-      onSuccess?.();
-    }
-  });
+  const [open, setOpen] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [parsedData, setParsedData] = useState<ParsedRow[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [step, setStep] = useState<'upload' | 'preview' | 'importing' | 'complete'>('upload');
 
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        processFile(file);
-      }
-      // Reset input para permitir mesmo arquivo
-      e.target.value = '';
-    },
-    [processFile]
-  );
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
+    setIsLoading(true);
+    setProgress(10);
+
+    try {
+      // Build column mapping from config
+      const columnMapping: Record<string, string> = {};
+      columns.forEach(col => {
+        columnMapping[col.label] = col.key;
+      });
+
+      const rawData = await importExcel<Record<string, unknown>>(selectedFile, columnMapping as Record<string, keyof Record<string, unknown>>);
+      setProgress(50);
+
+      const parsed: ParsedRow[] = rawData.map((row, index) => {
+        const errors: ValidationError[] = [];
+        
+        try {
+          schema.parse(row);
+          return { data: row as Record<string, unknown>, errors: [], isValid: true };
+        } catch (error) {
+          if (error instanceof z.ZodError) {
+            error.errors.forEach((err) => {
+              errors.push({
+                row: index + 1,
+                column: err.path.join('.'),
+                message: err.message,
+              });
+            });
+          }
+          return { data: row as Record<string, unknown>, errors, isValid: false };
+        }
+      });
+
+      setParsedData(parsed);
+      setProgress(100);
+      setStep('preview');
+    } catch {
+      toast.error('Erro ao processar arquivo');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [schema]);
+
+  const handleImport = async () => {
+    const validData = parsedData.filter((row) => row.isValid).map((row) => row.data as T);
+    
+    if (validData.length === 0) {
+      toast.error('Nenhum dado válido para importar');
+      return;
+    }
+
+    setStep('importing');
+    setProgress(0);
+
+    try {
+      await onImport(validData);
+      setProgress(100);
+      setStep('complete');
+      toast.success(`${validData.length} registros importados com sucesso!`);
+      onSuccess?.();
+    } catch {
+      toast.error('Erro ao importar dados');
+      setStep('preview');
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    generateCSVTemplate(columns, templateName);
+    toast.success('Template baixado!');
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setFile(null);
+    setParsedData([]);
+    setStep('upload');
+    setProgress(0);
+  };
+
+  const validCount = parsedData.filter((r) => r.isValid).length;
+  const errorCount = parsedData.filter((r) => !r.isValid).length;
 
   return (
-    <Dialog onOpenChange={(open) => !open && reset()}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="outline" size="sm" className="gap-2">
-            <Upload className="h-4 w-4" />
+        {trigger || (
+          <Button variant="outline" size="sm">
+            <Upload className="h-4 w-4 mr-2" />
             Importar
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>Importar {displayName}</DialogTitle>
-          <DialogDescription>
-            Faça upload de um arquivo CSV ou Excel para importar dados.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* Upload Area */}
-          <div className="flex gap-2">
-            <label className="flex-1">
+        {step === 'upload' && (
+          <div className="space-y-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
               <Input
                 type="file"
-                accept=".csv,.xlsx,.xls"
+                accept=".xlsx,.xls,.csv"
                 onChange={handleFileChange}
-                disabled={isProcessing}
-                className="cursor-pointer file:mr-4 file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
+                className="hidden"
+                id="file-upload"
               />
-            </label>
-            {templateUrl && (
-              <Button variant="outline" asChild>
-                <a href={templateUrl} download>
-                  <Download className="mr-2 h-4 w-4" />
-                  Template
-                </a>
-              </Button>
-            )}
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground">
+                  Clique para selecionar ou arraste um arquivo
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Formatos suportados: Excel (.xlsx, .xls) ou CSV
+                </p>
+              </label>
+            </div>
+            
+            <Button variant="outline" onClick={handleDownloadTemplate} className="w-full">
+              <Download className="h-4 w-4 mr-2" />
+              Baixar Template
+            </Button>
           </div>
+        )}
 
-          {/* Columns Info */}
-          {columns && columns.length > 0 && !result && (
-            <div className="rounded-md border p-3">
-              <p className="text-sm font-medium mb-2">Colunas esperadas:</p>
-              <div className="flex flex-wrap gap-2">
-                {columns.map((col) => (
-                  <span key={col.key} className="text-xs bg-muted px-2 py-1 rounded">
-                    {col.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Progress */}
-          {isProcessing && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {status === 'parsing' && 'Lendo arquivo...'}
-                {status === 'validating' && 'Validando dados...'}
-                {status === 'importing' && 'Importando...'}
-              </div>
-              <Progress value={progress} />
-            </div>
-          )}
-
-          {/* Results */}
-          {result && (
-            <>
-              <Alert variant={result.errors.length > 0 ? 'destructive' : 'default'}>
-                {result.errors.length === 0 ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : (
-                  <AlertCircle className="h-4 w-4" />
-                )}
-                <AlertTitle>
-                  {result.success.length} de {result.total} registros válidos
-                </AlertTitle>
-                <AlertDescription>
-                  {result.errors.length > 0
-                    ? `${result.errors.length} erro(s) encontrado(s). Corrija-os para importar todos os dados.`
-                    : 'Todos os registros estão prontos para importação.'}
-                </AlertDescription>
+        {step === 'preview' && (
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <Alert variant={validCount > 0 ? "default" : "destructive"}>
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertTitle>{validCount} válidos</AlertTitle>
               </Alert>
-
-              {/* Error Table */}
-              {result.errors.length > 0 && (
-                <div className="max-h-48 overflow-y-auto rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-20">Linha</TableHead>
-                        <TableHead>Campo</TableHead>
-                        <TableHead>Erro</TableHead>
-                        <TableHead>Valor</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {result.errors.slice(0, 20).map((error, i) => (
-                        <TableRow key={i}>
-                          <TableCell className="font-medium">{error.row}</TableCell>
-                          <TableCell>{error.field}</TableCell>
-                          <TableCell className="text-destructive">{error.message}</TableCell>
-                          <TableCell className="truncate max-w-[100px]">
-                            {String(error.value ?? '-')}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  {result.errors.length > 20 && (
-                    <div className="p-2 text-center text-sm text-muted-foreground">
-                      + {result.errors.length - 20} erros adicionais
-                    </div>
-                  )}
-                </div>
+              {errorCount > 0 && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>{errorCount} com erros</AlertTitle>
+                </Alert>
               )}
-            </>
-          )}
-        </div>
+            </div>
+
+            <div className="max-h-60 overflow-auto border rounded">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    {columns.slice(0, 4).map((col) => (
+                      <TableHead key={col.key}>{col.label}</TableHead>
+                    ))}
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {parsedData.slice(0, 10).map((row, idx) => (
+                    <TableRow key={idx} className={row.isValid ? '' : 'bg-destructive/10'}>
+                      <TableCell>{idx + 1}</TableCell>
+                      {columns.slice(0, 4).map((col) => (
+                        <TableCell key={col.key} className="max-w-32 truncate">
+                          {String(row.data[col.key] ?? '-')}
+                        </TableCell>
+                      ))}
+                      <TableCell>
+                        {row.isValid ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="h-4 w-4 text-destructive" />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        {(step === 'importing' || isLoading) && (
+          <div className="py-8">
+            <Progress value={progress} className="mb-4" />
+            <p className="text-center text-sm text-muted-foreground">
+              {step === 'importing' ? 'Importando dados...' : 'Processando arquivo...'}
+            </p>
+          </div>
+        )}
+
+        {step === 'complete' && (
+          <Alert>
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertTitle>Importação concluída!</AlertTitle>
+            <AlertDescription>
+              {validCount} registros foram importados com sucesso.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={reset}>
-            Cancelar
+          <Button variant="outline" onClick={handleClose}>
+            <X className="h-4 w-4 mr-2" />
+            {step === 'complete' ? 'Fechar' : 'Cancelar'}
           </Button>
-          {result && result.success.length > 0 && (
-            <Button
-              onClick={confirmImport}
-              disabled={isProcessing}
-              className="gap-2"
-            >
-              {isProcessing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <FileSpreadsheet className="h-4 w-4" />
-              )}
-              Importar {result.success.length} Registro(s)
+          {step === 'preview' && validCount > 0 && (
+            <Button onClick={handleImport}>
+              <Upload className="h-4 w-4 mr-2" />
+              Importar {validCount} registros
             </Button>
           )}
         </DialogFooter>
