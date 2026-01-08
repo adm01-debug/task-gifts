@@ -90,7 +90,7 @@ export const goalsService = {
       .from("goals")
       .select("*")
       .eq("id", goalId)
-      .single();
+      .maybeSingle();
 
     if (goalError) throw goalError;
     if (!goal) return null;
@@ -140,9 +140,10 @@ export const goalsService = {
       .from("goals")
       .insert({ ...goal, user_id: user.id })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Failed to create goal");
     return data as Goal;
   },
 
@@ -152,9 +153,10 @@ export const goalsService = {
       .update(updates)
       .eq("id", goalId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Goal not found");
     return data as Goal;
   },
 
@@ -172,9 +174,10 @@ export const goalsService = {
       .from("key_results")
       .insert(keyResult)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Failed to create key result");
     return data as KeyResult;
   },
 
@@ -187,7 +190,7 @@ export const goalsService = {
       .from("key_results")
       .select("current_value, goal_id")
       .eq("id", krId)
-      .single();
+      .maybeSingle();
 
     // Update key result
     const { data, error } = await supabase
@@ -195,9 +198,10 @@ export const goalsService = {
       .update({ current_value: currentValue })
       .eq("id", krId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Key result not found");
 
     // Log update
     if (kr) {

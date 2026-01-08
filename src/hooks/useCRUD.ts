@@ -50,8 +50,9 @@ export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
   const useGetById = (id: string) => useQuery({
     queryKey: [...queryKey, id],
     queryFn: async () => {
-      const { data, error } = await getTable(tableName).select('*').eq('id', id).single();
+      const { data, error } = await getTable(tableName).select('*').eq('id', id).maybeSingle();
       if (error) throw error;
+      if (!data) throw new Error(`${tableName} record not found`);
       return data as T;
     },
     enabled: !!id,
@@ -59,8 +60,9 @@ export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
 
   const createMutation = useMutation({
     mutationFn: async (newData: Partial<T>) => {
-      const { data, error } = await getTable(tableName).insert(newData).select().single();
+      const { data, error } = await getTable(tableName).insert(newData).select().maybeSingle();
       if (error) throw error;
+      if (!data) throw new Error('Failed to create record');
       return data as T;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success(messages.createSuccess || 'Registro criado!'); },
@@ -69,8 +71,9 @@ export function useCRUD<T extends BaseEntity>(config: CRUDConfig<T>) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data: updateData }: { id: string; data: Partial<T> }) => {
-      const { data, error } = await getTable(tableName).update(updateData).eq('id', id).select().single();
+      const { data, error } = await getTable(tableName).update(updateData).eq('id', id).select().maybeSingle();
       if (error) throw error;
+      if (!data) throw new Error('Record not found for update');
       return data as T;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success(messages.updateSuccess || 'Registro atualizado!'); },

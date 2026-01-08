@@ -92,13 +92,13 @@ export const actionPlanService = {
       .from('action_plans')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error('Failed to fetch action plan', 'ActionPlanService', error);
       throw error;
     }
-    return data as unknown as ActionPlan;
+    return data as unknown as ActionPlan | null;
   },
 
   async createPlan(plan: {
@@ -132,12 +132,13 @@ export const actionPlanService = {
         root_cause_summary: plan.rootCauseSummary,
       } as any)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error('Failed to create action plan', 'ActionPlanService', error);
       throw error;
     }
+    if (!data) throw new Error('Failed to create action plan');
     return data as unknown as ActionPlan;
   },
 
@@ -147,12 +148,13 @@ export const actionPlanService = {
       .update(updates as any)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error('Failed to update action plan', 'ActionPlanService', error);
       throw error;
     }
+    if (!data) throw new Error('Action plan not found');
     return data as unknown as ActionPlan;
   },
 
@@ -213,12 +215,13 @@ export const actionPlanService = {
         order_index: nextIndex,
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error('Failed to create action plan item', 'ActionPlanService', error);
       throw error;
     }
+    if (!data) throw new Error('Failed to create action plan item');
     return data as unknown as ActionPlanItem;
   },
 
@@ -228,12 +231,13 @@ export const actionPlanService = {
       .update(updates as any)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error('Failed to update action plan item', 'ActionPlanService', error);
       throw error;
     }
+    if (!data) throw new Error('Action plan item not found');
     return data as unknown as ActionPlanItem;
   },
 
@@ -252,12 +256,13 @@ export const actionPlanService = {
         comment,
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error('Failed to add action plan update', 'ActionPlanService', error);
       throw error;
     }
+    if (!data) throw new Error('Failed to add update');
     return data as unknown as ActionPlanUpdate;
   },
 

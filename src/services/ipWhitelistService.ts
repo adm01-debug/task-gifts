@@ -57,9 +57,10 @@ class IpWhitelistService {
         created_by: user?.id
       })
       .select()
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
+    if (!data) throw new Error('Failed to add IP to whitelist');
     return data as IpWhitelistEntry;
   }
 
@@ -69,9 +70,10 @@ class IpWhitelistService {
       .update(input)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
+    if (!data) throw new Error('IP not found');
     return data as IpWhitelistEntry;
   }
 

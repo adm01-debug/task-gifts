@@ -99,9 +99,10 @@ export function useSavedFilters(entityType: string) {
           is_default: input.is_default ?? false,
         })
         .select()
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) throw new Error('Failed to save filter');
       return data;
     },
     onSuccess: () => {
