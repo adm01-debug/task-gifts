@@ -102,9 +102,9 @@ export async function getThemeByDepartment(departmentId: string): Promise<Gamifi
     .from('gamification_themes')
     .select('*')
     .eq('department_id', departmentId)
-    .single();
+    .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') throw error;
+  if (error) throw error;
   return data as GamificationTheme | null;
 }
 

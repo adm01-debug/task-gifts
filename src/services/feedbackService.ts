@@ -218,9 +218,9 @@ export const feedbackService = {
       .from("feedback_responses")
       .select("*")
       .eq("request_id", requestId)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') throw error;
+    if (error) throw error;
     return data as FeedbackResponse | null;
   },
 

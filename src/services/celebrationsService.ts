@@ -119,7 +119,7 @@ export const celebrationsService = {
       .from("profiles")
       .select("display_name, birth_date, hire_date")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     if (!profile) return;
 
