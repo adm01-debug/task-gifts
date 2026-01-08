@@ -170,7 +170,7 @@ export const oneOnOnePreparationService = {
       .from("nine_box_evaluations")
       .select("*")
       .eq("user_id", employeeId)
-      .order("evaluation_date", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
