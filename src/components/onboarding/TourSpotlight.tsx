@@ -163,10 +163,14 @@ export const TourSpotlight = memo(function TourSpotlight() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9998] pointer-events-auto"
-            onClick={skipTour}
+            className="fixed inset-0 z-[9998]"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              skipTour();
+            }}
           >
-            <svg className="w-full h-full" style={{ position: "absolute", top: 0, left: 0 }}>
+            <svg className="w-full h-full pointer-events-none" style={{ position: "absolute", top: 0, left: 0 }}>
               <defs>
                 <mask id="spotlight-mask">
                   <rect x="0" y="0" width="100%" height="100%" fill="white" />
