@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { type AppRole } from "./useUserRoles";
+import { type AppRole } from "./useRBAC";
 
 export const adminUsersKeys = {
   all: ["admin-users"] as const,
