@@ -45,7 +45,7 @@ export const notificationTemplatesService = {
   },
 
   async getTemplateByKey(key: string): Promise<NotificationTemplate | null> {
-    const { data, error } = await supabase.from('notification_templates').select('*').eq('key', key).single();
+    const { data, error } = await supabase.from('notification_templates').select('*').eq('key', key).maybeSingle();
     if (error) { logger.error('Failed to fetch template', 'Notifications', error); return null; }
     return data as unknown as NotificationTemplate;
   },

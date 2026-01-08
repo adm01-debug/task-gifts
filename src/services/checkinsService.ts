@@ -152,11 +152,14 @@ export const checkinsService = {
   },
 
   async addActionItem(checkinId: string, actionItem: Omit<ActionItem, 'id'>): Promise<Checkin> {
-    const { data: checkin } = await supabase
+    const { data: checkin, error } = await supabase
       .from("checkins")
       .select("action_items")
       .eq("id", checkinId)
-      .single();
+      .maybeSingle();
+    
+    if (error) throw error;
+    if (!checkin) throw new Error("Checkin not found");
 
     const currentItems = (checkin?.action_items || []) as unknown as ActionItem[];
     const newItem: ActionItem = {
@@ -170,11 +173,14 @@ export const checkinsService = {
   },
 
   async toggleActionItem(checkinId: string, actionItemId: string): Promise<Checkin> {
-    const { data: checkin } = await supabase
+    const { data: checkin, error } = await supabase
       .from("checkins")
       .select("action_items")
       .eq("id", checkinId)
-      .single();
+      .maybeSingle();
+    
+    if (error) throw error;
+    if (!checkin) throw new Error("Checkin not found");
 
     const items = (checkin?.action_items || []) as unknown as ActionItem[];
     const updatedItems = items.map(item => 
