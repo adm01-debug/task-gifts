@@ -7,26 +7,21 @@ import { LeagueCard } from "@/components/LeagueCard";
 import type { LeagueHistory } from "@/services/leaguesService";
 import { PageWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobilePageLayout } from "@/components/mobile";
 
 export default function Leagues() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { myLeague, leaderboard, history, isLoading } = useLeagues();
 
-  return (
-    <PageWrapper pageName="Ligas" className="min-h-screen bg-background">
+  const pageContent = (
+    <>
       <SEOHead
         title="Ligas & Divisões | Gamify"
         description="Participe das ligas semanais e avance nas divisões competindo com outros usuários."
       />
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <Trophy className="h-6 w-6 text-primary" />
-        <h1 className="text-xl font-bold">Ligas & Divisões</h1>
-      </header>
-
-      <main className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <main className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <LeagueCard />
           
@@ -54,6 +49,33 @@ export default function Leagues() {
           </Card>
         </div>
       </main>
+    </>
+  );
+
+  // Mobile: use MobilePageLayout
+  if (isMobile) {
+    return (
+      <MobilePageLayout
+        title="Ligas & Divisões"
+        icon={Trophy}
+        backPath="/"
+      >
+        {pageContent}
+      </MobilePageLayout>
+    );
+  }
+
+  // Desktop: original layout
+  return (
+    <PageWrapper pageName="Ligas" className="min-h-screen bg-background">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <Trophy className="h-6 w-6 text-primary" />
+        <h1 className="text-xl font-bold">Ligas & Divisões</h1>
+      </header>
+      {pageContent}
     </PageWrapper>
   );
 }
