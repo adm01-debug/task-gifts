@@ -61,13 +61,16 @@ export const moodTrackerService = {
       .select("*")
       .eq("user_id", user.id)
       .eq("entry_date", today)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') throw error;
-    return data ? {
-      ...data,
-      factors: (data.factors || []) as string[],
-    } as MoodEntry : null;
+    if (error) throw error;
+
+    return data
+      ? ({
+          ...data,
+          factors: (data.factors || []) as string[],
+        } as MoodEntry)
+      : null;
   },
 
   async getMyMoodHistory(days = 30): Promise<MoodEntry[]> {
