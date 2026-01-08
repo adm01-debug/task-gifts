@@ -89,7 +89,7 @@ export function usePushNotifications() {
       const registration = await navigator.serviceWorker.register("/sw-push.js", {
         scope: "/"
       });
-      console.log("Push SW registered:", registration.scope);
+      // Service worker registered successfully
       return registration;
     } catch (error) {
       console.error("SW registration failed:", error);
@@ -154,7 +154,7 @@ export function usePushNotifications() {
         applicationServerKey: VAPID_PUBLIC_KEY || undefined
       });
 
-      console.log("Push subscription:", JSON.stringify(subscription));
+      // Subscription created successfully
 
       // Save subscription to backend
       // await saveSubscriptionToBackend(subscription);
