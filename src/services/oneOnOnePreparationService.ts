@@ -110,7 +110,7 @@ export const oneOnOnePreparationService = {
       .from("profiles")
       .select("*")
       .eq("id", employeeId)
-      .single();
+      .maybeSingle();
 
     // Fetch last completed checkin
     const { data: lastCheckin } = await supabase
@@ -120,7 +120,7 @@ export const oneOnOnePreparationService = {
       .eq("status", "completed")
       .order("completed_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     // Fetch recent mood entries (pulses)
     const { data: pulses } = await supabase
@@ -190,7 +190,7 @@ export const oneOnOnePreparationService = {
       typedKudos.map(async (k) => {
         let fromName = "Alguém";
         if (k.from_user_id) {
-          const { data: fromProfile } = await supabase.from("profiles").select("display_name").eq("id", k.from_user_id).single();
+          const { data: fromProfile } = await supabase.from("profiles").select("display_name").eq("id", k.from_user_id).maybeSingle();
           fromName = fromProfile?.display_name || "Alguém";
         }
         return { message: k.message, from: fromName, date: k.created_at };

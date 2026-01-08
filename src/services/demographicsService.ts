@@ -33,9 +33,9 @@ export const demographicsService = {
   },
 
   async getAttributeById(id: string): Promise<DemographicAttribute | null> {
-    const { data, error } = await supabase.from('demographic_attributes').select('*').eq('id', id).single();
+    const { data, error } = await supabase.from('demographic_attributes').select('*').eq('id', id).maybeSingle();
     if (error) { logger.error('Failed to fetch attribute', 'Demographics', error); return null; }
-    return data as unknown as DemographicAttribute;
+    return data as unknown as DemographicAttribute | null;
   },
 
   async createAttribute(attribute: Omit<DemographicAttribute, 'id'>): Promise<DemographicAttribute> {

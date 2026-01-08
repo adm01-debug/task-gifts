@@ -63,7 +63,7 @@ export const passwordResetService = {
           .from("profiles")
           .select("display_name")
           .eq("id", req.reviewed_by)
-          .single();
+          .maybeSingle();
         (req as any).reviewer = reviewer;
       }
     }
@@ -91,7 +91,7 @@ export const passwordResetService = {
         .from("profiles")
         .select("display_name, email")
         .eq("id", req.user_id)
-        .single();
+        .maybeSingle();
       (req as any).profiles = profile;
     }
     
@@ -122,7 +122,7 @@ export const passwordResetService = {
         .from("profiles")
         .select("display_name, email")
         .eq("id", req.user_id)
-        .single();
+        .maybeSingle();
       (req as any).profiles = profile;
       
       if (req.reviewed_by) {
@@ -130,7 +130,7 @@ export const passwordResetService = {
           .from("profiles")
           .select("display_name")
           .eq("id", req.reviewed_by)
-          .single();
+          .maybeSingle();
         (req as any).reviewer = reviewer;
       }
     }

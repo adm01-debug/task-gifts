@@ -85,7 +85,7 @@ export const leaguesService = {
       .from("leagues")
       .select("*")
       .eq("tier", 1)
-      .single();
+      .maybeSingle();
 
     if (!bronzeLeague) throw new Error("Bronze league not found");
 
@@ -156,7 +156,7 @@ export const leaguesService = {
       .from("user_leagues")
       .select("weekly_xp")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
     if (!userLeague) {
       await this.initializeUserLeague(userId);
@@ -176,7 +176,7 @@ export const leaguesService = {
       .from("leagues")
       .select("promotion_slots")
       .eq("id", leagueId)
-      .single();
+      .maybeSingle();
 
     if (!league) return [];
 
@@ -199,7 +199,7 @@ export const leaguesService = {
       .from("leagues")
       .select("demotion_slots")
       .eq("id", leagueId)
-      .single();
+      .maybeSingle();
 
     if (!league || !league.demotion_slots) return [];
 
