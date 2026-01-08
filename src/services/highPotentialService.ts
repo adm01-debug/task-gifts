@@ -79,7 +79,34 @@ export const highPotentialService = {
       .from("profiles")
       .select("*")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
+
+    if (!profile) {
+      // Return default metrics if profile not found
+      return {
+        questsCompleted: 0,
+        goalsAchieved: 0,
+        goalsTotal: 0,
+        taskOnTimeRate: 0,
+        trailsCompleted: 0,
+        trailsEnrolled: 0,
+        pdiProgress: 0,
+        certificationsCount: 0,
+        kudosReceived: 0,
+        kudosGiven: 0,
+        feedbacksGiven: 0,
+        checkinsCompleted: 0,
+        avgMood: 3,
+        attendanceRate: 0,
+        streak: 0,
+        bestStreak: 0,
+        mentoringSessions: 0,
+        teamChallengesParticipated: 0,
+        xpGained30Days: 0,
+        levelUpsLast90Days: 0,
+        nineBoxPosition: undefined,
+      };
+    }
 
     // Fetch goals
     const { data: goals } = await supabase
@@ -156,7 +183,7 @@ export const highPotentialService = {
       .from("nine_box_evaluations")
       .select("*")
       .eq("user_id", userId)
-      .order("evaluation_date", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
