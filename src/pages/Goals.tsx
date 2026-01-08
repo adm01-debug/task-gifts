@@ -20,10 +20,12 @@ import type { Goal, KeyResult } from "@/types/goals";
 import { PageWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
-
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobilePageLayout } from "@/components/mobile";
 export default function Goals() {
   const seoConfig = useSEO();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { goals, teamGoals, companyGoals, isLoading, createGoal, updateGoal, createKeyResult, deleteGoal, isCreating } = useGoals();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -232,21 +234,12 @@ export default function Goals() {
     </motion.div>
   );
 
-  return (
-    <PageWrapper pageName="Goals" className="min-h-screen bg-background">
+  const pageContent = (
+    <>
       <SEOHead title={seoConfig.title} description={seoConfig.description} keywords={seoConfig.keywords} />
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <Target className="h-6 w-6 text-primary" />
-        <h1 className="text-xl font-bold">Goals & OKRs</h1>
-        <span className="hidden md:block text-muted-foreground ml-2">Gerencie seus objetivos</span>
-      </header>
-
-      <main className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <main className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -442,6 +435,34 @@ export default function Goals() {
           </TabsContent>
         </Tabs>
       </main>
+    </>
+  );
+
+  // Mobile: use MobilePageLayout for consistent navigation
+  if (isMobile) {
+    return (
+      <MobilePageLayout
+        title="Goals & OKRs"
+        icon={Target}
+        backPath="/"
+      >
+        {pageContent}
+      </MobilePageLayout>
+    );
+  }
+
+  // Desktop: original layout with header
+  return (
+    <PageWrapper pageName="Goals" className="min-h-screen bg-background">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <Target className="h-6 w-6 text-primary" />
+        <h1 className="text-xl font-bold">Goals & OKRs</h1>
+        <span className="text-muted-foreground ml-2">Gerencie seus objetivos</span>
+      </header>
+      {pageContent}
     </PageWrapper>
   );
 }

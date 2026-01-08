@@ -20,6 +20,8 @@ import { useNavigate } from "react-router-dom";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useOneOnOnePreparationManual } from "@/hooks/useOneOnOnePreparation";
 import { OneOnOnePreparationPanel } from "@/components/checkins/OneOnOnePreparationPanel";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobilePageLayout } from "@/components/mobile";
 import type { Checkin, ActionItem, CheckinTemplate } from "@/services/checkinsService";
 
 interface Profile {
@@ -31,6 +33,7 @@ interface Profile {
 
 export default function Checkins() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { templates, checkins, upcomingCheckins, isLoading, createCheckin, completeCheckin, addActionItem, toggleActionItem, isCreating } = useCheckins();
   const { data: profiles } = useProfiles();
   const { toast } = useToast();
@@ -185,70 +188,60 @@ export default function Checkins() {
     </motion.div>
   );
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <Users className="h-6 w-6 text-primary" />
-        <h1 className="text-xl font-bold">Check-ins 1:1</h1>
-        <span className="hidden md:block text-muted-foreground ml-2">Reuniões de acompanhamento</span>
-      </header>
+  const pageContent = (
+    <main className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24">
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <Card>
+          <CardContent className="pt-4 md:pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs md:text-sm text-muted-foreground">Total</p>
+                <p className="text-xl md:text-2xl font-bold">{checkins.length}</p>
+              </div>
+              <Users className="h-6 w-6 md:h-8 md:w-8 text-primary/20" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4 md:pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs md:text-sm text-muted-foreground">Próximos</p>
+                <p className="text-xl md:text-2xl font-bold text-blue-600">{upcomingCheckins.length}</p>
+              </div>
+              <Calendar className="h-6 w-6 md:h-8 md:w-8 text-blue-500/20" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4 md:pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs md:text-sm text-muted-foreground">Concluídos</p>
+                <p className="text-xl md:text-2xl font-bold text-green-600">
+                  {checkins.filter((c) => c.status === "completed").length}
+                </p>
+              </div>
+              <CheckCircle2 className="h-6 w-6 md:h-8 md:w-8 text-green-500/20" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4 md:pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs md:text-sm text-muted-foreground">Templates</p>
+                <p className="text-xl md:text-2xl font-bold">{templates.length}</p>
+              </div>
+              <MessageSquare className="h-6 w-6 md:h-8 md:w-8 text-primary/20" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <main className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="text-2xl font-bold">{checkins.length}</p>
-                </div>
-                <Users className="h-8 w-8 text-primary/20" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Próximos</p>
-                  <p className="text-2xl font-bold text-blue-600">{upcomingCheckins.length}</p>
-                </div>
-                <Calendar className="h-8 w-8 text-blue-500/20" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Concluídos</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {checkins.filter((c) => c.status === "completed").length}
-                  </p>
-                </div>
-                <CheckCircle2 className="h-8 w-8 text-green-500/20" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Templates</p>
-                  <p className="text-2xl font-bold">{templates.length}</p>
-                </div>
-                <MessageSquare className="h-8 w-8 text-primary/20" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-between items-center">
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -514,9 +507,37 @@ export default function Checkins() {
               preparation={preparation} 
               isLoading={isPreparationLoading} 
             />
-          </DialogContent>
-        </Dialog>
-      </main>
+        </DialogContent>
+      </Dialog>
+    </main>
+  );
+
+  // Mobile: use MobilePageLayout
+  if (isMobile) {
+    return (
+      <MobilePageLayout
+        title="Check-ins 1:1"
+        icon={Users}
+        backPath="/"
+        subtitle="Reuniões de acompanhamento"
+      >
+        {pageContent}
+      </MobilePageLayout>
+    );
+  }
+
+  // Desktop: original layout
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <Users className="h-6 w-6 text-primary" />
+        <h1 className="text-xl font-bold">Check-ins 1:1</h1>
+        <span className="text-muted-foreground ml-2">Reuniões de acompanhamento</span>
+      </header>
+      {pageContent}
     </div>
   );
 }
