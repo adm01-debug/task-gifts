@@ -88,11 +88,11 @@ export const climateSurveyService = {
       .from('climate_surveys')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error('Failed to fetch climate survey', 'ClimateSurveyService', error);
-      throw error;
+      return null;
     }
     return data;
   },
