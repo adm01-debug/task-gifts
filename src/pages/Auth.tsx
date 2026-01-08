@@ -232,7 +232,7 @@ const Auth = () => {
         .from("profiles")
         .select("id")
         .eq("email", email)
-        .single();
+        .maybeSingle();
 
       if (userError || !userData) {
         toast.error("Email não encontrado no sistema");

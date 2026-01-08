@@ -110,9 +110,10 @@ export const enpsService = {
         departments:department_id (name)
       `)
       .eq("id", surveyId)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error("Survey not found");
     return data as ENPSSurvey;
   },
 
