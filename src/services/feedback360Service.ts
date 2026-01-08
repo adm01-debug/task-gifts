@@ -71,7 +71,7 @@ export const feedback360Service = {
   },
 
   async getCycleById(id: string): Promise<FeedbackCycle | null> {
-    const { data, error } = await supabase.from('feedback_cycles').select('*').eq('id', id).single();
+    const { data, error } = await supabase.from('feedback_cycles').select('*').eq('id', id).maybeSingle();
     if (error) { logger.error('Failed to fetch cycle', 'Feedback360', error); return null; }
     return data as unknown as FeedbackCycle;
   },
