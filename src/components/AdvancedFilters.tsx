@@ -1,13 +1,10 @@
-/**
- * Componente de Filtros Avançados
- * 
- * @module components/AdvancedFilters
- */
-
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -15,29 +12,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Filter, X, Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-// ============================================
-// TIPOS
-// ============================================
+import { Input } from '@/components/ui/input';
+import { Filter, Plus, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export interface FilterConfig {
   key: string;
   label: string;
   type: 'text' | 'select' | 'date' | 'number';
   options?: { value: string; label: string }[];
-  placeholder?: string;
 }
 
 export interface FilterValue {
   key: string;
-  operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'ilike';
+  operator: 'eq' | 'neq' | 'gt' | 'lt' | 'contains';
   value: unknown;
 }
 
@@ -45,32 +33,29 @@ interface AdvancedFiltersProps {
   filters: FilterConfig[];
   values: FilterValue[];
   onChange: (values: FilterValue[]) => void;
-  className?: string;
 }
 
-// ============================================
-// COMPONENTE
-// ============================================
+const operators = [
+  { value: 'eq', label: 'Igual a' },
+  { value: 'neq', label: 'Diferente de' },
+  { value: 'contains', label: 'Contém' },
+  { value: 'gt', label: 'Maior que' },
+  { value: 'lt', label: 'Menor que' },
+];
 
-export function AdvancedFilters({
+export const AdvancedFilters = memo(function AdvancedFilters({
   filters,
   values,
   onChange,
-  className,
 }: AdvancedFiltersProps) {
   const [open, setOpen] = useState(false);
 
-  const addFilter = (key: string) => {
-    const config = filters.find(f => f.key === key);
-    if (!config) return;
-
-    const newFilter: FilterValue = {
-      key,
-      operator: 'eq',
-      value: '',
-    };
-
-    onChange([...values, newFilter]);
+  const addFilter = () => {
+    if (filters.length === 0) return;
+    onChange([
+      ...values,
+      { key: filters[0].key, operator: 'eq', value: '' },
+    ]);
   };
 
   const updateFilter = (index: number, updates: Partial<FilterValue>) => {
@@ -85,125 +70,117 @@ export function AdvancedFilters({
 
   const clearAll = () => {
     onChange([]);
+    setOpen(false);
   };
 
-  const availableFilters = filters.filter(
-    f => !values.some(v => v.key === f.key)
-  );
+  const getFilterConfig = (key: string) => filters.find((f) => f.key === key);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn('gap-2', className)}
-        >
-          <Filter className="h-4 w-4" />
+        <Button variant="outline" size="sm" className="relative">
+          <Filter className="h-4 w-4 mr-1" />
           Filtros
           {values.length > 0 && (
-            <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+            <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
               {values.length}
-            </span>
+            </Badge>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96" align="start">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium">Filtros Avançados</h4>
+      <PopoverContent align="start" className="w-96 p-4">
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="font-medium text-sm">Filtros avançados</span>
             {values.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearAll}
-                className="h-8 px-2 text-xs"
-              >
-                Limpar todos
+              <Button variant="ghost" size="sm" onClick={clearAll}>
+                Limpar
               </Button>
             )}
           </div>
 
-          {/* Active Filters */}
-          <div className="space-y-2">
-            {values.map((filter, index) => {
-              const config = filters.find(f => f.key === filter.key);
-              if (!config) return null;
-
-              return (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 rounded-md border p-2"
+          {values.map((filter, index) => {
+            const config = getFilterConfig(filter.key);
+            return (
+              <div key={index} className="flex gap-2 items-center">
+                <Select
+                  value={filter.key}
+                  onValueChange={(v) => updateFilter(index, { key: v, value: '' })}
                 >
-                  <Label className="min-w-[80px] text-xs">
-                    {config.label}
-                  </Label>
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filters.map((f) => (
+                      <SelectItem key={f.key} value={f.key}>
+                        {f.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-                  {config.type === 'select' ? (
-                    <Select
-                      value={filter.value as string}
-                      onValueChange={(value) =>
-                        updateFilter(index, { value })
-                      }
-                    >
-                      <SelectTrigger className="h-8 flex-1">
-                        <SelectValue placeholder="Selecione..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {config.options?.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      type={config.type === 'number' ? 'number' : config.type === 'date' ? 'date' : 'text'}
-                      value={filter.value as string}
-                      onChange={(e) =>
-                        updateFilter(index, { value: e.target.value })
-                      }
-                      className="h-8 flex-1"
-                      placeholder={config.placeholder}
-                    />
-                  )}
+                <Select
+                  value={filter.operator}
+                  onValueChange={(v) => updateFilter(index, { operator: v as FilterValue['operator'] })}
+                >
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {operators.map((op) => (
+                      <SelectItem key={op.value} value={op.value}>
+                        {op.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 shrink-0"
-                    onClick={() => removeFilter(index)}
+                {config?.type === 'select' ? (
+                  <Select
+                    value={filter.value as string}
+                    onValueChange={(v) => updateFilter(index, { value: v })}
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Valor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {config.options?.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    type={config?.type === 'number' ? 'number' : config?.type === 'date' ? 'date' : 'text'}
+                    value={filter.value as string}
+                    onChange={(e) => updateFilter(index, { value: e.target.value })}
+                    placeholder="Valor"
+                    className="flex-1"
+                  />
+                )}
 
-          {/* Add Filter */}
-          {availableFilters.length > 0 && (
-            <Select onValueChange={addFilter}>
-              <SelectTrigger className="w-full">
-                <div className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  <span>Adicionar filtro</span>
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                {availableFilters.map((filter) => (
-                  <SelectItem key={filter.key} value={filter.key}>
-                    {filter.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => removeFilter(index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            );
+          })}
+
+          <Button variant="outline" size="sm" className="w-full" onClick={addFilter}>
+            <Plus className="h-4 w-4 mr-1" />
+            Adicionar filtro
+          </Button>
         </div>
       </PopoverContent>
     </Popover>
   );
-}
+});
 
 export default AdvancedFilters;
