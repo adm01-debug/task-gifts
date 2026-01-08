@@ -304,7 +304,7 @@ export const webauthnService = {
         .select("*")
         .eq("credential_id", credentialId)
         .eq("is_active", true)
-        .single();
+        .maybeSingle();
 
       if (fetchError || !credential) {
         return { success: false, error: "Credencial não encontrada" };
