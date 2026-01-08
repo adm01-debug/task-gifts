@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
@@ -8,13 +9,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export function ThemeToggle() {
+export const ThemeToggle = forwardRef<HTMLButtonElement>(function ThemeToggle(_, ref) {
   const { theme, toggleTheme } = useTheme();
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
+          ref={ref}
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
@@ -51,4 +53,6 @@ export function ThemeToggle() {
       </TooltipContent>
     </Tooltip>
   );
-}
+});
+
+ThemeToggle.displayName = "ThemeToggle";
