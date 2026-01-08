@@ -448,6 +448,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "announcements_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "announcements_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
@@ -896,7 +903,15 @@ export type Database = {
           xp_reward?: number
           year_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "celebrations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       certifications: {
         Row: {
