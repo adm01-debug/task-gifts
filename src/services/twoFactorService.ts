@@ -36,9 +36,9 @@ class TwoFactorService {
       .from("user_two_factor")
       .select("id, user_id, is_enabled, verified_at, created_at, updated_at")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== "PGRST116") {
+    if (error) {
       console.error("Error fetching 2FA settings:", error);
       throw error;
     }
@@ -190,9 +190,9 @@ class TwoFactorService {
       .from("user_two_factor")
       .select("is_enabled")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== "PGRST116") {
+    if (error) {
       console.error("Error checking 2FA status:", error);
       return false;
     }
