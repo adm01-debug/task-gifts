@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import DOMPurify from "dompurify";
 import { 
   X, CheckCircle2, ChevronLeft, ChevronRight, 
   Video, FileText, HelpCircle, Layers, Play
@@ -62,11 +63,21 @@ function VideoContent({ videoUrl }: { videoUrl: string }) {
 }
 
 function TextContent({ content }: { content: { text?: string; html?: string } }) {
-  if (content.html) {
+  // Sanitize HTML content to prevent XSS attacks
+  const sanitizedHtml = useMemo(() => {
+    if (!content.html) return null;
+    return DOMPurify.sanitize(content.html, {
+      ALLOWED_TAGS: ['p', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre', 'span', 'div'],
+      ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style'],
+      ALLOW_DATA_ATTR: false,
+    });
+  }, [content.html]);
+
+  if (sanitizedHtml) {
     return (
       <div 
         className="prose prose-invert max-w-none"
-        dangerouslySetInnerHTML={{ __html: content.html }}
+        dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       />
     );
   }
