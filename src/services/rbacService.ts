@@ -32,6 +32,13 @@ export interface UserRole {
   created_at: string;
 }
 
+export interface UserRoleWithProfile extends UserRole {
+  profiles: {
+    display_name: string | null;
+    email: string | null;
+  } | null;
+}
+
 export const rbacService = {
   // ===== PERMISSIONS =====
   
@@ -211,16 +218,30 @@ export const rbacService = {
     return data as UserRole[];
   },
 
-  async getAllUserRoles(): Promise<(UserRole & { profiles: { display_name: string; email: string } })[]> {
-    const { data, error } = await supabase
+  async getAllUserRoles(): Promise<UserRoleWithProfile[]> {
+    // Get user roles first
+    const { data: userRoles, error: rolesError } = await supabase
       .from("user_roles")
-      .select(`
-        *,
-        profiles:user_id (display_name, email)
-      `);
+      .select("*");
 
-    if (error) throw error;
-    return data as any[];
+    if (rolesError) throw rolesError;
+
+    // Get profile data separately
+    const userIds = [...new Set(userRoles?.map(r => r.user_id) || [])];
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id, display_name, email")
+      .in("id", userIds);
+
+    if (profilesError) throw profilesError;
+
+    // Map profiles to roles
+    const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+    
+    return (userRoles || []).map(role => ({
+      ...role,
+      profiles: profileMap.get(role.user_id) || null,
+    })) as UserRoleWithProfile[];
   },
 
   async assignRoleToUser(userId: string, role: AppRole): Promise<UserRole> {

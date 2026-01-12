@@ -481,7 +481,18 @@ function PermissionMatrixTab() {
 function UserRolesTab({ searchTerm }: { searchTerm: string }) {
   const queryClient = useQueryClient();
 
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  interface UserWithRoles {
+    id: string;
+    display_name: string | null;
+    email: string | null;
+    user_roles: Array<{
+      id: string;
+      role: AppRole;
+      created_at: string;
+    }>;
+  }
+
+  const { data: users = [], isLoading: usersLoading } = useQuery<UserWithRoles[]>({
     queryKey: ["rbac-users-with-roles"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -499,7 +510,7 @@ function UserRolesTab({ searchTerm }: { searchTerm: string }) {
         .order("display_name");
 
       if (error) throw error;
-      return data as any[];
+      return (data || []) as unknown as UserWithRoles[];
     },
   });
 

@@ -319,11 +319,11 @@ export const positionsService = {
   },
 
   async completeTaskScore(taskScoreId: string, status: 'on_time' | 'late' | 'rejected' | 'rework'): Promise<{ success: boolean; xp_earned?: number; coins_earned?: number; xp_penalty?: number }> {
-    const { data, error } = await supabase
-      .rpc("complete_task_score" as any, { 
-        p_task_score_id: taskScoreId, 
-        p_status: status 
-      });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)("complete_task_score", { 
+      p_task_score_id: taskScoreId, 
+      p_status: status 
+    });
     
     if (error) throw error;
     return data as { success: boolean; xp_earned?: number; coins_earned?: number; xp_penalty?: number };

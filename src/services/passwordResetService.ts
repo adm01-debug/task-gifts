@@ -64,7 +64,8 @@ export const passwordResetService = {
           .select("display_name")
           .eq("id", req.reviewed_by)
           .maybeSingle();
-        (req as any).reviewer = reviewer;
+        // Extend request with reviewer data dynamically
+        Object.assign(req, { reviewer });
       }
     }
     
@@ -92,7 +93,8 @@ export const passwordResetService = {
         .select("display_name, email")
         .eq("id", req.user_id)
         .maybeSingle();
-      (req as any).profiles = profile;
+      // Extend request with profile data dynamically
+      Object.assign(req, { profiles: profile });
     }
     
     return requests as unknown as PasswordResetRequest[];
@@ -123,7 +125,8 @@ export const passwordResetService = {
         .select("display_name, email")
         .eq("id", req.user_id)
         .maybeSingle();
-      (req as any).profiles = profile;
+      // Extend request with profile data dynamically
+      Object.assign(req, { profiles: profile });
       
       if (req.reviewed_by) {
         const { data: reviewer } = await supabase
@@ -131,7 +134,8 @@ export const passwordResetService = {
           .select("display_name")
           .eq("id", req.reviewed_by)
           .maybeSingle();
-        (req as any).reviewer = reviewer;
+        // Extend request with reviewer data dynamically
+        Object.assign(req, { reviewer });
       }
     }
     
