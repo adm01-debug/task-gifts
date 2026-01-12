@@ -44,9 +44,9 @@ export interface ApiRequestLog {
   api_key_id: string | null;
   endpoint: string;
   method: string;
-  request_body: any;
+  request_body: Record<string, unknown> | null;
   response_status: number;
-  response_body: any;
+  response_body: Record<string, unknown> | null;
   ip_address: string | null;
   user_agent: string | null;
   duration_ms: number | null;
@@ -57,7 +57,7 @@ export interface WebhookDeliveryLog {
   id: string;
   subscription_id: string;
   event_type: string;
-  payload: any;
+  payload: Record<string, unknown>;
   response_status: number | null;
   response_body: string | null;
   attempt_count: number;

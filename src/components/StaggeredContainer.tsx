@@ -7,7 +7,7 @@ interface StaggeredContainerProps {
   className?: string;
   staggerDelay?: number;
   initialDelay?: number;
-  [key: string]: any; // Allow data-* attributes
+  [key: `data-${string}`]: string | undefined;
 }
 
 interface StaggeredItemProps {

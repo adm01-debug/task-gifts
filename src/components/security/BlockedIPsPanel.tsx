@@ -100,8 +100,9 @@ export function BlockedIPsPanel() {
       setNewIP("");
       setNewReason("");
     },
-    onError: (error: any) => {
-      if (error.message?.includes("duplicate")) {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes("duplicate")) {
         toast.error("Este IP já está bloqueado");
       } else {
         toast.error("Erro ao bloquear IP");

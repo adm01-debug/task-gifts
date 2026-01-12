@@ -86,7 +86,7 @@ async function fetchRolePermissions(roleIds: string[]): Promise<PermissionInfo[]
   
   // Extract unique permissions
   const permissionsMap = new Map<string, PermissionInfo>();
-  (data || []).forEach((rp: any) => {
+  (data || []).forEach((rp: { permissions: PermissionInfo | null }) => {
     if (rp.permissions) {
       permissionsMap.set(rp.permissions.id, rp.permissions);
     }

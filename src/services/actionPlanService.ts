@@ -2,6 +2,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/services/loggingService";
 import type { ClimatePillar } from "./climateSurveyService";
 
+export interface RootCause {
+  id?: string;
+  description: string;
+  category?: string;
+  priority?: number;
+}
+
 export interface ActionPlan {
   id: string;
   title: string;
@@ -17,7 +24,7 @@ export interface ActionPlan {
   related_survey_id: string | null;
   target_date: string;
   progress_percent: number;
-  root_causes: any;
+  root_causes: RootCause[] | null;
   root_cause_summary: string | null;
   xp_reward: number;
   coin_reward: number;
@@ -36,7 +43,7 @@ export interface ActionPlanItem {
   when_start: string | null;
   when_end: string | null;
   who_responsible_id: string;
-  who_participants: any | null;
+  who_participants: string[] | null;
   how_method: string | null;
   how_much_cost: number | null;
   how_much_currency: string | null;

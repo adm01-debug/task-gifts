@@ -74,7 +74,13 @@ import {
   useDeleteTitle,
   useApplyPreset,
 } from "@/hooks/useGamificationAdmin";
-import { THEME_PRESETS } from "@/services/gamificationAdminService";
+import { 
+  THEME_PRESETS, 
+  GamificationTheme, 
+  CustomRank, 
+  CustomBadge, 
+  CustomTitle 
+} from "@/services/gamificationAdminService";
 
 const RARITY_CONFIG = {
   common: { label: "Comum", color: "#9ca3af", icon: "⚪" },
@@ -87,6 +93,9 @@ const RARITY_CONFIG = {
 
 const EMOJI_PICKER = ["⚔️", "🛡️", "👑", "🏆", "⭐", "🌟", "💎", "🔥", "⚡", "🎯", "🚀", "🌙", "✨", "🎮", "🥷", "🧙", "🐉", "🦅", "🐺", "🦁", "🌿", "🍃", "🌊", "❄️", "☀️"];
 
+type UnlockType = 'level' | 'achievement' | 'purchase' | 'manual' | 'event';
+type EditableItem = GamificationTheme | CustomRank | CustomBadge | CustomTitle | null;
+
 export function GamificationManager() {
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("themes");
@@ -94,8 +103,7 @@ export function GamificationManager() {
   const [rankDialog, setRankDialog] = useState(false);
   const [badgeDialog, setBadgeDialog] = useState(false);
   const [titleDialog, setTitleDialog] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<EditableItem>(null);
   const [presetDialog, setPresetDialog] = useState(false);
 
   const { data: departments } = useDepartments();
@@ -167,7 +175,7 @@ export function GamificationManager() {
     description: "",
     icon: "👑",
     color: "#fbbf24",
-    unlock_type: "level" as const,
+    unlock_type: "level" as string,
     is_limited: false,
     max_holders: null as number | null,
     is_active: true,
@@ -211,10 +219,11 @@ export function GamificationManager() {
 
   const handleSaveTitle = async () => {
     if (!selectedThemeId) return;
+    const formData = { ...titleForm, unlock_type: titleForm.unlock_type as UnlockType };
     if (editingItem) {
-      await updateTitle.mutateAsync({ id: editingItem.id, updates: titleForm });
+      await updateTitle.mutateAsync({ id: editingItem.id, updates: formData });
     } else {
-      await createTitle.mutateAsync({ ...titleForm, theme_id: selectedThemeId, unlock_requirement: {} });
+      await createTitle.mutateAsync({ ...formData, theme_id: selectedThemeId, unlock_requirement: {} });
     }
     setTitleDialog(false);
     setEditingItem(null);
@@ -232,8 +241,7 @@ export function GamificationManager() {
   const resetBadgeForm = () => setBadgeForm({ name: "", description: "", icon: "🏆", color: "#fbbf24", rarity: "common", category: "achievement", xp_reward: 50, coin_reward: 25, is_active: true, order_index: 0 });
   const resetTitleForm = () => setTitleForm({ name: "", prefix: "", suffix: "", description: "", icon: "👑", color: "#fbbf24", unlock_type: "level", is_limited: false, max_holders: null, is_active: true, order_index: 0 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const openEditTheme = (theme: any) => {
+  const openEditTheme = (theme: GamificationTheme) => {
     setThemeForm({
       name: theme.name,
       description: theme.description || "",
@@ -247,8 +255,7 @@ export function GamificationManager() {
     setThemeDialog(true);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const openEditRank = (rank: any) => {
+  const openEditRank = (rank: CustomRank) => {
     setRankForm({
       name: rank.name,
       title: rank.title,
@@ -265,8 +272,7 @@ export function GamificationManager() {
     setRankDialog(true);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const openEditBadge = (badge: any) => {
+  const openEditBadge = (badge: CustomBadge) => {
     setBadgeForm({
       name: badge.name,
       description: badge.description || "",
@@ -283,8 +289,7 @@ export function GamificationManager() {
     setBadgeDialog(true);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const openEditTitle = (title: any) => {
+  const openEditTitle = (title: CustomTitle) => {
     setTitleForm({
       name: title.name,
       prefix: title.prefix || "",

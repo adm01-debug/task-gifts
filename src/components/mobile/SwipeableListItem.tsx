@@ -63,7 +63,7 @@ export const SwipeableListItem = memo(function SwipeableListItem({
     hasTriggeredHaptic.current = false;
   }, []);
 
-  const handleDrag = useCallback((_: any, info: PanInfo) => {
+  const handleDrag = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const currentX = info.offset.x;
     
     // Trigger haptic at threshold
@@ -75,7 +75,7 @@ export const SwipeableListItem = memo(function SwipeableListItem({
     }
   }, [leftAction, rightAction, threshold, haptic]);
 
-  const handleDragEnd = useCallback((_: any, info: PanInfo) => {
+  const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
     const currentX = info.offset.x;
 
