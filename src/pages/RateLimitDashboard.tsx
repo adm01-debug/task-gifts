@@ -23,25 +23,34 @@ import { RateLimitRulesPanel } from "@/components/security/RateLimitRulesPanel";
 import { LoginAttemptsPanel } from "@/components/security/LoginAttemptsPanel";
 import { SessionsPanel } from "@/components/security/SessionsPanel";
 
+interface BlockedIPInfo {
+  ip_address: string;
+  violation_count: number;
+  reason: string;
+  is_permanent: boolean;
+}
+
+interface RecentAlert {
+  id: string;
+  alert_type: string;
+  severity: string;
+  title: string;
+  created_at: string;
+}
+
+interface CleanupResult {
+  rate_limit_logs_deleted: number;
+  login_attempts_deleted: number;
+}
+
 interface SecurityStats {
   rate_limit_violations: number;
   blocked_ips: number;
   failed_logins: number;
   active_sessions: number;
   unresolved_alerts: number;
-  top_blocked_ips: Array<{
-    ip_address: string;
-    violation_count: number;
-    reason: string;
-    is_permanent: boolean;
-  }>;
-  recent_alerts: Array<{
-    id: string;
-    alert_type: string;
-    severity: string;
-    title: string;
-    created_at: string;
-  }>;
+  top_blocked_ips: BlockedIPInfo[];
+  recent_alerts: RecentAlert[];
 }
 
 export default function RateLimitDashboard() {
@@ -61,9 +70,9 @@ export default function RateLimitDashboard() {
     mutationFn: async () => {
       const { data, error } = await supabase.rpc("cleanup_old_security_logs", { p_days_to_keep: 30 });
       if (error) throw error;
-      return data;
+      return data as unknown as CleanupResult;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: CleanupResult) => {
       toast.success(`Limpeza concluída! Removidos: ${data.rate_limit_logs_deleted} logs de rate limit, ${data.login_attempts_deleted} tentativas de login.`);
       queryClient.invalidateQueries({ queryKey: ["security"] });
       refetchStats();
@@ -217,7 +226,7 @@ export default function RateLimitDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {stats.top_blocked_ips.map((ip: any, index: number) => (
+                  {stats.top_blocked_ips.map((ip: BlockedIPInfo, index: number) => (
                     <Badge 
                       key={index} 
                       variant={ip.is_permanent ? "destructive" : "secondary"}
