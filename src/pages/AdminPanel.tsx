@@ -17,7 +17,6 @@ import {
   History,
   TrendingUp,
   AlertTriangle,
-  Link2,
   Trophy,
   Target,
   BarChart3,
@@ -27,8 +26,6 @@ import {
   Heart,
   Briefcase,
   Scale,
-  Plug,
-  Sparkles,
   Grid3X3,
   FileText,
   Gauge,
@@ -49,7 +46,6 @@ import { DepartmentsManager } from "@/components/admin/DepartmentsManager";
 import { AdminChangeHistory } from "@/components/admin/AdminChangeHistory";
 import { AdminMetricsDashboard } from "@/components/admin/AdminMetricsDashboard";
 import { AdminAlertsPanel } from "@/components/admin/AdminAlertsPanel";
-import { Bitrix24Integration } from "@/components/admin/Bitrix24Integration";
 import { LeaguesManager } from "@/components/admin/LeaguesManager";
 import { GoalsManager } from "@/components/admin/GoalsManager";
 import { SurveyCreator } from "@/components/admin/SurveyCreator";
@@ -59,8 +55,6 @@ import { CelebrationManager } from "@/components/admin/CelebrationManager";
 import { MoodAnalytics } from "@/components/admin/MoodAnalytics";
 import { PositionsManager } from "@/components/admin/PositionsManager";
 import { PenaltyRulesManager } from "@/components/admin/PenaltyRulesManager";
-import { ApiIntegrationManager } from "@/components/admin/ApiIntegrationManager";
-import { GamificationManager } from "@/components/admin/GamificationManager";
 import { NineBoxMatrix } from "@/components/admin/NineBoxMatrix";
 import { DevelopmentPlanManager } from "@/components/admin/DevelopmentPlanManager";
 import { ENPSDashboard } from "@/components/admin/ENPSDashboard";
@@ -261,9 +255,9 @@ function AdminPanelContent() {
               <History className="h-4 w-4" />
               Histórico
             </TabsTrigger>
-            <TabsTrigger value="bitrix24" className="gap-2">
-              <Link2 className="h-4 w-4" />
-              Bitrix24
+            <TabsTrigger value="leagues" className="gap-2">
+              <Trophy className="h-4 w-4" />
+              Ligas
             </TabsTrigger>
             <TabsTrigger value="leagues" className="gap-2">
               <Trophy className="h-4 w-4" />
@@ -297,17 +291,9 @@ function AdminPanelContent() {
               <Briefcase className="h-4 w-4" />
               Cargos
             </TabsTrigger>
-            <TabsTrigger value="penalties" className="gap-2">
-              <Scale className="h-4 w-4" />
-              Penalidades
-            </TabsTrigger>
-            <TabsTrigger value="api" className="gap-2">
-              <Plug className="h-4 w-4" />
-              API
-            </TabsTrigger>
-            <TabsTrigger value="gamification" className="gap-2">
-              <Sparkles className="h-4 w-4" />
-              Gamificação
+            <TabsTrigger value="ninebox" className="gap-2">
+              <Grid3X3 className="h-4 w-4" />
+              9-Box
             </TabsTrigger>
             <TabsTrigger value="ninebox" className="gap-2">
               <Grid3X3 className="h-4 w-4" />
@@ -441,11 +427,6 @@ function AdminPanelContent() {
             <AdminChangeHistory />
           </TabsContent>
 
-          {/* Bitrix24 Tab */}
-          <TabsContent value="bitrix24">
-            <Bitrix24Integration />
-          </TabsContent>
-
           {/* Leagues Tab */}
           <TabsContent value="leagues">
             <LeaguesManager />
@@ -489,16 +470,6 @@ function AdminPanelContent() {
           {/* Penalties Tab */}
           <TabsContent value="penalties">
             <PenaltyRulesManager />
-          </TabsContent>
-
-          {/* API Integration Tab */}
-          <TabsContent value="api">
-            <ApiIntegrationManager />
-          </TabsContent>
-
-          {/* Gamification Tab */}
-          <TabsContent value="gamification">
-            <GamificationManager />
           </TabsContent>
 
           {/* 9-Box Tab */}
