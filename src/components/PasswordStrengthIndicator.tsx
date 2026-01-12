@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getPasswordStrength, checkPasswordLeaked } from "@/lib/authValidations";
 import { cn } from "@/lib/utils";
@@ -21,11 +21,12 @@ interface PasswordStrengthIndicatorProps {
   showLeakCheck?: boolean;
 }
 
-export function PasswordStrengthIndicator({ 
-  password, 
-  className,
-  showLeakCheck = true
-}: PasswordStrengthIndicatorProps) {
+export const PasswordStrengthIndicator = forwardRef<HTMLDivElement, PasswordStrengthIndicatorProps>(
+  function PasswordStrengthIndicator({ 
+    password, 
+    className,
+    showLeakCheck = true
+  }, ref) {
   const [leakStatus, setLeakStatus] = useState<{
     checked: boolean;
     checking: boolean;
@@ -111,7 +112,7 @@ export function PasswordStrengthIndicator({
   };
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div ref={ref} className={cn("space-y-3", className)}>
       {/* Strength Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -260,4 +261,4 @@ export function PasswordStrengthIndicator({
       )}
     </div>
   );
-}
+});

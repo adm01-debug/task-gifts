@@ -1,13 +1,11 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useRBAC, type AppRole, type AccessCheckOptions } from "@/hooks/useRBAC";
+import { useRBAC, type AccessCheckOptions } from "@/hooks/useRBAC";
 import { Loader2, ShieldX } from "lucide-react";
 
 interface ProtectedRouteProps extends Partial<AccessCheckOptions> {
   children: ReactNode;
-  /** @deprecated Use requiredRole instead */
-  role?: AppRole;
   redirectTo?: string;
   accessDeniedMessage?: string;
 }
@@ -41,7 +39,6 @@ interface ProtectedRouteProps extends Partial<AccessCheckOptions> {
  */
 export function ProtectedRoute({
   children,
-  role,
   requiredRole,
   requiredRoles,
   requiredPermission,
@@ -53,9 +50,6 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading: authLoading } = useAuth();
   const { canAccess, isLoading: rbacLoading } = useRBAC();
-
-  // Compatibilidade com prop antiga "role"
-  const effectiveRole = requiredRole || role;
 
   // Show loading while checking auth
   if (authLoading) {
@@ -73,7 +67,7 @@ export function ProtectedRoute({
 
   // Determinar se precisa verificar RBAC
   const needsRBACCheck = !!(
-    effectiveRole || 
+    requiredRole || 
     requiredRoles?.length || 
     requiredPermission || 
     requiredPermissions?.length ||
@@ -96,7 +90,7 @@ export function ProtectedRoute({
 
   // Build access check options
   const accessOptions: AccessCheckOptions = {
-    requiredRole: effectiveRole,
+    requiredRole,
     requiredRoles,
     requiredPermission,
     requiredPermissions,
