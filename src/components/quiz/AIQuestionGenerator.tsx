@@ -57,9 +57,9 @@ export default function AIQuestionGenerator({ onQuestionsGenerated }: AIQuestion
 
       setGeneratedQuestions(data.questions || []);
       toast.success(`${data.questions?.length || 0} perguntas geradas!`);
-    } catch (error) {
-      logger.apiError('handleGenerate', error, 'AIQuestionGenerator');
-      toast.error(error instanceof Error ? error.message : "Erro ao gerar perguntas");
+    } catch (err: unknown) {
+      logger.apiError('handleGenerate', err, 'AIQuestionGenerator');
+      toast.error(err instanceof Error ? err.message : "Erro ao gerar perguntas");
     } finally {
       setIsGenerating(false);
     }
@@ -92,8 +92,8 @@ export default function AIQuestionGenerator({ onQuestionsGenerated }: AIQuestion
       toast.success(`${savedCount} perguntas salvas com sucesso!`);
       setGeneratedQuestions([]);
       onQuestionsGenerated?.();
-    } catch (error) {
-      logger.apiError('handleSaveAll', error, 'AIQuestionGenerator');
+    } catch (err: unknown) {
+      logger.apiError('handleSaveAll', err, 'AIQuestionGenerator');
       toast.error(`Erro ao salvar. ${savedCount} de ${generatedQuestions.length} salvas.`);
     } finally {
       setIsSaving(false);

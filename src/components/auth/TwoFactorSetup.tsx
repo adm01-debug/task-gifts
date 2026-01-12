@@ -42,8 +42,8 @@ export function TwoFactorSetup() {
     try {
       await setup();
       setShowSetup(true);
-    } catch (error) {
-      console.error("Setup error:", error);
+    } catch (err: unknown) {
+      console.error("Setup error:", err);
     }
   };
 

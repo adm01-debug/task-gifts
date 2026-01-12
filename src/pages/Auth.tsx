@@ -391,8 +391,8 @@ const Auth = () => {
         return true;
       }
       return false;
-    } catch (error) {
-      console.error("2FA verification error:", error);
+    } catch (err: unknown) {
+      console.error("2FA verification error:", err);
       return false;
     } finally {
       setVerifying2FA(false);

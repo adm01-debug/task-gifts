@@ -40,7 +40,7 @@ export function showUndoToast({
         try {
           await onUndo();
           toast.success("Ação desfeita!");
-        } catch (error) {
+        } catch {
           toast.error("Erro ao desfazer ação");
         }
       },

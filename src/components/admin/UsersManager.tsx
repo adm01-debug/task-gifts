@@ -191,7 +191,7 @@ export function UsersManager() {
       await assignRole.mutateAsync({ userId: roleDialogUser, role: selectedRole });
       toast.success(`Role ${roleConfig[selectedRole].label} atribuído`);
       setRoleDialogUser(null);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao atribuir role");
     }
   }, [roleDialogUser, selectedRole, assignRole]);
@@ -202,7 +202,7 @@ export function UsersManager() {
       await removeRole.mutateAsync(removeRoleConfirm);
       toast.success("Role removido");
       setRemoveRoleConfirm(null);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao remover role");
     }
   }, [removeRoleConfirm, removeRole]);
@@ -214,7 +214,7 @@ export function UsersManager() {
       toast.success("Usuário adicionado ao departamento");
       setDeptDialogUser(null);
       setSelectedDept("");
-    } catch (error) {
+    } catch {
       toast.error("Erro ao adicionar ao departamento");
     }
   }, [deptDialogUser, selectedDept, assignDepartment]);
@@ -224,7 +224,7 @@ export function UsersManager() {
     try {
       await removeDepartmentMember.mutateAsync(memberId);
       toast.success("Removido do departamento");
-    } catch (error) {
+    } catch {
       toast.error("Erro ao remover do departamento");
     } finally {
       setRemovingDeptMemberId(null);

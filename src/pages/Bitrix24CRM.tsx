@@ -167,7 +167,7 @@ function Bitrix24CRMContent() {
       }
       setShowCreateDialog(false);
       handleRefresh();
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
   };

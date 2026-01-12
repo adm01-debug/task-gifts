@@ -439,8 +439,8 @@ export const highPotentialService = {
           riskOfLeaving: risk,
           recommendation,
         });
-      } catch (error) {
-        logger.apiError(`Processing high potential user ${profile.id}`, error, "HighPotentialService");
+      } catch (err: unknown) {
+        logger.apiError(`Processing high potential user ${profile.id}`, err, "HighPotentialService");
       }
     }
 

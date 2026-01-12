@@ -197,7 +197,7 @@ function QuizAdminContent() {
       setIsDialogOpen(false);
       setForm(emptyForm);
       setEditingId(null);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao salvar pergunta");
     }
   }, [form, editingId, updateQuestion, createQuestion]);
@@ -208,7 +208,7 @@ function QuizAdminContent() {
       await deleteQuestion.mutateAsync(deleteId);
       toast.success("Pergunta excluída!");
       setDeleteId(null);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao excluir");
     }
   }, [deleteId, deleteQuestion]);
@@ -217,7 +217,7 @@ function QuizAdminContent() {
     try {
       await toggleActive.mutateAsync({ id, isActive: !isActive });
       toast.success(isActive ? "Pergunta desativada" : "Pergunta ativada");
-    } catch (error) {
+    } catch {
       toast.error("Erro ao alterar status");
     }
   }, [toggleActive]);

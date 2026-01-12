@@ -85,8 +85,8 @@ export default function ResetPassword() {
             setIsValidToken(false);
           }
         }
-      } catch (error) {
-        console.error("Token check error:", error);
+      } catch (err: unknown) {
+        console.error("Token check error:", err);
         setIsValidToken(false);
       } finally {
         setIsCheckingToken(false);
@@ -123,7 +123,7 @@ export default function ResetPassword() {
         await supabase.auth.signOut();
         navigate("/auth");
       }, 3000);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao redefinir senha");
     } finally {
       setIsLoading(false);
