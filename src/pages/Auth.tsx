@@ -89,7 +89,36 @@ const Auth = () => {
     }
   };
 
+  // Handle OAuth callback - process hash fragments from redirect
   useEffect(() => {
+    const handleAuthCallback = async () => {
+      // Check if we have hash parameters from OAuth callback
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      
+      if (accessToken && refreshToken) {
+        try {
+          // Set the session from the tokens in the URL
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          
+          if (error) {
+            console.error('Error setting session from callback:', error);
+            toast.error('Erro ao processar autenticação. Tente novamente.');
+          } else {
+            // Clean up the URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        } catch (err) {
+          console.error('Auth callback error:', err);
+        }
+      }
+    };
+    
+    handleAuthCallback();
     checkIpAccess();
   }, []);
 
