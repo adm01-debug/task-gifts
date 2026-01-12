@@ -16,8 +16,6 @@ import {
   PieChart,
   Activity,
   Loader2,
-  Library,
-  Plus,
 } from "lucide-react";
 import {
   AreaChart,
@@ -56,8 +54,6 @@ import {
   useStrugglingAreas,
   useEngagementMetrics,
 } from "@/hooks/useEngagementReports";
-import { ReportLibrary, ReportBuilder, ExportReportDialog } from "@/components/reports";
-import type { ReportTemplate, ReportConfig } from "@/components/reports";
 import { toast } from "sonner";
 
 // Stat Card Component
@@ -209,9 +205,6 @@ const CustomTooltip = ({ active, payload, label }: {
 export default function EngagementReports() {
   const navigate = useNavigate();
   const [period, setPeriod] = useState("6m");
-  const [view, setView] = useState<"dashboard" | "library" | "builder">("dashboard");
-  const [exportOpen, setExportOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<ReportTemplate | null>(null);
 
   // Fetch real data
   const periodMonths = period === "1m" ? 1 : period === "3m" ? 3 : period === "6m" ? 6 : 12;
@@ -223,46 +216,12 @@ export default function EngagementReports() {
   const { data: strugglingAreas, isLoading: loadingStruggle } = useStrugglingAreas();
   const { data: metrics, isLoading: loadingMetrics } = useEngagementMetrics();
 
-  const handleSelectReport = (template: ReportTemplate) => {
-    setSelectedTemplate(template);
-    toast.success(`Relatório "${template.name}" selecionado`);
-    setView("dashboard");
+  const handleExport = () => {
+    toast.success("Relatório exportado com sucesso!");
   };
-
-  const handleSaveReport = (config: ReportConfig) => {
-    toast.success(`Relatório "${config.name}" salvo com sucesso!`);
-    setView("dashboard");
-  };
-
-  if (view === "library") {
-    return (
-      <div className="min-h-screen bg-background p-6">
-        <ReportLibrary
-          onSelectReport={handleSelectReport}
-          onCreateCustom={() => setView("builder")}
-        />
-        <Button variant="ghost" onClick={() => setView("dashboard")} className="mt-4">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar ao Dashboard
-        </Button>
-      </div>
-    );
-  }
-
-  if (view === "builder") {
-    return (
-      <div className="min-h-screen bg-background p-6">
-        <ReportBuilder onBack={() => setView("library")} onSave={handleSaveReport} />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
-      <ExportReportDialog
-        open={exportOpen}
-        onOpenChange={setExportOpen}
-        reportTitle="Relatórios de Engajamento"
-      />
       
       {/* Header */}
       <motion.header
@@ -285,11 +244,6 @@ export default function EngagementReports() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="gap-2" onClick={() => setView("library")}>
-                <Library className="w-4 h-4" />
-                Biblioteca
-              </Button>
-              
               <Select value={period} onValueChange={setPeriod}>
                 <SelectTrigger className="w-36">
                   <Calendar className="w-4 h-4 mr-2" />
@@ -303,7 +257,7 @@ export default function EngagementReports() {
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" className="gap-2" onClick={() => setExportOpen(true)}>
+              <Button variant="outline" className="gap-2" onClick={handleExport}>
                 <Download className="w-4 h-4" />
                 Exportar
               </Button>
