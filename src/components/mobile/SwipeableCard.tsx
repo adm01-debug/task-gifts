@@ -81,7 +81,7 @@ export const SwipeableCard = memo(function SwipeableCard({
     onSwipeStart?.();
   };
 
-  const handleDrag = (_: any, info: PanInfo) => {
+  const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const offset = info.offset.x;
     
     // Trigger haptic when crossing threshold
@@ -96,7 +96,7 @@ export const SwipeableCard = memo(function SwipeableCard({
     }
   };
 
-  const handleDragEnd = (_: any, info: PanInfo) => {
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
     onSwipeEnd?.();
     

@@ -9,14 +9,53 @@ export interface PDIAlert {
   title: string;
   description: string;
   userId?: string;
-  userName?: string;
-  userAvatar?: string;
+  userName?: string | null;
+  userAvatar?: string | null;
   relatedId?: string;
   dueDate?: string;
   createdAt: string;
 }
 
-async function fetchPDIAlerts(departmentId?: string): Promise<PDIAlert[]> {
+interface PDIData {
+  id: string;
+  title: string;
+  target_date: string | null;
+  status: string;
+  user_id: string;
+}
+
+interface ActionData {
+  id: string;
+  title: string;
+  due_date: string | null;
+  status: string;
+  plan_id: string;
+}
+
+interface NineBoxEvaluation {
+  id: string;
+  user_id: string;
+  box_position: number;
+  performance_score: number;
+  potential_score: number;
+  created_at: string;
+}
+
+interface UserCertification {
+  id: string;
+  user_id: string;
+  expires_at: string | null;
+  status: string;
+  certification_id: string;
+}
+
+interface Profile {
+  id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
+async function fetchPDIAlerts(_departmentId?: string): Promise<PDIAlert[]> {
   const alerts: PDIAlert[] = [];
   const now = new Date();
   const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -36,15 +75,15 @@ async function fetchPDIAlerts(departmentId?: string): Promise<PDIAlert[]> {
     .order("target_date", { ascending: true });
 
   // Get profiles separately
-  const userIds = [...new Set(pdiData?.map(p => p.user_id) || [])];
+  const userIds = [...new Set((pdiData as PDIData[] | null)?.map(p => p.user_id) || [])];
   const { data: profiles } = userIds.length > 0 
     ? await supabase.from("profiles").select("id, display_name, avatar_url").in("id", userIds)
     : { data: [] };
   
-  const profileMap = new Map<string, { id: string; display_name: string | null; avatar_url: string | null }>();
-  profiles?.forEach(p => profileMap.set(p.id, p));
+  const profileMap = new Map<string, Profile>();
+  (profiles as Profile[] | null)?.forEach(p => profileMap.set(p.id, p));
 
-  pdiData?.forEach((pdi: any) => {
+  (pdiData as PDIData[] | null)?.forEach((pdi) => {
     if (!pdi.target_date) return;
     const targetDate = new Date(pdi.target_date);
     const profile = profileMap.get(pdi.user_id);
@@ -95,15 +134,15 @@ async function fetchPDIAlerts(departmentId?: string): Promise<PDIAlert[]> {
     .limit(20);
 
   // Get plan info for actions
-  const planIds = [...new Set(actionsData?.map(a => a.plan_id) || [])];
+  const planIds = [...new Set((actionsData as ActionData[] | null)?.map(a => a.plan_id) || [])];
   const { data: plans } = planIds.length > 0
     ? await supabase.from("development_plans").select("id, user_id").in("id", planIds)
     : { data: [] };
   
   const planMap = new Map<string, { id: string; user_id: string }>();
-  plans?.forEach(p => planMap.set(p.id, p));
+  (plans as { id: string; user_id: string }[] | null)?.forEach(p => planMap.set(p.id, p));
 
-  actionsData?.forEach((action: any) => {
+  (actionsData as ActionData[] | null)?.forEach((action) => {
     const plan = planMap.get(action.plan_id);
     const profile = plan ? profileMap.get(plan.user_id) : null;
     
@@ -117,7 +156,7 @@ async function fetchPDIAlerts(departmentId?: string): Promise<PDIAlert[]> {
       userName: profile?.display_name,
       userAvatar: profile?.avatar_url,
       relatedId: action.plan_id,
-      dueDate: action.due_date,
+      dueDate: action.due_date ?? undefined,
       createdAt: now.toISOString(),
     });
   });
@@ -138,14 +177,14 @@ async function fetchPDIAlerts(departmentId?: string): Promise<PDIAlert[]> {
     .limit(10);
 
   // Deduplicate by user_id (keep only latest evaluation)
-  const latestByUser = new Map();
-  lowPerformance?.forEach((eval_: any) => {
+  const latestByUser = new Map<string, NineBoxEvaluation>();
+  (lowPerformance as NineBoxEvaluation[] | null)?.forEach((eval_) => {
     if (!latestByUser.has(eval_.user_id)) {
       latestByUser.set(eval_.user_id, eval_);
     }
   });
 
-  latestByUser.forEach((eval_: any) => {
+  latestByUser.forEach((eval_) => {
     const profile = profileMap.get(eval_.user_id);
     alerts.push({
       id: `low-perf-${eval_.id}`,
@@ -177,19 +216,19 @@ async function fetchPDIAlerts(departmentId?: string): Promise<PDIAlert[]> {
     .limit(10);
 
   if (certifications && certifications.length > 0) {
-    const certIds = [...new Set(certifications.map(c => c.certification_id))];
+    const certIds = [...new Set((certifications as UserCertification[]).map(c => c.certification_id))];
     const { data: certInfo } = await supabase
       .from("certifications")
       .select("id, name")
       .in("id", certIds);
     
-    const certMap = new Map(certInfo?.map(c => [c.id, c]) || []);
+    const certMap = new Map((certInfo as { id: string; name: string }[] | null)?.map(c => [c.id, c]) || []);
 
-    certifications.forEach((cert: any) => {
+    (certifications as UserCertification[]).forEach((cert) => {
       const profile = profileMap.get(cert.user_id);
       const certification = certMap.get(cert.certification_id);
-      const expiresAt = new Date(cert.expires_at);
-      const isUrgent = expiresAt <= in7Days;
+      const expiresAt = cert.expires_at ? new Date(cert.expires_at) : null;
+      const isUrgent = expiresAt ? expiresAt <= in7Days : false;
 
       alerts.push({
         id: `cert-expiring-${cert.id}`,
@@ -201,7 +240,7 @@ async function fetchPDIAlerts(departmentId?: string): Promise<PDIAlert[]> {
         userName: profile?.display_name,
         userAvatar: profile?.avatar_url,
         relatedId: cert.id,
-        dueDate: cert.expires_at,
+        dueDate: cert.expires_at ?? undefined,
         createdAt: now.toISOString(),
       });
     });

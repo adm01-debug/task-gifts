@@ -140,7 +140,7 @@ export function ActionPlanManager() {
   );
 }
 
-function CreateActionPlanForm({ onSuccess, departments }: { onSuccess: () => void; departments: any[] }) {
+function CreateActionPlanForm({ onSuccess, departments }: { onSuccess: () => void; departments: { id: string; name: string }[] }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [pillar, setPillar] = useState<ClimatePillar | ''>('');
@@ -228,7 +228,7 @@ function CreateActionPlanForm({ onSuccess, departments }: { onSuccess: () => voi
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Todos</SelectItem>
-                  {departments.map((dept: any) => (
+                  {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
                   ))}
                 </SelectContent>

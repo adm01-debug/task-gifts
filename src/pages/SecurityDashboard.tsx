@@ -456,24 +456,24 @@ export default function SecurityDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {deviceAlerts.map((alert: any) => (
+                    {deviceAlerts.map((alert) => (
                       <div key={alert.id} className="flex items-center gap-3 p-3 rounded-lg border">
                         <div className="p-2 rounded-full bg-muted">
                           <Monitor className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium">
-                            {alert.browser} em {alert.os}
+                            {alert.user_agent || "Dispositivo desconhecido"}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            IP: {alert.ip_address} • {formatDistanceToNow(new Date(alert.created_at), {
+                            IP: {String(alert.ip_address)} • {formatDistanceToNow(new Date(alert.created_at), {
                               addSuffix: true,
                               locale: ptBR
                             })}
                           </p>
                         </div>
-                        <Badge variant={alert.acknowledged ? "secondary" : "outline"}>
-                          {alert.acknowledged ? "Reconhecido" : "Novo"}
+                        <Badge variant={alert.is_acknowledged ? "secondary" : "outline"}>
+                          {alert.is_acknowledged ? "Reconhecido" : "Novo"}
                         </Badge>
                       </div>
                     ))}
@@ -631,7 +631,7 @@ export default function SecurityDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {stats.top_blocked_ips.map((ip: any, index: number) => (
+                    {stats.top_blocked_ips.map((ip, index: number) => (
                       <Badge 
                         key={index} 
                         variant={ip.is_permanent ? "destructive" : "secondary"}
