@@ -41,9 +41,10 @@ export function PasskeyLogin({ onSuccess, defaultEmail = "" }: PasskeyLoginProps
       toast.success("Autenticação biométrica bem-sucedida!");
       onSuccess();
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro no login com passkey:", error);
-      toast.error(error.message || "Erro ao fazer login");
+      const errorMessage = error instanceof Error ? error.message : "Erro ao fazer login";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

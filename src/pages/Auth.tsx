@@ -248,8 +248,9 @@ const Auth = () => {
         { duration: 6000 }
       );
       setView("login");
-    } catch (err: any) {
-      if (err.message?.includes("pendente")) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      if (errorMessage.includes("pendente")) {
         toast.info("Você já possui uma solicitação pendente. Aguarde a aprovação do seu gestor.");
       } else {
         toast.error("Erro ao solicitar reset de senha. Tente novamente.");

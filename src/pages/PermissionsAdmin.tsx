@@ -33,8 +33,9 @@ export default function PermissionsAdmin() {
       
       if (error) throw error;
       
+      interface UserRoleData { role: string }
       const counts: Record<string, number> = {};
-      (data || []).forEach((ur: any) => {
+      (data || []).forEach((ur: UserRoleData) => {
         counts[ur.role] = (counts[ur.role] || 0) + 1;
       });
       return counts;

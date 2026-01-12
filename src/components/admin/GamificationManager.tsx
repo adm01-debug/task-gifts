@@ -94,6 +94,7 @@ export function GamificationManager() {
   const [rankDialog, setRankDialog] = useState(false);
   const [badgeDialog, setBadgeDialog] = useState(false);
   const [titleDialog, setTitleDialog] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingItem, setEditingItem] = useState<any>(null);
   const [presetDialog, setPresetDialog] = useState(false);
 
@@ -231,6 +232,7 @@ export function GamificationManager() {
   const resetBadgeForm = () => setBadgeForm({ name: "", description: "", icon: "🏆", color: "#fbbf24", rarity: "common", category: "achievement", xp_reward: 50, coin_reward: 25, is_active: true, order_index: 0 });
   const resetTitleForm = () => setTitleForm({ name: "", prefix: "", suffix: "", description: "", icon: "👑", color: "#fbbf24", unlock_type: "level", is_limited: false, max_holders: null, is_active: true, order_index: 0 });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openEditTheme = (theme: any) => {
     setThemeForm({
       name: theme.name,
@@ -245,6 +247,7 @@ export function GamificationManager() {
     setThemeDialog(true);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openEditRank = (rank: any) => {
     setRankForm({
       name: rank.name,
@@ -262,6 +265,7 @@ export function GamificationManager() {
     setRankDialog(true);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openEditBadge = (badge: any) => {
     setBadgeForm({
       name: badge.name,
@@ -279,6 +283,7 @@ export function GamificationManager() {
     setBadgeDialog(true);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openEditTitle = (title: any) => {
     setTitleForm({
       name: title.name,
@@ -883,7 +888,7 @@ export function GamificationManager() {
                         </div>
                         <div>
                           <Label>Raridade</Label>
-                          <Select value={badgeForm.rarity} onValueChange={(v: any) => setBadgeForm({ ...badgeForm, rarity: v })}>
+                          <Select value={badgeForm.rarity} onValueChange={(v) => setBadgeForm({ ...badgeForm, rarity: v as keyof typeof RARITY_CONFIG })}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -1068,7 +1073,7 @@ export function GamificationManager() {
                         </div>
                         <div>
                           <Label>Tipo de Desbloqueio</Label>
-                          <Select value={titleForm.unlock_type} onValueChange={(v: any) => setTitleForm({ ...titleForm, unlock_type: v })}>
+                          <Select value={titleForm.unlock_type} onValueChange={(v) => setTitleForm({ ...titleForm, unlock_type: v as typeof titleForm.unlock_type })}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
