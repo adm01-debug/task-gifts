@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, ArrowLeft } from "lucide-react";
@@ -10,7 +10,8 @@ interface TwoFactorVerifyProps {
   isLoading?: boolean;
 }
 
-export function TwoFactorVerify({ onVerify, onCancel, isLoading }: TwoFactorVerifyProps) {
+export const TwoFactorVerify = forwardRef<HTMLDivElement, TwoFactorVerifyProps>(
+  function TwoFactorVerify({ onVerify, onCancel, isLoading }, ref) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
 
@@ -45,7 +46,7 @@ export function TwoFactorVerify({ onVerify, onCancel, isLoading }: TwoFactorVeri
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card ref={ref} className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
           <Shield className="h-6 w-6 text-primary" />
@@ -104,4 +105,4 @@ export function TwoFactorVerify({ onVerify, onCancel, isLoading }: TwoFactorVeri
       </CardContent>
     </Card>
   );
-}
+});
