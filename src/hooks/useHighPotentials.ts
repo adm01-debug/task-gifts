@@ -30,9 +30,10 @@ export function useHighPotentialsManual() {
       const results = await highPotentialService.identifyHighPotentials(departmentId);
       setData(results);
       return results;
-    } catch (err) {
-      setError(err as Error);
-      throw err;
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
