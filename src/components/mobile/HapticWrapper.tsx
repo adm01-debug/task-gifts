@@ -4,7 +4,7 @@ import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 /**
  * Higher-order component that adds haptic feedback to any clickable component
  */
-export function withHapticFeedback<P extends { onClick?: (...args: any[]) => void }>(
+export function withHapticFeedback<P extends { onClick?: (...args: unknown[]) => void }>(
   WrappedComponent: ComponentType<P>,
   feedbackType: "button" | "success" | "error" | "selection" = "button"
 ) {
@@ -12,7 +12,7 @@ export function withHapticFeedback<P extends { onClick?: (...args: any[]) => voi
     const haptic = useHapticFeedback();
 
     const handleClick = useCallback(
-      (...args: any[]) => {
+      (...args: unknown[]) => {
         switch (feedbackType) {
           case "success":
             haptic.questCompleted();
@@ -28,6 +28,7 @@ export function withHapticFeedback<P extends { onClick?: (...args: any[]) => voi
         }
         props.onClick?.(...args);
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [haptic, props.onClick]
     );
 
@@ -38,14 +39,14 @@ export function withHapticFeedback<P extends { onClick?: (...args: any[]) => voi
 /**
  * Hook to create haptic-enabled click handlers
  */
-export function useHapticClick<T extends (...args: any[]) => void>(
+export function useHapticClick<T extends (...args: unknown[]) => void>(
   handler: T,
   type: "button" | "success" | "error" | "selection" = "button"
 ): T {
   const haptic = useHapticFeedback();
 
   return useCallback(
-    ((...args: any[]) => {
+    ((...args: unknown[]) => {
       switch (type) {
         case "success":
           haptic.questCompleted();
@@ -61,6 +62,7 @@ export function useHapticClick<T extends (...args: any[]) => void>(
       }
       return handler(...args);
     }) as T,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [haptic, handler, type]
   );
 }

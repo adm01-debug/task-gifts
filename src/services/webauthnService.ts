@@ -219,17 +219,18 @@ export const webauthnService = {
         .eq("challenge", options.challenge);
 
       return { success: true };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro no registro WebAuthn:", err);
       
-      if (err.name === "NotAllowedError") {
+      const error = err as Error & { name?: string };
+      if (error.name === "NotAllowedError") {
         return { success: false, error: "Operação cancelada pelo usuário" };
       }
-      if (err.name === "InvalidStateError") {
+      if (error.name === "InvalidStateError") {
         return { success: false, error: "Este dispositivo já está registrado" };
       }
       
-      return { success: false, error: err.message || "Erro ao registrar passkey" };
+      return { success: false, error: error.message || "Erro ao registrar passkey" };
     }
   },
 
@@ -252,11 +253,11 @@ export const webauthnService = {
         .rpc("get_passkeys_by_email", { p_email: email });
 
       if (credentials && credentials.length > 0) {
-        allowCredentials = credentials.map((cred: any) => ({
+        allowCredentials = credentials.map((cred: { credential_id: string }) => ({
           id: base64URLDecode(cred.credential_id),
           type: "public-key" as const
         }));
-        credentialIds = credentials.map((cred: any) => cred.credential_id);
+        credentialIds = credentials.map((cred: { credential_id: string }) => cred.credential_id);
       }
     }
 
@@ -336,14 +337,15 @@ export const webauthnService = {
         .eq("challenge", options.challenge);
 
       return { success: true, userId: credential.user_id };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro na autenticação WebAuthn:", err);
       
-      if (err.name === "NotAllowedError") {
+      const error = err as Error & { name?: string };
+      if (error.name === "NotAllowedError") {
         return { success: false, error: "Operação cancelada pelo usuário" };
       }
       
-      return { success: false, error: err.message || "Erro na autenticação" };
+      return { success: false, error: error.message || "Erro na autenticação" };
     }
   },
 

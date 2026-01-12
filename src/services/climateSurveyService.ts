@@ -33,7 +33,7 @@ export interface ClimateSurveyQuestion {
   question_text_es: string | null;
   question_type: string;
   pillar: ClimatePillar;
-  options: any | null;
+  options: Record<string, unknown> | null;
   is_required: boolean;
   order_index: number;
   created_at: string;

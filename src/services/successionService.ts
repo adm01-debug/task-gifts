@@ -203,7 +203,7 @@ export const successionService = {
       .slice(0, limit);
   },
 
-  calculateMatchScore(hipo: HighPotentialScore, position: any): number {
+  calculateMatchScore(hipo: HighPotentialScore, _position: CriticalPosition): number {
     let score = 0;
 
     // Base score from HiPo assessment

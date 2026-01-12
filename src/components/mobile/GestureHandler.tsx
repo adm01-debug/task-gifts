@@ -84,7 +84,7 @@ export const GestureHandler = memo(function GestureHandler({
     }
   }, [disabled, onDoubleTap, triggerHaptic]);
 
-  const handleDragEnd = useCallback((_: any, info: PanInfo) => {
+  const handleDragEnd = useCallback((_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (disabled || !onSwipe) return;
     
     const { offset, velocity } = info;
