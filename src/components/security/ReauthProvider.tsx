@@ -86,7 +86,8 @@ export function ReauthProvider({ children }: ReauthProviderProps) {
 
       // Success - execute callback
       await executeCallback();
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error("Password verification failed:", err);
       setError("Erro ao verificar senha");
       setIsLoading(false);
     }
@@ -109,7 +110,8 @@ export function ReauthProvider({ children }: ReauthProviderProps) {
 
       // Success - execute callback
       await executeCallback();
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error("2FA verification failed:", err);
       setError("Erro ao verificar código 2FA");
       setIsLoading(false);
     }
@@ -123,7 +125,8 @@ export function ReauthProvider({ children }: ReauthProviderProps) {
       toast.success("Ação autorizada com sucesso");
       setIsOpen(false);
       reset();
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error("Callback execution failed:", err);
       setError("Erro ao executar ação");
       setIsLoading(false);
     }

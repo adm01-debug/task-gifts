@@ -38,8 +38,8 @@ export function useLoginLockout(email: string) {
       setLockoutStatus(status);
       setRemainingTime(status?.remaining_seconds || 0);
       return status;
-    } catch (err) {
-      console.error("Lockout check failed:", err);
+    } catch (err: unknown) {
+      console.error("Lockout check failed:", err instanceof Error ? err.message : String(err));
       return null;
     } finally {
       setIsChecking(false);
@@ -72,8 +72,8 @@ export function useLoginLockout(email: string) {
         return result.lockout_status;
       }
       return null;
-    } catch (err) {
-      console.error("Failed to log attempt:", err);
+    } catch (err: unknown) {
+      console.error("Failed to log attempt:", err instanceof Error ? err.message : String(err));
       return null;
     }
   }, [email]);
@@ -89,8 +89,8 @@ export function useLoginLockout(email: string) {
       });
       setLockoutStatus(null);
       setRemainingTime(0);
-    } catch (err) {
-      console.error("Failed to reset attempts:", err);
+    } catch (err: unknown) {
+      console.error("Failed to reset attempts:", err instanceof Error ? err.message : String(err));
     }
   }, [email]);
 

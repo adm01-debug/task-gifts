@@ -80,8 +80,8 @@ const Auth = () => {
       if (!result.allowed) {
         toast.error('Acesso bloqueado: IP não autorizado');
       }
-    } catch (err) {
-      console.error('IP check failed:', err);
+    } catch (err: unknown) {
+      console.error('IP check failed:', err instanceof Error ? err.message : String(err));
       // On error, allow access (fail open)
       setIsIpAllowed(true);
     } finally {
@@ -112,8 +112,8 @@ const Auth = () => {
             // Clean up the URL
             window.history.replaceState({}, document.title, window.location.pathname);
           }
-        } catch (err) {
-          console.error('Auth callback error:', err);
+        } catch (err: unknown) {
+          console.error('Auth callback error:', err instanceof Error ? err.message : String(err));
         }
       }
     };
@@ -364,7 +364,8 @@ const Auth = () => {
           navigate("/");
         }
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error('Auth error:', err instanceof Error ? err.message : String(err));
       toast.error("Algo deu errado. Tente novamente.");
     } finally {
       setLoading(false);
