@@ -140,12 +140,11 @@ export function AvatarCustomizer({
                     selectedFrame?.preview_color && "ring-4",
                   )}
                   style={{
-                    // @ts-ignore - ringColor is a valid CSS custom property workaround
                     '--tw-ring-color': selectedFrame?.preview_color || 'transparent',
                     boxShadow: selectedFrame?.rarity === 'legendary' 
                       ? `0 0 20px ${selectedFrame.preview_color}` 
                       : undefined,
-                  } as React.CSSProperties}
+                  } as React.CSSProperties & { '--tw-ring-color': string }}
                 >
                   {displayName.charAt(0).toUpperCase()}
 
