@@ -51,7 +51,7 @@ export const useDeviceDetection = () => {
       screen.width + 'x' + screen.height,
       new Date().getTimezoneOffset(),
       nav.hardwareConcurrency || 'unknown',
-      (nav as any).deviceMemory || 'unknown',
+      (nav as Navigator & { deviceMemory?: number }).deviceMemory?.toString() || 'unknown',
     ];
     
     // Criar hash simples
