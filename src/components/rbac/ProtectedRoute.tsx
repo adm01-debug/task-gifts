@@ -52,7 +52,7 @@ export function ProtectedRoute({
   accessDeniedMessage,
 }: ProtectedRouteProps) {
   const { user, loading: authLoading } = useAuth();
-  const { canAccess, isLoading: rbacLoading, isAdmin } = useRBAC();
+  const { canAccess, isLoading: rbacLoading } = useRBAC();
 
   // Compatibilidade com prop antiga "role"
   const effectiveRole = requiredRole || role;

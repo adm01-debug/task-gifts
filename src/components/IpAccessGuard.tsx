@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode, forwardRef } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { motion } from "framer-motion";
 import { ShieldX, RefreshCw, Globe, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,41 +16,36 @@ interface IpVerificationResult {
   message: string;
 }
 
-export const IpAccessGuard = forwardRef<HTMLDivElement, IpAccessGuardProps>(
-  function IpAccessGuard({ children }, _ref) {
-    const [isChecking, setIsChecking] = useState(true);
-    const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
-    const [ipInfo, setIpInfo] = useState<IpVerificationResult | null>(null);
-    const [error, setError] = useState<string | null>(null);
+export function IpAccessGuard({ children }: IpAccessGuardProps) {
+  const [isChecking, setIsChecking] = useState(true);
+  const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
+  const [ipInfo, setIpInfo] = useState<IpVerificationResult | null>(null);
 
-    const checkIpAccess = async () => {
-      setIsChecking(true);
-      setError(null);
+  const checkIpAccess = async () => {
+    setIsChecking(true);
+    
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('verify-ip');
       
-      try {
-        const { data, error: fnError } = await supabase.functions.invoke('verify-ip');
-        
-        if (fnError) {
-          console.error('Error verifying IP:', fnError);
-          // On error, allow access (fail open)
-          setIsAllowed(true);
-          setError('Não foi possível verificar o IP. Acesso permitido temporariamente.');
-          return;
-        }
-
-        const result = data as IpVerificationResult;
-        setIpInfo(result);
-        setIsAllowed(result.allowed);
-        
-      } catch (err) {
-        console.error('IP check failed:', err);
+      if (fnError) {
+        console.error('Error verifying IP:', fnError);
         // On error, allow access (fail open)
         setIsAllowed(true);
-        setError('Erro de conexão. Acesso permitido temporariamente.');
-      } finally {
-        setIsChecking(false);
+        return;
       }
-    };
+
+      const result = data as IpVerificationResult;
+      setIpInfo(result);
+      setIsAllowed(result.allowed);
+      
+    } catch (err) {
+      console.error('IP check failed:', err);
+      // On error, allow access (fail open)
+      setIsAllowed(true);
+    } finally {
+      setIsChecking(false);
+    }
+  };
 
     useEffect(() => {
       checkIpAccess();
@@ -134,7 +129,6 @@ export const IpAccessGuard = forwardRef<HTMLDivElement, IpAccessGuardProps>(
       );
     }
 
-    // Access allowed - render children
-    return <>{children}</>;
-  }
-);
+  // Access allowed - render children
+  return <>{children}</>;
+}
