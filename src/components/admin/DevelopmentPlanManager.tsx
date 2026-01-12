@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { DevelopmentPlan } from "@/services/developmentPlanService";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText,
@@ -121,7 +122,7 @@ export function DevelopmentPlanManager() {
     setExpandedPlans(newExpanded);
   };
 
-  const calculateProgress = (plan: typeof plans extends (infer T)[] | undefined ? T : never) => {
+  const calculateProgress = (_plan: DevelopmentPlan): number => {
     // For now, we don't have actions loaded in the list view
     return 0;
   };

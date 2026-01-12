@@ -23,9 +23,10 @@ export function useOneOnOnePreparationManual() {
       const result = await oneOnOnePreparationService.prepareOneOnOne(employeeId);
       setPreparation(result);
       return result;
-    } catch (err) {
-      setError(err as Error);
-      throw err;
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
