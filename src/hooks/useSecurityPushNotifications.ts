@@ -15,6 +15,22 @@ interface SecurityAlert {
   is_resolved: boolean;
 }
 
+interface BlockedIP {
+  id: string;
+  ip_address: string;
+  reason: string;
+  block_type: string;
+  blocked_at: string;
+}
+
+interface LoginAttempt {
+  id: string;
+  email: string;
+  ip_address: string | null;
+  error_message: string | null;
+  created_at: string;
+}
+
 interface NewDeviceAlert {
   id: string;
   user_id: string;
@@ -126,7 +142,7 @@ export function useSecurityPushNotifications() {
           table: 'blocked_ips',
         },
         (payload) => {
-          const blocked = payload.new as any;
+          const blocked = payload.new as BlockedIP;
           
           showNotification('🚫 IP Bloqueado', {
             body: `IP ${blocked.ip_address} foi bloqueado: ${blocked.reason}`,
@@ -151,7 +167,7 @@ export function useSecurityPushNotifications() {
           table: 'login_attempts',
         },
         (payload) => {
-          const attempt = payload.new as any;
+          const attempt = payload.new as LoginAttempt;
           
           // Only notify for failed attempts with error messages
           if (attempt.error_message) {

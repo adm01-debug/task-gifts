@@ -392,12 +392,16 @@ export const highPotentialService = {
 
     if (!profiles) return [];
 
-    // Filter by department if specified
+    // Filter by department if specified - use unknown first due to dynamic relation types
+    type TeamMember = { department_id: string; departments: { name: string } | null };
+    type UserPosition = { positions: { name: string } | null };
+    
     let filteredProfiles = profiles;
     if (departmentId) {
-      filteredProfiles = profiles.filter((p: any) => 
-        p.team_members?.some((tm: any) => tm.department_id === departmentId)
-      );
+      filteredProfiles = profiles.filter((p) => {
+        const teamMembers = p.team_members as unknown as TeamMember[] | null;
+        return teamMembers?.some((tm) => tm.department_id === departmentId);
+      });
     }
 
     const results: HighPotentialScore[] = [];
@@ -412,12 +416,16 @@ export const highPotentialService = {
         const risk = this.determineRiskOfLeaving(factors);
         const recommendation = this.generateRecommendation(overallScore, factors, risk);
 
+        // Cast nested relations using unknown first for type safety
+        const teamMembers = profile.team_members as unknown as TeamMember[] | null;
+        const userPositions = profile.user_positions as unknown as UserPosition[] | null;
+
         results.push({
           userId: profile.id,
           displayName: profile.display_name || profile.email?.split('@')[0] || 'Usuário',
           avatarUrl: profile.avatar_url,
-          department: (profile.team_members as any)?.[0]?.departments?.name,
-          position: (profile.user_positions as any)?.[0]?.positions?.name,
+          department: teamMembers?.[0]?.departments?.name,
+          position: userPositions?.[0]?.positions?.name,
           level: profile.level || 1,
           overallScore,
           factors,
