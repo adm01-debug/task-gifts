@@ -4,6 +4,8 @@ export { MobilePageLayout } from "./MobilePageLayout";
 export { PullToRefresh } from "./PullToRefresh";
 export { MobileHidingHeader } from "./MobileHidingHeader";
 export { SwipeablePage } from "./SwipeablePage";
+export { SwipeableCard } from "./SwipeableCard";
+export { GestureHandler } from "./GestureHandler";
 export { MobileInput } from "./MobileInput";
 export { ScrollToTopFAB } from "./ScrollToTopFAB";
 export { LazyImage } from "./LazyImage";
