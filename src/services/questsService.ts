@@ -6,7 +6,6 @@ import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
 import { profilesService } from "./profilesService";
 import { achievementsService } from "./achievementsService";
-import { bitrix24SyncService } from "./bitrix24SyncService";
 import { logger } from "./loggingService";
 
 export type Quest = Tables<"custom_quests">;
@@ -276,13 +275,6 @@ export const questsService = {
           await achievementsService.checkQuestAchievements(data.user_id);
         } catch (e) {
           logger.apiError("Failed to check quest achievements", e, "questsService");
-        }
-
-        // Sync with Bitrix24 - complete linked task if exists
-        try {
-          await bitrix24SyncService.syncQuestCompletion(quest.id);
-        } catch (e) {
-          logger.apiError("Failed to sync quest completion with Bitrix24", e, "questsService");
         }
       }
     } catch (e) {
