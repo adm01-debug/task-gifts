@@ -146,7 +146,7 @@ export function DepartmentsManager() {
         toast.success("Departamento criado");
       }
       setDialogOpen(false);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao salvar departamento");
     }
   };
@@ -157,7 +157,7 @@ export function DepartmentsManager() {
       await deleteDept.mutateAsync(deleteConfirm.id);
       toast.success("Departamento excluído");
       setDeleteConfirm(null);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao excluir departamento");
     }
   };
@@ -181,7 +181,7 @@ export function DepartmentsManager() {
       toast.success("Membro adicionado");
       setAddMemberDialog(null);
       setSelectedUserId("");
-    } catch (error) {
+    } catch {
       toast.error("Erro ao adicionar membro");
     }
   };
@@ -191,7 +191,7 @@ export function DepartmentsManager() {
     try {
       await removeMember.mutateAsync(memberId);
       toast.success("Membro removido");
-    } catch (error) {
+    } catch {
       toast.error("Erro ao remover membro");
     } finally {
       setRemovingMemberIds(prev => {
@@ -207,7 +207,7 @@ export function DepartmentsManager() {
     try {
       await setManager.mutateAsync({ memberId, isManager: !isCurrentlyManager });
       toast.success(isCurrentlyManager ? "Gestor removido" : "Gestor definido");
-    } catch (error) {
+    } catch {
       toast.error("Erro ao atualizar gestor");
     } finally {
       setTogglingManagerIds(prev => {

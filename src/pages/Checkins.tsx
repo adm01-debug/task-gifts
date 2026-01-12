@@ -55,7 +55,7 @@ export default function Checkins() {
     try {
       await prepareOneOnOne(employeeId);
       setIsPreparationDialogOpen(true);
-    } catch (error) {
+    } catch {
       toast({ title: "Erro ao preparar 1:1", variant: "destructive" });
     }
   };

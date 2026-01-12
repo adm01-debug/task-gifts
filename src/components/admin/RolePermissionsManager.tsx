@@ -177,7 +177,7 @@ export function RolePermissionsManager() {
       setRolePermissions(permIds);
       setOriginalPermissions(permIds);
       setHasChanges(false);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao carregar permissões");
     }
   };
@@ -265,7 +265,7 @@ export function RolePermissionsManager() {
       setOriginalPermissions(new Set(rolePermissions));
       setHasChanges(false);
       toast.success("Permissões atualizadas com sucesso!");
-    } catch (error) {
+    } catch {
       toast.error("Erro ao salvar permissões");
     } finally {
       setIsSaving(false);

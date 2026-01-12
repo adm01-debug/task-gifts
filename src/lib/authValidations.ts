@@ -113,8 +113,8 @@ export async function checkPasswordLeaked(password: string): Promise<{
     }
     
     return { isLeaked: false, occurrences: 0 };
-  } catch (error) {
-    console.error('Error checking leaked password:', error);
+  } catch (err: unknown) {
+    console.error('Error checking leaked password:', err);
     return { isLeaked: false, occurrences: 0 };
   }
 }

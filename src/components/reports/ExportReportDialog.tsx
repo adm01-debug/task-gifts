@@ -144,7 +144,7 @@ export default function ExportReportDialog({
         setExportProgress(0);
         setExportComplete(false);
       }, 1500);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao exportar relatório");
       setExporting(false);
       setExportProgress(0);

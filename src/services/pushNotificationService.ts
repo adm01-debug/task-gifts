@@ -35,8 +35,8 @@ export const pushNotificationService = {
       await navigator.serviceWorker.ready;
       
       return registration;
-    } catch (error) {
-      logger.apiError("Service Worker registration failed", error, "pushNotificationService");
+    } catch (err: unknown) {
+      logger.apiError("Service Worker registration failed", err, "pushNotificationService");
       return null;
     }
   },
@@ -54,8 +54,8 @@ export const pushNotificationService = {
       const permission = await Notification.requestPermission();
       logger.info("Notification permission: " + permission, "pushNotificationService");
       return permission;
-    } catch (error) {
-      logger.apiError("Permission request failed", error, "pushNotificationService");
+    } catch (err: unknown) {
+      logger.apiError("Permission request failed", err, "pushNotificationService");
       return 'denied';
     }
   },
@@ -77,8 +77,8 @@ export const pushNotificationService = {
       await this.saveSubscription(subscription);
       
       return subscription;
-    } catch (error) {
-      logger.apiError("Push subscription failed", error, "pushNotificationService");
+    } catch (err: unknown) {
+      logger.apiError("Push subscription failed", err, "pushNotificationService");
       return null;
     }
   },
@@ -93,8 +93,8 @@ export const pushNotificationService = {
 
       // In a real implementation, you would save this to a push_subscriptions table
       logger.info("Push subscription saved for user: " + user.id, "pushNotificationService");
-    } catch (error) {
-      logger.apiError("Failed to save subscription", error, "pushNotificationService");
+    } catch (err: unknown) {
+      logger.apiError("Failed to save subscription", err, "pushNotificationService");
     }
   },
 

@@ -171,9 +171,9 @@ export default function QuestBuilder() {
         navigate("/manager");
       }, 1500);
 
-    } catch (error) {
-      logger.apiError('handleSave', error, 'QuestBuilder');
-      const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro ao salvar a quest.";
+    } catch (err: unknown) {
+      logger.apiError('handleSave', err, 'QuestBuilder');
+      const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro ao salvar a quest.";
       toast({
         title: "Erro ao salvar",
         description: errorMessage,

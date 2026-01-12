@@ -73,7 +73,7 @@ export function SurveyCreator() {
         starts_at: "",
         ends_at: "",
       });
-    } catch (error) {
+    } catch {
       toast.error("Erro ao criar pesquisa");
     } finally {
       setIsSubmitting(false);

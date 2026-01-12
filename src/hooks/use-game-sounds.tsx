@@ -74,8 +74,8 @@ class GameAudioEngine {
       this.masterGain = this.audioContext.createGain();
       this.masterGain.connect(this.audioContext.destination);
       this.masterGain.gain.value = this.masterVolume;
-    } catch (e) {
-      console.warn("Web Audio API not supported", e);
+    } catch (err: unknown) {
+      console.warn("Web Audio API not supported", err);
     }
   }
 

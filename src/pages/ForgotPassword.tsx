@@ -48,7 +48,7 @@ export default function ForgotPassword() {
       setEmailSent(true);
       setSentEmail(data.email);
       toast.success("Instruções enviadas!");
-    } catch (error) {
+    } catch {
       toast.error("Erro ao processar solicitação");
     } finally {
       setIsLoading(false);

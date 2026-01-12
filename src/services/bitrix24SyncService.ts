@@ -57,8 +57,8 @@ export const bitrix24SyncService = {
         .eq("id", mapping.id);
 
       return true;
-    } catch (error) {
-      logger.apiError("Failed to sync quest completion with Bitrix24", error, "bitrix24SyncService");
+    } catch (err: unknown) {
+      logger.apiError("Failed to sync quest completion with Bitrix24", err, "bitrix24SyncService");
       return false;
     }
   },
@@ -155,8 +155,8 @@ export const bitrix24SyncService = {
       }
 
       return result;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Erro desconhecido";
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido";
       result.errors.push(`Erro geral: ${errorMsg}`);
       return result;
     }
@@ -316,8 +316,8 @@ export const bitrix24SyncService = {
       }
 
       return result;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Erro desconhecido";
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido";
       result.errors.push(`Erro geral: ${errorMsg}`);
       return result;
     }
@@ -362,8 +362,8 @@ export const bitrix24SyncService = {
       }
 
       return bitrixEventId;
-    } catch (error) {
-      logger.apiError("Failed to create event in Bitrix24", error, "bitrix24SyncService");
+    } catch (err: unknown) {
+      logger.apiError("Failed to create event in Bitrix24", err, "bitrix24SyncService");
       return null;
     }
   },
@@ -417,8 +417,8 @@ export const bitrix24SyncService = {
         });
 
       return true;
-    } catch (error) {
-      logger.apiError("Failed to sync check-in with Bitrix24", error, "bitrix24SyncService");
+    } catch (err: unknown) {
+      logger.apiError("Failed to sync check-in with Bitrix24", err, "bitrix24SyncService");
       return false;
     }
   },
@@ -454,8 +454,8 @@ export const bitrix24SyncService = {
         .eq("local_id", `${userId}_${today}`);
 
       return true;
-    } catch (error) {
-      logger.apiError("Failed to sync check-out with Bitrix24", error, "bitrix24SyncService");
+    } catch (err: unknown) {
+      logger.apiError("Failed to sync check-out with Bitrix24", err, "bitrix24SyncService");
       return false;
     }
   },
@@ -466,8 +466,8 @@ export const bitrix24SyncService = {
   async getBitrixTimemanStatus() {
     try {
       return await getTimemanStatus();
-    } catch (error) {
-      logger.apiError("Failed to get Bitrix24 timeman status", error, "bitrix24SyncService");
+    } catch (err: unknown) {
+      logger.apiError("Failed to get Bitrix24 timeman status", err, "bitrix24SyncService");
       return null;
     }
   },
