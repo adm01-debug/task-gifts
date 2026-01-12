@@ -200,13 +200,18 @@ export const highPotentialService = {
     const attendanceData = attendance || [];
     const moodsData = moods || [];
 
+    interface GoalData { status: string }
+    interface EnrollmentData { completed_at: string | null }
+    interface MoodData { mood_score: number }
+    interface AttendanceData { is_punctual: boolean }
+
     return {
       questsCompleted: profile?.quests_completed || 0,
-      goalsAchieved: goalsData.filter((g: any) => g.status === 'completed').length,
+      goalsAchieved: goalsData.filter((g: GoalData) => g.status === 'completed').length,
       goalsTotal: goalsData.length,
       taskOnTimeRate: 85, // Would need task_scores to calculate properly
 
-      trailsCompleted: enrollmentsData.filter((e: any) => e.completed_at).length,
+      trailsCompleted: enrollmentsData.filter((e: EnrollmentData) => e.completed_at).length,
       trailsEnrolled: enrollmentsData.length,
       pdiProgress,
       certificationsCount: certs?.length || 0,
@@ -216,11 +221,11 @@ export const highPotentialService = {
       feedbacksGiven: 0, // Would need feedback_responses
       checkinsCompleted: checkins?.length || 0,
       avgMood: moodsData.length > 0 
-        ? moodsData.reduce((acc: number, m: any) => acc + m.mood_score, 0) / moodsData.length 
+        ? moodsData.reduce((acc: number, m: MoodData) => acc + m.mood_score, 0) / moodsData.length 
         : 3,
 
       attendanceRate: attendanceData.length > 0 
-        ? (attendanceData.filter((a: any) => a.is_punctual).length / attendanceData.length) * 100 
+        ? (attendanceData.filter((a: AttendanceData) => a.is_punctual).length / attendanceData.length) * 100 
         : 0,
       streak: profile?.streak || 0,
       bestStreak: profile?.best_streak || 0,

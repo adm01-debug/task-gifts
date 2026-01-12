@@ -110,7 +110,7 @@ export default function SecurityDashboard() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: { rate_limit_logs_deleted: number; login_attempts_deleted: number }) => {
       toast.success(`Limpeza concluída! Removidos: ${data.rate_limit_logs_deleted} logs de rate limit, ${data.login_attempts_deleted} tentativas de login.`);
       queryClient.invalidateQueries({ queryKey: ["security"] });
       refetchStats();

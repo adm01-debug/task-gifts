@@ -141,6 +141,7 @@ export const climateSurveyService = {
   },
 
   async createQuestion(question: Omit<ClimateSurveyQuestion, 'id' | 'created_at'>): Promise<ClimateSurveyQuestion> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
       .from('climate_survey_questions')
       .insert(question as any)
@@ -223,13 +224,14 @@ export const climateSurveyService = {
       throw error;
     }
 
-    const scores = (data || []).map((d: any) => d.score).filter((s: number | null) => s !== null);
+    interface ScoreData { score: number | null }
+    const scores = (data || []).map((d: ScoreData) => d.score).filter((s): s is number => s !== null);
     const total = scores.length;
     if (total === 0) return { enps: 0, promoters: 0, passives: 0, detractors: 0 };
 
-    const promoters = scores.filter((s: number) => s >= 9).length;
-    const passives = scores.filter((s: number) => s >= 7 && s < 9).length;
-    const detractors = scores.filter((s: number) => s < 7).length;
+    const promoters = scores.filter((s) => s >= 9).length;
+    const passives = scores.filter((s) => s >= 7 && s < 9).length;
+    const detractors = scores.filter((s) => s < 7).length;
 
     const enps = Math.round(((promoters - detractors) / total) * 100);
 

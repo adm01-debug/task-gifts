@@ -168,7 +168,7 @@ export function GoalsManager() {
                   <Label htmlFor="goal_type">Tipo</Label>
                   <Select
                     value={formData.goal_type || "personal"}
-                    onValueChange={(value: any) => setFormData({ ...formData, goal_type: value })}
+                    onValueChange={(value) => setFormData({ ...formData, goal_type: value as GoalTemplate['goal_type'] })}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -184,7 +184,7 @@ export function GoalsManager() {
                   <Label htmlFor="priority">Prioridade</Label>
                   <Select
                     value={formData.priority || "medium"}
-                    onValueChange={(value: any) => setFormData({ ...formData, priority: value })}
+                    onValueChange={(value) => setFormData({ ...formData, priority: value as GoalTemplate['priority'] })}
                   >
                     <SelectTrigger>
                       <SelectValue />

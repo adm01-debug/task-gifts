@@ -572,7 +572,8 @@ function UserRolesTab({ searchTerm }: { searchTerm: string }) {
           </TableHeader>
           <TableBody>
             {filteredUsers.map((user) => {
-              const userRoles = user.user_roles?.map((r: any) => r.role) || [];
+              interface UserRoleItem { role: string }
+              const userRoles = user.user_roles?.map((r: UserRoleItem) => r.role) || [];
               return (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">
