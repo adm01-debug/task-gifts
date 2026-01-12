@@ -67,6 +67,15 @@ export interface WebhookDeliveryLog {
   created_at: string;
 }
 
+interface ExternalTaskMetadata {
+  source_url?: string;
+  assignee?: string;
+  labels?: string[];
+  project_id?: string;
+  sprint_id?: string;
+  [key: string]: string | number | boolean | string[] | undefined;
+}
+
 export interface ExternalTask {
   id: string;
   api_key_id: string | null;
@@ -86,7 +95,7 @@ export interface ExternalTask {
   deadline_at: string | null;
   started_at: string | null;
   completed_at: string | null;
-  metadata: Record<string, any>;
+  metadata: ExternalTaskMetadata;
   created_at: string;
   updated_at: string;
 }

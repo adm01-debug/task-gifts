@@ -20,6 +20,16 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
+interface AlertMetadata {
+  request_count?: number;
+  blocked_duration?: number;
+  user_agent?: string;
+  country?: string;
+  endpoint?: string;
+  method?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
 interface SecurityAlert {
   id: string;
   alert_type: string;
@@ -28,7 +38,7 @@ interface SecurityAlert {
   description: string | null;
   ip_address: string | null;
   user_id: string | null;
-  metadata: Record<string, any>;
+  metadata: AlertMetadata;
   is_resolved: boolean;
   resolved_at: string | null;
   resolution_notes: string | null;
