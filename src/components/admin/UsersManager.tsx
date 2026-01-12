@@ -757,7 +757,7 @@ export function UsersManager() {
                   toast.success(`Role atribuído para ${result.successful} usuário(s)`);
                   setBulkRoleDialog(false);
                   setSelectedUsers([]);
-                } catch (error) {
+                } catch {
                   toast.error("Erro ao atribuir roles");
                 }
               }} 
@@ -807,7 +807,7 @@ export function UsersManager() {
                   setBulkDeptDialog(false);
                   setBulkDept("");
                   setSelectedUsers([]);
-                } catch (error) {
+                } catch {
                   toast.error("Erro ao adicionar ao departamento");
                 }
               }} 
@@ -840,7 +840,7 @@ export function UsersManager() {
                   toast.success(`Role removido de ${result.successful} usuário(s)`);
                   setBulkRemoveRoleConfirm(null);
                   setSelectedUsers([]);
-                } catch (error) {
+                } catch {
                   toast.error("Erro ao remover roles");
                 }
               }}
@@ -871,7 +871,7 @@ export function UsersManager() {
                   toast.success(`${result.successful} usuário(s) removido(s) dos departamentos`);
                   setBulkRemoveDeptsConfirm(false);
                   setSelectedUsers([]);
-                } catch (error) {
+                } catch {
                   toast.error("Erro ao remover dos departamentos");
                 }
               }}

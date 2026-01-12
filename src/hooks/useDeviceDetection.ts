@@ -114,8 +114,8 @@ export const useDeviceDetection = () => {
         deviceId: data?.device_id,
         isTrusted: data?.is_trusted || false
       };
-    } catch (error) {
-      console.error('Error registering device:', error);
+    } catch (err: unknown) {
+      console.error('Error registering device:', err instanceof Error ? err.message : String(err));
       return { isNewDevice: false, deviceId: null, isTrusted: false };
     } finally {
       setIsLoading(false);

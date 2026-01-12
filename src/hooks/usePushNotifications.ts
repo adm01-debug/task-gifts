@@ -63,8 +63,8 @@ export function usePushNotifications() {
       }
 
       return isGranted;
-    } catch (error) {
-      logger.apiError("requestPermission", error, "PushNotifications");
+    } catch (err: unknown) {
+      logger.apiError("requestPermission", err, "PushNotifications");
       toast.error("Erro ao solicitar permissão de notificações");
       return false;
     }
@@ -86,8 +86,8 @@ export function usePushNotifications() {
       };
 
       return notification;
-    } catch (error) {
-      logger.warn("Error showing notification", error instanceof Error ? error.message : String(error));
+    } catch (err: unknown) {
+      logger.warn("Error showing notification", err instanceof Error ? err.message : String(err));
       return null;
     }
   }, [state.isGranted]);
