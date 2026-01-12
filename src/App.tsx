@@ -46,12 +46,10 @@ const Achievements = lazy(() => import("./pages/Achievements"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PersonalStats = lazy(() => import("./pages/PersonalStats"));
 const SeasonalEventDetail = lazy(() => import("./pages/SeasonalEventDetail"));
-const Mentorship = lazy(() => import("./pages/Mentorship"));
 const Duels = lazy(() => import("./pages/Duels"));
 const DailyQuiz = lazy(() => import("./pages/DailyQuiz"));
 const QuizAdmin = lazy(() => import("./pages/QuizAdmin"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
-const Bitrix24CRM = lazy(() => import("./pages/Bitrix24CRM"));
 const BIDashboard = lazy(() => import("./pages/BIDashboard"));
 const Goals = lazy(() => import("./pages/Goals"));
 const Checkins = lazy(() => import("./pages/Checkins"));
@@ -156,12 +154,10 @@ const App = () => (
                             <Route path="/estatisticas" element={<ProtectedRoute><PersonalStats /></ProtectedRoute>} />
                             <Route path="/loja" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
                             <Route path="/eventos/:eventId" element={<ProtectedRoute><SeasonalEventDetail /></ProtectedRoute>} />
-                            <Route path="/mentoria" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
                             <Route path="/duelos" element={<ProtectedRoute><Duels /></ProtectedRoute>} />
                             <Route path="/quiz" element={<ProtectedRoute><DailyQuiz /></ProtectedRoute>} />
                             <Route path="/quiz/admin" element={<ProtectedRoute requiredRole="manager"><QuizAdmin /></ProtectedRoute>} />
                             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
-                            <Route path="/bitrix24" element={<ProtectedRoute requiredRole="admin"><Bitrix24CRM /></ProtectedRoute>} />
                             <Route path="/bi" element={<ProtectedRoute requiredRole="manager"><BIDashboard /></ProtectedRoute>} />
                             <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
                             <Route path="/checkins" element={<ProtectedRoute requiredRole="manager"><Checkins /></ProtectedRoute>} />
