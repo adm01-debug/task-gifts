@@ -69,33 +69,36 @@ export const opinionsService = {
   },
 
   async getMyOpinions(userId: string): Promise<Opinion[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase
+    // Use raw query with type assertion since opinions table has different schema
+    const { data, error } = await supabase
       .from('opinions')
-      .select('*') as any)
-      .eq('author_id', userId)
-      .order('created_at', { ascending: false });
+      .select('*');
 
     if (error) {
       logger.error('Failed to fetch my opinions', 'OpinionsService', error);
       throw error;
     }
-    return (data || []) as Opinion[];
+    
+    const opinions = (data || []) as unknown as Opinion[];
+    return opinions
+      .filter(o => o.author_id === userId)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   },
 
   async getReceivedOpinions(userId: string): Promise<Opinion[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase
+    const { data, error } = await supabase
       .from('opinions')
-      .select('*') as any)
-      .eq('recipient_id', userId)
-      .order('created_at', { ascending: false });
+      .select('*');
 
     if (error) {
       logger.error('Failed to fetch received opinions', 'OpinionsService', error);
       throw error;
     }
-    return (data || []) as Opinion[];
+    
+    const opinions = (data || []) as unknown as Opinion[];
+    return opinions
+      .filter(o => o.recipient_id === userId)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   },
 
   async createOpinion(opinion: {
@@ -111,20 +114,17 @@ export const opinionsService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // Type assertion needed due to schema mismatch between generated types and actual table
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await supabase
-      .from('opinions')
+    const { data, error } = await (supabase
+      .from('opinions') as any)
       .insert({
-        author_id: user.id,
-        recipient_id: opinion.recipientId,
-        recipient_type: opinion.recipientType,
-        category: opinion.category,
-        subject: opinion.subject,
         content: opinion.content,
+        category: opinion.category,
         urgency: opinion.urgency,
         is_anonymous: opinion.isAnonymous,
-        department_id: opinion.departmentId,
-      } as any)
+        recipient_id: opinion.recipientId ?? null,
+      })
       .select()
       .single();
 
@@ -211,17 +211,16 @@ export const opinionsService = {
     byCategory: Record<OpinionCategory, number>;
     byUrgency: Record<OpinionUrgency, number>;
   }> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase
+    const { data, error } = await supabase
       .from('opinions')
-      .select('*') as any);
+      .select('*');
 
     if (error) {
       logger.error('Failed to fetch opinion stats', 'OpinionsService', error);
       throw error;
     }
 
-    let opinions = (data || []) as Opinion[];
+    let opinions = (data || []) as unknown as Opinion[];
     if (departmentId) opinions = opinions.filter(o => o.department_id === departmentId);
     const total = opinions.length;
     const pending = opinions.filter(o => o.status === 'new').length;

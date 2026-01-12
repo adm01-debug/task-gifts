@@ -18,6 +18,16 @@ interface RateLimitLog {
   created_at: string;
 }
 
+interface SecurityMetadata {
+  request_count?: number;
+  blocked_duration?: number;
+  user_agent?: string;
+  country?: string;
+  endpoint?: string;
+  method?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
 interface BlockedIP {
   id: string;
   ip_address: string;
@@ -28,7 +38,7 @@ interface BlockedIP {
   expires_at: string | null;
   is_permanent: boolean;
   violation_count: number;
-  metadata: Record<string, any>;
+  metadata: SecurityMetadata;
   created_at: string;
   updated_at: string;
 }
@@ -41,7 +51,7 @@ interface SecurityAlert {
   description: string | null;
   ip_address: string | null;
   user_id: string | null;
-  metadata: Record<string, any>;
+  metadata: SecurityMetadata;
   is_resolved: boolean;
   resolved_by: string | null;
   resolved_at: string | null;
