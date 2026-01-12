@@ -12,14 +12,13 @@ interface MobileInputProps extends InputHTMLAttributes<HTMLInputElement> {
  */
 export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
   ({ mobileType = "text", className, ...props }, ref) => {
-    const inputModeMap: Record<string, string> = {
+    const inputModeMap: Record<string, React.HTMLAttributes<HTMLInputElement>['inputMode']> = {
       email: "email",
       tel: "tel",
       number: "numeric",
       search: "search",
       url: "url",
     };
-
     const autoCompleteMap: Record<string, string> = {
       email: "email",
       tel: "tel",
@@ -30,7 +29,7 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
       <input
         ref={ref}
         type={mobileType}
-        inputMode={inputModeMap[mobileType] as any}
+        inputMode={inputModeMap[mobileType]}
         autoComplete={autoCompleteMap[mobileType] || "off"}
         autoCapitalize={mobileType === "email" ? "none" : undefined}
         autoCorrect={mobileType === "email" ? "off" : undefined}
