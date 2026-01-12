@@ -69,6 +69,7 @@ export const opinionsService = {
   },
 
   async getMyOpinions(userId: string): Promise<Opinion[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase
       .from('opinions')
       .select('*') as any)
@@ -83,6 +84,7 @@ export const opinionsService = {
   },
 
   async getReceivedOpinions(userId: string): Promise<Opinion[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase
       .from('opinions')
       .select('*') as any)
@@ -109,6 +111,7 @@ export const opinionsService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
       .from('opinions')
       .insert({
@@ -133,7 +136,7 @@ export const opinionsService = {
   },
 
   async updateOpinionStatus(id: string, status: OpinionStatus): Promise<Opinion> {
-    const updates: any = { status };
+    const updates: { status: OpinionStatus; read_at?: string; resolved_at?: string } = { status };
     if (status === 'read') updates.read_at = new Date().toISOString();
     if (status === 'resolved') updates.resolved_at = new Date().toISOString();
 
@@ -208,6 +211,7 @@ export const opinionsService = {
     byCategory: Record<OpinionCategory, number>;
     byUrgency: Record<OpinionUrgency, number>;
   }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase
       .from('opinions')
       .select('*') as any);

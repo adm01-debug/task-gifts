@@ -130,6 +130,7 @@ export const actionPlanService = {
         related_survey_id: plan.relatedSurveyId,
         root_causes: plan.rootCauses || [],
         root_cause_summary: plan.rootCauseSummary,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .select()
       .maybeSingle();
@@ -143,6 +144,7 @@ export const actionPlanService = {
   },
 
   async updatePlan(id: string, updates: Partial<ActionPlan>): Promise<ActionPlan> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
       .from('action_plans')
       .update(updates as any)
@@ -226,6 +228,7 @@ export const actionPlanService = {
   },
 
   async updateItem(id: string, updates: Partial<ActionPlanItem>): Promise<ActionPlanItem> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
       .from('action_plan_items')
       .update(updates as any)
