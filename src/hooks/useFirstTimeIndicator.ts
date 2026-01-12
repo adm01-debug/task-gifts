@@ -62,7 +62,9 @@ export const useFirstTimeIndicator = () => {
 
   // Expose reset function globally for testing
   useEffect(() => {
-    (window as any).resetIndicatorCelebrations = resetAll;
+    if (typeof window !== 'undefined') {
+      (window as Window & { resetIndicatorCelebrations?: () => void }).resetIndicatorCelebrations = resetAll;
+    }
   }, [resetAll]);
 
   return {
