@@ -218,7 +218,8 @@ const Profile = () => {
       if (data) {
         setProfile(data as ProfileData);
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error('Profile load error:', err instanceof Error ? err.message : String(err));
       toast.error("Erro ao carregar perfil");
     } finally {
       setLoadingProfile(false);

@@ -21,7 +21,12 @@ const sizeConfig = {
   xl: { container: "w-36 h-36", inner: "w-32 h-32", text: "text-4xl", accessory: "text-2xl", effect: "text-lg" },
 };
 
-const effectAnimations: Record<string, { animate: object; transition: object }> = {
+interface EffectAnimation {
+  animate: Record<string, number | number[]>;
+  transition: { duration: number; repeat: number };
+}
+
+const effectAnimations: Record<string, EffectAnimation> = {
   "✨": { animate: { scale: [1, 1.3, 1], rotate: [0, 180, 360] }, transition: { duration: 2, repeat: Infinity } },
   "⭐": { animate: { scale: [1, 1.2, 1], opacity: [1, 0.5, 1] }, transition: { duration: 1.5, repeat: Infinity } },
   "🌈": { animate: { y: [-5, 5, -5], rotate: [-5, 5, -5] }, transition: { duration: 2, repeat: Infinity } },

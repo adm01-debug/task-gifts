@@ -14,8 +14,8 @@ const getStoredState = (): IndicatorState => {
     if (stored) {
       return JSON.parse(stored);
     }
-  } catch (e) {
-    // Ignore errors
+  } catch {
+    // Ignore localStorage errors (e.g., private browsing mode)
   }
   return { level: false, streak: false, trophy: false };
 };
@@ -23,8 +23,8 @@ const getStoredState = (): IndicatorState => {
 const setStoredState = (state: IndicatorState) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) {
-    // Ignore errors
+  } catch {
+    // Ignore localStorage errors (e.g., private browsing mode)
   }
 };
 

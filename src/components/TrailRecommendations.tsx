@@ -62,11 +62,11 @@ export function TrailRecommendations() {
 
       setRecommendations(data);
       toast.success("Recomendações geradas com sucesso!");
-    } catch (err) {
-      logger.apiError('fetchRecommendations', err, 'TrailRecommendations');
-      const message = err instanceof Error ? err.message : "Erro ao gerar recomendações";
-      setError(message);
-      toast.error(message);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      logger.apiError('fetchRecommendations', error, 'TrailRecommendations');
+      setError(error.message);
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }

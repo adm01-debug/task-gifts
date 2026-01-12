@@ -38,8 +38,8 @@ export function IpAccessGuard({ children }: IpAccessGuardProps) {
       setIpInfo(result);
       setIsAllowed(result.allowed);
       
-    } catch (err) {
-      console.error('IP check failed:', err);
+    } catch (err: unknown) {
+      console.error('IP check failed:', err instanceof Error ? err.message : String(err));
       // On error, allow access (fail open)
       setIsAllowed(true);
     } finally {
