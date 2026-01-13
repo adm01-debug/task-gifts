@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, BookOpen, Target, User, Zap, Clock, Award, Command, Filter, X, ChevronDown, History, Trash2 } from "lucide-react";
+import { Search, BookOpen, Target, User, Zap, Clock, Award, Command, Filter, X, ChevronDown, History } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -27,6 +27,7 @@ import { useQuests } from "@/hooks/useQuests";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useFuseSearch, getHighlightSegments, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
 import { cn } from "@/lib/utils";
 
 interface GlobalSearchProps {
@@ -76,22 +77,25 @@ function clearRecentSearches(): RecentSearch[] {
   return [];
 }
 
-// Highlight matching text in search results
-function HighlightText({ text, query }: { text: string; query: string }) {
-  if (!query.trim()) return <>{text}</>;
-  
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  const parts = text.split(regex);
+// Highlight matching text in search results using Fuse.js indices
+function HighlightText({ 
+  text, 
+  indices 
+}: { 
+  text: string; 
+  indices?: [number, number][];
+}) {
+  const segments = getHighlightSegments(text, indices);
   
   return (
     <>
-      {parts.map((part, i) => 
-        regex.test(part) ? (
+      {segments.map((segment, i) => 
+        segment.isMatch ? (
           <mark key={i} className="bg-primary/30 text-foreground rounded px-0.5">
-            {part}
+            {segment.text}
           </mark>
         ) : (
-          <span key={i}>{part}</span>
+          <span key={i}>{segment.text}</span>
         )
       )}
     </>
@@ -274,8 +278,8 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
   };
 
 
-  // Filtered data
-  const filteredTrails = useMemo(() => {
+  // Pre-filter data by department/difficulty before fuzzy search
+  const preFilteredTrails = useMemo(() => {
     if (!trails) return [];
     let result = trails;
     
@@ -286,7 +290,7 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
     return result;
   }, [trails, selectedDepartments]);
 
-  const filteredQuests = useMemo(() => {
+  const preFilteredQuests = useMemo(() => {
     if (!quests) return [];
     let result = quests;
     
@@ -300,6 +304,28 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
     
     return result;
   }, [quests, difficultyFilter, selectedDepartments]);
+
+  // Fuzzy search with Fuse.js
+  const trailSearchResults = useFuseSearch(
+    preFilteredTrails,
+    ['title', 'description'],
+    debouncedSearchQuery,
+    { ...SEARCH_PRESETS.content, limit: 8 }
+  );
+
+  const questSearchResults = useFuseSearch(
+    preFilteredQuests,
+    ['title', 'description'],
+    debouncedSearchQuery,
+    { ...SEARCH_PRESETS.content, limit: 8 }
+  );
+
+  const userSearchResults = useFuseSearch(
+    profiles || [],
+    ['display_name', 'email'],
+    debouncedSearchQuery,
+    { ...SEARCH_PRESETS.loose, limit: 8 }
+  );
 
   const quickActions = [
     { id: "dashboard", label: "Dashboard", icon: "🏠", route: "/" },
@@ -599,113 +625,128 @@ export function GlobalSearch({ trigger }: GlobalSearchProps) {
           )}
 
           {/* Trails */}
-          {(categoryFilter === "all" || categoryFilter === "trails") && filteredTrails.length > 0 && (
+          {(categoryFilter === "all" || categoryFilter === "trails") && trailSearchResults.length > 0 && (
             <>
               <CommandGroup heading="Trilhas de Aprendizado">
-                {filteredTrails.slice(0, 8).map((trail) => (
-                  <CommandItem
-                    key={trail.id}
-                    onSelect={() => handleSelect("trail", trail.id, trail.title, trail.icon || "📚")}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <span className="text-sm">{trail.icon || "📚"}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">
-                        <HighlightText text={trail.title} query={searchQuery} />
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        {trail.estimated_hours && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {trail.estimated_hours}h
-                          </span>
-                        )}
-                        {trail.xp_reward && (
-                          <span className="flex items-center gap-1 text-primary">
-                            <Zap className="w-3 h-3" />
-                            {trail.xp_reward} XP
-                          </span>
-                        )}
+                {trailSearchResults.map((result) => {
+                  const trail = result.item;
+                  const titleMatch = result.matches?.find(m => m.key === 'title');
+                  return (
+                    <CommandItem
+                      key={trail.id}
+                      onSelect={() => handleSelect("trail", trail.id, trail.title, trail.icon || "📚")}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm">{trail.icon || "📚"}</span>
                       </div>
-                    </div>
-                    <BookOpen className="w-4 h-4 text-muted-foreground" />
-                  </CommandItem>
-                ))}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">
+                          <HighlightText text={trail.title} indices={titleMatch?.indices} />
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          {trail.estimated_hours && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {trail.estimated_hours}h
+                            </span>
+                          )}
+                          {trail.xp_reward && (
+                            <span className="flex items-center gap-1 text-primary">
+                              <Zap className="w-3 h-3" />
+                              {trail.xp_reward} XP
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <BookOpen className="w-4 h-4 text-muted-foreground" />
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
               <CommandSeparator />
             </>
           )}
 
           {/* Quests */}
-          {(categoryFilter === "all" || categoryFilter === "quests") && filteredQuests.length > 0 && (
+          {(categoryFilter === "all" || categoryFilter === "quests") && questSearchResults.length > 0 && (
             <>
               <CommandGroup heading="Quests">
-                {filteredQuests.slice(0, 8).map((quest) => (
-                  <CommandItem
-                    key={quest.id}
-                    onSelect={() => handleSelect("quest", quest.id, quest.title, quest.icon || "🎯")}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                      <span className="text-sm">{quest.icon || "🎯"}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">
-                        <HighlightText text={quest.title} query={searchQuery} />
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Badge variant="secondary" className={cn("text-[10px] px-1.5 py-0", getDifficultyColor(quest.difficulty))}>
-                          {quest.difficulty}
-                        </Badge>
-                        <span className="flex items-center gap-1 text-primary">
-                          <Zap className="w-3 h-3" />
-                          {quest.xp_reward} XP
-                        </span>
+                {questSearchResults.map((result) => {
+                  const quest = result.item;
+                  const titleMatch = result.matches?.find(m => m.key === 'title');
+                  return (
+                    <CommandItem
+                      key={quest.id}
+                      onSelect={() => handleSelect("quest", quest.id, quest.title, quest.icon || "🎯")}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                        <span className="text-sm">{quest.icon || "🎯"}</span>
                       </div>
-                    </div>
-                    <Target className="w-4 h-4 text-muted-foreground" />
-                  </CommandItem>
-                ))}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">
+                          <HighlightText text={quest.title} indices={titleMatch?.indices} />
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Badge variant="secondary" className={cn("text-[10px] px-1.5 py-0", getDifficultyColor(quest.difficulty))}>
+                            {quest.difficulty}
+                          </Badge>
+                          <span className="flex items-center gap-1 text-primary">
+                            <Zap className="w-3 h-3" />
+                            {quest.xp_reward} XP
+                          </span>
+                        </div>
+                      </div>
+                      <Target className="w-4 h-4 text-muted-foreground" />
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
               <CommandSeparator />
             </>
           )}
 
           {/* Users */}
-          {(categoryFilter === "all" || categoryFilter === "users") && profiles && profiles.length > 0 && (
+          {(categoryFilter === "all" || categoryFilter === "users") && userSearchResults.length > 0 && (
             <CommandGroup heading="Usuários">
-              {profiles.slice(0, 8).map((profile) => (
-                <CommandItem
-                  key={profile.id}
-                  onSelect={() => handleSelect("user", profile.id, profile.display_name || profile.email || "Usuário", "👤")}
-                  className="flex items-center gap-3 cursor-pointer"
-                >
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={profile.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                      {(profile.display_name || profile.email || "U")[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">
-                      <HighlightText text={profile.display_name || profile.email || "Usuário"} query={searchQuery} />
-                    </p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Award className="w-3 h-3" />
-                        Nível {profile.level}
-                      </span>
-                      <span className="flex items-center gap-1 text-primary">
-                        <Zap className="w-3 h-3" />
-                        {profile.xp} XP
-                      </span>
+              {userSearchResults.map((result) => {
+                const profile = result.item;
+                const nameMatch = result.matches?.find(m => m.key === 'display_name' || m.key === 'email');
+                return (
+                  <CommandItem
+                    key={profile.id}
+                    onSelect={() => handleSelect("user", profile.id, profile.display_name || profile.email || "Usuário", "👤")}
+                    className="flex items-center gap-3 cursor-pointer"
+                  >
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={profile.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                        {(profile.display_name || profile.email || "U")[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">
+                        <HighlightText 
+                          text={profile.display_name || profile.email || "Usuário"} 
+                          indices={nameMatch?.indices} 
+                        />
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Award className="w-3 h-3" />
+                          Nível {profile.level}
+                        </span>
+                        <span className="flex items-center gap-1 text-primary">
+                          <Zap className="w-3 h-3" />
+                          {profile.xp} XP
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <User className="w-4 h-4 text-muted-foreground" />
-                </CommandItem>
-              ))}
+                    <User className="w-4 h-4 text-muted-foreground" />
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           )}
         </CommandList>
