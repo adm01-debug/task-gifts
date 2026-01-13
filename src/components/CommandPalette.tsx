@@ -13,14 +13,15 @@ import {
   Home, Target, Trophy, TrendingUp, Clock, BookOpen,
   Gamepad2, ShoppingBag, Swords, Heart, Award,
   ClipboardCheck, BarChart3, Megaphone, MessageSquare,
-  User, Settings, Shield, LogOut, Search, Zap, Bell,
-  Moon, Sun, Palette
+  User, Settings, Shield, LogOut, Search, Bell,
+  Moon, Sun
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useFuseSearch, getHighlightSegments, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
 import { toast } from "sonner";
 
-interface CommandItem {
+interface CommandItemData {
   id: string;
   label: string;
   icon: React.ElementType;
@@ -29,8 +30,34 @@ interface CommandItem {
   category: "navigation" | "actions" | "settings";
 }
 
+// Highlight component for fuzzy search results
+function HighlightLabel({ 
+  text, 
+  indices 
+}: { 
+  text: string; 
+  indices?: [number, number][];
+}) {
+  const segments = getHighlightSegments(text, indices);
+  
+  return (
+    <>
+      {segments.map((segment, i) => 
+        segment.isMatch ? (
+          <mark key={i} className="bg-primary/30 text-foreground rounded px-0.5">
+            {segment.text}
+          </mark>
+        ) : (
+          <span key={i}>{segment.text}</span>
+        )
+      )}
+    </>
+  );
+}
+
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -47,6 +74,13 @@ export function CommandPalette() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
+  // Reset search when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setSearchQuery("");
+    }
+  }, [open]);
 
   const handleNavigate = useCallback((path: string) => {
     navigate(path);
@@ -66,7 +100,7 @@ export function CommandPalette() {
     setOpen(false);
   }, [theme, setTheme]);
 
-  const commands: CommandItem[] = useMemo(() => [
+  const commands: CommandItemData[] = useMemo(() => [
     // Navigation
     { id: "home", label: "Dashboard", icon: Home, action: () => handleNavigate("/"), keywords: ["início", "home"], category: "navigation" },
     { id: "stats", label: "Estatísticas", icon: TrendingUp, action: () => handleNavigate("/estatisticas"), keywords: ["stats", "números"], category: "navigation" },
@@ -96,13 +130,44 @@ export function CommandPalette() {
     { id: "logout", label: "Sair", icon: LogOut, action: handleSignOut, keywords: ["logout", "desconectar"], category: "settings" },
   ], [handleNavigate, handleSignOut, handleToggleTheme, theme]);
 
-  const navigationCommands = commands.filter(c => c.category === "navigation");
-  const actionCommands = commands.filter(c => c.category === "actions");
-  const settingsCommands = commands.filter(c => c.category === "settings");
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    commands,
+    ['label', 'keywords'],
+    searchQuery,
+    { ...SEARCH_PRESETS.commands, limit: 20 }
+  );
+
+  // Group results by category
+  const groupedResults = useMemo(() => {
+    const navigation: typeof searchResults = [];
+    const actions: typeof searchResults = [];
+    const settings: typeof searchResults = [];
+
+    searchResults.forEach(result => {
+      switch (result.item.category) {
+        case "navigation":
+          navigation.push(result);
+          break;
+        case "actions":
+          actions.push(result);
+          break;
+        case "settings":
+          settings.push(result);
+          break;
+      }
+    });
+
+    return { navigation, actions, settings };
+  }, [searchResults]);
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Digite um comando ou busque..." />
+      <CommandInput 
+        placeholder="Digite um comando ou busque..." 
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+      />
       <CommandList>
         <CommandEmpty>
           <div className="flex flex-col items-center gap-2 py-6">
@@ -112,48 +177,67 @@ export function CommandPalette() {
           </div>
         </CommandEmpty>
         
-        <CommandGroup heading="Navegação">
-          {navigationCommands.map((command) => (
-            <CommandItem
-              key={command.id}
-              onSelect={command.action}
-              keywords={command.keywords}
-            >
-              <command.icon className="mr-2 h-4 w-4" />
-              <span>{command.label}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
+        {groupedResults.navigation.length > 0 && (
+          <CommandGroup heading="Navegação">
+            {groupedResults.navigation.map((result) => {
+              const command = result.item;
+              const labelMatch = result.matches?.find(m => m.key === 'label');
+              return (
+                <CommandItem
+                  key={command.id}
+                  onSelect={command.action}
+                >
+                  <command.icon className="mr-2 h-4 w-4" />
+                  <HighlightLabel text={command.label} indices={labelMatch?.indices} />
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        )}
         
-        <CommandSeparator />
+        {groupedResults.navigation.length > 0 && groupedResults.actions.length > 0 && (
+          <CommandSeparator />
+        )}
         
-        <CommandGroup heading="Ações Rápidas">
-          {actionCommands.map((command) => (
-            <CommandItem
-              key={command.id}
-              onSelect={command.action}
-              keywords={command.keywords}
-            >
-              <command.icon className="mr-2 h-4 w-4" />
-              <span>{command.label}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
+        {groupedResults.actions.length > 0 && (
+          <CommandGroup heading="Ações Rápidas">
+            {groupedResults.actions.map((result) => {
+              const command = result.item;
+              const labelMatch = result.matches?.find(m => m.key === 'label');
+              return (
+                <CommandItem
+                  key={command.id}
+                  onSelect={command.action}
+                >
+                  <command.icon className="mr-2 h-4 w-4" />
+                  <HighlightLabel text={command.label} indices={labelMatch?.indices} />
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        )}
         
-        <CommandSeparator />
+        {(groupedResults.navigation.length > 0 || groupedResults.actions.length > 0) && groupedResults.settings.length > 0 && (
+          <CommandSeparator />
+        )}
         
-        <CommandGroup heading="Configurações">
-          {settingsCommands.map((command) => (
-            <CommandItem
-              key={command.id}
-              onSelect={command.action}
-              keywords={command.keywords}
-            >
-              <command.icon className="mr-2 h-4 w-4" />
-              <span>{command.label}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
+        {groupedResults.settings.length > 0 && (
+          <CommandGroup heading="Configurações">
+            {groupedResults.settings.map((result) => {
+              const command = result.item;
+              const labelMatch = result.matches?.find(m => m.key === 'label');
+              return (
+                <CommandItem
+                  key={command.id}
+                  onSelect={command.action}
+                >
+                  <command.icon className="mr-2 h-4 w-4" />
+                  <HighlightLabel text={command.label} indices={labelMatch?.indices} />
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        )}
       </CommandList>
       
       <div className="border-t border-border px-3 py-2 text-xs text-muted-foreground flex items-center justify-between">
