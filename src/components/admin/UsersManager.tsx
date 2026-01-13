@@ -67,6 +67,7 @@ import { useProfiles } from "@/hooks/useProfiles";
 import { useDepartments } from "@/hooks/useDepartments";
 import { type AppRole } from "@/hooks/useRBAC";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useFuseSearch, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
 import { 
   useAllUserRoles, 
   useAssignRole, 
@@ -148,12 +149,16 @@ export function UsersManager() {
     }
   });
 
-  // Filter and paginate using debounced search
-  const filteredUsers = (profiles || []).filter((user) => {
-    const matchesSearch =
-      user.display_name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    profiles || [],
+    ['display_name', 'email'],
+    debouncedSearchQuery,
+    { ...SEARCH_PRESETS.loose, limit: 100 }
+  );
 
+  // Filter after fuzzy search
+  const filteredUsers = searchResults.map(r => r.item).filter((user) => {
     const userRoles = userRolesMap.get(user.id) || [];
     const matchesRole = filterRole === "all" || userRoles.includes(filterRole as AppRole);
 
@@ -162,7 +167,7 @@ export function UsersManager() {
       filterDepartment === "all" ||
       userDepts.some((d) => d.name === filterDepartment);
 
-    return matchesSearch && matchesRole && matchesDept;
+    return matchesRole && matchesDept;
   });
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);

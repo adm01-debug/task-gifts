@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
+import { useFuseSearch, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
 
 interface SessionLog {
   id: string;
@@ -94,12 +95,15 @@ export function SessionsPanel() {
   });
 
   const activeSessions = sessions?.filter((s) => s.is_active) || [];
-  const filteredSessions = sessions?.filter(
-    (s) =>
-      s.ip_address?.includes(search) ||
-      s.browser?.toLowerCase().includes(search.toLowerCase()) ||
-      s.os?.toLowerCase().includes(search.toLowerCase())
+  
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    sessions || [],
+    ['ip_address', 'browser', 'os', 'city', 'country'],
+    search,
+    { ...SEARCH_PRESETS.loose, limit: 100 }
   );
+  const filteredSessions = searchResults.map(r => r.item);
 
   const parseUserAgent = (ua: string | null) => {
     if (!ua) return { browser: "Desconhecido", os: "Desconhecido" };
