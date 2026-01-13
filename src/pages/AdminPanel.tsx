@@ -67,6 +67,7 @@ import { useDepartments } from "@/hooks/useDepartments";
 import { useAdminRewards } from "@/hooks/useShop";
 import { useQuizQuestions } from "@/hooks/useQuizQuestions";
 import { usePublishedTrails } from "@/hooks/useTrails";
+import { useFuseSearch, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
 
 interface QuickLinkProps {
   icon: React.ElementType;
@@ -182,11 +183,14 @@ function AdminPanelContent() {
     },
   ];
 
-  const filteredLinks = quickLinks.filter(
-    (link) =>
-      link.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      link.description.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    quickLinks,
+    ['title', 'description'],
+    searchQuery,
+    { ...SEARCH_PRESETS.commands, limit: 20 }
   );
+  const filteredLinks = searchResults.map(r => r.item);
 
   const seo = useSEO();
 

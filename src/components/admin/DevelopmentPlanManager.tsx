@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { DevelopmentPlan } from "@/services/developmentPlanService";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -66,6 +66,7 @@ import {
   useCompetencies,
 } from "@/hooks/useDevelopmentPlans";
 import { useProfiles } from "@/hooks/useProfiles";
+import { useFuseSearch, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
 import { ACTION_TYPES, PRIORITY_COLORS } from "@/services/developmentPlanService";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -102,15 +103,26 @@ export function DevelopmentPlanManager() {
   const { data: profiles } = useProfiles();
   const deletePlan = useDeleteDevelopmentPlan();
 
-  const filteredPlans = plans?.filter((plan) => {
-    const profile = profiles?.find((p) => p.id === plan.user_id);
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      plan.title.toLowerCase().includes(searchLower) ||
-      profile?.display_name?.toLowerCase().includes(searchLower) ||
-      profile?.email?.toLowerCase().includes(searchLower)
-    );
-  });
+  // Create searchable items combining plan data with profile info
+  const searchableItems = useMemo(() => {
+    return (plans || []).map(plan => {
+      const profile = profiles?.find(p => p.id === plan.user_id);
+      return {
+        ...plan,
+        _searchName: profile?.display_name || '',
+        _searchEmail: profile?.email || '',
+      };
+    });
+  }, [plans, profiles]);
+
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    searchableItems,
+    ['title', '_searchName', '_searchEmail'],
+    searchQuery,
+    { ...SEARCH_PRESETS.content, limit: 50 }
+  );
+  const filteredPlans = searchResults.map(r => r.item);
 
   const toggleExpand = (planId: string) => {
     const newExpanded = new Set(expandedPlans);

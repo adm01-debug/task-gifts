@@ -52,6 +52,7 @@ import { toast } from "sonner";
 import { rbacService, type Role, type Permission, type UserRole } from "@/services/rbacService";
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "@/hooks/useRBAC";
+import { useFuseSearch, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
 
 export function RBACDashboard() {
   const [activeTab, setActiveTab] = useState("roles");
@@ -126,10 +127,14 @@ function RolesTab({ searchTerm }: { searchTerm: string }) {
     queryFn: () => rbacService.getRoles(),
   });
 
-  const filteredRoles = roles.filter(role =>
-    role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    role.key.toLowerCase().includes(searchTerm.toLowerCase())
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    roles,
+    ['name', 'key'],
+    searchTerm,
+    { ...SEARCH_PRESETS.commands, limit: 50 }
   );
+  const filteredRoles = searchResults.map(r => r.item);
 
   if (isLoading) {
     return (
@@ -290,11 +295,14 @@ function PermissionsTab({ searchTerm }: { searchTerm: string }) {
     queryFn: () => rbacService.getPermissions(),
   });
 
-  const filteredPermissions = permissions.filter(perm =>
-    perm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    perm.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    perm.module.toLowerCase().includes(searchTerm.toLowerCase())
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    permissions,
+    ['name', 'key', 'module'],
+    searchTerm,
+    { ...SEARCH_PRESETS.commands, limit: 100 }
   );
+  const filteredPermissions = searchResults.map(r => r.item);
 
   // Group by module
   const permissionsByModule = filteredPermissions.reduce((acc, perm) => {
@@ -539,10 +547,14 @@ function UserRolesTab({ searchTerm }: { searchTerm: string }) {
     onError: () => toast.error("Erro ao remover role"),
   });
 
-  const filteredUsers = users.filter(user =>
-    user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    users,
+    ['display_name', 'email'],
+    searchTerm,
+    { ...SEARCH_PRESETS.loose, limit: 50 }
   );
+  const filteredUsers = searchResults.map(r => r.item);
 
   if (usersLoading) {
     return (

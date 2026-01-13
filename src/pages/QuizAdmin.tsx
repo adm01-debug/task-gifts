@@ -53,6 +53,7 @@ import {
   useQuizQuestion
 } from "@/hooks/useQuizQuestions";
 import { useDepartments } from "@/hooks/useDepartments";
+import { useFuseSearch, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -124,13 +125,23 @@ function QuizAdminContent() {
     [questions]
   );
 
-  // Filtered questions (memoized)
-  const filteredQuestions = useMemo(() => questions?.filter(q => {
-    const matchesType = filterType === 'all' || q.quiz_type === filterType;
-    const matchesCategory = filterCategory === 'all' || q.category === filterCategory;
-    const matchesSearch = q.question.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesCategory && matchesSearch;
-  }) || [], [questions, filterType, filterCategory, searchQuery]);
+  // Pre-filter by type and category
+  const preFilteredQuestions = useMemo(() => {
+    return (questions || []).filter(q => {
+      const matchesType = filterType === 'all' || q.quiz_type === filterType;
+      const matchesCategory = filterCategory === 'all' || q.category === filterCategory;
+      return matchesType && matchesCategory;
+    });
+  }, [questions, filterType, filterCategory]);
+
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    preFilteredQuestions,
+    ['question'],
+    searchQuery,
+    { ...SEARCH_PRESETS.content, limit: 100 }
+  );
+  const filteredQuestions = searchResults.map(r => r.item);
 
   const handleOpenCreate = useCallback(() => {
     setEditingId(null);

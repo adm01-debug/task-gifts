@@ -14,6 +14,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { kudosMessageSchema } from "@/lib/validations";
+import { useFuseSearch, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
 import type { KudosBadge } from "@/services/kudosService";
 
 interface GiveKudosFormProps {
@@ -33,10 +34,15 @@ const GiveKudosForm = forwardRef<HTMLDivElement, GiveKudosFormProps>(({ onSucces
   const [searchQuery, setSearchQuery] = useState("");
 
   const otherUsers = useMemo(() => profiles.filter(p => p.id !== user?.id), [profiles, user?.id]);
-  const filteredUsers = useMemo(() => otherUsers.filter(p => 
-    p.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  ), [otherUsers, searchQuery]);
+  
+  // Fuzzy search with Fuse.js
+  const searchResults = useFuseSearch(
+    otherUsers,
+    ['display_name', 'email'],
+    searchQuery,
+    { ...SEARCH_PRESETS.loose, limit: 20 }
+  );
+  const filteredUsers = searchResults.map(r => r.item);
 
   // Validate message with Zod schema
   const validateMessage = useCallback((value: string) => {
