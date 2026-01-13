@@ -1,9 +1,29 @@
 /**
  * Custom hook for fuzzy search using Fuse.js
  * Provides configurable fuzzy search with highlighting support
+ * 
+ * ## Extended Search Syntax (enabled by default)
+ * 
+ * | Pattern    | Description                          | Example           |
+ * |------------|--------------------------------------|-------------------|
+ * | `=termo`   | Exact match                          | `=react`          |
+ * | `^termo`   | Starts with (prefix)                 | `^dash`           |
+ * | `termo$`   | Ends with (suffix)                   | `board$`          |
+ * | `!termo`   | Negation (exclude term)              | `!admin`          |
+ * | `-termo`   | Negation (exclude term) - alias      | `-test`           |
+ * | `'termo`   | Include fuzzy match                  | `'react`          |
+ * | `termo1 termo2` | AND (both terms must match)     | `react hook`      |
+ * | `termo1|termo2` | OR (either term matches)        | `react|vue`       |
+ * 
+ * Examples:
+ * - `=Dashboard` - exact match "Dashboard"
+ * - `^Tri` - items starting with "Tri"
+ * - `ção$` - items ending with "ção"
+ * - `react -test` - items with "react" but not "test"
+ * - `admin|manager` - items with "admin" or "manager"
  */
 import { useMemo } from 'react';
-import Fuse, { IFuseOptions, FuseResult } from 'fuse.js';
+import Fuse, { IFuseOptions, FuseResult, Expression } from 'fuse.js';
 
 export interface UseFuseSearchOptions<T> extends IFuseOptions<T> {
   /** Minimum number of characters before search is triggered */
@@ -29,15 +49,42 @@ const DEFAULT_OPTIONS: IFuseOptions<unknown> = {
   includeScore: true,
   includeMatches: true,
   ignoreLocation: true,
-  useExtendedSearch: false,
+  useExtendedSearch: true, // Enable extended search by default
   findAllMatches: true,
 };
+
+/**
+ * Extended search operators reference
+ */
+export const EXTENDED_SEARCH_OPERATORS = {
+  EXACT: '=',      // =term - exact match
+  PREFIX: '^',     // ^term - starts with
+  SUFFIX: '$',     // term$ - ends with
+  NEGATE: '!',     // !term - exclude
+  NEGATE_ALT: '-', // -term - exclude (alternative)
+  FUZZY: "'",      // 'term - fuzzy include
+  OR: '|',         // term1|term2 - OR
+  // AND is implicit with space: term1 term2
+} as const;
+
+/**
+ * Check if a query uses extended search syntax
+ */
+export function hasExtendedSearchSyntax(query: string): boolean {
+  const patterns = [
+    /^[=^'!-]/, // Starts with operator
+    /\$$/, // Ends with suffix operator
+    /\|/, // Contains OR operator
+    /\s+[=^'!-]/, // Space followed by operator
+  ];
+  return patterns.some(p => p.test(query));
+}
 
 /**
  * Hook for fuzzy searching through a list of items
  * @param items - Array of items to search through
  * @param keys - Keys to search on (e.g., ['name', 'description'])
- * @param query - Search query string
+ * @param query - Search query string (supports extended search syntax)
  * @param options - Additional Fuse.js options
  * @returns Filtered and sorted results with match information
  */
@@ -74,7 +121,12 @@ export function useFuseSearch<T>(
       return [];
     }
 
-    const searchResults = fuse.search(query, { limit });
+    // Normalize negation syntax: convert "-term" to "!term" for Fuse.js
+    const normalizedQuery = query.replace(/(?:^|\s)-(?=\S)/g, (match) => 
+      match.startsWith(' ') ? ' !' : '!'
+    );
+
+    const searchResults = fuse.search(normalizedQuery, { limit });
     
     return searchResults.map((result: FuseResult<T>) => ({
       item: result.item,
@@ -148,12 +200,14 @@ export const SEARCH_PRESETS = {
     threshold: 0.2,
     distance: 50,
     ignoreLocation: false,
+    useExtendedSearch: true,
   },
   /** Loose matching - higher threshold, position doesn't matter */
   loose: {
     threshold: 0.6,
     distance: 200,
     ignoreLocation: true,
+    useExtendedSearch: true,
   },
   /** Command palette style - optimized for short commands */
   commands: {
@@ -161,6 +215,7 @@ export const SEARCH_PRESETS = {
     distance: 100,
     minMatchCharLength: 1,
     ignoreLocation: true,
+    useExtendedSearch: true,
   },
   /** Content search - for longer text content */
   content: {
@@ -169,5 +224,6 @@ export const SEARCH_PRESETS = {
     minMatchCharLength: 3,
     ignoreLocation: true,
     findAllMatches: true,
+    useExtendedSearch: true,
   },
 } as const;
