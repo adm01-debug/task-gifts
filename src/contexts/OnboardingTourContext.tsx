@@ -146,9 +146,14 @@ export function OnboardingTourProvider({ children }: { children: ReactNode }) {
   }, [activeTour]);
 
   const skipTour = useCallback(() => {
+    if (activeTour) {
+      setCompletedTours((prev) => 
+        prev.includes(activeTour.id) ? prev : [...prev, activeTour.id]
+      );
+    }
     setActiveTour(null);
     setCurrentStep(0);
-  }, []);
+  }, [activeTour]);
 
   const markTourComplete = useCallback((tourId: string) => {
     setCompletedTours((prev) => 
