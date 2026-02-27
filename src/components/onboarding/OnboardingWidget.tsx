@@ -4,16 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ChevronRight, Sparkles, X } from "lucide-react";
-import { useOnboardingProgress, ONBOARDING_STEPS } from "@/hooks/useOnboarding";
+import { useOnboardingProgress, useSkipOnboarding, ONBOARDING_STEPS } from "@/hooks/useOnboarding";
 import { onboardingService } from "@/services/onboardingService";
 import { OnboardingModal } from "./OnboardingModal";
 
 export function OnboardingWidget() {
   const { data: progress, isLoading } = useOnboardingProgress();
+  const skipOnboarding = useSkipOnboarding();
   const [modalOpen, setModalOpen] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
 
-  if (isLoading || dismissed) return null;
+  if (isLoading) return null;
 
   const isComplete = onboardingService.isOnboardingComplete(progress);
   if (isComplete) return null;
@@ -39,7 +39,9 @@ export function OnboardingWidget() {
             variant="ghost"
             size="icon"
             className="absolute top-2 right-2 h-6 w-6 text-muted-foreground hover:text-foreground"
-            onClick={() => setDismissed(true)}
+            onClick={() => skipOnboarding.mutate()}
+            disabled={skipOnboarding.isPending}
+            title="Pular onboarding"
           >
             <X className="w-4 h-4" />
           </Button>

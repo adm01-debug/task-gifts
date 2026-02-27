@@ -222,6 +222,21 @@ export const onboardingService = {
     return true;
   },
 
+  async skipOnboarding(userId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from("onboarding_progress")
+      .update({
+        completed_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+
+    if (error) {
+      logger.apiError('skipOnboarding', error, 'onboardingService');
+      return false;
+    }
+    return true;
+  },
+
   isOnboardingComplete(progress: OnboardingProgress | null): boolean {
     if (!progress) return false;
     return progress.completed_at !== null;

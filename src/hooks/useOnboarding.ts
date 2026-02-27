@@ -77,4 +77,22 @@ export function useClaimOnboardingReward() {
   });
 }
 
+export function useSkipOnboarding() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!user?.id) throw new Error("User not authenticated");
+      return onboardingService.skipOnboarding(user.id);
+    },
+    onSuccess: () => {
+      toast.success("Onboarding pulado com sucesso!");
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: onboardingKeys.progress(user.id) });
+      }
+    },
+  });
+}
+
 export { ONBOARDING_STEPS };
