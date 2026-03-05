@@ -141,21 +141,19 @@ export const climateSurveyService = {
   },
 
   async createQuestion(question: Omit<ClimateSurveyQuestion, 'id' | 'created_at'>): Promise<ClimateSurveyQuestion> {
-    const insertData = {
-      survey_id: question.survey_id,
-      question_text: question.question_text,
-      question_type: question.question_type,
-      pillar: question.pillar,
-      order_index: question.order_index,
-      is_required: question.is_required,
-      options: question.options,
-      question_text_en: question.question_text_en,
-      question_text_es: question.question_text_es,
-    };
-    
     const { data, error } = await supabase
       .from('climate_survey_questions')
-      .insert(insertData)
+      .insert({
+        survey_id: question.survey_id,
+        question_text: question.question_text,
+        question_type: question.question_type,
+        pillar: question.pillar as Database["public"]["Enums"]["climate_pillar"],
+        order_index: question.order_index,
+        is_required: question.is_required,
+        options: question.options as Json | null,
+        question_text_en: question.question_text_en,
+        question_text_es: question.question_text_es,
+      })
       .select()
       .single();
 
