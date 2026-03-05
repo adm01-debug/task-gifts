@@ -1,6 +1,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+interface ProfileRef {
+  id: string;
+  display_name: string;
+  email: string;
+}
+
+interface CheckinWithProfiles {
+  id: string;
+  employee_id: string;
+  manager_id: string;
+  scheduled_at: string;
+  status: string;
+  employee: ProfileRef | null;
+  manager: ProfileRef | null;
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',

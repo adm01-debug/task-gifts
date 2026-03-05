@@ -232,11 +232,14 @@ serve(async (req) => {
         achievementsUnlocked: achievements?.length || 0,
         streakDays: streakData?.current_streak || 0,
         rank,
-        rankChange: Math.floor(Math.random() * 10) - 3, // Would need historical data
-        topAchievements: achievements?.map(a => ({
-          name: (a as any).achievements?.name || "",
-          icon: (a as any).achievements?.icon || "🏆"
-        })) || [],
+        rankChange: 0,
+        topAchievements: achievements?.map((a: Record<string, unknown>) => {
+          const ach = a.achievements as { name?: string; icon?: string } | null;
+          return {
+            name: ach?.name || "",
+            icon: ach?.icon || "🏆"
+          };
+        }) || [],
         upcomingDeadlines: []
       };
 
