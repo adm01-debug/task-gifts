@@ -61,7 +61,9 @@ serve(async (req) => {
 
     console.log(`Found ${scheduledCheckins?.length || 0} scheduled check-ins`);
 
-    for (const checkin of scheduledCheckins || []) {
+    for (const rawCheckin of scheduledCheckins || []) {
+      const checkin = rawCheckin as unknown as CheckinWithProfiles;
+      const employeeName = checkin.employee?.display_name || "Colaborador";
       const scheduledDate = new Date(checkin.scheduled_at);
       const isToday = scheduledDate.toDateString() === today.toDateString();
       const isTomorrow = scheduledDate.toDateString() === tomorrow.toDateString();
