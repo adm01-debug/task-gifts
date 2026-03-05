@@ -43,8 +43,10 @@ export function RBACProvider({ children }: { children: ReactNode }) {
  */
 export function useRBACContext() {
   const context = useContext(RBACContext);
-  const directRBAC = useRBAC();
   
-  // Se tiver o provider, usa o contexto; senão, usa o hook diretamente
-  return context || directRBAC;
+  if (!context) {
+    throw new Error("useRBACContext must be used within a RBACProvider");
+  }
+  
+  return context;
 }
