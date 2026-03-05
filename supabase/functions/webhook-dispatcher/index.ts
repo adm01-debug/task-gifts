@@ -102,11 +102,11 @@ serve(async (req) => {
           errorMessage = `HTTP ${responseStatus}: ${responseBody}`;
           console.warn(`[Dispatcher] Webhook failed with status ${responseStatus}`);
         }
-      } catch (error: any) {
-        errorMessage = error.message || 'Unknown error';
+      } catch (error: unknown) {
+        errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error(`[Dispatcher] Attempt ${attempt} failed:`, errorMessage);
 
-        if (error.name === 'AbortError') {
+        if (error instanceof Error && error.name === 'AbortError') {
           errorMessage = 'Request timeout';
         }
       }
@@ -154,11 +154,12 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
-  } catch (error: any) {
-    console.error('[Dispatcher] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[Dispatcher] Error:', message);
     return new Response(JSON.stringify({ 
       error: 'Internal server error', 
-      message: error?.message 
+      message 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

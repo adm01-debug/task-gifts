@@ -191,10 +191,11 @@ serve(async (req) => {
       }
     );
     
-  } catch (error: any) {
-    console.error("Error in detect-new-device:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error in detect-new-device:", message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, "Content-Type": "application/json" } 

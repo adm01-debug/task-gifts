@@ -237,11 +237,12 @@ serve(async (req) => {
 
     return jsonResponse(result, 200);
 
-  } catch (error: any) {
-    console.error('[API] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[API] Error:', message);
     const duration = Date.now() - startTime;
-    await logRequest(supabase, apiKeyInfo.id, path, req.method, null, 500, { error: error?.message || 'Unknown error' }, duration, req);
-    return jsonResponse({ error: 'Internal server error', message: error?.message || 'Unknown error' }, 500);
+    await logRequest(supabase, apiKeyInfo.id, path, req.method, null, 500, { error: message }, duration, req);
+    return jsonResponse({ error: 'Internal server error', message }, 500);
   }
 });
 

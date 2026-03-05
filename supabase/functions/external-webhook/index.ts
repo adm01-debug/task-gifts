@@ -140,11 +140,12 @@ serve(async (req) => {
       result
     }, 200);
 
-  } catch (error: any) {
-    console.error('[Webhook] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[Webhook] Error:', message);
     return jsonResponse({ 
       error: 'Internal server error', 
-      message: error?.message || 'Unknown error' 
+      message 
     }, 500);
   }
 });

@@ -1,6 +1,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+interface ProfileRef {
+  id: string;
+  display_name: string;
+  email: string;
+}
+
+interface CheckinWithProfiles {
+  id: string;
+  employee_id: string;
+  manager_id: string;
+  scheduled_at: string;
+  status: string;
+  employee: ProfileRef | null;
+  manager: ProfileRef | null;
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -45,7 +61,9 @@ serve(async (req) => {
 
     console.log(`Found ${scheduledCheckins?.length || 0} scheduled check-ins`);
 
-    for (const checkin of scheduledCheckins || []) {
+    for (const rawCheckin of scheduledCheckins || []) {
+      const checkin = rawCheckin as unknown as CheckinWithProfiles;
+      const employeeName = checkin.employee?.display_name || "Colaborador";
       const scheduledDate = new Date(checkin.scheduled_at);
       const isToday = scheduledDate.toDateString() === today.toDateString();
       const isTomorrow = scheduledDate.toDateString() === tomorrow.toDateString();
@@ -55,7 +73,7 @@ serve(async (req) => {
 
       if (isToday) {
         // Urgent reminder for today's check-ins
-        console.log(`Check-in for ${(checkin.employee as any)?.display_name} is scheduled for TODAY at ${timeStr}`);
+        console.log(`Check-in for ${employeeName} is scheduled for TODAY at ${timeStr}`);
 
         // Notify manager
         if (checkin.manager_id) {
@@ -74,12 +92,12 @@ serve(async (req) => {
               .insert({
                 user_id: checkin.manager_id,
                 title: `⏰ Check-in HOJE às ${timeStr}`,
-                message: `Você tem um check-in agendado com ${(checkin.employee as any)?.display_name} para hoje às ${timeStr}.`,
+                message: `Você tem um check-in agendado com ${employeeName} para hoje às ${timeStr}.`,
                 type: 'checkin_reminder',
                 data: {
                   checkin_id: checkin.id,
                   employee_id: checkin.employee_id,
-                  employee_name: (checkin.employee as any)?.display_name,
+                  employee_name: employeeName,
                   scheduled_at: checkin.scheduled_at,
                   urgent: true,
                 },
@@ -117,7 +135,7 @@ serve(async (req) => {
         }
       } else if (isTomorrow) {
         // Advance reminder for tomorrow's check-ins
-        console.log(`Check-in for ${(checkin.employee as any)?.display_name} is scheduled for TOMORROW at ${timeStr}`);
+        console.log(`Check-in for ${employeeName} is scheduled for TOMORROW at ${timeStr}`);
 
         // Notify manager
         if (checkin.manager_id) {
@@ -126,12 +144,12 @@ serve(async (req) => {
             .insert({
               user_id: checkin.manager_id,
               title: `📅 Check-in amanhã às ${timeStr}`,
-              message: `Lembrete: você tem um check-in agendado com ${(checkin.employee as any)?.display_name} amanhã às ${timeStr}.`,
+              message: `Lembrete: você tem um check-in agendado com ${employeeName} amanhã às ${timeStr}.`,
               type: 'checkin_reminder',
               data: {
                 checkin_id: checkin.id,
                 employee_id: checkin.employee_id,
-                employee_name: (checkin.employee as any)?.display_name,
+                employee_name: employeeName,
                 scheduled_at: checkin.scheduled_at,
               },
             });
@@ -170,7 +188,9 @@ serve(async (req) => {
     if (!overdueError && overdueCheckins) {
       console.log(`Found ${overdueCheckins.length} overdue check-ins`);
 
-      for (const checkin of overdueCheckins) {
+      for (const rawOverdue of overdueCheckins) {
+        const checkin = rawOverdue as unknown as CheckinWithProfiles;
+        const employeeName = checkin.employee?.display_name || "Colaborador";
         // Notify manager about overdue
         if (checkin.manager_id) {
           await supabase
@@ -178,12 +198,12 @@ serve(async (req) => {
             .insert({
               user_id: checkin.manager_id,
               title: `⚠️ Check-in atrasado`,
-              message: `O check-in com ${(checkin.employee as any)?.display_name} está atrasado. Por favor, reagende.`,
+              message: `O check-in com ${employeeName} está atrasado. Por favor, reagende.`,
               type: 'checkin_overdue',
               data: {
                 checkin_id: checkin.id,
                 employee_id: checkin.employee_id,
-                employee_name: (checkin.employee as any)?.display_name,
+                employee_name: employeeName,
                 scheduled_at: checkin.scheduled_at,
               },
             });
