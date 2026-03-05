@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/services/loggingService";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 export type ClimatePillar = 
   | 'recognition' | 'autonomy' | 'growth' | 'leadership' | 'peers'
@@ -141,10 +142,19 @@ export const climateSurveyService = {
   },
 
   async createQuestion(question: Omit<ClimateSurveyQuestion, 'id' | 'created_at'>): Promise<ClimateSurveyQuestion> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
       .from('climate_survey_questions')
-      .insert(question as any)
+      .insert({
+        survey_id: question.survey_id,
+        question_text: question.question_text,
+        question_type: question.question_type,
+        pillar: question.pillar as Database["public"]["Enums"]["climate_pillar"],
+        order_index: question.order_index,
+        is_required: question.is_required,
+        options: question.options as Json | null,
+        question_text_en: question.question_text_en,
+        question_text_es: question.question_text_es,
+      })
       .select()
       .single();
 
