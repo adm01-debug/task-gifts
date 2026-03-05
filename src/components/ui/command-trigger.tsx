@@ -216,13 +216,25 @@ export function FloatingCommandHint() {
             Pressione <kbd className="px-1 bg-muted rounded">{isMac ? "⌘" : "Ctrl"}+K</kbd> para busca rápida
           </p>
         </div>
-        <button 
-          onClick={(e) => { e.stopPropagation(); setVisible(false); }}
-          className="p-1 hover:bg-muted rounded-full"
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={(e) => {
+            e.stopPropagation();
+            setVisible(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              setVisible(false);
+            }
+          }}
+          className="p-1 hover:bg-muted rounded-full text-muted-foreground cursor-pointer"
+          aria-label="Fechar"
         >
-          <span className="sr-only">Fechar</span>
-          <span className="text-muted-foreground">×</span>
-        </button>
+          ×
+        </span>
       </motion.button>
     </motion.div>
   );

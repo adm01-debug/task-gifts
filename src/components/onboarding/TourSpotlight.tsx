@@ -156,14 +156,17 @@ export const TourSpotlight = memo(function TourSpotlight() {
 
   return (
     <AnimatePresence>
-      {isVisible && (
-        <>
+      {isVisible ? (
+        <motion.div
+          key="tour-layer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[9998] pointer-events-none"
+        >
           {/* Overlay with spotlight cutout */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9998]"
+          <div
+            className="absolute inset-0 pointer-events-auto"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -213,7 +216,7 @@ export const TourSpotlight = memo(function TourSpotlight() {
                 }}
               />
             )}
-          </motion.div>
+          </div>
 
           {/* Tooltip */}
           {tooltipPos && (
@@ -309,8 +312,8 @@ export const TourSpotlight = memo(function TourSpotlight() {
               )}
             </motion.div>
           )}
-        </>
-      )}
+        </motion.div>
+      ) : null}
     </AnimatePresence>
   );
 });
