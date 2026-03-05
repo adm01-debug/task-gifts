@@ -188,7 +188,9 @@ serve(async (req) => {
     if (!overdueError && overdueCheckins) {
       console.log(`Found ${overdueCheckins.length} overdue check-ins`);
 
-      for (const checkin of overdueCheckins) {
+      for (const rawOverdue of overdueCheckins) {
+        const checkin = rawOverdue as unknown as CheckinWithProfiles;
+        const employeeName = checkin.employee?.display_name || "Colaborador";
         // Notify manager about overdue
         if (checkin.manager_id) {
           await supabase
@@ -196,12 +198,12 @@ serve(async (req) => {
             .insert({
               user_id: checkin.manager_id,
               title: `⚠️ Check-in atrasado`,
-              message: `O check-in com ${(checkin.employee as any)?.display_name} está atrasado. Por favor, reagende.`,
+              message: `O check-in com ${employeeName} está atrasado. Por favor, reagende.`,
               type: 'checkin_overdue',
               data: {
                 checkin_id: checkin.id,
                 employee_id: checkin.employee_id,
-                employee_name: (checkin.employee as any)?.display_name,
+                employee_name: employeeName,
                 scheduled_at: checkin.scheduled_at,
               },
             });
