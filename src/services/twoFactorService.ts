@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/services/loggingService";
 import * as OTPAuth from "otpauth";
 
 export interface TwoFactorSettings {
@@ -39,7 +40,7 @@ class TwoFactorService {
       .maybeSingle();
 
     if (error) {
-      console.error("Error fetching 2FA settings:", error);
+      logger.apiError('getSettings', error, 'twoFactorService');
       throw error;
     }
 
@@ -193,7 +194,7 @@ class TwoFactorService {
       .maybeSingle();
 
     if (error) {
-      console.error("Error checking 2FA status:", error);
+      logger.apiError('isEnabled', error, 'twoFactorService');
       return false;
     }
 

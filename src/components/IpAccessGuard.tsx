@@ -29,7 +29,7 @@ export function IpAccessGuard({ children }: IpAccessGuardProps) {
       const { data, error: fnError } = await supabase.functions.invoke('verify-ip');
       
       if (fnError) {
-        console.error('Error verifying IP:', fnError);
+        logger.apiError('verifyIP', fnError, 'IpAccessGuard');
         // On error, allow access (fail open)
         setIsAllowed(true);
         return;

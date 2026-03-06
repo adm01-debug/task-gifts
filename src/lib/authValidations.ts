@@ -98,7 +98,7 @@ export async function checkPasswordLeaked(password: string): Promise<{
     });
     
     if (!response.ok) {
-      console.error('HIBP API error:', response.status);
+      // HIBP API error - silently fail
       return { isLeaked: false, occurrences: 0 };
     }
     
