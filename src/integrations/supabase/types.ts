@@ -6640,6 +6640,7 @@ export type Database = {
         Returns: string
       }
       calculate_enps_score: { Args: { p_survey_id: string }; Returns: number }
+      check_login_lockout: { Args: { p_email: string }; Returns: Json }
       cleanup_expired_challenges: { Args: never; Returns: undefined }
       cleanup_old_security_logs: {
         Args: { p_days_to_keep?: number }
