@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext, ReactNode, useCallback 
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useDeviceDetection } from "./useDeviceDetection";
+import { logger } from "@/services/loggingService";
 
 interface AuthContextType {
   user: User | null;
@@ -49,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     // Registrar dispositivo após login bem-sucedido
     if (!error && data?.user) {
-      registerDevice(data.user.id).catch(console.error);
+      registerDevice(data.user.id).catch((err: unknown) => logger.apiError('registerDevice', err, 'useAuth'));
     }
     
     return { error };

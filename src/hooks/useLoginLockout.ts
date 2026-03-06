@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/services/loggingService";
 
 interface LockoutStatus {
   is_locked: boolean;
@@ -30,7 +31,7 @@ export function useLoginLockout(email: string) {
       });
 
       if (error) {
-        console.error("Error checking lockout:", error);
+        logger.apiError('checkLockout', error, 'useLoginLockout');
         return null;
       }
 
@@ -39,7 +40,7 @@ export function useLoginLockout(email: string) {
       setRemainingTime(status?.remaining_seconds || 0);
       return status;
     } catch (err: unknown) {
-      console.error("Lockout check failed:", err instanceof Error ? err.message : String(err));
+      logger.apiError('checkLockout', err, 'useLoginLockout');
       return null;
     } finally {
       setIsChecking(false);
@@ -61,7 +62,7 @@ export function useLoginLockout(email: string) {
       });
 
       if (error) {
-        console.error("Error logging attempt:", error);
+        logger.apiError('logFailedAttempt', error, 'useLoginLockout');
         return null;
       }
 
@@ -73,7 +74,7 @@ export function useLoginLockout(email: string) {
       }
       return null;
     } catch (err: unknown) {
-      console.error("Failed to log attempt:", err instanceof Error ? err.message : String(err));
+      logger.apiError('logFailedAttempt', err, 'useLoginLockout');
       return null;
     }
   }, [email]);
@@ -90,7 +91,7 @@ export function useLoginLockout(email: string) {
       setLockoutStatus(null);
       setRemainingTime(0);
     } catch (err: unknown) {
-      console.error("Failed to reset attempts:", err instanceof Error ? err.message : String(err));
+      logger.apiError('resetAttempts', err, 'useLoginLockout');
     }
   }, [email]);
 

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/services/loggingService';
 
 interface DeviceInfo {
   fingerprint: string;
@@ -115,7 +116,7 @@ export const useDeviceDetection = () => {
         isTrusted: data?.is_trusted || false
       };
     } catch (err: unknown) {
-      console.error('Error registering device:', err instanceof Error ? err.message : String(err));
+      logger.apiError('registerDevice', err, 'useDeviceDetection');
       return { isNewDevice: false, deviceId: null, isTrusted: false };
     } finally {
       setIsLoading(false);
@@ -130,7 +131,7 @@ export const useDeviceDetection = () => {
       .order('last_seen_at', { ascending: false });
     
     if (error) {
-      console.error('Error fetching devices:', error);
+      logger.apiError('getUserDevices', error, 'useDeviceDetection');
       return [];
     }
     
@@ -146,7 +147,7 @@ export const useDeviceDetection = () => {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('Error fetching alerts:', error);
+      logger.apiError('getUnreadAlerts', error, 'useDeviceDetection');
       return [];
     }
     
@@ -161,7 +162,7 @@ export const useDeviceDetection = () => {
       .eq('id', alertId);
     
     if (error) {
-      console.error('Error marking alert as read:', error);
+      logger.apiError('markAlertAsRead', error, 'useDeviceDetection');
     }
   }, []);
 
@@ -173,7 +174,7 @@ export const useDeviceDetection = () => {
       .eq('id', deviceId);
     
     if (error) {
-      console.error('Error trusting device:', error);
+      logger.apiError('trustDevice', error, 'useDeviceDetection');
       return false;
     }
     
@@ -188,7 +189,7 @@ export const useDeviceDetection = () => {
       .eq('id', deviceId);
     
     if (error) {
-      console.error('Error removing device:', error);
+      logger.apiError('removeDevice', error, 'useDeviceDetection');
       return false;
     }
     

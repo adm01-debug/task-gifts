@@ -18,6 +18,7 @@ import { CertificationsPanel } from "@/components/CertificationsPanel";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { AvatarPreview } from "@/components/AvatarPreview";
 import { ProfileAvatarSection } from "@/components/ProfileAvatarSection";
+import { logger } from "@/services/loggingService";
 import { SoundSettingsCard } from "@/components/SoundSettingsCard";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
@@ -219,7 +220,7 @@ const Profile = () => {
         setProfile(data as ProfileData);
       }
     } catch (err: unknown) {
-      console.error('Profile load error:', err instanceof Error ? err.message : String(err));
+      logger.apiError('Profile load', err, 'Profile');
       toast.error("Erro ao carregar perfil");
     } finally {
       setLoadingProfile(false);

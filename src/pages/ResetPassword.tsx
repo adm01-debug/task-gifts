@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { logger } from "@/services/loggingService";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Lock, CheckCircle2, Loader2, Eye, EyeOff, Shield, XCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -55,7 +56,7 @@ export default function ResetPassword() {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error("Session error:", error);
+          logger.apiError('getSession', error, 'ResetPassword');
           setIsValidToken(false);
           return;
         }
@@ -86,7 +87,7 @@ export default function ResetPassword() {
           }
         }
       } catch (err: unknown) {
-        console.error("Token check error:", err);
+        logger.apiError('Token check', err, 'ResetPassword');
         setIsValidToken(false);
       } finally {
         setIsCheckingToken(false);

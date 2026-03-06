@@ -4,6 +4,7 @@ import { ShieldX, RefreshCw, Globe, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/services/loggingService";
 
 interface IpAccessGuardProps {
   children: ReactNode;
@@ -28,7 +29,7 @@ export function IpAccessGuard({ children }: IpAccessGuardProps) {
       const { data, error: fnError } = await supabase.functions.invoke('verify-ip');
       
       if (fnError) {
-        console.error('Error verifying IP:', fnError);
+        logger.apiError('verifyIP', fnError, 'IpAccessGuard');
         // On error, allow access (fail open)
         setIsAllowed(true);
         return;
@@ -39,7 +40,7 @@ export function IpAccessGuard({ children }: IpAccessGuardProps) {
       setIsAllowed(result.allowed);
       
     } catch (err: unknown) {
-      console.error('IP check failed:', err instanceof Error ? err.message : String(err));
+      logger.apiError('IP check', err, 'IpAccessGuard');
       // On error, allow access (fail open)
       setIsAllowed(true);
     } finally {

@@ -98,7 +98,7 @@ export async function checkPasswordLeaked(password: string): Promise<{
     });
     
     if (!response.ok) {
-      console.error('HIBP API error:', response.status);
+      // HIBP API error - silently fail
       return { isLeaked: false, occurrences: 0 };
     }
     
@@ -114,7 +114,7 @@ export async function checkPasswordLeaked(password: string): Promise<{
     
     return { isLeaked: false, occurrences: 0 };
   } catch (err: unknown) {
-    console.error('Error checking leaked password:', err);
+    // Silently fail - leaked password check should not block auth
     return { isLeaked: false, occurrences: 0 };
   }
 }

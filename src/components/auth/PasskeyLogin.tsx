@@ -5,6 +5,7 @@ import { webauthnService, isWebAuthnSupported } from "@/services/webauthnService
 import { supabase } from "@/integrations/supabase/client";
 import { Fingerprint, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from "@/services/loggingService";
 
 interface PasskeyLoginProps {
   onSuccess: () => void;
@@ -42,7 +43,7 @@ export function PasskeyLogin({ onSuccess, defaultEmail = "" }: PasskeyLoginProps
       onSuccess();
       
     } catch (error: unknown) {
-      console.error("Erro no login com passkey:", error);
+      logger.apiError("Passkey login", error, "PasskeyLogin");
       const errorMessage = error instanceof Error ? error.message : "Erro ao fazer login";
       toast.error(errorMessage);
     } finally {
