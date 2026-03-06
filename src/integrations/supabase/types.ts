@@ -6666,6 +6666,13 @@ export type Database = {
         Args: { p_department_id?: string; p_period_type?: string }
         Returns: string
       }
+      get_2fa_status: {
+        Args: { p_user_id: string }
+        Returns: {
+          is_enabled: boolean
+          verified_at: string
+        }[]
+      }
       get_department_metrics: { Args: never; Returns: Json }
       get_executive_metrics: { Args: never; Returns: Json }
       get_leaderboard_api: {
@@ -6779,6 +6786,7 @@ export type Database = {
           system_type: string
         }[]
       }
+      validate_reset_token: { Args: { p_token: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "manager" | "employee"
