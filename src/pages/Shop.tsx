@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Coins, Package, Star, Target, ShoppingBag, History, Sparkles, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -29,17 +29,22 @@ import { PageWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
 
-function RewardCard({
-  reward,
-  userCoins,
-  onPurchase,
-  purchasingRewardId,
-}: {
+interface RewardCardProps {
   reward: ShopReward;
   userCoins: number;
   onPurchase: (reward: ShopReward) => void;
   purchasingRewardId: string | null;
-}) {
+}
+
+const RewardCard = forwardRef<HTMLDivElement, RewardCardProps>(function RewardCard(
+  {
+    reward,
+    userCoins,
+    onPurchase,
+    purchasingRewardId,
+  },
+  ref
+) {
   const isPurchasing = purchasingRewardId === reward.id;
   const rarityConfig = shopService.getRarityConfig(reward.rarity);
   const categoryConfig = shopService.getCategoryConfig(reward.category);
@@ -48,6 +53,7 @@ function RewardCard({
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.02, y: -4 }}
@@ -147,7 +153,7 @@ function RewardCard({
       </Card>
     </motion.div>
   );
-}
+});
 
 function PurchaseHistory() {
   const { data: purchases, isLoading } = useUserPurchases();
