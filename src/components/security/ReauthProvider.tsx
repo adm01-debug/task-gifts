@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Shield, Lock, AlertTriangle } from "lucide-react";
+import { logger } from "@/services/loggingService";
 import { toast } from "sonner";
 
 interface ReauthContextType {
@@ -87,7 +88,7 @@ export function ReauthProvider({ children }: ReauthProviderProps) {
       // Success - execute callback
       await executeCallback();
     } catch (err: unknown) {
-      console.error("Password verification failed:", err);
+      logger.apiError('Password verification', err, 'ReauthProvider');
       setError("Erro ao verificar senha");
       setIsLoading(false);
     }
@@ -111,7 +112,7 @@ export function ReauthProvider({ children }: ReauthProviderProps) {
       // Success - execute callback
       await executeCallback();
     } catch (err: unknown) {
-      console.error("2FA verification failed:", err);
+      logger.apiError('2FA verification', err, 'ReauthProvider');
       setError("Erro ao verificar código 2FA");
       setIsLoading(false);
     }
@@ -126,7 +127,7 @@ export function ReauthProvider({ children }: ReauthProviderProps) {
       setIsOpen(false);
       reset();
     } catch (err: unknown) {
-      console.error("Callback execution failed:", err);
+      logger.apiError('Callback execution', err, 'ReauthProvider');
       setError("Erro ao executar ação");
       setIsLoading(false);
     }

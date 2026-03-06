@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/services/loggingService";
 
 // Tipos
 export interface WebAuthnCredential {
@@ -207,7 +208,7 @@ export const webauthnService = {
       });
 
       if (error) {
-        console.error("Erro ao salvar credencial:", error);
+        logger.apiError('Save credential', error, 'webauthnService');
         return { success: false, error: "Erro ao salvar credencial" };
       }
 
@@ -220,7 +221,7 @@ export const webauthnService = {
 
       return { success: true };
     } catch (err: unknown) {
-      console.error("Erro no registro WebAuthn:", err);
+      logger.apiError('WebAuthn register', err, 'webauthnService');
       
       const error = err as Error & { name?: string };
       if (error.name === "NotAllowedError") {
@@ -338,7 +339,7 @@ export const webauthnService = {
 
       return { success: true, userId: credential.user_id };
     } catch (err: unknown) {
-      console.error("Erro na autenticação WebAuthn:", err);
+      logger.apiError('WebAuthn authenticate', err, 'webauthnService');
       
       const error = err as Error & { name?: string };
       if (error.name === "NotAllowedError") {
@@ -359,7 +360,7 @@ export const webauthnService = {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Erro ao buscar credenciais:", error);
+      logger.apiError('Get credentials', error, 'webauthnService');
       return [];
     }
 

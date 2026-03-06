@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { logger } from "@/services/loggingService";
 import { passwordResetService } from "@/services/passwordResetService";
 import { twoFactorService } from "@/services/twoFactorService";
 import { TwoFactorVerify } from "@/components/auth/TwoFactorVerify";
@@ -67,7 +68,7 @@ const Auth = () => {
       const { data, error: fnError } = await supabase.functions.invoke('verify-ip');
       
       if (fnError) {
-        console.error('Error verifying IP:', fnError);
+        logger.apiError('verifyIP', fnError, 'Auth');
         // On error, allow access (fail open)
         setIsIpAllowed(true);
         return;
@@ -81,7 +82,7 @@ const Auth = () => {
         toast.error('Acesso bloqueado: IP não autorizado');
       }
     } catch (err: unknown) {
-      console.error('IP check failed:', err instanceof Error ? err.message : String(err));
+      logger.apiError('IP check', err, 'Auth');
       // On error, allow access (fail open)
       setIsIpAllowed(true);
     } finally {
@@ -106,14 +107,14 @@ const Auth = () => {
           });
           
           if (error) {
-            console.error('Error setting session from callback:', error);
+            logger.apiError('setSession callback', error, 'Auth');
             toast.error('Erro ao processar autenticação. Tente novamente.');
           } else {
             // Clean up the URL
             window.history.replaceState({}, document.title, window.location.pathname);
           }
         } catch (err: unknown) {
-          console.error('Auth callback error:', err instanceof Error ? err.message : String(err));
+          logger.apiError('Auth callback', err, 'Auth');
         }
       }
     };
@@ -365,7 +366,7 @@ const Auth = () => {
         }
       }
     } catch (err: unknown) {
-      console.error('Auth error:', err instanceof Error ? err.message : String(err));
+      logger.apiError('Auth submit', err, 'Auth');
       toast.error("Algo deu errado. Tente novamente.");
     } finally {
       setLoading(false);
@@ -392,7 +393,7 @@ const Auth = () => {
       }
       return false;
     } catch (err: unknown) {
-      console.error("2FA verification error:", err);
+      logger.apiError('2FA verification', err, 'Auth');
       return false;
     } finally {
       setVerifying2FA(false);

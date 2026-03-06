@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, ShieldCheck, ShieldOff, Copy, Check, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from "@/services/loggingService";
 import QRCode from "qrcode";
 
 export function TwoFactorSetup() {
@@ -34,7 +35,7 @@ export function TwoFactorSetup() {
     if (setupData?.qrCodeUrl) {
       QRCode.toDataURL(setupData.qrCodeUrl, { width: 200, margin: 2 })
         .then(setQrCodeDataUrl)
-        .catch(console.error);
+        .catch((err: unknown) => logger.apiError('QR code generation', err, 'TwoFactorSetup'));
     }
   }, [setupData?.qrCodeUrl]);
 
@@ -43,7 +44,7 @@ export function TwoFactorSetup() {
       await setup();
       setShowSetup(true);
     } catch (err: unknown) {
-      console.error("Setup error:", err);
+      logger.apiError('2FA setup', err, 'TwoFactorSetup');
     }
   };
 

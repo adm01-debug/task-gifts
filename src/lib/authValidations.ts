@@ -114,7 +114,7 @@ export async function checkPasswordLeaked(password: string): Promise<{
     
     return { isLeaked: false, occurrences: 0 };
   } catch (err: unknown) {
-    console.error('Error checking leaked password:', err);
+    // Silently fail - leaked password check should not block auth
     return { isLeaked: false, occurrences: 0 };
   }
 }

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, BellOff, BellRing, CheckCircle, AlertTriangle, Info } from "lucide-react";
 import { useSecurityPushNotifications } from "@/hooks/useSecurityPushNotifications";
 import { toast } from "sonner";
+import { logger } from "@/services/loggingService";
 
 export function SecurityNotificationsToggle() {
   const { isGranted, requestPermission } = useSecurityPushNotifications();
@@ -24,7 +25,7 @@ export function SecurityNotificationsToggle() {
       try {
         setNotificationTypes(JSON.parse(saved));
       } catch (e) {
-        console.error('Error loading notification preferences:', e);
+        logger.warn('Error loading notification preferences', 'SecurityNotificationsToggle', e);
       }
     }
   }, []);

@@ -3,6 +3,7 @@ import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-mo
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
+import { logger } from "@/services/loggingService";
 
 interface PullToRefreshProps {
   children: ReactNode;
@@ -74,7 +75,7 @@ export function PullToRefresh({
       try {
         await onRefresh();
       } catch (err: unknown) {
-        console.error("Refresh failed:", err);
+        logger.apiError('Pull to refresh', err, 'PullToRefresh');
       } finally {
         setIsRefreshing(false);
       }
