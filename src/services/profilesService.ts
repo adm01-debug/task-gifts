@@ -7,6 +7,9 @@ export type Profile = Tables<"profiles">;
 export type ProfileInsert = TablesInsert<"profiles">;
 export type ProfileUpdate = TablesUpdate<"profiles">;
 
+// Public-safe columns (no PII like cpf, phone, personal_email)
+const PUBLIC_PROFILE_COLUMNS = "id, display_name, avatar_url, level, xp, coins, streak, best_streak, quests_completed, status, created_at, updated_at, email, employee_id, hire_date, last_access_at, contract_type" as const;
+
 export const profilesService = {
   async getById(id: string): Promise<Profile | null> {
     const { data, error } = await supabase
@@ -22,22 +25,22 @@ export const profilesService = {
   async getAll(): Promise<Profile[]> {
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select(PUBLIC_PROFILE_COLUMNS)
       .order("xp", { ascending: false });
     
     if (error) throw error;
-    return data ?? [];
+    return (data ?? []) as Profile[];
   },
 
   async getLeaderboard(limit = 10): Promise<Profile[]> {
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select(PUBLIC_PROFILE_COLUMNS)
       .order("xp", { ascending: false })
       .limit(limit);
     
     if (error) throw error;
-    return data ?? [];
+    return (data ?? []) as Profile[];
   },
 
   async update(id: string, updates: ProfileUpdate): Promise<Profile> {
