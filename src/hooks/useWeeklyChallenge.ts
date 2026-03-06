@@ -141,6 +141,19 @@ export function useWeeklyChallenge() {
           event: "*",
           schema: "public",
           table: "weekly_challenges",
+          filter: `challenger_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["weekly-challenge"] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "weekly_challenges",
+          filter: `opponent_id=eq.${user.id}`,
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ["weekly-challenge"] });
