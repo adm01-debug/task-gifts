@@ -14,6 +14,7 @@ import { twoFactorService } from "@/services/twoFactorService";
 import { TwoFactorVerify } from "@/components/auth/TwoFactorVerify";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { lovable } from "@/integrations/lovable/index";
 import { 
   emailSchema, 
   passwordSchema, 
