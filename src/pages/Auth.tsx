@@ -666,6 +666,24 @@ const Auth = () => {
     );
   };
 
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error("Erro ao fazer login com Google");
+        logger.apiError("Google OAuth", result.error, "Auth");
+      }
+    } catch (err: unknown) {
+      logger.apiError("Google OAuth", err, "Auth");
+      toast.error("Erro ao fazer login com Google");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex bg-background relative overflow-hidden">
       {/* Animated background */}
