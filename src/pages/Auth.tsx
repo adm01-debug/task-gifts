@@ -40,6 +40,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; displayName?: string }>({});
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [verifying2FA, setVerifying2FA] = useState(false);
   
   // IP Validation states
