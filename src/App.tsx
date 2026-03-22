@@ -23,6 +23,7 @@ import { FloatingCommandHint } from "@/components/ui/command-trigger";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { lazy, Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { useScrollRestoration } from "@/hooks/useNavigationHelpers";
 
 // Eagerly loaded routes (critical path)
 import Index from "./pages/Index";
