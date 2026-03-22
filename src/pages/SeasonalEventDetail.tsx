@@ -108,15 +108,7 @@ export default function SeasonalEventDetail() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
-        </Button>
+        <DesktopBackButton label="Voltar" className="mb-4" />
       </motion.div>
 
       {/* Event Banner */}

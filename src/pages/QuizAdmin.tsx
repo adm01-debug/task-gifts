@@ -274,10 +274,7 @@ function QuizAdminContent() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Button variant="ghost" className="mb-4 gap-2" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </Button>
+          <DesktopBackButton label="Voltar" />
           
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
