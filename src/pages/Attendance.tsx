@@ -6,7 +6,7 @@ import {
   TrendingUp, 
   CheckCircle2, 
   XCircle, 
-  ArrowLeft,
+  Target,
   Target,
   Award,
   Timer
