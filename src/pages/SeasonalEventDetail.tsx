@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSeasonalEventDetail, useClaimSeasonalReward } from "@/hooks/useSeasonalEvents";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { DesktopBackButton } from "@/components/navigation";
 import confetti from "canvas-confetti";
 
 export default function SeasonalEventDetail() {
