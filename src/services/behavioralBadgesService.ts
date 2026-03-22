@@ -467,7 +467,7 @@ export const behavioralBadgesService = {
     let consecutiveCheckinsWeeks = 0;
     if (checkins.length > 0) {
       const now = new Date();
-      let currentWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+      const currentWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
       
       for (let i = 0; i < 52; i++) {
         const weekStart = new Date(currentWeek);
@@ -493,7 +493,7 @@ export const behavioralBadgesService = {
     let consecutivePulsesWeeks = 0;
     if (pulses.length > 0) {
       const now = new Date();
-      let currentWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+      const currentWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
       
       for (let i = 0; i < 52; i++) {
         const weekStart = new Date(currentWeek);

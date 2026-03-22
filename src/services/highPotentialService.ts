@@ -389,7 +389,7 @@ export const highPotentialService = {
 
   async identifyHighPotentials(departmentId?: string): Promise<HighPotentialScore[]> {
     // Fetch all profiles (optionally filtered by department)
-    let query = supabase
+    const query = supabase
       .from("profiles")
       .select("*, team_members(department_id, departments(name)), user_positions(positions(name))");
 
