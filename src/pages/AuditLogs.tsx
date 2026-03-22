@@ -8,7 +8,7 @@ import {
   Calendar, 
   User, 
   Activity,
-  ArrowLeft,
+  Search,
   Search,
   Clock,
   FileText,
