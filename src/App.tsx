@@ -131,6 +131,7 @@ const App = () => (
                       <Sonner />
                       <BrowserRouter>
                         <OnboardingTourProvider>
+                        <ScrollRestorationProvider>
                         <Suspense fallback={<PageLoader />}>
                           <SkipLinks />
                           <OfflineIndicator />
