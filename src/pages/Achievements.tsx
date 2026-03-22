@@ -16,6 +16,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobilePageLayout } from "@/components/mobile";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 const rarityConfig = {
   common: {
     label: "Comum",
