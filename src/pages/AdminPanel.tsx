@@ -7,7 +7,6 @@ import {
   ShoppingBag,
   BookOpen,
   Settings,
-  Settings,
   Shield,
   LayoutDashboard,
   Key,
