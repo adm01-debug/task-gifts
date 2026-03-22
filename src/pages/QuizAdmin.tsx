@@ -44,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { DesktopBackButton } from "@/components/navigation";
 import { 
   useQuizQuestions, 
   useCreateQuizQuestion, 
