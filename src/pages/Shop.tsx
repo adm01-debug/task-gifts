@@ -1,6 +1,6 @@
 import { useState, useCallback, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, Package, Star, Target, ShoppingBag, History, Sparkles, ArrowLeft } from "lucide-react";
+import { Coins, Package, Star, Target, ShoppingBag, History, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CelebrationEffect } from "@/components/CelebrationEffect";
 import { FlashSalesBanner } from "@/components/FlashSalesBanner";
