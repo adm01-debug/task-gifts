@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { QuestPreview } from "@/components/quest-builder/QuestPreview";
 import { QuestStepEditor } from "@/components/quest-builder/QuestStepEditor";
 import { IconPicker } from "@/components/quest-builder/IconPicker";
+import { DesktopBackButton } from "@/components/navigation";
 import { logger } from "@/services/loggingService";
 
 interface QuestStep {
