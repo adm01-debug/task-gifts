@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Plus, ArrowLeft, Trash2, Edit2, Eye, EyeOff, 
+  Plus, Trash2, Edit2, Eye, EyeOff, 
   Sparkles, Trophy, HelpCircle, CheckCircle2, XCircle,
   Filter, Search, Wand2, BarChart3
 } from "lucide-react";
