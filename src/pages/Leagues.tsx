@@ -70,12 +70,11 @@ export default function Leagues() {
   return (
     <PageWrapper pageName="Ligas" className="min-h-screen bg-background">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <DesktopBackButton />
         <Trophy className="h-6 w-6 text-primary" />
         <h1 className="text-xl font-bold">Ligas & Divisões</h1>
       </header>
+      <GlobalBreadcrumbs className="px-4 md:px-6 pt-3" />
       {pageContent}
     </PageWrapper>
   );
