@@ -86,9 +86,23 @@ export function PageTransition({ children, className = "" }: PageTransitionProps
       ? mobileTransition
       : desktopTransition;
 
+  // Focus management: move focus to main content after route change
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Small delay to wait for animation
+    const timer = setTimeout(() => {
+      const mainContent = document.getElementById("main-content");
+      if (mainContent) {
+        mainContent.focus({ preventScroll: true });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
+        ref={containerRef}
         key={location.pathname}
         initial="initial"
         animate="animate"
