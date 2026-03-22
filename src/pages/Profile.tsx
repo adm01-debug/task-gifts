@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
-  ArrowLeft, Trophy, Zap, Flame, Star, Target, Users, Calendar,
+  Trophy, Zap, Flame, Star, Target, Users, Calendar,
   Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart, Wand2, GraduationCap, Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
