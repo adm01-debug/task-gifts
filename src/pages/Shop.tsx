@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { PageWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
+import { useSmartBack } from "@/hooks/useNavigationHelpers";
+import { GlobalBreadcrumbs } from "@/components/navigation";
 
 interface RewardCardProps {
   reward: ShopReward;
