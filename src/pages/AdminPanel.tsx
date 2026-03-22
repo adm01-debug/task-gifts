@@ -67,6 +67,7 @@ import { useAdminRewards } from "@/hooks/useShop";
 import { useQuizQuestions } from "@/hooks/useQuizQuestions";
 import { usePublishedTrails } from "@/hooks/useTrails";
 import { useFuseSearch, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 
 interface QuickLinkProps {
   icon: React.ElementType;
