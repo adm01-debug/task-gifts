@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
-  ArrowLeft, Swords, Trophy, Clock, Send, X, Check,
+  Swords, Trophy, Clock, Send, X, Check,
   Users, Zap, Crown, Target, Timer, Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
