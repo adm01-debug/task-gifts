@@ -22,6 +22,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobilePageLayout } from "@/components/mobile";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 export default function Goals() {
   const seoConfig = useSEO();
   const navigate = useNavigate();
