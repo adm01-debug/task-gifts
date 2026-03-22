@@ -45,6 +45,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRecentAuditLogs, AuditAction } from "@/hooks/useAudit";
 import { useProfiles } from "@/hooks/useProfiles";
 import { cn } from "@/lib/utils";
+import { DesktopBackButton } from "@/components/navigation";
 
 const actionLabels: Record<AuditAction, string> = {
   user_signup: "Cadastro",

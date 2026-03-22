@@ -49,6 +49,7 @@ import { HighPotentialsPanel } from "@/components/manager/HighPotentialsPanel";
 import { SuccessionPanel } from "@/components/manager/SuccessionPanel";
 import { TeamCertificationsPanel } from "@/components/TeamCertificationsPanel";
 import { cn } from "@/lib/utils";
+import { DesktopBackButton } from "@/components/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 

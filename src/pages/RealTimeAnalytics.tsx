@@ -37,6 +37,7 @@ import { useRecentAuditLogs, AuditAction } from "@/hooks/useAudit";
 import { useProfiles } from "@/hooks/useProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { DesktopBackButton } from "@/components/navigation";
 import { RechartsTooltipProps, RechartsTooltipPayloadItem } from "@/types/charts";
 
 const actionCategories: Record<string, AuditAction[]> = {

@@ -35,6 +35,7 @@ import {
   useAttendanceSettings
 } from "@/hooks/useAttendance";
 import { AttendanceCalendar } from "@/components/AttendanceCalendar";
+import { DesktopBackButton } from "@/components/navigation";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWeekend } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState, useMemo } from "react";

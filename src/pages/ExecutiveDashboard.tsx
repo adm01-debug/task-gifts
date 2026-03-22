@@ -44,6 +44,7 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useExecutiveMetrics, useMonthlyTrends, useDepartmentMetrics } from "@/hooks/useExecutiveMetrics";
+import { DesktopBackButton } from "@/components/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 // Type for executive metrics from API
 interface ExecutiveMetricsData {
