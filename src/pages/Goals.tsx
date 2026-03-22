@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Target, Plus, TrendingUp, Calendar, CheckCircle2, Clock, AlertCircle, ArrowLeft } from "lucide-react";
+import { Target, Plus, TrendingUp, Calendar, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
