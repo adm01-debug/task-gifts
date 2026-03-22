@@ -5,7 +5,6 @@ import { format, subDays, startOfDay, endOfDay, eachHourOfInterval, eachDayOfInt
 import { ptBR } from "date-fns/locale";
 import {
   Activity,
-  Activity,
   Users,
   Zap,
   Clock,

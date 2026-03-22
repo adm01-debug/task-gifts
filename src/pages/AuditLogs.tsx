@@ -9,7 +9,6 @@ import {
   User, 
   Activity,
   Search,
-  Search,
   Clock,
   FileText,
   ChevronDown

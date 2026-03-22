@@ -12,7 +12,6 @@ import {
   BookOpen,
   Flame,
   Filter,
-  Filter,
   Brain,
   Crown,
 } from "lucide-react";
