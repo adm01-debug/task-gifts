@@ -110,6 +110,12 @@ function MobileGlobalComponents() {
   );
 }
 
+// Scroll restoration wrapper
+function ScrollRestorationProvider({ children }: { children: React.ReactNode }) {
+  useScrollRestoration();
+  return <>{children}</>;
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
