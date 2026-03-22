@@ -8,7 +8,6 @@ import {
   Calendar, 
   User, 
   Activity,
-  ArrowLeft,
   Search,
   Clock,
   FileText,
@@ -46,6 +45,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRecentAuditLogs, AuditAction } from "@/hooks/useAudit";
 import { useProfiles } from "@/hooks/useProfiles";
 import { cn } from "@/lib/utils";
+import { DesktopBackButton } from "@/components/navigation";
 
 const actionLabels: Record<AuditAction, string> = {
   user_signup: "Cadastro",
@@ -182,14 +182,7 @@ export default function AuditLogs() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4"
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="shrink-0"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+          <DesktopBackButton />
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               <Shield className="w-6 h-6 text-primary-foreground" />

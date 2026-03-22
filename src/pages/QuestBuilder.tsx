@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowLeft,
   Save,
   Eye,
   EyeOff,
@@ -34,6 +33,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { QuestPreview } from "@/components/quest-builder/QuestPreview";
 import { QuestStepEditor } from "@/components/quest-builder/QuestStepEditor";
 import { IconPicker } from "@/components/quest-builder/IconPicker";
+import { DesktopBackButton } from "@/components/navigation";
 import { logger } from "@/services/loggingService";
 
 interface QuestStep {
@@ -194,15 +194,7 @@ export default function QuestBuilder() {
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-              aria-label="Voltar"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+            <DesktopBackButton />
             <div>
               <h1 className="text-lg font-bold text-foreground">Criar Nova Quest</h1>
               <p className="text-sm text-muted-foreground">

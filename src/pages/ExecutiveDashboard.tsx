@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
-import { 
-  ArrowLeft, 
-  TrendingUp, 
+import {
+  TrendingUp,
   TrendingDown, 
   Users, 
   DollarSign, 
@@ -45,6 +44,7 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useExecutiveMetrics, useMonthlyTrends, useDepartmentMetrics } from "@/hooks/useExecutiveMetrics";
+import { DesktopBackButton } from "@/components/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 // Type for executive metrics from API
 interface ExecutiveMetricsData {
@@ -294,9 +294,7 @@ const ExecutiveDashboard = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Voltar">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
+              <DesktopBackButton />
               <div>
                 <h1 className="text-2xl font-bold">Dashboard Executivo</h1>
                 <p className="text-sm text-muted-foreground">

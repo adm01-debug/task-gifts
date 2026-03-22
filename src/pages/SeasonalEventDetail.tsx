@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { differenceInDays, differenceInHours, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowLeft, Calendar, Clock, Gift, Sparkles, Trophy, Check, Coins } from "lucide-react";
+import { Calendar, Clock, Gift, Sparkles, Trophy, Check, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSeasonalEventDetail, useClaimSeasonalReward } from "@/hooks/useSeasonalEvents";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { DesktopBackButton } from "@/components/navigation";
 import confetti from "canvas-confetti";
 
 export default function SeasonalEventDetail() {
@@ -107,15 +108,7 @@ export default function SeasonalEventDetail() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
-        </Button>
+        <DesktopBackButton label="Voltar" className="mb-4" />
       </motion.div>
 
       {/* Event Banner */}

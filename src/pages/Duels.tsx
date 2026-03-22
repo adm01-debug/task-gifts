@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
-  ArrowLeft, Swords, Trophy, Clock, Send, X, Check,
+  Swords, Trophy, Clock, Send, X, Check,
   Users, Zap, Crown, Target, Timer, Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { PageWrapper } from "@/components/PageWrapper";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -496,14 +497,7 @@ const Duels = () => {
         {/* Header */}
         <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
         <div className="container max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/")}
-            className="p-2 rounded-lg hover:bg-muted transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </motion.button>
+          <DesktopBackButton />
           <div className="flex-1">
             <h1 className="text-xl font-bold flex items-center gap-2">
               <Swords className="w-5 h-5 text-destructive" />
