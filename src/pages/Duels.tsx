@@ -17,6 +17,7 @@ import { PageWrapper } from "@/components/PageWrapper";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
