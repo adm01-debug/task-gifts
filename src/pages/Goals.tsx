@@ -456,13 +456,12 @@ export default function Goals() {
   return (
     <PageWrapper pageName="Goals" className="min-h-screen bg-background">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <DesktopBackButton />
         <Target className="h-6 w-6 text-primary" />
         <h1 className="text-xl font-bold">Goals & OKRs</h1>
         <span className="text-muted-foreground ml-2">Gerencie seus objetivos</span>
       </header>
+      <GlobalBreadcrumbs className="px-4 md:px-6 pt-3" />
       {pageContent}
     </PageWrapper>
   );

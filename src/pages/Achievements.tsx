@@ -100,9 +100,7 @@ export default function Achievements() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3"
         >
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <DesktopBackButton />
           <div className="p-3 rounded-xl bg-amber-500/10">
             <Trophy className="w-8 h-8 text-amber-500" />
           </div>
