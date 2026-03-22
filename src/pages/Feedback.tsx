@@ -8,6 +8,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 import type { FeedbackCycle, FeedbackRequest } from "@/services/feedbackService";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 
 export default function Feedback() {
   const navigate = useNavigate();
