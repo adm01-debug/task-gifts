@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { 
-  ArrowLeft, 
+import {
+  TrendingUp, 
   TrendingUp, 
   TrendingDown, 
   Users, 
