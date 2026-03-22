@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 
 interface ProfileData {
   id: string;
