@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { format, subDays, startOfDay, endOfDay, eachHourOfInterval, eachDayOfInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  ArrowLeft,
+  Activity,
   Activity,
   Users,
   Zap,
