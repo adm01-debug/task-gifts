@@ -362,14 +362,7 @@ export default function ManagerDashboard() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => navigate("/")}
-                aria-label="Voltar para o início"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
+              <DesktopBackButton />
               <div>
                 <h1 className="text-xl font-bold text-foreground">Dashboard do Gestor</h1>
                 <p className="text-sm text-muted-foreground">Acompanhe o progresso da sua equipe</p>

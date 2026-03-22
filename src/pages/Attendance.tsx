@@ -148,9 +148,7 @@ const Attendance = () => {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Voltar">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <DesktopBackButton />
             <div>
               <h1 className="text-2xl font-bold">Controle de Ponto</h1>
               <p className="text-sm text-muted-foreground">

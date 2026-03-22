@@ -272,14 +272,7 @@ export default function RealTimeAnalytics() {
           className="flex flex-col md:flex-row md:items-center justify-between gap-4"
         >
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <DesktopBackButton />
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-success to-primary flex items-center justify-center">
                 <Activity className="w-6 h-6 text-primary-foreground" />
