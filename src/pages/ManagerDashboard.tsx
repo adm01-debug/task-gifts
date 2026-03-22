@@ -11,7 +11,7 @@ import {
   BarChart3,
   BookOpen,
   Flame,
-  ArrowLeft,
+  Filter,
   Filter,
   Brain,
   Crown,
