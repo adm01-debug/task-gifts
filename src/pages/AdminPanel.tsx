@@ -7,7 +7,6 @@ import {
   ShoppingBag,
   BookOpen,
   Settings,
-  ArrowLeft,
   Shield,
   LayoutDashboard,
   Key,
@@ -68,6 +67,7 @@ import { useAdminRewards } from "@/hooks/useShop";
 import { useQuizQuestions } from "@/hooks/useQuizQuestions";
 import { usePublishedTrails } from "@/hooks/useTrails";
 import { useFuseSearch, SEARCH_PRESETS } from "@/hooks/useFuseSearch";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 
 interface QuickLinkProps {
   icon: React.ElementType;
@@ -207,9 +207,7 @@ function AdminPanelContent() {
         <div className="container max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate("/")} aria-label="Voltar">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
+              <DesktopBackButton />
               <div>
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-primary/10">

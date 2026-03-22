@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Plus, Calendar, Clock, CheckCircle2, MessageSquare, ArrowLeft, Star, Brain, Sparkles } from "lucide-react";
+import { Users, Plus, Calendar, Clock, CheckCircle2, MessageSquare, Star, Brain, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import { useOneOnOnePreparationManual } from "@/hooks/useOneOnOnePreparation";
 import { OneOnOnePreparationPanel } from "@/components/checkins/OneOnOnePreparationPanel";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobilePageLayout } from "@/components/mobile";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 import type { Checkin, ActionItem, CheckinTemplate } from "@/services/checkinsService";
 
 interface Profile {
@@ -530,13 +531,12 @@ export default function Checkins() {
   return (
     <div className="min-h-screen bg-background">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <DesktopBackButton />
         <Users className="h-6 w-6 text-primary" />
         <h1 className="text-xl font-bold">Check-ins 1:1</h1>
         <span className="text-muted-foreground ml-2">Reuniões de acompanhamento</span>
       </header>
+      <GlobalBreadcrumbs className="px-4 md:px-6 pt-3" />
       {pageContent}
     </div>
   );

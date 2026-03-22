@@ -1,4 +1,4 @@
-import { ArrowLeft, MessageCircle, Inbox } from "lucide-react";
+import { MessageCircle, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 import type { FeedbackCycle, FeedbackRequest } from "@/services/feedbackService";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 
 export default function Feedback() {
   const navigate = useNavigate();
@@ -27,12 +28,11 @@ export default function Feedback() {
     <PageWrapper pageName="Feedback" className="min-h-screen bg-background">
       <SEOHead {...seoData} />
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <DesktopBackButton />
         <MessageCircle className="h-6 w-6 text-primary" />
         <h1 className="text-xl font-bold">Feedback 360°</h1>
       </header>
+      <GlobalBreadcrumbs className="px-4 md:px-6 pt-3" />
 
       <main className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
         <Card>

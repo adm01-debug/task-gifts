@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Lock, CheckCircle2, Flame, Sparkles, Star, ArrowLeft } from "lucide-react";
+import { Trophy, Lock, CheckCircle2, Flame, Sparkles, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobilePageLayout } from "@/components/mobile";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 const rarityConfig = {
   common: {
     label: "Comum",
@@ -99,9 +100,7 @@ export default function Achievements() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3"
         >
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <DesktopBackButton />
           <div className="p-3 rounded-xl bg-amber-500/10">
             <Trophy className="w-8 h-8 text-amber-500" />
           </div>

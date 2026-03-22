@@ -1,6 +1,6 @@
 import { useState, useCallback, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, Package, Star, Target, ShoppingBag, History, Sparkles, ArrowLeft } from "lucide-react";
+import { Coins, Package, Star, Target, ShoppingBag, History, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CelebrationEffect } from "@/components/CelebrationEffect";
 import { FlashSalesBanner } from "@/components/FlashSalesBanner";
@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { PageWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
+import { useSmartBack } from "@/hooks/useNavigationHelpers";
+import { GlobalBreadcrumbs } from "@/components/navigation";
 
 interface RewardCardProps {
   reward: ShopReward;
@@ -317,8 +319,9 @@ export default function Shop() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate("/")}
                 className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+                aria-label="Voltar"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
               </motion.button>
               <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2">

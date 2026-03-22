@@ -23,6 +23,7 @@ import { FloatingCommandHint } from "@/components/ui/command-trigger";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { lazy, Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { useScrollRestoration } from "@/hooks/useNavigationHelpers";
 
 // Eagerly loaded routes (critical path)
 import Index from "./pages/Index";
@@ -109,6 +110,12 @@ function MobileGlobalComponents() {
   );
 }
 
+// Scroll restoration wrapper
+function ScrollRestorationProvider({ children }: { children: React.ReactNode }) {
+  useScrollRestoration();
+  return <>{children}</>;
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -124,6 +131,7 @@ const App = () => (
                       <Sonner />
                       <BrowserRouter>
                         <OnboardingTourProvider>
+                        <ScrollRestorationProvider>
                         <Suspense fallback={<PageLoader />}>
                           <SkipLinks />
                           <OfflineIndicator />
@@ -178,6 +186,7 @@ const App = () => (
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </Suspense>
+                        </ScrollRestorationProvider>
                         </OnboardingTourProvider>
                       </BrowserRouter>
                     </TooltipProvider>

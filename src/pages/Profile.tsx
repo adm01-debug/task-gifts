@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
-  ArrowLeft, Trophy, Zap, Flame, Star, Target, Users, Calendar,
+  Trophy, Zap, Flame, Star, Target, Users, Calendar,
   Medal, Crown, Award, TrendingUp, Edit2, Camera, Heart, Wand2, GraduationCap, Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { SEOHead } from "@/components/SEOHead";
 import { useSEO } from "@/hooks/useSEO";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 
 interface ProfileData {
   id: string;
@@ -276,17 +277,11 @@ const Profile = () => {
         )}
       >
         <div className="container max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/")}
-            className="p-2 rounded-lg hover:bg-muted transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </motion.button>
+          <DesktopBackButton />
           <h1 className="text-xl font-bold">Meu Perfil</h1>
         </div>
       </header>
+      <GlobalBreadcrumbs className="container max-w-4xl mx-auto px-6 pt-2" />
 
       <main className="container max-w-4xl mx-auto px-6 py-8 space-y-8 relative z-10">
         {/* Profile Header */}
