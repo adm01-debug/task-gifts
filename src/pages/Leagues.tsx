@@ -1,6 +1,5 @@
-import { Trophy, ArrowLeft, TrendingUp } from "lucide-react";
+import { Trophy, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useLeagues } from "@/hooks/useLeagues";
 import { useNavigate } from "react-router-dom";
 import { LeagueCard } from "@/components/LeagueCard";
@@ -9,6 +8,8 @@ import { PageWrapper } from "@/components/PageWrapper";
 import { SEOHead } from "@/components/SEOHead";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobilePageLayout } from "@/components/mobile";
+import { DesktopBackButton } from "@/components/navigation";
+import { GlobalBreadcrumbs } from "@/components/navigation";
 
 export default function Leagues() {
   const navigate = useNavigate();
