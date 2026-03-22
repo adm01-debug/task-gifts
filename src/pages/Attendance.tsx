@@ -7,7 +7,6 @@ import {
   CheckCircle2, 
   XCircle, 
   Target,
-  Target,
   Award,
   Timer
 } from "lucide-react";
