@@ -22,6 +22,7 @@ import { useOneOnOnePreparationManual } from "@/hooks/useOneOnOnePreparation";
 import { OneOnOnePreparationPanel } from "@/components/checkins/OneOnOnePreparationPanel";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobilePageLayout } from "@/components/mobile";
+import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
 import type { Checkin, ActionItem, CheckinTemplate } from "@/services/checkinsService";
 
 interface Profile {
