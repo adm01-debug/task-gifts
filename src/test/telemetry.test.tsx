@@ -158,7 +158,7 @@ describe("Telemetry Data Computation", () => {
     });
 
     it("falls back to 'unknown' when both are null", () => {
-      const row = makeTelemetryRow({ rpc_name: null, table_name: null });
+      const row = { ...makeTelemetryRow({}), rpc_name: null, table_name: null };
       const key = row.rpc_name || row.table_name || "unknown";
       expect(key).toBe("unknown");
     });
