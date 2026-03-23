@@ -1,21 +1,9 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { AchievementNotificationProvider } from "@/contexts/AchievementNotificationContext";
-import { SoundSettingsProvider } from "@/contexts/SoundSettingsContext";
 import { OnboardingTourProvider } from "@/contexts/OnboardingTourContext";
-import { GamificationProvider } from "@/contexts/GamificationContext";
-import { ThemeProvider } from "@/hooks/useTheme";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { MobileBottomNav, ScrollToTopFAB, NetworkStatusBar } from "@/components/mobile";
-import { IpAccessGuard } from "@/components/IpAccessGuard";
 import { AccessibilityProvider, SkipLinks } from "@/components/accessibility";
 import { TourSpotlight, TourLauncher } from "@/components/onboarding";
 import { CommandPalette } from "@/components/CommandPalette";
@@ -24,6 +12,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { lazy, Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { useScrollRestoration } from "@/hooks/useNavigationHelpers";
+import { Providers } from "@/components/Providers";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Eagerly loaded routes (critical path)
 import Index from "./pages/Index";
@@ -58,24 +48,12 @@ const Leagues = lazy(() => import("./pages/Leagues"));
 const Surveys = lazy(() => import("./pages/Surveys"));
 const Feedback = lazy(() => import("./pages/Feedback"));
 const Announcements = lazy(() => import("./pages/Announcements"));
-
-// Security pages
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const RateLimitDashboard = lazy(() => import("./pages/RateLimitDashboard"));
 const SecurityDashboard = lazy(() => import("./pages/SecurityDashboard"));
 const PermissionsAdmin = lazy(() => import("./pages/PermissionsAdmin"));
 const AdminTelemetria = lazy(() => import("./pages/AdminTelemetria"));
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 // Loading fallback component
 function PageLoader() {
@@ -94,7 +72,6 @@ function MobileGlobalComponents() {
   const isMobile = useIsMobile();
   const location = useLocation();
   
-  // Don't show bottom nav on auth pages
   const hideBottomNav = location.pathname === "/auth" || 
                         location.pathname === "/forgot-password" || 
                         location.pathname === "/reset-password";
@@ -118,89 +95,62 @@ function ScrollRestorationProvider({ children }: { children: React.ReactNode }) 
 }
 
 const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AccessibilityProvider>
-          <SoundSettingsProvider>
-            <IpAccessGuard>
-              <AuthProvider>
-                <GamificationProvider>
-                  <AchievementNotificationProvider>
-                    <TooltipProvider>
-                      <Toaster />
-                      <Sonner />
-                      <BrowserRouter>
-                        <OnboardingTourProvider>
-                        <ScrollRestorationProvider>
-                        <Suspense fallback={<PageLoader />}>
-                          <SkipLinks />
-                          <OfflineIndicator />
-                          <KeyboardShortcutsHelp />
-                          <CommandPalette />
-                          <FloatingCommandHint />
-                          <TourSpotlight />
-                          <TourLauncher />
-                          <MobileGlobalComponents />
-                          <Routes>
-                            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                            <Route path="/auth" element={<Auth />} />
-                            <Route path="/forgot-password" element={<ForgotPassword />} />
-                            <Route path="/reset-password" element={<ResetPassword />} />
-                            <Route path="/security" element={<ProtectedRoute requiredRole="admin"><RateLimitDashboard /></ProtectedRoute>} />
-                            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                            <Route path="/manager" element={<ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>} />
-                            <Route path="/quest-builder" element={<ProtectedRoute requiredRole="manager"><QuestBuilder /></ProtectedRoute>} />
-                            <Route path="/reports" element={<ProtectedRoute requiredRole="manager"><EngagementReports /></ProtectedRoute>} />
-                            <Route path="/audit" element={<ProtectedRoute requiredRole="admin"><AuditLogs /></ProtectedRoute>} />
-                            <Route path="/analytics" element={<ProtectedRoute><RealTimeAnalytics /></ProtectedRoute>} />
-                            <Route path="/trails" element={<ProtectedRoute><LearningTrails /></ProtectedRoute>} />
-                            <Route path="/trails/:id" element={<ProtectedRoute><TrailDetail /></ProtectedRoute>} />
-                            <Route path="/ponto" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
-                            <Route path="/executivo" element={<ProtectedRoute requiredRole="admin"><ExecutiveDashboard /></ProtectedRoute>} />
-                            <Route path="/feed" element={<ProtectedRoute><SocialFeed /></ProtectedRoute>} />
-                            <Route path="/conquistas" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
-                            <Route path="/estatisticas" element={<ProtectedRoute><PersonalStats /></ProtectedRoute>} />
-                            <Route path="/loja" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
-                            <Route path="/eventos/:eventId" element={<ProtectedRoute><SeasonalEventDetail /></ProtectedRoute>} />
-                            <Route path="/duelos" element={<ProtectedRoute><Duels /></ProtectedRoute>} />
-                            <Route path="/quiz" element={<ProtectedRoute><DailyQuiz /></ProtectedRoute>} />
-                            <Route path="/quiz/admin" element={<ProtectedRoute requiredRole="manager"><QuizAdmin /></ProtectedRoute>} />
-                            <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
-                            <Route path="/bi" element={<ProtectedRoute requiredRole="manager"><BIDashboard /></ProtectedRoute>} />
-                            <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
-                            <Route path="/checkins" element={<ProtectedRoute requiredRole="manager"><Checkins /></ProtectedRoute>} />
-                            <Route path="/leagues" element={<ProtectedRoute><Leagues /></ProtectedRoute>} />
-                            <Route path="/surveys" element={<ProtectedRoute><Surveys /></ProtectedRoute>} />
-                            <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
-                            <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
-                            <Route path="/security-dashboard" element={<ProtectedRoute><SecurityDashboard /></ProtectedRoute>} />
-                            <Route path="/admin/permissions" element={<ProtectedRoute requiredRole="admin"><PermissionsAdmin /></ProtectedRoute>} />
-                            <Route path="/admin/telemetria" element={<ProtectedRoute requiredRole="admin"><AdminTelemetria /></ProtectedRoute>} />
-                            <Route
-                              path="/loja/admin"
-                              element={
-                                <ProtectedRoute requiredRole="admin">
-                                  <ShopAdmin />
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route path="*" element={<NotFound />} />
-                          </Routes>
-                        </Suspense>
-                        </ScrollRestorationProvider>
-                        </OnboardingTourProvider>
-                      </BrowserRouter>
-                    </TooltipProvider>
-                  </AchievementNotificationProvider>
-                </GamificationProvider>
-              </AuthProvider>
-            </IpAccessGuard>
-          </SoundSettingsProvider>
-        </AccessibilityProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
+  <Providers>
+    <BrowserRouter>
+      <OnboardingTourProvider>
+        <ScrollRestorationProvider>
+          <Suspense fallback={<PageLoader />}>
+            <SkipLinks />
+            <OfflineIndicator />
+            <KeyboardShortcutsHelp />
+            <CommandPalette />
+            <FloatingCommandHint />
+            <TourSpotlight />
+            <TourLauncher />
+            <MobileGlobalComponents />
+            <Routes>
+              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/security" element={<ProtectedRoute requiredRole="admin"><RateLimitDashboard /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/manager" element={<ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>} />
+              <Route path="/quest-builder" element={<ProtectedRoute requiredRole="manager"><QuestBuilder /></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute requiredRole="manager"><EngagementReports /></ProtectedRoute>} />
+              <Route path="/audit" element={<ProtectedRoute requiredRole="admin"><AuditLogs /></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute><RealTimeAnalytics /></ProtectedRoute>} />
+              <Route path="/trails" element={<ProtectedRoute><LearningTrails /></ProtectedRoute>} />
+              <Route path="/trails/:id" element={<ProtectedRoute><TrailDetail /></ProtectedRoute>} />
+              <Route path="/ponto" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+              <Route path="/executivo" element={<ProtectedRoute requiredRole="admin"><ExecutiveDashboard /></ProtectedRoute>} />
+              <Route path="/feed" element={<ProtectedRoute><SocialFeed /></ProtectedRoute>} />
+              <Route path="/conquistas" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+              <Route path="/estatisticas" element={<ProtectedRoute><PersonalStats /></ProtectedRoute>} />
+              <Route path="/loja" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
+              <Route path="/eventos/:eventId" element={<ProtectedRoute><SeasonalEventDetail /></ProtectedRoute>} />
+              <Route path="/duelos" element={<ProtectedRoute><Duels /></ProtectedRoute>} />
+              <Route path="/quiz" element={<ProtectedRoute><DailyQuiz /></ProtectedRoute>} />
+              <Route path="/quiz/admin" element={<ProtectedRoute requiredRole="manager"><QuizAdmin /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPanel /></ProtectedRoute>} />
+              <Route path="/bi" element={<ProtectedRoute requiredRole="manager"><BIDashboard /></ProtectedRoute>} />
+              <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
+              <Route path="/checkins" element={<ProtectedRoute requiredRole="manager"><Checkins /></ProtectedRoute>} />
+              <Route path="/leagues" element={<ProtectedRoute><Leagues /></ProtectedRoute>} />
+              <Route path="/surveys" element={<ProtectedRoute><Surveys /></ProtectedRoute>} />
+              <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
+              <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
+              <Route path="/security-dashboard" element={<ProtectedRoute><SecurityDashboard /></ProtectedRoute>} />
+              <Route path="/admin/permissions" element={<ProtectedRoute requiredRole="admin"><PermissionsAdmin /></ProtectedRoute>} />
+              <Route path="/admin/telemetria" element={<ProtectedRoute requiredRole="admin"><AdminTelemetria /></ProtectedRoute>} />
+              <Route path="/loja/admin" element={<ProtectedRoute requiredRole="admin"><ShopAdmin /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </ScrollRestorationProvider>
+      </OnboardingTourProvider>
+    </BrowserRouter>
+  </Providers>
 );
 
 export default App;
