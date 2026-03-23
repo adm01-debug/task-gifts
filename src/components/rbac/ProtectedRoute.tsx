@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRBAC, type AccessCheckOptions } from "@/hooks/useRBAC";
 import { Loader2, ShieldX } from "lucide-react";
