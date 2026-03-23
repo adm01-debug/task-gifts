@@ -2,6 +2,7 @@ import { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import { motion } from "framer-motion";
+import { logger } from "@/services/loggingService";
 
 interface Props {
   children: ReactNode;
