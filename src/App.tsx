@@ -65,6 +65,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const RateLimitDashboard = lazy(() => import("./pages/RateLimitDashboard"));
 const SecurityDashboard = lazy(() => import("./pages/SecurityDashboard"));
 const PermissionsAdmin = lazy(() => import("./pages/PermissionsAdmin"));
+const AdminTelemetria = lazy(() => import("./pages/AdminTelemetria"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
