@@ -156,8 +156,11 @@ export default defineConfig(() => ({
       output: {
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom"],
-          ui: ["framer-motion", "recharts", "lucide-react"],
+          ui: ["lucide-react"],
+          charts: ["recharts"],
+          animation: ["framer-motion"],
           supabase: ["@supabase/supabase-js"],
+          query: ["@tanstack/react-query"],
         },
       },
     },
