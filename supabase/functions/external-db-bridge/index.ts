@@ -53,6 +53,33 @@ function validateTelemetryPayload(payload: TelemetryPayload): string | null {
   return null;
 }
 
+function severityIcon(severity: string): string {
+  switch (severity) {
+    case 'error': return '❌';
+    case 'very_slow': return '🔴';
+    case 'slow': return '🟡';
+    default: return '🟢';
+  }
+}
+
+function emitTelemetryFireAndForget(
+  supabase: ReturnType<typeof createClient>,
+  row: Record<string, unknown>
+) {
+  const severity = row.severity as string;
+  const icon = severityIcon(severity);
+  const table = row.rpc_name || row.table_name || 'unknown';
+  const durationMs = row.duration_ms as number;
+
+  console.log(`${icon} [telemetry] ${severity.toUpperCase()} | ${row.operation} ${table} | ${durationMs}ms${row.error_message ? ' | ERR: ' + row.error_message : ''}`);
+
+  supabase.from('query_telemetry').insert(row).then(({ error }) => {
+    if (error) {
+      console.error(`❌ [telemetry-persist] Failed to save: ${error.message}`);
+    }
+  });
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -63,7 +90,6 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
-    // Authenticate via JWT
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
@@ -82,7 +108,6 @@ serve(async (req) => {
     }
 
     const userId = claimsData.claims.sub as string;
-
     const body: BridgeRequest = await req.json();
 
     switch (body.action) {
@@ -110,35 +135,25 @@ serve(async (req) => {
         }
 
         const severity = classifySeverity(body.payload.duration_ms, body.payload.error_message);
+        const row = {
+          operation: body.payload.operation,
+          table_name: body.payload.table_name ?? null,
+          rpc_name: body.payload.rpc_name ?? null,
+          duration_ms: body.payload.duration_ms,
+          record_count: body.payload.record_count ?? null,
+          query_limit: body.payload.query_limit ?? null,
+          query_offset: body.payload.query_offset ?? null,
+          count_mode: body.payload.count_mode ?? null,
+          severity,
+          error_message: body.payload.error_message ?? null,
+          user_id: userId,
+        };
 
-        const { data, error } = await supabase
-          .from('query_telemetry')
-          .insert({
-            operation: body.payload.operation,
-            table_name: body.payload.table_name ?? null,
-            rpc_name: body.payload.rpc_name ?? null,
-            duration_ms: body.payload.duration_ms,
-            record_count: body.payload.record_count ?? null,
-            query_limit: body.payload.query_limit ?? null,
-            query_offset: body.payload.query_offset ?? null,
-            count_mode: body.payload.count_mode ?? null,
-            severity,
-            error_message: body.payload.error_message ?? null,
-            user_id: userId,
-          })
-          .select('id')
-          .single();
-
-        if (error) {
-          console.error('[external-db-bridge] Insert telemetry error:', error);
-          return new Response(
-            JSON.stringify({ error: 'Failed to persist telemetry', details: error.message }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
+        // Fire-and-forget persistence
+        emitTelemetryFireAndForget(supabase, row);
 
         return new Response(
-          JSON.stringify({ success: true, id: data.id, severity }),
+          JSON.stringify({ success: true, severity }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -187,13 +202,20 @@ serve(async (req) => {
           );
         }
 
+        // Log each item
+        for (const r of rows) {
+          if (r) {
+            console.log(`${severityIcon(r.severity)} [telemetry-batch] ${r.severity.toUpperCase()} | ${r.operation} ${r.rpc_name || r.table_name || 'unknown'} | ${r.duration_ms}ms`);
+          }
+        }
+
         const { data, error } = await supabase
           .from('query_telemetry')
           .insert(rows)
           .select('id');
 
         if (error) {
-          console.error('[external-db-bridge] Batch insert error:', error);
+          console.error('❌ [external-db-bridge] Batch insert error:', error);
           return new Response(
             JSON.stringify({ error: 'Failed to persist batch telemetry', details: error.message }),
             { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -256,16 +278,17 @@ serve(async (req) => {
         const durationMs = Date.now() - startMs;
         const recordCount = Array.isArray(result.data) ? result.data.length : 0;
         const errorMsg = result.error ? String(result.error) : null;
+        const severity = classifySeverity(durationMs, errorMsg);
 
-        // Auto-emit telemetry for the query
-        await supabase.from('query_telemetry').insert({
+        // Fire-and-forget telemetry for the query
+        emitTelemetryFireAndForget(supabase, {
           operation: q.operation,
           table_name: q.table,
           duration_ms: durationMs,
           record_count: recordCount,
           query_limit: q.limit ?? null,
           query_offset: q.offset ?? null,
-          severity: classifySeverity(durationMs, errorMsg),
+          severity,
           error_message: errorMsg,
           user_id: userId,
         });
@@ -295,7 +318,7 @@ serve(async (req) => {
         );
     }
   } catch (err) {
-    console.error('[external-db-bridge] Unhandled error:', err);
+    console.error('❌ [external-db-bridge] Unhandled error:', err);
     return new Response(
       JSON.stringify({ error: 'Internal server error', message: String(err) }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
