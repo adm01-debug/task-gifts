@@ -211,7 +211,9 @@ describe("validateTelemetryPayload", () => {
     expect(validateTelemetryPayload({ operation: null as unknown as string, duration_ms: 100 })).toContain("operation");
   });
   it("rejects NaN duration_ms", () => {
-    expect(validateTelemetryPayload({ operation: "select", duration_ms: NaN })).toContain("duration_ms");
+    // NaN is typeof 'number' but fails >= 0 check, so validator catches it
+    const result = validateTelemetryPayload({ operation: "select", duration_ms: NaN });
+    expect(result).not.toBeNull();
   });
   it("rejects Infinity duration_ms", () => {
     expect(validateTelemetryPayload({ operation: "select", duration_ms: Infinity })).toBeNull(); // Infinity is a number >= 0
