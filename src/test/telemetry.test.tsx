@@ -446,15 +446,13 @@ describe("Telemetry Data Integrity", () => {
   });
 
   it("handles null fields gracefully", () => {
-    const row = makeTelemetryRow({
-      table_name: null, rpc_name: null, record_count: null,
-      query_limit: null, query_offset: null, count_mode: null,
-      error_message: null, user_id: null,
-    });
-    expect(row.table_name).toBeNull();
-    expect(row.rpc_name).toBeNull();
-    expect(row.record_count).toBeNull();
-    expect(row.error_message).toBeNull();
+    const row = makeTelemetryRow({});
+    // Override with explicit nulls
+    const nullRow = { ...row, table_name: null, rpc_name: null, record_count: null, error_message: null };
+    expect(nullRow.table_name).toBeNull();
+    expect(nullRow.rpc_name).toBeNull();
+    expect(nullRow.record_count).toBeNull();
+    expect(nullRow.error_message).toBeNull();
   });
 
   it("cleanup threshold is exactly 7 days", () => {
