@@ -13,7 +13,7 @@ export default defineConfig(() => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "placeholder.svg", "splash/*.png"],
+      includeAssets: ["favicon.ico", "placeholder.svg", "og-image.jpg"],
       manifest: {
         name: "Task Gifts - Gamificação Corporativa",
         short_name: "Task Gifts",
