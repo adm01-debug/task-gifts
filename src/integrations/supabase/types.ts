@@ -4660,6 +4660,54 @@ export type Database = {
           },
         ]
       }
+      query_telemetry: {
+        Row: {
+          count_mode: string | null
+          created_at: string
+          duration_ms: number
+          error_message: string | null
+          id: string
+          operation: string
+          query_limit: number | null
+          query_offset: number | null
+          record_count: number | null
+          rpc_name: string | null
+          severity: string
+          table_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          count_mode?: string | null
+          created_at?: string
+          duration_ms?: number
+          error_message?: string | null
+          id?: string
+          operation?: string
+          query_limit?: number | null
+          query_offset?: number | null
+          record_count?: number | null
+          rpc_name?: string | null
+          severity?: string
+          table_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          count_mode?: string | null
+          created_at?: string
+          duration_ms?: number
+          error_message?: string | null
+          id?: string
+          operation?: string
+          query_limit?: number | null
+          query_offset?: number | null
+          record_count?: number | null
+          rpc_name?: string | null
+          severity?: string
+          table_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       quest_assignments: {
         Row: {
           completed_at: string | null
