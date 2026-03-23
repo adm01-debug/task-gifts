@@ -13,7 +13,7 @@ export default defineConfig(() => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "placeholder.svg", "splash/*.png"],
+      includeAssets: ["favicon.ico", "placeholder.svg", "og-image.jpg"],
       manifest: {
         name: "Task Gifts - Gamificação Corporativa",
         short_name: "Task Gifts",
@@ -156,8 +156,11 @@ export default defineConfig(() => ({
       output: {
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom"],
-          ui: ["framer-motion", "recharts", "lucide-react"],
+          ui: ["lucide-react"],
+          charts: ["recharts"],
+          animation: ["framer-motion"],
           supabase: ["@supabase/supabase-js"],
+          query: ["@tanstack/react-query"],
         },
       },
     },
