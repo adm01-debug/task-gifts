@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
     <!-- Mobile Web App Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
@@ -17,7 +17,7 @@
     <meta name="keywords" content="gamificação corporativa, treinamento empresarial, engajamento de funcionários, LXP, plataforma de aprendizado, promo brindes" />
     <meta name="author" content="Promo Brindes" />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#6366f1" />
+    <meta name="theme-color" content="#e07400" />
     <link rel="canonical" href="https://taskgifts.promobrindes.com.br" />
     
     <!-- PWA Apple Touch Icons & Splash Screens -->
@@ -53,7 +53,7 @@
     <!-- Fonts - Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Fonts loaded via CSS @import in index.css -->
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -74,9 +74,40 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Task Gifts",
+      "description": "Plataforma de gamificação e treinamento corporativo",
+      "url": "https://taskgifts.promobrindes.com.br",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "BRL"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "Promo Brindes",
+        "url": "https://promobrindes.com.br"
+      }
+    }
+    </script>
   </head>
 
   <body>
+    <noscript>
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;padding:2rem;text-align:center;">
+        <div>
+          <h1>JavaScript Necessário</h1>
+          <p>Por favor, habilite o JavaScript no seu navegador para usar o Task Gifts.</p>
+        </div>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

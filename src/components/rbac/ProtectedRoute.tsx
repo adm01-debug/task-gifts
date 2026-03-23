@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRBAC, type AccessCheckOptions } from "@/hooks/useRBAC";
 import { Loader2, ShieldX } from "lucide-react";
@@ -113,12 +113,12 @@ export function ProtectedRoute({
             {accessDeniedMessage || 
               "Você não tem permissão para acessar esta página."}
           </p>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
           >
             Voltar ao Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     );
