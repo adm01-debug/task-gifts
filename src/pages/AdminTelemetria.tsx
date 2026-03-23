@@ -3,17 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Activity, AlertTriangle, Clock, Database, RefreshCw, Zap, Trash2 } from "lucide-react";
+import { Activity, AlertTriangle, Clock, Database, RefreshCw, Zap, Trash2, Download, FileText, CalendarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TelemetryCharts } from "@/components/admin/telemetry/TelemetryCharts";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PageWrapper } from "@/components/PageWrapper";
-import { DesktopBackButton, GlobalBreadcrumbs } from "@/components/navigation";
+import { DesktopBackButton } from "@/components/navigation";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-interface TelemetryRow {
+export interface TelemetryRow {
   id: string;
   operation: string;
   table_name: string | null;
@@ -29,32 +35,120 @@ interface TelemetryRow {
   created_at: string;
 }
 
-type SeverityFilter = "all" | "slow" | "very_slow" | "error";
-type TimeFilter = "1h" | "6h" | "24h" | "7d";
+export type SeverityFilter = "all" | "slow" | "very_slow" | "error";
+export type TimeFilter = "1h" | "6h" | "24h" | "7d" | "custom";
+
+export function getTimeThreshold(timeFilter: TimeFilter, customStart?: Date): string {
+  const now = new Date();
+  switch (timeFilter) {
+    case "1h": return new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+    case "6h": return new Date(now.getTime() - 6 * 60 * 60 * 1000).toISOString();
+    case "24h": return new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+    case "7d": return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    case "custom": return customStart ? customStart.toISOString() : new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+  }
+}
+
+export function formatDuration(ms: number) {
+  if (ms >= 1000) return `${(ms / 1000).toFixed(1)}s`;
+  return `${ms}ms`;
+}
+
+export function formatTime(iso: string) {
+  return new Date(iso).toLocaleString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+  });
+}
+
+export function exportTelemetryCSV(rows: TelemetryRow[]) {
+  const BOM = "\uFEFF";
+  const headers = ["Quando", "Operação", "Tabela/RPC", "Duração (ms)", "Records", "Limit", "Offset", "Count Mode", "Severidade", "Erro"];
+  const csvRows = rows.map(r => [
+    formatTime(r.created_at),
+    r.operation,
+    r.rpc_name || r.table_name || "-",
+    String(r.duration_ms),
+    r.record_count != null ? String(r.record_count) : "-",
+    r.query_limit != null ? String(r.query_limit) : "-",
+    r.query_offset != null ? String(r.query_offset) : "-",
+    r.count_mode || "-",
+    r.severity,
+    r.error_message || "-",
+  ]);
+
+  const csv = BOM + [headers.join(";"), ...csvRows.map(r => r.join(";"))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `telemetria_${format(new Date(), "yyyy-MM-dd_HHmm")}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function exportTelemetryPDF(rows: TelemetryRow[]) {
+  const doc = new jsPDF({ orientation: "landscape", format: "a4" });
+  doc.setFontSize(16);
+  doc.text("Telemetria de Queries — Relatório", 14, 15);
+  doc.setFontSize(9);
+  doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy HH:mm")} · ${rows.length} registros`, 14, 22);
+
+  const tableData = rows.map(r => [
+    formatTime(r.created_at),
+    r.operation,
+    r.rpc_name || r.table_name || "-",
+    formatDuration(r.duration_ms),
+    r.record_count != null ? String(r.record_count) : "-",
+    r.query_limit != null ? String(r.query_limit) : "-",
+    r.severity,
+    r.error_message ? r.error_message.substring(0, 40) : "-",
+  ]);
+
+  autoTable(doc, {
+    startY: 28,
+    head: [["Quando", "Operação", "Tabela/RPC", "Duração", "Records", "Limit", "Severidade", "Erro"]],
+    body: tableData,
+    styles: { fontSize: 7, cellPadding: 2 },
+    headStyles: { fillColor: [59, 130, 246], textColor: 255 },
+    alternateRowStyles: { fillColor: [245, 247, 250] },
+    didParseCell: (data) => {
+      if (data.column.index === 6 && data.section === "body") {
+        const val = String(data.cell.raw);
+        if (val === "very_slow") data.cell.styles.textColor = [220, 38, 38];
+        else if (val === "slow") data.cell.styles.textColor = [202, 138, 4];
+        else if (val === "error") data.cell.styles.textColor = [220, 38, 38];
+      }
+    },
+  });
+
+  doc.save(`telemetria_${format(new Date(), "yyyy-MM-dd_HHmm")}.pdf`);
+}
 
 function AdminTelemetriaContent() {
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("24h");
+  const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
+  const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
 
-  const getTimeThreshold = () => {
-    const now = new Date();
-    switch (timeFilter) {
-      case "1h": return new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-      case "6h": return new Date(now.getTime() - 6 * 60 * 60 * 1000).toISOString();
-      case "24h": return new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-      case "7d": return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    }
-  };
+  const threshold = getTimeThreshold(timeFilter, customStartDate);
 
   const { data: rows = [], isLoading, refetch, isRefetching } = useQuery<TelemetryRow[]>({
-    queryKey: ["query-telemetry", severityFilter, timeFilter],
+    queryKey: ["query-telemetry", severityFilter, timeFilter, customStartDate?.toISOString(), customEndDate?.toISOString()],
     queryFn: async () => {
       let query = supabase
         .from("query_telemetry" as any)
         .select("*")
-        .gte("created_at", getTimeThreshold())
+        .gte("created_at", threshold)
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(500);
+
+      if (timeFilter === "custom" && customEndDate) {
+        query = query.lte("created_at", customEndDate.toISOString());
+      }
 
       if (severityFilter !== "all") {
         query = query.eq("severity", severityFilter);
@@ -69,11 +163,11 @@ function AdminTelemetriaContent() {
   });
 
   const handleCleanup = async () => {
-    const threshold = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const cleanupThreshold = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const { error } = await supabase
       .from("query_telemetry" as any)
       .delete()
-      .lt("created_at", threshold);
+      .lt("created_at", cleanupThreshold);
     if (error) {
       toast.error("Erro ao limpar dados antigos");
     } else {
@@ -100,21 +194,6 @@ function AdminTelemetriaContent() {
   const topOffenders = [...tableStats.entries()]
     .sort((a, b) => b[1].count - a[1].count)
     .slice(0, 8);
-
-  const formatDuration = (ms: number) => {
-    if (ms >= 1000) return `${(ms / 1000).toFixed(1)}s`;
-    return `${ms}ms`;
-  };
-
-  const formatTime = (iso: string) => {
-    return new Date(iso).toLocaleString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      day: "2-digit",
-      month: "2-digit",
-    });
-  };
 
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
@@ -148,6 +227,14 @@ function AdminTelemetriaContent() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => exportTelemetryCSV(rows)} disabled={rows.length === 0}>
+                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                  CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => exportTelemetryPDF(rows)} disabled={rows.length === 0}>
+                  <FileText className="h-3.5 w-3.5 mr-1.5" />
+                  PDF
+                </Button>
                 <Button variant="outline" size="sm" onClick={handleCleanup}>
                   <Trash2 className="h-3.5 w-3.5 mr-1.5" />
                   Limpar +7d
@@ -255,7 +342,7 @@ function AdminTelemetriaContent() {
               </SelectContent>
             </Select>
             <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v as TimeFilter)}>
-              <SelectTrigger className="w-36">
+              <SelectTrigger className="w-44">
                 <SelectValue placeholder="Período" />
               </SelectTrigger>
               <SelectContent>
@@ -263,8 +350,38 @@ function AdminTelemetriaContent() {
                 <SelectItem value="6h">Últimas 6h</SelectItem>
                 <SelectItem value="24h">Últimas 24h</SelectItem>
                 <SelectItem value="7d">Últimos 7 dias</SelectItem>
+                <SelectItem value="custom">📅 Personalizado</SelectItem>
               </SelectContent>
             </Select>
+
+            {timeFilter === "custom" && (
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn("w-[130px] text-left font-normal", !customStartDate && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                      {customStartDate ? format(customStartDate, "dd/MM/yyyy") : "Início"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={customStartDate} onSelect={setCustomStartDate} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+                <span className="text-xs text-muted-foreground">até</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn("w-[130px] text-left font-normal", !customEndDate && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                      {customEndDate ? format(customEndDate, "dd/MM/yyyy") : "Fim"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={customEndDate} onSelect={setCustomEndDate} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+
             <span className="text-xs text-muted-foreground ml-auto">
               {rows.length} registros · auto-refresh 30s
             </span>
