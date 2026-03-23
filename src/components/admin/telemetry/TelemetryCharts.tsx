@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from "recharts";
 import { useMemo } from "react";
 
 interface TelemetryRow {
@@ -18,15 +18,23 @@ interface TelemetryChartsProps {
 }
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "#eab308", "hsl(var(--muted-foreground))"];
+const SEVERITY_COLORS: Record<string, string> = {
+  normal: "hsl(var(--primary))",
+  slow: "#eab308",
+  very_slow: "hsl(var(--destructive))",
+  error: "#dc2626",
+};
 
 export function TelemetryCharts({ rows, timeFilter }: TelemetryChartsProps) {
+  // Duration by table with avg AND max
   const durationByTable = useMemo(() => {
-    const map = new Map<string, { name: string; avgMs: number; count: number; totalMs: number }>();
+    const map = new Map<string, { name: string; avgMs: number; maxMs: number; count: number; totalMs: number }>();
     for (const r of rows) {
       const key = r.rpc_name || r.table_name || "unknown";
-      const prev = map.get(key) || { name: key, avgMs: 0, count: 0, totalMs: 0 };
+      const prev = map.get(key) || { name: key, avgMs: 0, maxMs: 0, count: 0, totalMs: 0 };
       prev.count++;
       prev.totalMs += r.duration_ms;
+      prev.maxMs = Math.max(prev.maxMs, r.duration_ms);
       prev.avgMs = Math.round(prev.totalMs / prev.count);
       map.set(key, prev);
     }
@@ -46,10 +54,10 @@ export function TelemetryCharts({ rows, timeFilter }: TelemetryChartsProps) {
     ].filter(d => d.value > 0);
   }, [rows]);
 
+  // Stacked AreaChart timeline by severity
   const timeline = useMemo(() => {
-    const buckets = new Map<string, { time: string; count: number; avgMs: number; totalMs: number }>();
-    const fmt = timeFilter === "1h" || timeFilter === "6h" ? "HH:mm" : "dd/MM HH:mm";
-    
+    const buckets = new Map<string, { time: string; normal: number; slow: number; very_slow: number; error: number; avgMs: number; maxMs: number; totalMs: number; count: number }>();
+
     for (const r of rows) {
       const d = new Date(r.created_at);
       let key: string;
@@ -63,10 +71,12 @@ export function TelemetryCharts({ rows, timeFilter }: TelemetryChartsProps) {
         d.setMinutes(0, 0, 0);
         key = d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
       }
-      
-      const prev = buckets.get(key) || { time: key, count: 0, avgMs: 0, totalMs: 0 };
+
+      const prev = buckets.get(key) || { time: key, normal: 0, slow: 0, very_slow: 0, error: 0, avgMs: 0, maxMs: 0, totalMs: 0, count: 0 };
+      prev[r.severity as keyof typeof SEVERITY_COLORS] = (prev[r.severity as keyof typeof SEVERITY_COLORS] as number || 0) + 1;
       prev.count++;
       prev.totalMs += r.duration_ms;
+      prev.maxMs = Math.max(prev.maxMs, r.duration_ms);
       prev.avgMs = Math.round(prev.totalMs / prev.count);
       buckets.set(key, prev);
     }
@@ -77,38 +87,41 @@ export function TelemetryCharts({ rows, timeFilter }: TelemetryChartsProps) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      {/* Timeline */}
+      {/* Stacked AreaChart - Volume por Severidade */}
       <Card className="lg:col-span-2">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Queries ao Longo do Tempo</CardTitle>
+          <CardTitle className="text-sm">Volume de Queries por Severidade</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={timeline}>
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={timeline}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis dataKey="time" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} name="Quantidade" dot={false} />
-              <Line type="monotone" dataKey="avgMs" stroke="hsl(var(--destructive))" strokeWidth={2} name="Média (ms)" dot={false} />
-            </LineChart>
+              <Area type="monotone" dataKey="normal" stackId="1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.3} name="Normal" />
+              <Area type="monotone" dataKey="slow" stackId="1" stroke="#eab308" fill="#eab308" fillOpacity={0.4} name="Lenta" />
+              <Area type="monotone" dataKey="very_slow" stackId="1" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.4} name="Muito Lenta" />
+              <Area type="monotone" dataKey="error" stackId="1" stroke="#dc2626" fill="#dc2626" fillOpacity={0.5} name="Erro" />
+            </AreaChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {/* Duration by Table */}
+      {/* Duração Média vs Máxima por Tabela */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Duração Média por Tabela (ms)</CardTitle>
+          <CardTitle className="text-sm">Duração Média / Máxima por Tabela (ms)</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={240}>
             <BarChart data={durationByTable} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis type="number" tick={{ fontSize: 10 }} />
               <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={100} />
               <Tooltip />
               <Bar dataKey="avgMs" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Média (ms)" />
+              <Bar dataKey="maxMs" fill="hsl(var(--destructive))" radius={[0, 4, 4, 0]} name="Máxima (ms)" fillOpacity={0.5} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -120,7 +133,7 @@ export function TelemetryCharts({ rows, timeFilter }: TelemetryChartsProps) {
           <CardTitle className="text-sm">Distribuição por Severidade</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={240}>
             <PieChart>
               <Pie data={severityDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, value }) => `${name}: ${value}`}>
                 {severityDistribution.map((_, i) => (
