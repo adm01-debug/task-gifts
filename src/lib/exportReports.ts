@@ -180,20 +180,22 @@ export function exportToExcel(report: ReportData, options: ExportOptions = { for
 
 export function exportToPDF(report: ReportData, options: ExportOptions = { format: "pdf" }): void {
   const html = generatePDFHTML(report);
-  
-  // Open in new window for printing
-  const printWindow = window.open("", "_blank");
+
+  // Use blob URL instead of document.write() to prevent XSS
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const blobUrl = URL.createObjectURL(blob);
+
+  const printWindow = window.open(blobUrl, "_blank");
   if (!printWindow) {
+    URL.revokeObjectURL(blobUrl);
     return;
   }
-  
-  printWindow.document.write(html);
-  printWindow.document.close();
-  
+
   // Wait for styles to load then print
   printWindow.onload = () => {
     setTimeout(() => {
       printWindow.print();
+      URL.revokeObjectURL(blobUrl);
     }, 250);
   };
 }

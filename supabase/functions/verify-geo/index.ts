@@ -1,9 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders, handleCorsPreflightIfNeeded } from '../_shared/cors.ts';
 
 interface GeoResponse {
   country_code?: string;
@@ -15,7 +11,13 @@ interface GeoResponse {
 async function getGeoFromIP(ip: string): Promise<GeoResponse> {
   try {
     // Use ip-api.com (free, no API key required, 45 requests per minute)
-    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode`);
+    // Validate IP format to prevent SSRF
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipRegex.test(ip)) {
+      return { ip, error: 'Invalid IP format' };
+    }
+    // Use HTTPS to prevent MITM attacks on geo data
+    const response = await fetch(`https://ip-api.com/json/${ip}?fields=status,message,country,countryCode`);
     const data = await response.json();
     
     if (data.status === 'success') {
@@ -36,9 +38,10 @@ async function getGeoFromIP(ip: string): Promise<GeoResponse> {
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const preflightResponse = handleCorsPreflightIfNeeded(req);
+  if (preflightResponse) return preflightResponse;
+
+  const corsHeaders = getCorsHeaders(req);
 
   try {
     // Get client IP from various headers

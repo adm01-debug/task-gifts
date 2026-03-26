@@ -196,9 +196,10 @@ export const missionsService = {
       .from("user_mission_progress")
       .select("*, mission:department_missions(*)")
       .eq("id", progressId)
+      .eq("user_id", userId)
       .maybeSingle();
 
-    if (!progress) throw new Error("Progress not found");
+    if (!progress) throw new Error("Progress not found or unauthorized");
     
     const typedProgress = progress as { claimed?: boolean; completed_at?: string; mission?: DepartmentMission };
     if (typedProgress.claimed) throw new Error("Already claimed");

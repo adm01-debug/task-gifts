@@ -134,6 +134,10 @@ export const duelsService = {
     durationHours: number = 24,
     message?: string
   ): Promise<DirectDuel> {
+    // Input validation
+    if (challengerId === opponentId) throw new Error("Você não pode duelar consigo mesmo");
+    if (durationHours <= 0 || durationHours > 168) throw new Error("Duração deve ser entre 1 e 168 horas");
+
     // Get current XP for both users
     const { data: profiles } = await supabase
       .from("profiles")

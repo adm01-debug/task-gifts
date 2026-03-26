@@ -111,12 +111,61 @@ export const shopService = {
     })) as ShopPurchase[];
   },
 
-  // Purchase a reward
+  // Purchase a reward - uses atomic RPC to prevent double-spend race condition
   async purchaseReward(
     userId: string,
     rewardId: string,
     quantity: number = 1
   ): Promise<ShopPurchase> {
+    // Validate input
+    if (quantity <= 0 || quantity > 100) {
+      throw new Error("Quantidade deve ser entre 1 e 100");
+    }
+
+    // Attempt atomic purchase via RPC
+    const { data: rpcResult, error: rpcError } = await supabase
+      .rpc("purchase_reward_atomic", {
+        p_user_id: userId,
+        p_reward_id: rewardId,
+        p_quantity: quantity,
+      });
+
+    if (!rpcError && rpcResult?.success) {
+      // Fetch the created purchase record
+      const { data: purchase, error: fetchError } = await supabase
+        .from("shop_purchases")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("reward_id", rewardId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (fetchError || !purchase) throw new Error("Compra realizada mas registro não encontrado");
+
+      // Log audit
+      try {
+        await auditService.log({
+          user_id: userId,
+          action: "coins_spent",
+          entity_type: "shop_purchase",
+          entity_id: purchase.id,
+          new_data: {
+            reward_name: rpcResult.reward_name,
+            quantity,
+            total_coins: rpcResult.total_cost,
+          },
+        });
+      } catch {
+        logger.warn("Failed to log shop purchase audit", "shopService");
+      }
+
+      return purchase as ShopPurchase;
+    }
+
+    // Fallback: non-atomic (log warning)
+    logger.warn("RPC purchase_reward_atomic unavailable, using fallback", "shopService", rpcError);
+
     // Get reward details
     const { data: reward, error: rewardError } = await supabase
       .from("shop_rewards")
@@ -125,7 +174,7 @@ export const shopService = {
       .maybeSingle();
 
     if (rewardError || !reward) throw new Error("Recompensa não encontrada");
-    
+
     const typedReward = reward as ShopReward;
 
     // Check stock
