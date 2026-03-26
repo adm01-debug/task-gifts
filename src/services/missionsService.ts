@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { profilesService } from "./profilesService";
 import { logger } from "./loggingService";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface DepartmentMission {
   id: string;

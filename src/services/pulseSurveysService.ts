@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface PulseSurvey {
   id: string;
@@ -124,6 +125,7 @@ export const pulseSurveysService = {
   },
 
   async createSurvey(survey: SurveyInsert): Promise<PulseSurvey> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
@@ -153,6 +155,7 @@ export const pulseSurveysService = {
   },
 
   async submitResponse(surveyId: string, answers: Record<string, string | number>): Promise<PulseResponse> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 

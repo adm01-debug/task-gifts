@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface League {
   id: string;
@@ -152,6 +153,7 @@ export const leaguesService = {
   },
 
   async addWeeklyXP(userId: string, xpAmount: number): Promise<void> {
+    await requireAdminOrManager();
     const { data: userLeague } = await supabase
       .from("user_leagues")
       .select("weekly_xp")
@@ -217,6 +219,7 @@ export const leaguesService = {
   },
 
   async createLeague(league: Omit<League, 'id' | 'created_at'>): Promise<League> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("leagues")
       .insert(league)
@@ -228,6 +231,7 @@ export const leaguesService = {
   },
 
   async updateLeague(id: string, league: Partial<Omit<League, 'id' | 'created_at'>>): Promise<League> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("leagues")
       .update(league)
@@ -240,6 +244,7 @@ export const leaguesService = {
   },
 
   async deleteLeague(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("leagues")
       .delete()

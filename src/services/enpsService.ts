@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface ENPSSurvey {
   id: string;
@@ -128,6 +129,7 @@ export const enpsService = {
     follow_up_question?: string;
     status?: string;
   }) {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("enps_surveys")
       .insert(survey)
@@ -139,6 +141,7 @@ export const enpsService = {
   },
 
   async updateSurvey(id: string, updates: Partial<ENPSSurvey>) {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("enps_surveys")
       .update({ ...updates, updated_at: new Date().toISOString() })
@@ -151,6 +154,7 @@ export const enpsService = {
   },
 
   async deleteSurvey(id: string) {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("enps_surveys")
       .delete()
@@ -176,6 +180,7 @@ export const enpsService = {
     score: number;
     follow_up_answer?: string;
   }) {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("enps_responses")
       .insert(response)

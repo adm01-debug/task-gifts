@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { logger } from "./loggingService";
 
 export type AuditAction = 
   | 'user_signup'
@@ -67,9 +68,12 @@ export const auditService = {
         .from("audit_logs")
         .insert(insertData as Database["public"]["Tables"]["audit_logs"]["Insert"]);
       
-      // Fire and forget - no console.error in production
-    } catch {
-      // Silently fail - audit logging should not block main operations
+      if (error) {
+        logger.warn(`Audit log failed for action "${data.action}": ${error.message}`, "auditService");
+      }
+    } catch (err) {
+      // Audit should not block main operations, but we log the failure
+      logger.warn("Audit log exception", "auditService", err);
     }
   },
 

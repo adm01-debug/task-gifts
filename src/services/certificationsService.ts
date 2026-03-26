@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { notificationsService } from "./notificationsService";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface Certification {
   id: string;

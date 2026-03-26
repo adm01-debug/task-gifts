@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface Notification {
   id: string;
@@ -57,6 +58,7 @@ export const notificationsService = {
   },
 
   async markAsRead(notificationId: string): Promise<void> {
+    await requireAuth();
     const { error } = await supabase
       .from("notifications")
       .update({ read: true })
@@ -66,6 +68,7 @@ export const notificationsService = {
   },
 
   async markAllAsRead(userId: string): Promise<void> {
+    await requireAuth();
     const { error } = await supabase
       .from("notifications")
       .update({ read: true })
@@ -76,6 +79,7 @@ export const notificationsService = {
   },
 
   async delete(notificationId: string): Promise<void> {
+    await requireAuth();
     const { error } = await supabase
       .from("notifications")
       .delete()
@@ -85,6 +89,7 @@ export const notificationsService = {
   },
 
   async deleteAll(userId: string): Promise<void> {
+    await requireAuth();
     const { error } = await supabase
       .from("notifications")
       .delete()
@@ -94,6 +99,7 @@ export const notificationsService = {
   },
 
   async create(notification: NotificationInsert): Promise<Notification> {
+    await requireAuth();
     const { data, error } = await supabase
       .from("notifications")
       .insert(notification)

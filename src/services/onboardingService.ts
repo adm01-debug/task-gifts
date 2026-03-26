@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "./loggingService";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface OnboardingStep {
   id: string;
@@ -153,6 +154,7 @@ export const onboardingService = {
   },
 
   async completeStep(userId: string, stepId: string): Promise<boolean> {
+    await requireAuth();
     const progress = await this.getProgress(userId);
     if (!progress) return false;
 
@@ -180,6 +182,7 @@ export const onboardingService = {
   },
 
   async claimReward(userId: string, stepId: string): Promise<boolean> {
+    await requireAuth();
     const progress = await this.getProgress(userId);
     if (!progress) return false;
 

@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/services/loggingService";
 import type { Database, Json } from "@/integrations/supabase/types";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export type ClimatePillar = 
   | 'recognition' | 'autonomy' | 'growth' | 'leadership' | 'peers'
@@ -99,6 +100,7 @@ export const climateSurveyService = {
   },
 
   async createSurvey(survey: Omit<ClimateSurvey, 'id' | 'created_at' | 'updated_at'>): Promise<ClimateSurvey> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from('climate_surveys')
       .insert(survey)
@@ -113,6 +115,7 @@ export const climateSurveyService = {
   },
 
   async updateSurvey(id: string, updates: Partial<ClimateSurvey>): Promise<ClimateSurvey> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from('climate_surveys')
       .update(updates)
@@ -142,6 +145,7 @@ export const climateSurveyService = {
   },
 
   async createQuestion(question: Omit<ClimateSurveyQuestion, 'id' | 'created_at'>): Promise<ClimateSurveyQuestion> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from('climate_survey_questions')
       .insert({
@@ -166,6 +170,7 @@ export const climateSurveyService = {
   },
 
   async submitResponse(surveyId: string, userId: string, answers: { questionId: string; score?: number; textAnswer?: string }[]): Promise<void> {
+    await requireAdminOrManager();
     const { data: response, error: responseError } = await supabase
       .from('climate_survey_responses')
       .insert({

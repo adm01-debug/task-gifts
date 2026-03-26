@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface Announcement {
   id: string;
@@ -115,6 +116,7 @@ export const announcementsService = {
   },
 
   async createAnnouncement(announcement: AnnouncementInsert): Promise<Announcement> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
@@ -136,6 +138,7 @@ export const announcementsService = {
   },
 
   async updateAnnouncement(id: string, updates: Partial<AnnouncementInsert>): Promise<Announcement> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("announcements")
       .update(updates)
@@ -151,6 +154,7 @@ export const announcementsService = {
   },
 
   async deleteAnnouncement(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("announcements")
       .delete()
@@ -160,6 +164,7 @@ export const announcementsService = {
   },
 
   async markAsRead(announcementId: string): Promise<void> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -181,6 +186,7 @@ export const announcementsService = {
   },
 
   async addReaction(announcementId: string, emoji: string): Promise<void> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
@@ -198,6 +204,7 @@ export const announcementsService = {
   },
 
   async removeReaction(announcementId: string, emoji: string): Promise<void> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
@@ -212,6 +219,7 @@ export const announcementsService = {
   },
 
   async togglePin(announcementId: string, isPinned: boolean, expiresAt?: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("announcements")
       .update({

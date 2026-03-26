@@ -6,6 +6,7 @@ import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
 import { achievementsService } from "./achievementsService";
 import { logger } from "./loggingService";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface KudosBadge {
   id: string;
@@ -119,33 +120,33 @@ export const kudosService = {
   async getKudosReceived(userId: string): Promise<KudosWithDetails[]> {
     const { data, error } = await supabase
       .from("kudos")
-      .select("*")
+      .select(`
+        *,
+        badge:kudos_badges(*),
+        from_profile:profiles!from_user_id(id, display_name, avatar_url),
+        to_profile:profiles!to_user_id(id, display_name, avatar_url)
+      `)
       .eq("to_user_id", userId)
       .order("created_at", { ascending: false });
-    
+
     if (error) throw error;
-    return (data ?? []).map(k => ({
-      ...k,
-      from_profile: null,
-      to_profile: null,
-      badge: null,
-    })) as KudosWithDetails[];
+    return (data ?? []) as KudosWithDetails[];
   },
 
   async getKudosGiven(userId: string): Promise<KudosWithDetails[]> {
     const { data, error } = await supabase
       .from("kudos")
-      .select("*")
+      .select(`
+        *,
+        badge:kudos_badges(*),
+        from_profile:profiles!from_user_id(id, display_name, avatar_url),
+        to_profile:profiles!to_user_id(id, display_name, avatar_url)
+      `)
       .eq("from_user_id", userId)
       .order("created_at", { ascending: false });
-    
+
     if (error) throw error;
-    return (data ?? []).map(k => ({
-      ...k,
-      from_profile: null,
-      to_profile: null,
-      badge: null,
-    })) as KudosWithDetails[];
+    return (data ?? []) as KudosWithDetails[];
   },
 
   async getKudosCount(userId: string): Promise<{ received: number; given: number }> {
@@ -166,7 +167,8 @@ export const kudosService = {
     };
   },
 
-  async giveKudos(kudos: KudosInsert): Promise<{ 
+  async giveKudos(kudos: KudosInsert): Promise<{
+    await requireAuth(); 
     kudos: Kudos; 
     comboResult: { finalXp: number; bonusXp: number; multiplier: number } | null;
   }> {
@@ -267,6 +269,7 @@ export const kudosService = {
   },
 
   async deleteKudos(id: string): Promise<void> {
+    await requireAuth();
     const { error } = await supabase
       .from("kudos")
       .delete()

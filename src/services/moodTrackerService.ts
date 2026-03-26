@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface MoodEntry {
   id: string;
@@ -95,6 +96,7 @@ export const moodTrackerService = {
   },
 
   async submitMood(mood: MoodInsert): Promise<MoodEntry> {
+    await requireAuth();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 

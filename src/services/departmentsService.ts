@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export type Department = Tables<"departments">;
 export type DepartmentInsert = TablesInsert<"departments">;
@@ -44,6 +45,7 @@ export const departmentsService = {
   },
 
   async create(department: DepartmentInsert): Promise<Department> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("departments")
       .insert(department)
@@ -55,6 +57,7 @@ export const departmentsService = {
   },
 
   async update(id: string, updates: DepartmentUpdate): Promise<Department> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("departments")
       .update(updates)
@@ -67,6 +70,7 @@ export const departmentsService = {
   },
 
   async delete(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("departments")
       .delete()
@@ -87,6 +91,7 @@ export const departmentsService = {
   },
 
   async addTeamMember(departmentId: string, userId: string, isManager = false): Promise<TeamMember> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("team_members")
       .insert({ 
@@ -102,6 +107,7 @@ export const departmentsService = {
   },
 
   async removeTeamMember(memberId: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("team_members")
       .delete()
@@ -111,6 +117,7 @@ export const departmentsService = {
   },
 
   async setManager(memberId: string, isManager: boolean): Promise<TeamMember> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("team_members")
       .update({ is_manager: isManager })

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface CheckinTemplate {
   id: string;
@@ -106,6 +107,7 @@ export const checkinsService = {
   },
 
   async createCheckin(checkin: CheckinInsert): Promise<Checkin> {
+    await requireAuth();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
@@ -127,6 +129,7 @@ export const checkinsService = {
   },
 
   async updateCheckin(checkinId: string, updates: Record<string, unknown>): Promise<Checkin> {
+    await requireAuth();
     const { data, error } = await supabase
       .from("checkins")
       .update(updates as never)
@@ -143,6 +146,7 @@ export const checkinsService = {
   },
 
   async completeCheckin(checkinId: string, responses: Record<string, string | number>, moodRating?: number): Promise<Checkin> {
+    await requireAuth();
     return this.updateCheckin(checkinId, {
       status: 'completed',
       completed_at: new Date().toISOString(),
@@ -152,6 +156,7 @@ export const checkinsService = {
   },
 
   async addActionItem(checkinId: string, actionItem: Omit<ActionItem, 'id'>): Promise<Checkin> {
+    await requireAuth();
     const { data: checkin, error } = await supabase
       .from("checkins")
       .select("action_items")
@@ -173,6 +178,7 @@ export const checkinsService = {
   },
 
   async toggleActionItem(checkinId: string, actionItemId: string): Promise<Checkin> {
+    await requireAuth();
     const { data: checkin, error } = await supabase
       .from("checkins")
       .select("action_items")

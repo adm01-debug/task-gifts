@@ -6,6 +6,7 @@ import { missionsService } from "./missionsService";
 import { comboService } from "./comboService";
 import { achievementsService } from "./achievementsService";
 import { logger } from "./loggingService";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface AttendanceRecord {
   id: string;

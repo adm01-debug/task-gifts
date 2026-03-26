@@ -52,10 +52,19 @@ export function useLoginLockout(email: string) {
     if (!email) return null;
 
     try {
+      // Attempt to detect client IP via Supabase Edge Function
+      let clientIp: string | null = null;
+      try {
+        const { data: ipData } = await supabase.functions.invoke("verify-ip");
+        clientIp = ipData?.ip || null;
+      } catch {
+        // IP detection is best-effort, proceed without it
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase.rpc as any)("log_login_attempt", {
         p_email: email.toLowerCase().trim(),
-        p_ip_address: null,
+        p_ip_address: clientIp,
         p_user_agent: navigator.userAgent,
         p_attempt_type: "password",
         p_error_message: errorMessage,

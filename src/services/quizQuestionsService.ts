@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface QuizOption {
   id: string;
@@ -136,6 +137,7 @@ export const quizQuestionsService = {
   },
 
   async createQuestion(data: CreateQuestionData): Promise<QuizQuestion> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
@@ -177,6 +179,7 @@ export const quizQuestionsService = {
   },
 
   async updateQuestion(questionId: string, data: UpdateQuestionData): Promise<QuizQuestion> {
+    await requireAdminOrManager();
     const updateData: Record<string, unknown> = {};
     
     if (data.quiz_type !== undefined) updateData.quiz_type = data.quiz_type;
@@ -227,6 +230,7 @@ export const quizQuestionsService = {
   },
 
   async deleteQuestion(questionId: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from('quiz_questions')
       .delete()
@@ -236,6 +240,7 @@ export const quizQuestionsService = {
   },
 
   async toggleActive(questionId: string, isActive: boolean): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from('quiz_questions')
       .update({ is_active: isActive })

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface DirectDuel {
   id: string;
@@ -134,6 +135,7 @@ export const duelsService = {
     durationHours: number = 24,
     message?: string
   ): Promise<DirectDuel> {
+    await requireAuth();
     // Input validation
     if (challengerId === opponentId) throw new Error("Você não pode duelar consigo mesmo");
     if (durationHours <= 0 || durationHours > 168) throw new Error("Duração deve ser entre 1 e 168 horas");
@@ -166,6 +168,7 @@ export const duelsService = {
   },
 
   async acceptDuel(duelId: string): Promise<DirectDuel> {
+    await requireAuth();
     const now = new Date();
     const { data: duel } = await supabase
       .from("direct_duels")
@@ -204,6 +207,7 @@ export const duelsService = {
   },
 
   async declineDuel(duelId: string): Promise<DirectDuel> {
+    await requireAuth();
     const { data, error } = await supabase
       .from("direct_duels")
       .update({ status: 'declined' })
@@ -228,6 +232,7 @@ export const duelsService = {
   },
 
   async updateDuelProgress(duelId: string, userId: string, currentXp: number): Promise<void> {
+    await requireAuth();
     const { data: duel } = await supabase
       .from("direct_duels")
       .select("*")
@@ -249,6 +254,7 @@ export const duelsService = {
   },
 
   async completeDuel(duelId: string): Promise<DirectDuel> {
+    await requireAuth();
     const { data: duel } = await supabase
       .from("direct_duels")
       .select("*")

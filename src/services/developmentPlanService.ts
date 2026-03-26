@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface DevelopmentPlan {
   id: string;
@@ -122,6 +123,7 @@ export const developmentPlanService = {
     linked_feedback_id?: string;
     linked_nine_box_id?: string;
   }) {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("development_plans")
       .insert(plan)
@@ -133,6 +135,7 @@ export const developmentPlanService = {
   },
 
   async updatePlan(id: string, updates: Partial<DevelopmentPlan>) {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("development_plans")
       .update({ ...updates, updated_at: new Date().toISOString() })
@@ -145,6 +148,7 @@ export const developmentPlanService = {
   },
 
   async deletePlan(id: string) {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("development_plans")
       .delete()
@@ -163,6 +167,7 @@ export const developmentPlanService = {
     due_date?: string;
     xp_reward?: number;
   }) {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("development_plan_actions")
       .insert(action)
@@ -174,6 +179,7 @@ export const developmentPlanService = {
   },
 
   async updateAction(id: string, updates: Partial<DevelopmentPlanAction>) {
+    await requireAdminOrManager();
     const updateData: Record<string, unknown> = { ...updates, updated_at: new Date().toISOString() };
     
     if (updates.status === "completed" && !updates.completed_at) {
@@ -193,6 +199,7 @@ export const developmentPlanService = {
   },
 
   async deleteAction(id: string) {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("development_plan_actions")
       .delete()
@@ -223,6 +230,7 @@ export const developmentPlanService = {
     category?: string;
     department_id?: string;
   }) {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("competencies")
       .insert(competency)

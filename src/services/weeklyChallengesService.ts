@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface WeeklyChallenge {
   id: string;
@@ -40,6 +41,7 @@ export const weeklyChallengesService = {
     challengerXp: number,
     opponentXp: number
   ): Promise<WeeklyChallenge> {
+    await requireAuth();
     const weekStart = getWeekStart();
     const weekEnd = getWeekEnd();
 
@@ -68,6 +70,7 @@ export const weeklyChallengesService = {
     isChallenger: boolean,
     xpGained: number
   ): Promise<void> {
+    await requireAuth();
     const updateField = isChallenger ? "challenger_xp_gained" : "opponent_xp_gained";
     
     const { error } = await supabase
@@ -82,6 +85,7 @@ export const weeklyChallengesService = {
     challengeId: string,
     winnerId: string | null
   ): Promise<void> {
+    await requireAuth();
     const { error } = await supabase
       .from("weekly_challenges")
       .update({ 

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface ActivityReaction {
   id: string;
@@ -62,6 +63,7 @@ export const activityReactionsService = {
   },
 
   async toggleReaction(activityId: string, userId: string, emoji: string): Promise<boolean> {
+    await requireAuth();
     // Check if reaction exists
     const { data: existing } = await supabase
       .from("activity_reactions")

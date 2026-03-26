@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "./loggingService";
+import { requireAuth } from "@/lib/authGuards";
 
 export type AvatarCategory = 'background' | 'frame' | 'accessory' | 'effect' | 'badge_style';
 export type AvatarRarity = 'common' | 'rare' | 'epic' | 'legendary';
@@ -130,6 +131,7 @@ export const avatarService = {
   },
 
   async unlockItem(userId: string, itemId: string): Promise<void> {
+    await requireAuth();
     const { error } = await supabase
       .from("user_avatar_items")
       .insert({ user_id: userId, item_id: itemId });
@@ -138,6 +140,7 @@ export const avatarService = {
   },
 
   async purchaseItem(userId: string, itemId: string, price: number): Promise<void> {
+    await requireAuth();
     // Get current coins
     const { data: profile } = await supabase
       .from("profiles")
@@ -165,6 +168,7 @@ export const avatarService = {
     category: AvatarCategory,
     itemId: string | null
   ): Promise<UserAvatarConfig> {
+    await requireAuth();
     const columnMap: Record<AvatarCategory, string> = {
       background: 'selected_background',
       frame: 'selected_frame',

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface NineBoxEvaluation {
   id: string;
@@ -81,6 +82,7 @@ export const nineBoxService = {
     strengths?: string[];
     development_areas?: string[];
   }) {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("nine_box_evaluations")
       .insert(evaluation)
@@ -92,6 +94,7 @@ export const nineBoxService = {
   },
 
   async updateEvaluation(id: string, updates: Partial<NineBoxEvaluation>) {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("nine_box_evaluations")
       .update({ ...updates, updated_at: new Date().toISOString() })

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface Goal {
   id: string;
@@ -133,6 +134,7 @@ export const goalsService = {
   },
 
   async createGoal(goal: GoalInsert): Promise<Goal> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
@@ -148,6 +150,7 @@ export const goalsService = {
   },
 
   async updateGoal(goalId: string, updates: Partial<GoalInsert>): Promise<Goal> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("goals")
       .update(updates)
@@ -161,6 +164,7 @@ export const goalsService = {
   },
 
   async deleteGoal(goalId: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("goals")
       .delete()
@@ -170,6 +174,7 @@ export const goalsService = {
   },
 
   async createKeyResult(keyResult: KeyResultInsert): Promise<KeyResult> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("key_results")
       .insert(keyResult)
@@ -182,6 +187,7 @@ export const goalsService = {
   },
 
   async updateKeyResult(krId: string, currentValue: number, note?: string): Promise<KeyResult> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 

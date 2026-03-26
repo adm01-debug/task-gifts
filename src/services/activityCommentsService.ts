@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface ActivityComment {
   id: string;
@@ -57,6 +58,7 @@ export const activityCommentsService = {
   },
 
   async addComment(activityId: string, userId: string, content: string): Promise<ActivityComment> {
+    await requireAuth();
     const { data, error } = await supabase
       .from("activity_comments")
       .insert({
@@ -73,6 +75,7 @@ export const activityCommentsService = {
   },
 
   async deleteComment(commentId: string): Promise<void> {
+    await requireAuth();
     const { error } = await supabase
       .from("activity_comments")
       .delete()

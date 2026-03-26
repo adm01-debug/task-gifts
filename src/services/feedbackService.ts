@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface FeedbackCycle {
   id: string;
@@ -124,6 +125,7 @@ export const feedbackService = {
   },
 
   async createCycle(cycle: CycleInsert): Promise<FeedbackCycle> {
+    await requireAuth();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
@@ -150,6 +152,7 @@ export const feedbackService = {
   },
 
   async startCycle(cycleId: string): Promise<void> {
+    await requireAuth();
     const { error } = await supabase
       .from("feedback_cycles")
       .update({ status: 'active' })
@@ -165,6 +168,7 @@ export const feedbackService = {
     relationship: FeedbackRequest['relationship'],
     dueDate?: string
   ): Promise<FeedbackRequest> {
+    await requireAuth();
     const { data, error } = await supabase
       .from("feedback_requests")
       .insert({
@@ -189,6 +193,7 @@ export const feedbackService = {
     overallRating?: number,
     isAnonymous = false
   ): Promise<FeedbackResponse> {
+    await requireAuth();
     // Update request status
     await supabase
       .from("feedback_requests")

@@ -3,6 +3,7 @@ import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase
 import { notificationsService } from "./notificationsService";
 import { auditService } from "./auditService";
 import { logger } from "./loggingService";
+import { requireAuth } from "@/lib/authGuards";
 
 export type Profile = Tables<"profiles">;
 export type ProfileInsert = TablesInsert<"profiles">;

@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { BOX_LABELS } from "./nineBoxService";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 interface PDITemplate {
   title: string;

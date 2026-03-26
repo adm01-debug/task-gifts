@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 type PositionInsert = Database["public"]["Tables"]["positions"]["Insert"];
 type TaskTemplateInsert = Database["public"]["Tables"]["position_task_templates"]["Insert"];
@@ -129,6 +130,7 @@ export const positionsService = {
   },
 
   async createPosition(position: Partial<Position>): Promise<Position> {
+    await requireAdminOrManager();
     const insertData: PositionInsert = {
       name: position.name || "",
       description: position.description,
@@ -146,6 +148,7 @@ export const positionsService = {
   },
 
   async updatePosition(id: string, updates: Partial<Position>): Promise<Position> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("positions")
       .update(updates)
@@ -158,6 +161,7 @@ export const positionsService = {
   },
 
   async deletePosition(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("positions")
       .delete()
@@ -183,6 +187,7 @@ export const positionsService = {
   },
 
   async createTaskTemplate(template: Partial<PositionTaskTemplate>): Promise<PositionTaskTemplate> {
+    await requireAdminOrManager();
     const insertData: TaskTemplateInsert = {
       position_id: template.position_id || "",
       title: template.title || "",
@@ -208,6 +213,7 @@ export const positionsService = {
   },
 
   async updateTaskTemplate(id: string, updates: Partial<PositionTaskTemplate>): Promise<PositionTaskTemplate> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("position_task_templates")
       .update(updates)
@@ -220,6 +226,7 @@ export const positionsService = {
   },
 
   async deleteTaskTemplate(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("position_task_templates")
       .delete()
@@ -245,6 +252,7 @@ export const positionsService = {
   },
 
   async assignUserPosition(userId: string, positionId: string, isPrimary: boolean = true): Promise<UserPosition> {
+    await requireAdminOrManager();
     // Se for primário, remover flag primary de outros
     if (isPrimary) {
       await supabase
@@ -265,6 +273,7 @@ export const positionsService = {
   },
 
   async removeUserPosition(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("user_positions")
       .delete()
@@ -300,6 +309,7 @@ export const positionsService = {
   },
 
   async createTaskScore(taskScore: Partial<TaskScore>): Promise<TaskScore> {
+    await requireAdminOrManager();
     const insertData: TaskScoreInsert = {
       user_id: taskScore.user_id || "",
       task_template_id: taskScore.task_template_id,
@@ -318,7 +328,8 @@ export const positionsService = {
     return data as TaskScore;
   },
 
-  async completeTaskScore(taskScoreId: string, status: 'on_time' | 'late' | 'rejected' | 'rework'): Promise<{ success: boolean; xp_earned?: number; coins_earned?: number; xp_penalty?: number }> {
+  async completeTaskScore(taskScoreId: string, status: 'on_time' | 'late' | 'rejected' | 'rework'): Promise<{
+    await requireAdminOrManager(); success: boolean; xp_earned?: number; coins_earned?: number; xp_penalty?: number }> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase.rpc as any)("complete_task_score", { 
       p_task_score_id: taskScoreId, 
@@ -353,6 +364,7 @@ export const positionsService = {
     coinsDeducted: number = 0, 
     reason?: string
   ): Promise<string> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     
     const { data, error } = await supabase
@@ -382,6 +394,7 @@ export const positionsService = {
   },
 
   async updatePenaltyRule(id: string, updates: Partial<PenaltyRule>): Promise<PenaltyRule> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("penalty_rules")
       .update(updates)
@@ -394,6 +407,7 @@ export const positionsService = {
   },
 
   async createPenaltyRule(rule: Partial<PenaltyRule>): Promise<PenaltyRule> {
+    await requireAdminOrManager();
     const insertData: PenaltyRuleInsert = {
       penalty_type: rule.penalty_type || "",
       name: rule.name || "",
@@ -458,6 +472,7 @@ export const positionsService = {
     deadlineAt: string | null,
     metadata: Record<string, unknown>
   ): Promise<TaskScore> {
+    await requireAdminOrManager();
     const insertData: TaskScoreInsert = {
       user_id: userId,
       bitrix_task_id: bitrixTaskId,

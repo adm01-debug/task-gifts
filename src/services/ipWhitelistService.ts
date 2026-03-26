@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface IpWhitelistEntry {
   id: string;
@@ -46,6 +47,7 @@ class IpWhitelistService {
   }
 
   async addIp(input: CreateIpWhitelistInput): Promise<IpWhitelistEntry> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     
     const { data, error } = await supabase
@@ -65,6 +67,7 @@ class IpWhitelistService {
   }
 
   async updateIp(id: string, input: UpdateIpWhitelistInput): Promise<IpWhitelistEntry> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from('ip_whitelist')
       .update(input)
@@ -78,6 +81,7 @@ class IpWhitelistService {
   }
 
   async deleteIp(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from('ip_whitelist')
       .delete()
@@ -87,6 +91,7 @@ class IpWhitelistService {
   }
 
   async toggleIpStatus(id: string, isActive: boolean): Promise<IpWhitelistEntry> {
+    await requireAdminOrManager();
     return this.updateIp(id, { is_active: isActive });
   }
 

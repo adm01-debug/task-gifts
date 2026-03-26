@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "@/hooks/useRBAC";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface Permission {
   id: string;
@@ -65,6 +66,7 @@ export const rbacService = {
   },
 
   async createPermission(permission: Omit<Permission, "id">): Promise<Permission> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("permissions")
       .insert(permission)
@@ -76,6 +78,7 @@ export const rbacService = {
   },
 
   async updatePermission(id: string, updates: Partial<Permission>): Promise<Permission> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("permissions")
       .update(updates)
@@ -88,6 +91,7 @@ export const rbacService = {
   },
 
   async deletePermission(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("permissions")
       .delete()
@@ -120,6 +124,7 @@ export const rbacService = {
   },
 
   async createRole(role: Omit<Role, "id">): Promise<Role> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("roles")
       .insert(role)
@@ -131,6 +136,7 @@ export const rbacService = {
   },
 
   async updateRole(id: string, updates: Partial<Role>): Promise<Role> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("roles")
       .update(updates)
@@ -143,6 +149,7 @@ export const rbacService = {
   },
 
   async deleteRole(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("roles")
       .delete()
@@ -168,6 +175,7 @@ export const rbacService = {
   },
 
   async assignPermissionToRole(roleId: string, permissionId: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("role_permissions")
       .insert({ role_id: roleId, permission_id: permissionId });
@@ -176,6 +184,7 @@ export const rbacService = {
   },
 
   async removePermissionFromRole(roleId: string, permissionId: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("role_permissions")
       .delete()
@@ -186,6 +195,7 @@ export const rbacService = {
   },
 
   async setRolePermissions(roleId: string, permissionIds: string[]): Promise<void> {
+    await requireAdminOrManager();
     // Remove all existing permissions
     const { error: deleteError } = await supabase
       .from("role_permissions")
@@ -246,6 +256,7 @@ export const rbacService = {
   },
 
   async assignRoleToUser(userId: string, role: AppRole): Promise<UserRole> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("user_roles")
       .insert({ user_id: userId, role })
@@ -257,6 +268,7 @@ export const rbacService = {
   },
 
   async removeRoleFromUser(userId: string, role: AppRole): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("user_roles")
       .delete()
@@ -267,6 +279,7 @@ export const rbacService = {
   },
 
   async setUserRoles(userId: string, roles: AppRole[]): Promise<void> {
+    await requireAdminOrManager();
     // Remove all existing roles
     const { error: deleteError } = await supabase
       .from("user_roles")

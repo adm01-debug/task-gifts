@@ -3,6 +3,7 @@ import { profilesService } from "./profilesService";
 import { notificationsService } from "./notificationsService";
 import { auditService } from "./auditService";
 import { logger } from "./loggingService";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export type RewardCategory = "product" | "benefit" | "experience";
 export type RewardRarity = "common" | "rare" | "epic" | "legendary";
@@ -117,6 +118,7 @@ export const shopService = {
     rewardId: string,
     quantity: number = 1
   ): Promise<ShopPurchase> {
+    await requireAdminOrManager();
     // Validate input
     if (quantity <= 0 || quantity > 100) {
       throw new Error("Quantidade deve ser entre 1 e 100");
@@ -319,6 +321,7 @@ export const shopService = {
   async createReward(
     reward: CreateRewardInput
   ): Promise<ShopReward> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("shop_rewards")
       .insert(reward)
@@ -335,6 +338,7 @@ export const shopService = {
     id: string,
     updates: UpdateRewardInput
   ): Promise<ShopReward> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("shop_rewards")
       .update(updates)
@@ -349,6 +353,7 @@ export const shopService = {
 
   // Delete a reward
   async deleteReward(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("shop_rewards")
       .delete()
@@ -382,6 +387,7 @@ export const shopService = {
     processedBy: string,
     notes?: string
   ): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("shop_purchases")
       .update({
@@ -461,6 +467,7 @@ export const shopService = {
   async createPromotion(
     promotion: CreatePromotionInput
   ): Promise<ShopPromotion> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("shop_promotions")
       .insert(promotion)
@@ -477,6 +484,7 @@ export const shopService = {
     id: string,
     updates: UpdatePromotionInput
   ): Promise<ShopPromotion> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("shop_promotions")
       .update(updates)
@@ -491,6 +499,7 @@ export const shopService = {
 
   // Delete promotion
   async deletePromotion(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("shop_promotions")
       .delete()

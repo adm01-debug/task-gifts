@@ -7,6 +7,7 @@ import { comboService } from "./comboService";
 import { profilesService } from "./profilesService";
 import { achievementsService } from "./achievementsService";
 import { logger } from "./loggingService";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export type Quest = Tables<"custom_quests">;
 export type QuestInsert = TablesInsert<"custom_quests">;
@@ -58,6 +59,7 @@ export const questsService = {
   },
 
   async create(quest: QuestInsert): Promise<Quest> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("custom_quests")
       .insert(quest)
@@ -78,6 +80,7 @@ export const questsService = {
   },
 
   async update(id: string, updates: QuestUpdate): Promise<Quest> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("custom_quests")
       .update(updates)
@@ -91,6 +94,7 @@ export const questsService = {
   },
 
   async delete(id: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("custom_quests")
       .delete()
@@ -120,6 +124,7 @@ export const questsService = {
   },
 
   async createStep(step: QuestStepInsert): Promise<QuestStep> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("quest_steps")
       .insert(step)
@@ -132,6 +137,7 @@ export const questsService = {
   },
 
   async createSteps(steps: QuestStepInsert[]): Promise<QuestStep[]> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("quest_steps")
       .insert(steps)
@@ -142,6 +148,7 @@ export const questsService = {
   },
 
   async deleteSteps(questId: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase
       .from("quest_steps")
       .delete()
@@ -172,6 +179,7 @@ export const questsService = {
   },
 
   async assignQuest(questId: string, userId: string): Promise<QuestAssignment> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("quest_assignments")
       .insert({ quest_id: questId, user_id: userId })
@@ -195,6 +203,7 @@ export const questsService = {
   },
 
   async updateProgress(assignmentId: string, currentStep: number): Promise<QuestAssignment> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("quest_assignments")
       .update({ current_step: currentStep })
@@ -207,7 +216,8 @@ export const questsService = {
     return data;
   },
 
-  async completeQuest(assignmentId: string): Promise<{ 
+  async completeQuest(assignmentId: string): Promise<{
+    await requireAdminOrManager(); 
     assignment: QuestAssignment; 
     quest: Quest | null;
     comboResult: { finalXp: number; bonusXp: number; multiplier: number } | null;

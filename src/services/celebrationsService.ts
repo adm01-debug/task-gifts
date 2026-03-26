@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface Celebration {
   id: string;
@@ -80,6 +81,7 @@ export const celebrationsService = {
   },
 
   async createCelebration(celebration: CelebrationInsert): Promise<Celebration> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
@@ -97,6 +99,7 @@ export const celebrationsService = {
   },
 
   async updateProfileDates(birthDate?: string, hireDate?: string): Promise<void> {
+    await requireAdminOrManager();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 

@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { achievementsService } from "./achievementsService";
 import { logger } from "./loggingService";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface BehaviorMetrics {
   userId: string;

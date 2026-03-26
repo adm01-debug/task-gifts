@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "./loggingService";
+import { requireAuth } from "@/lib/authGuards";
 
 export interface UserCombo {
   id: string;

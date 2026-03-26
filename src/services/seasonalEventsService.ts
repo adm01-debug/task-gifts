@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface SeasonalEvent {
   id: string;
@@ -166,7 +167,8 @@ export const seasonalEventsService = {
     }
   },
 
-  async claimReward(userId: string, challengeId: string): Promise<{ xp: number; coins: number }> {
+  async claimReward(userId: string, challengeId: string): Promise<{
+    await requireAdminOrManager(); xp: number; coins: number }> {
     // Get challenge rewards
     const { data: challenge } = await supabase
       .from("seasonal_challenges")
