@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
 import { LevelUpCelebration } from "@/components/ui/level-up-celebration";
 import { gamifiedToast } from "@/components/ui/gamified-toast";
 
@@ -100,7 +100,7 @@ export function GamificationProvider({ children }: GamificationProviderProps) {
     gamifiedToast.streak(days);
   }, []);
 
-  const value: GamificationContextType = {
+  const value: GamificationContextType = useMemo(() => ({
     celebrateLevelUp,
     toast: gamifiedToast,
     rewardXP,
@@ -108,7 +108,7 @@ export function GamificationProvider({ children }: GamificationProviderProps) {
     unlockAchievement,
     completeQuest,
     updateStreak,
-  };
+  }), [celebrateLevelUp, rewardXP, rewardCoins, unlockAchievement, completeQuest, updateStreak]);
 
   return (
     <GamificationContext.Provider value={value}>

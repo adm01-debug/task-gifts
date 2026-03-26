@@ -21,11 +21,9 @@ export interface PermissionInfo {
   category: string | null;
 }
 
-interface UserRoleData {
-  id: string;
-  user_id: string;
-  role: AppRole;
-  created_at: string;
+interface RBACData {
+  roles: RoleInfo[];
+  permissions: PermissionInfo[];
 }
 
 interface RBACState {
@@ -40,59 +38,55 @@ interface RBACState {
   highestLevel: number;
 }
 
-// Fetch user roles from user_roles table
-async function fetchUserRoles(userId: string): Promise<UserRoleData[]> {
-  const { data, error } = await supabase
+/**
+ * Fetches all RBAC data in a single RPC call to eliminate the 3-query waterfall.
+ * Falls back to legacy multi-query approach if RPC is unavailable.
+ */
+async function fetchUserRBAC(userId: string): Promise<RBACData> {
+  // Try unified RPC first (single query)
+  const { data: rpcData, error: rpcError } = await supabase
+    .rpc("get_user_rbac", { p_user_id: userId });
+
+  if (!rpcError && rpcData) {
+    return {
+      roles: (rpcData.roles || []) as RoleInfo[],
+      permissions: (rpcData.permissions || []) as PermissionInfo[],
+    };
+  }
+
+  // Fallback: legacy multi-query approach
+  console.warn("[useRBAC] RPC get_user_rbac unavailable, using fallback queries", rpcError);
+
+  const { data: userRoles } = await supabase
     .from("user_roles")
-    .select("*")
+    .select("role")
     .eq("user_id", userId);
 
-  if (error) throw error;
-  return (data || []) as UserRoleData[];
-}
+  const roleKeys = (userRoles || []).map((r: { role: string }) => r.role);
+  if (roleKeys.length === 0) return { roles: [], permissions: [] };
 
-// Fetch detailed role info from roles table
-async function fetchRoleInfos(roleKeys: AppRole[]): Promise<RoleInfo[]> {
-  if (roleKeys.length === 0) return [];
-  
-  const { data, error } = await supabase
+  const { data: roleInfos } = await supabase
     .from("roles")
     .select("id, key, name, description, level")
     .in("key", roleKeys);
 
-  if (error) throw error;
-  return (data || []) as RoleInfo[];
-}
+  const roles = (roleInfos || []) as RoleInfo[];
+  const roleIds = roles.map(r => r.id);
+  if (roleIds.length === 0) return { roles, permissions: [] };
 
-// Fetch permissions for given role IDs
-async function fetchRolePermissions(roleIds: string[]): Promise<PermissionInfo[]> {
-  if (roleIds.length === 0) return [];
-
-  const { data, error } = await supabase
+  const { data: rpData } = await supabase
     .from("role_permissions")
-    .select(`
-      permission_id,
-      permissions:permission_id (
-        id,
-        key,
-        name,
-        module,
-        category
-      )
-    `)
+    .select(`permission_id, permissions:permission_id (id, key, name, module, category)`)
     .in("role_id", roleIds);
 
-  if (error) throw error;
-  
-  // Extract unique permissions
   const permissionsMap = new Map<string, PermissionInfo>();
-  (data || []).forEach((rp: { permissions: PermissionInfo | null }) => {
+  (rpData || []).forEach((rp: { permissions: PermissionInfo | null }) => {
     if (rp.permissions) {
       permissionsMap.set(rp.permissions.id, rp.permissions);
     }
   });
-  
-  return Array.from(permissionsMap.values());
+
+  return { roles, permissions: Array.from(permissionsMap.values()) };
 }
 
 export function useRBAC(): RBACState & {
@@ -107,66 +101,46 @@ export function useRBAC(): RBACState & {
 } {
   const { user } = useAuth();
 
-  // Fetch user's roles
-  const { data: userRoles = [], isLoading: rolesLoading } = useQuery({
-    queryKey: ["rbac-user-roles", user?.id],
-    queryFn: () => fetchUserRoles(user!.id),
+  // Single unified query for all RBAC data
+  const { data: rbacData, isLoading } = useQuery({
+    queryKey: ["rbac-unified", user?.id],
+    queryFn: () => fetchUserRBAC(user!.id),
     enabled: !!user?.id,
-    staleTime: 60000,
-  });
-
-  const roleKeys = useMemo(() => 
-    userRoles.map(r => r.role), 
-    [userRoles]
-  );
-
-  // Fetch detailed role info
-  const { data: roleInfos = [], isLoading: roleInfosLoading } = useQuery({
-    queryKey: ["rbac-role-infos", roleKeys],
-    queryFn: () => fetchRoleInfos(roleKeys),
-    enabled: roleKeys.length > 0,
     staleTime: 300000, // 5 minutes
   });
 
-  const roleIds = useMemo(() => 
-    roleInfos.map(r => r.id), 
+  const roleInfos = useMemo(() => rbacData?.roles || [], [rbacData]);
+  const permissionInfos = useMemo(() => rbacData?.permissions || [], [rbacData]);
+
+  const roleKeys = useMemo(() =>
+    roleInfos.map(r => r.key as AppRole),
     [roleInfos]
   );
 
-  // Fetch permissions for user's roles
-  const { data: permissionInfos = [], isLoading: permissionsLoading } = useQuery({
-    queryKey: ["rbac-permissions", roleIds],
-    queryFn: () => fetchRolePermissions(roleIds),
-    enabled: roleIds.length > 0,
-    staleTime: 300000, // 5 minutes
-  });
-
-  const permissions = useMemo(() => 
-    permissionInfos.map(p => p.key), 
+  const permissions = useMemo(() =>
+    permissionInfos.map(p => p.key),
     [permissionInfos]
   );
 
-  const highestLevel = useMemo(() => 
+  const highestLevel = useMemo(() =>
     roleInfos.length > 0 ? Math.max(...roleInfos.map(r => r.level)) : 0,
     [roleInfos]
   );
 
-  const isAdmin = useMemo(() => 
+  const isAdmin = useMemo(() =>
     roleKeys.includes("admin") || permissions.includes("admin.full"),
     [roleKeys, permissions]
   );
 
-  const isSuperAdmin = useMemo(() => 
+  const isSuperAdmin = useMemo(() =>
     roleInfos.some(r => r.key === "super_admin") || highestLevel >= 100,
     [roleInfos, highestLevel]
   );
 
-  const isManager = useMemo(() => 
+  const isManager = useMemo(() =>
     roleKeys.includes("admin") || roleKeys.includes("manager") || highestLevel >= 40,
     [roleKeys, highestLevel]
   );
-
-  const isLoading = rolesLoading || roleInfosLoading || permissionsLoading;
 
   // Helper functions
   const hasRole = useCallback((role: AppRole): boolean => {

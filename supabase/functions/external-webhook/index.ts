@@ -1,16 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key, x-api-secret, x-webhook-signature',
-};
+import { getCorsHeaders, handleCorsPreflightIfNeeded } from "../_shared/cors.ts";
 
 serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const preflightResponse = handleCorsPreflightIfNeeded(req);
+  if (preflightResponse) return preflightResponse;
+
+  const corsHeaders = getCorsHeaders(req);
 
   console.log('[Webhook] Received webhook request');
 
@@ -397,19 +394,19 @@ async function handleUserCheckin(supabase: any, data: any) {
     return { success: false, error: error.message };
   }
 
-  // Award XP if punctual
+  // Award XP if punctual (using atomic RPC)
   if (isPunctual) {
     const xpReward = settings?.xp_punctual_checkin || 15;
-    await supabase
-      .from('profiles')
-      .update({ xp: supabase.raw(`xp + ${xpReward}`) })
-      .eq('id', user.id);
+    await supabase.rpc('add_xp_atomic', {
+      p_user_id: user.id,
+      p_amount: xpReward
+    });
 
-    return { 
-      success: true, 
-      record_id: record.id, 
-      is_punctual: true, 
-      xp_earned: xpReward 
+    return {
+      success: true,
+      record_id: record.id,
+      is_punctual: true,
+      xp_earned: xpReward
     };
   }
 

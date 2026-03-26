@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key, x-api-secret',
-};
+import { getCorsHeaders, handleCorsPreflightIfNeeded } from "../_shared/cors.ts";
 
 interface ApiKeyInfo {
   id: string;
@@ -16,9 +12,10 @@ interface ApiKeyInfo {
 
 serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const preflightResponse = handleCorsPreflightIfNeeded(req);
+  if (preflightResponse) return preflightResponse;
+
+  const corsHeaders = getCorsHeaders(req);
 
   const startTime = Date.now();
   const url = new URL(req.url);
@@ -716,17 +713,15 @@ async function grantAchievement(supabase: any, email: string, body: any) {
     return { success: false, error: grantError.message };
   }
 
-  // Add rewards
-  await supabase
-    .from('profiles')
-    .update({
-      xp: supabase.raw(`xp + ${achievement.xp_reward}`),
-      coins: supabase.raw(`coins + ${achievement.coin_reward}`)
-    })
-    .eq('id', user.id);
+  // Add rewards atomically via RPC
+  await supabase.rpc('add_user_rewards', {
+    p_user_id: user.id,
+    p_xp: achievement.xp_reward || 0,
+    p_coins: achievement.coin_reward || 0
+  });
 
-  return { 
-    success: true, 
+  return {
+    success: true,
     message: 'Achievement granted',
     xp_reward: achievement.xp_reward,
     coin_reward: achievement.coin_reward

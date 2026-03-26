@@ -17,32 +17,62 @@ interface IpVerificationResult {
   message: string;
 }
 
+// Max retries before allowing access (fail-open as last resort)
+const MAX_RETRIES = 3;
+
 export function IpAccessGuard({ children }: IpAccessGuardProps) {
   const [isChecking, setIsChecking] = useState(true);
   const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
   const [ipInfo, setIpInfo] = useState<IpVerificationResult | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [lastError, setLastError] = useState<string | null>(null);
 
   const checkIpAccess = async () => {
     setIsChecking(true);
-    
+    setLastError(null);
+
     try {
       const { data, error: fnError } = await supabase.functions.invoke('verify-ip');
-      
+
       if (fnError) {
         logger.apiError('verifyIP', fnError, 'IpAccessGuard');
-        // On error, allow access (fail open)
-        setIsAllowed(true);
+        const newRetryCount = retryCount + 1;
+        setRetryCount(newRetryCount);
+
+        if (newRetryCount >= MAX_RETRIES) {
+          // Only fail-open after exhausting retries, and log prominently
+          logger.warn(
+            `IP verification failed ${MAX_RETRIES} times, allowing access as fallback`,
+            'IpAccessGuard'
+          );
+          setIsAllowed(true);
+        } else {
+          setLastError(`Erro ao verificar IP (tentativa ${newRetryCount}/${MAX_RETRIES})`);
+          setIsAllowed(null); // Show retry UI
+        }
         return;
       }
 
       const result = data as IpVerificationResult;
       setIpInfo(result);
       setIsAllowed(result.allowed);
-      
+      setRetryCount(0); // Reset on success
+
     } catch (err: unknown) {
       logger.apiError('IP check', err, 'IpAccessGuard');
-      // On error, allow access (fail open)
-      setIsAllowed(true);
+      const newRetryCount = retryCount + 1;
+      setRetryCount(newRetryCount);
+
+      if (newRetryCount >= MAX_RETRIES) {
+        logger.warn(
+          `IP verification failed ${MAX_RETRIES} times, allowing access as fallback`,
+          'IpAccessGuard'
+        );
+        setIsAllowed(true);
+      } else {
+        setLastError(`Erro de conexão (tentativa ${newRetryCount}/${MAX_RETRIES})`);
+        setIsAllowed(null);
+      }
     } finally {
       setIsChecking(false);
     }
