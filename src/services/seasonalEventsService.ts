@@ -110,6 +110,9 @@ export const seasonalEventsService = {
   },
 
   async incrementProgress(userId: string, challengeId: string, amount: number = 1): Promise<void> {
+    // Validate input
+    if (amount <= 0 || amount > 10000) throw new Error("Invalid amount: must be between 1 and 10000");
+
     // Get challenge to check target
     const { data: challenge } = await supabase
       .from("seasonal_challenges")
@@ -119,37 +122,47 @@ export const seasonalEventsService = {
 
     if (!challenge) return;
 
-    // Get or create progress
-    let { data: progress } = await supabase
+    // Upsert progress to prevent race condition on get-or-create
+    const { data: progress, error: upsertError } = await supabase
       .from("user_seasonal_progress")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("challenge_id", challengeId)
-      .maybeSingle();
+      .upsert(
+        { user_id: userId, challenge_id: challengeId, current_value: amount },
+        { onConflict: "user_id,challenge_id", ignoreDuplicates: false }
+      )
+      .select()
+      .single();
 
-    if (!progress) {
-      const { data: newProgress, error: insertError } = await supabase
+    if (upsertError) {
+      // Fallback: record already exists, just update
+      const { data: existing } = await supabase
         .from("user_seasonal_progress")
-        .insert({ user_id: userId, challenge_id: challengeId, current_value: amount })
-        .select()
-        .single();
+        .select("*")
+        .eq("user_id", userId)
+        .eq("challenge_id", challengeId)
+        .maybeSingle();
 
-      if (insertError) throw insertError;
-      progress = newProgress;
-    } else {
-      const newValue = progress.current_value + amount;
-      const isCompleted = newValue >= challenge.target_value && !progress.completed_at;
+      if (existing) {
+        const newValue = existing.current_value + amount;
+        const isCompleted = newValue >= challenge.target_value && !existing.completed_at;
 
-      const { error: updateError } = await supabase
+        await supabase
+          .from("user_seasonal_progress")
+          .update({
+            current_value: newValue,
+            completed_at: isCompleted ? new Date().toISOString() : existing.completed_at,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", existing.id);
+      }
+      return;
+    }
+
+    // If upsert created a new record, check if already completed
+    if (progress && progress.current_value >= challenge.target_value && !progress.completed_at) {
+      await supabase
         .from("user_seasonal_progress")
-        .update({
-          current_value: newValue,
-          completed_at: isCompleted ? new Date().toISOString() : progress.completed_at,
-          updated_at: new Date().toISOString(),
-        })
+        .update({ completed_at: new Date().toISOString() })
         .eq("id", progress.id);
-
-      if (updateError) throw updateError;
     }
   },
 

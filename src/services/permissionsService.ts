@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/services/loggingService";
+import { requireAdmin } from "@/lib/authGuards";
 
 export interface Permission {
   id: string;
@@ -83,11 +84,13 @@ export const permissionsService = {
   },
 
   async assignRoleToUser(userId: string, roleKey: 'admin' | 'manager' | 'employee'): Promise<void> {
+    await requireAdmin();
     const { error } = await supabase.from('user_roles').insert({ user_id: userId, role: roleKey });
     if (error) { logger.error('Failed to assign role', 'Permissions', error); throw error; }
   },
 
   async removeRoleFromUser(userId: string, roleKey: 'admin' | 'manager' | 'employee'): Promise<void> {
+    await requireAdmin();
     const { error } = await supabase.from('user_roles').delete().eq('user_id', userId).eq('role', roleKey);
     if (error) { logger.error('Failed to remove role', 'Permissions', error); throw error; }
   },

@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/services/loggingService";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface FeedbackCycle {
   id: string;
@@ -85,6 +86,7 @@ export const feedback360Service = {
     created_by: string;
     department_id?: string;
   }): Promise<FeedbackCycle> {
+    await requireAdminOrManager();
     const { data, error } = await supabase.from('feedback_cycles').insert({
       name: cycle.name,
       description: cycle.description,
@@ -101,6 +103,7 @@ export const feedback360Service = {
   },
 
   async updateCycle(id: string, updates: Record<string, unknown>): Promise<FeedbackCycle> {
+    await requireAdminOrManager();
     const { data, error } = await supabase.from('feedback_cycles').update(updates as never).eq('id', id).select().maybeSingle();
     if (error) { logger.error('Failed to update cycle', 'Feedback360', error); throw error; }
     if (!data) throw new Error('Feedback cycle not found');
@@ -126,6 +129,7 @@ export const feedback360Service = {
   },
 
   async createEvaluation(evaluation: { cycle_id: string; evaluator_id: string; evaluatee_id: string; evaluator_type: string }): Promise<FeedbackEvaluation> {
+    await requireAuth();
     const { data, error } = await supabase.from('feedback_evaluations').insert({
       cycle_id: evaluation.cycle_id,
       evaluator_id: evaluation.evaluator_id,
@@ -139,6 +143,7 @@ export const feedback360Service = {
   },
 
   async completeEvaluation(evaluationId: string): Promise<void> {
+    await requireAuth();
     const { error } = await supabase.from('feedback_evaluations').update({ 
       status: 'completed', 
       completed_at: new Date().toISOString() 

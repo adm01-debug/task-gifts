@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/services/loggingService";
+import { requireAdminOrManager, requireAuth } from "@/lib/authGuards";
 
 export interface PDITemplate {
   id: string;
@@ -54,6 +55,7 @@ export const pdiService = {
   },
 
   async createTemplate(template: Omit<PDITemplate, 'id' | 'created_at'>): Promise<PDITemplate> {
+    await requireAdminOrManager();
     const { data, error } = await supabase.from('pdi_templates').insert(template).select().maybeSingle();
     if (error) { logger.error('Failed to create template', 'PDIService', error); throw error; }
     if (!data) throw new Error('Failed to create template');
@@ -67,6 +69,7 @@ export const pdiService = {
   },
 
   async addMentor(mentor: Omit<PDIMentor, 'id' | 'created_at'>): Promise<PDIMentor> {
+    await requireAdminOrManager();
     const { data, error } = await supabase.from('pdi_mentors').insert(mentor).select().maybeSingle();
     if (error) { logger.error('Failed to add mentor', 'PDIService', error); throw error; }
     if (!data) throw new Error('Failed to add mentor');
@@ -74,6 +77,7 @@ export const pdiService = {
   },
 
   async removeMentor(mentorId: string): Promise<void> {
+    await requireAdminOrManager();
     const { error } = await supabase.from('pdi_mentors').delete().eq('id', mentorId);
     if (error) { logger.error('Failed to remove mentor', 'PDIService', error); throw error; }
   },
@@ -85,6 +89,7 @@ export const pdiService = {
   },
 
   async createCheckin(checkin: Omit<PDICheckin, 'id' | 'created_at'>): Promise<PDICheckin> {
+    await requireAuth();
     const { data, error } = await supabase.from('pdi_checkins').insert(checkin).select().maybeSingle();
     if (error) { logger.error('Failed to create checkin', 'PDIService', error); throw error; }
     if (!data) throw new Error('Failed to create checkin');
@@ -92,6 +97,7 @@ export const pdiService = {
   },
 
   async applyTemplate(planId: string, templateId: string): Promise<void> {
+    await requireAdminOrManager();
     const template = await this.getTemplateById(templateId);
     if (!template) throw new Error('Template not found');
     

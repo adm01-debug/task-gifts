@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "./loggingService";
+import { requireSelfOrAdmin } from "@/lib/authGuards";
 
 export interface Achievement {
   id: string;
@@ -60,6 +61,7 @@ export const achievementsService = {
     userId: string,
     achievementKey: string
   ): Promise<{ success: boolean; achievement?: Achievement; alreadyUnlocked?: boolean }> {
+    await requireSelfOrAdmin(userId);
     // Check if already unlocked
     const hasIt = await this.hasAchievement(userId, achievementKey);
     if (hasIt) {

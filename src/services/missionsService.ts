@@ -129,7 +129,26 @@ export const missionsService = {
     const periodStart = start.toISOString().split("T")[0];
     const periodEnd = end.toISOString().split("T")[0];
 
-    // Try to get existing progress
+    // Use upsert to prevent race condition on concurrent get-or-create
+    const { data, error } = await supabase
+      .from("user_mission_progress")
+      .upsert(
+        {
+          user_id: userId,
+          mission_id: mission.id,
+          period_start: periodStart,
+          period_end: periodEnd,
+          current_value: 0,
+        },
+        { onConflict: "user_id,mission_id,period_start", ignoreDuplicates: true }
+      )
+      .select()
+      .maybeSingle();
+
+    // If upsert returned data, use it
+    if (!error && data) return data as UserMissionProgress;
+
+    // Fallback: fetch existing record (upsert with ignoreDuplicates won't return existing row)
     const { data: existing } = await supabase
       .from("user_mission_progress")
       .select("*")
@@ -139,19 +158,6 @@ export const missionsService = {
       .maybeSingle();
 
     if (existing) return existing as UserMissionProgress;
-
-    // Create new progress
-    const { data, error } = await supabase
-      .from("user_mission_progress")
-      .insert({
-        user_id: userId,
-        mission_id: mission.id,
-        period_start: periodStart,
-        period_end: periodEnd,
-        current_value: 0,
-      })
-      .select()
-      .maybeSingle();
 
     if (error) throw error;
     if (!data) throw new Error("Failed to create mission progress");

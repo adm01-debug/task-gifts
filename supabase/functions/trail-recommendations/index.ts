@@ -1,16 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { 
+import { getCorsHeaders, handleCorsPreflightIfNeeded } from "../_shared/cors.ts";
   checkRateLimit, 
   getRateLimitIdentifier, 
   createRateLimitResponse,
   RATE_LIMITS 
 } from "../_shared/rate-limiter.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 // Type definitions for query results
 interface TeamMemberWithDept {
@@ -50,9 +46,10 @@ interface AvailableTrail {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const _preflightResp = handleCorsPreflightIfNeeded(req);
+  if (_preflightResp) return _preflightResp;
+
+  const corsHeaders = getCorsHeaders(req);
 
   // Apply rate limiting
   const identifier = getRateLimitIdentifier(req, "trail-recommendations");

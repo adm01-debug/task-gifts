@@ -7,6 +7,7 @@ import { achievementsService } from "./achievementsService";
 import { certificationsService } from "./certificationsService";
 import { Json } from "@/integrations/supabase/types";
 import { logger } from "./loggingService";
+import { requireSelfOrAdmin, requireAdminOrManager } from "@/lib/authGuards";
 
 export interface LearningTrail {
   id: string;
@@ -236,6 +237,7 @@ export const trailsService = {
     progress: ModuleProgress;
     comboResult: { finalXp: number; bonusXp: number; multiplier: number };
   }> {
+    await requireSelfOrAdmin(userId);
     const { data, error } = await supabase
       .from("module_progress")
       .update({
@@ -276,6 +278,7 @@ export const trailsService = {
 
   // Update enrollment progress
   async updateEnrollmentProgress(userId: string, trailId: string, progressPercent: number): Promise<TrailEnrollment> {
+    await requireSelfOrAdmin(userId);
     const updates: Partial<TrailEnrollment> = { progress_percent: progressPercent };
     
     if (progressPercent >= 100) {
@@ -337,6 +340,7 @@ export const trailsService = {
 
   // Create trail (for managers/admins)
   async createTrail(trail: CreateTrailInput): Promise<LearningTrail> {
+    await requireAdminOrManager();
     const { data, error } = await supabase
       .from("learning_trails")
       .insert({

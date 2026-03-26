@@ -1,16 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { 
+import { getCorsHeaders, handleCorsPreflightIfNeeded } from "../_shared/cors.ts";
   checkRateLimit, 
   getRateLimitIdentifier, 
   createRateLimitResponse,
   RATE_LIMITS 
 } from "../_shared/rate-limiter.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 interface TokenRecord {
   id: string;
@@ -109,9 +105,10 @@ async function callBitrix(domain: string, token: string, method: string, params:
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const _preflightResp = handleCorsPreflightIfNeeded(req);
+  if (_preflightResp) return _preflightResp;
+
+  const corsHeaders = getCorsHeaders(req);
 
   // Apply rate limiting
   const identifier = getRateLimitIdentifier(req, "bitrix24-api");
