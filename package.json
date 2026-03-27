@@ -13,6 +13,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "ci": "npm run type-check && npm run lint && npm run test:run && npm run build"
   },
   "dependencies": {

@@ -1,0 +1,240 @@
+openapi: 3.0.3
+info:
+  title: GameficaRH External API
+  description: API REST para integração com sistemas externos (ERP, CRM, Bitrix24, etc.)
+  version: 1.0.0
+  contact:
+    name: GameficaRH Team
+
+servers:
+  - url: https://rvwpdecdopqqyvhdhsam.supabase.co/functions/v1/external-api
+    description: Production
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API Key fornecida pelo admin
+    ApiSecretAuth:
+      type: apiKey
+      in: header
+      name: x-api-secret
+      description: API Secret fornecido pelo admin
+
+  schemas:
+    Task:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        external_id: { type: string }
+        user_email: { type: string, format: email }
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        priority: { type: string, enum: [low, medium, high, critical] }
+        status: { type: string }
+        xp_reward: { type: integer }
+        coin_reward: { type: integer }
+        created_at: { type: string, format: date-time }
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        display_name: { type: string }
+        level: { type: integer }
+        xp: { type: integer }
+        coins: { type: integer }
+        streak: { type: integer }
+        quests_completed: { type: integer }
+
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+        message: { type: string }
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  timestamp: { type: string, format: date-time }
+
+  /tasks:
+    get:
+      summary: Listar tarefas
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: user_email
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        "200":
+          description: Lista de tarefas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  tasks:
+                    type: array
+                    items: { $ref: "#/components/schemas/Task" }
+
+    post:
+      summary: Criar tarefa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [external_id, user_email, title]
+              properties:
+                external_id: { type: string }
+                user_email: { type: string, format: email }
+                title: { type: string }
+                description: { type: string }
+                category: { type: string }
+                priority: { type: string, default: medium }
+                xp_reward: { type: integer, default: 50 }
+                coin_reward: { type: integer, default: 25 }
+                deadline_at: { type: string, format: date-time }
+      responses:
+        "200":
+          description: Tarefa criada
+
+  /tasks/{external_id}/complete:
+    post:
+      summary: Completar tarefa
+      parameters:
+        - name: external_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [on_time, late, rework, rejected] }
+      responses:
+        "200":
+          description: Tarefa completada
+
+  /users:
+    get:
+      summary: Listar usuários
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50 }
+      responses:
+        "200":
+          description: Lista de usuários
+
+  /users/{email}/add-xp:
+    post:
+      summary: Adicionar XP a um usuário
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: integer }
+                reason: { type: string }
+      responses:
+        "200":
+          description: XP adicionado
+
+  /users/{email}/add-coins:
+    post:
+      summary: Adicionar coins a um usuário
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: integer }
+                reason: { type: string }
+      responses:
+        "200":
+          description: Coins adicionados
+
+  /leaderboard:
+    get:
+      summary: Leaderboard
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+        - name: department_id
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Ranking de usuários
+
+  /departments:
+    get:
+      summary: Listar departamentos
+      responses:
+        "200":
+          description: Lista de departamentos
+
+  /achievements:
+    get:
+      summary: Listar achievements
+      responses:
+        "200":
+          description: Lista de achievements
+
+  /stats/summary:
+    get:
+      summary: Métricas executivas
+      responses:
+        "200":
+          description: Resumo de métricas
