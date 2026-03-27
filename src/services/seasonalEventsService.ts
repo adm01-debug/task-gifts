@@ -167,8 +167,8 @@ export const seasonalEventsService = {
     }
   },
 
-  async claimReward(userId: string, challengeId: string): Promise<{
-    await requireAdminOrManager(); xp: number; coins: number }> {
+  async claimReward(userId: string, challengeId: string): Promise<{ xp: number; coins: number }> {
+    await requireAuth();
     // Get challenge rewards
     const { data: challenge } = await supabase
       .from("seasonal_challenges")
