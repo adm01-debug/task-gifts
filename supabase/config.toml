@@ -50,3 +50,6 @@ verify_jwt = true
 
 [functions.verify-geo]
 verify_jwt = false
+
+[functions.health]
+verify_jwt = false
