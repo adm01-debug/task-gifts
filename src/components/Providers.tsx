@@ -11,6 +11,7 @@ import { IpAccessGuard } from "@/components/IpAccessGuard";
 import { AccessibilityProvider } from "@/components/accessibility";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { LGPDConsentBanner } from "@/components/LGPDConsentBanner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +41,7 @@ export function Providers({ children }: ProvidersProps) {
                       <TooltipProvider>
                         <Toaster />
                         <Sonner />
+                        <LGPDConsentBanner />
                         {children}
                       </TooltipProvider>
                     </AchievementNotificationProvider>
