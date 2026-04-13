@@ -15,7 +15,7 @@ import {
 import { CustomTooltip, CHART_COLORS } from "./BIChartComponents";
 
 interface BITrainingTabProps {
-  completionTrend: Array<Record<string, unknown>> | undefined;
+  completionTrend: Array<{ month?: string; completed?: number; started?: number; [key: string]: unknown }> | undefined;
   metrics: {
     completedTrails?: number;
     trainingCompletionRate?: number;
