@@ -12,20 +12,7 @@ import {
   RefreshCw,
   Radio,
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
+import { AnalyticsChartTabs } from "@/components/analytics/AnalyticsChartTabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,8 +25,6 @@ import { useProfiles } from "@/hooks/useProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { DesktopBackButton } from "@/components/navigation";
-import { RechartsTooltipProps, RechartsTooltipPayloadItem } from "@/types/charts";
-
 const actionCategories: Record<string, AuditAction[]> = {
   auth: ["user_signup", "user_login"],
   quests: ["quest_created", "quest_updated", "quest_deleted", "quest_assigned", "quest_completed"],
