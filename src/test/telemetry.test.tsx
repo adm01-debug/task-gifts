@@ -348,27 +348,27 @@ describe("TelemetryCharts Component", () => {
   it("renders charts when rows are provided", () => {
     const rows = generateRows(10, { severity: "slow", duration_ms: 4000 });
     render(<TelemetryCharts rows={rows} timeFilter="24h" />, { wrapper });
-    expect(screen.getByText("Queries ao Longo do Tempo")).toBeInTheDocument();
-    expect(screen.getByText("Duração Média por Tabela (ms)")).toBeInTheDocument();
+    expect(screen.getByText("Volume de Queries por Severidade")).toBeInTheDocument();
+    expect(screen.getByText("Duração Média / Máxima por Tabela (ms)")).toBeInTheDocument();
     expect(screen.getByText("Distribuição por Severidade")).toBeInTheDocument();
   });
 
   it("renders with 1h time filter", () => {
     const rows = generateRows(5);
     render(<TelemetryCharts rows={rows} timeFilter="1h" />, { wrapper });
-    expect(screen.getByText("Queries ao Longo do Tempo")).toBeInTheDocument();
+    expect(screen.getByText("Volume de Queries por Severidade")).toBeInTheDocument();
   });
 
   it("renders with 6h time filter", () => {
     const rows = generateRows(5);
     render(<TelemetryCharts rows={rows} timeFilter="6h" />, { wrapper });
-    expect(screen.getByText("Queries ao Longo do Tempo")).toBeInTheDocument();
+    expect(screen.getByText("Volume de Queries por Severidade")).toBeInTheDocument();
   });
 
   it("renders with 7d time filter", () => {
     const rows = generateRows(5);
     render(<TelemetryCharts rows={rows} timeFilter="7d" />, { wrapper });
-    expect(screen.getByText("Queries ao Longo do Tempo")).toBeInTheDocument();
+    expect(screen.getByText("Volume de Queries por Severidade")).toBeInTheDocument();
   });
 
   it("handles mixed severity rows", () => {
@@ -385,19 +385,19 @@ describe("TelemetryCharts Component", () => {
   it("handles rows with only rpc_name (no table_name)", () => {
     const rows = generateRows(5, { rpc_name: "get_executive_metrics", table_name: null });
     render(<TelemetryCharts rows={rows} timeFilter="24h" />, { wrapper });
-    expect(screen.getByText("Duração Média por Tabela (ms)")).toBeInTheDocument();
+    expect(screen.getByText("Duração Média / Máxima por Tabela (ms)")).toBeInTheDocument();
   });
 
   it("handles single row", () => {
     const rows = [makeTelemetryRow({ duration_ms: 5000, severity: "slow" })];
     render(<TelemetryCharts rows={rows} timeFilter="24h" />, { wrapper });
-    expect(screen.getByText("Queries ao Longo do Tempo")).toBeInTheDocument();
+    expect(screen.getByText("Volume de Queries por Severidade")).toBeInTheDocument();
   });
 
   it("handles 200 rows (max limit)", () => {
     const rows = generateRows(200, { severity: "normal" });
     render(<TelemetryCharts rows={rows} timeFilter="7d" />, { wrapper });
-    expect(screen.getByText("Queries ao Longo do Tempo")).toBeInTheDocument();
+    expect(screen.getByText("Volume de Queries por Severidade")).toBeInTheDocument();
   });
 });
 
