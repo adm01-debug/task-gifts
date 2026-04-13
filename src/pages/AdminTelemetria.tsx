@@ -7,9 +7,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Activity, AlertTriangle, Clock, Database, RefreshCw, Zap, Trash2, Download, FileText, CalendarIcon } from "lucide-react";
+import { Activity, RefreshCw, Trash2, Download, FileText, CalendarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TelemetryCharts } from "@/components/admin/telemetry/TelemetryCharts";
+import { TelemetryStatsCards } from "@/components/admin/telemetry/TelemetryStatsCards";
+import { TopOffendersCard } from "@/components/admin/telemetry/TopOffendersCard";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PageWrapper } from "@/components/PageWrapper";
@@ -249,81 +251,9 @@ function AdminTelemetriaContent() {
         </header>
 
         <main className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-destructive/10">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{verySlow}</p>
-                  <p className="text-[11px] text-muted-foreground">Muito Lentas (&gt;8s)</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-yellow-500/10">
-                  <Clock className="h-5 w-5 text-yellow-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{slow}</p>
-                  <p className="text-[11px] text-muted-foreground">Lentas (&gt;3s)</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-destructive/10">
-                  <Zap className="h-5 w-5 text-destructive" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{errors}</p>
-                  <p className="text-[11px] text-muted-foreground">Erros</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Database className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{formatDuration(avgDuration)}</p>
-                  <p className="text-[11px] text-muted-foreground">Média de duração</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <TelemetryStatsCards verySlow={verySlow} slow={slow} errors={errors} avgDuration={avgDuration} />
 
-          {/* Top Offenders */}
-          {topOffenders.length > 0 && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Database className="h-4 w-4" />
-                  Tabelas Mais Problemáticas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {topOffenders.map(([name, stats]) => (
-                    <div key={name} className="p-3 rounded-lg border border-border/50 bg-muted/30">
-                      <p className="font-mono text-sm font-medium truncate" title={name}>{name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-muted-foreground">{stats.count}× alertas</span>
-                        <span className="text-xs text-destructive">max {formatDuration(stats.maxMs)}</span>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
-                        média: {formatDuration(Math.round(stats.totalMs / stats.count))}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <TopOffendersCard topOffenders={topOffenders} />
 
           {/* Charts */}
           <TelemetryCharts rows={rows} timeFilter={timeFilter} />
