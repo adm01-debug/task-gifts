@@ -51,7 +51,7 @@ export function CheckinDetailDialog({ checkin, onClose, onComplete, onAddActionI
                 </Avatar>
                 <div>
                   <p className="font-medium">{checkin.employee?.display_name}</p>
-                  <p className="text-sm text-muted-foreground">{checkin.employee?.email}</p>
+                  <p className="text-sm text-muted-foreground">{checkin.employee?.display_name}</p>
                 </div>
               </div>
               {getStatusBadge(checkin.status)}
