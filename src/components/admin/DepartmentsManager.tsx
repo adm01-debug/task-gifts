@@ -180,9 +180,9 @@ export function DepartmentsManager() {
         )}
       </div>
 
-      <DepartmentFormDialog open={dialogOpen} onOpenChange={setDialogOpen} formData={formData} setFormData={setFormData} isEditing={!!editingDept} onSave={handleSave} isSaving={createDept.isPending || updateDept.isPending} />
-      <DeleteConfirmDialog department={deleteConfirm} onOpenChange={() => setDeleteConfirm(null)} onConfirm={handleDelete} />
-      <AddMemberDialog open={!!addMemberDialog} onOpenChange={() => setAddMemberDialog(null)} selectedUserId={selectedUserId} onUserChange={setSelectedUserId} availableUsers={addMemberDialog ? getAvailableUsers(addMemberDialog) : []} onAdd={handleAddMember} isAdding={assignDepartment.isPending} />
+      <DepartmentFormDialog open={dialogOpen} onOpenChange={setDialogOpen} editingDept={editingDept} formData={formData} setFormData={setFormData} onSave={handleSave} isSaving={createDept.isPending || updateDept.isPending} />
+      <DeleteConfirmDialog department={deleteConfirm} onClose={() => setDeleteConfirm(null)} onDelete={handleDelete} />
+      <AddMemberDialog open={!!addMemberDialog} onClose={() => setAddMemberDialog(null)} selectedUserId={selectedUserId} setSelectedUserId={setSelectedUserId} availableUsers={addMemberDialog ? getAvailableUsers(addMemberDialog) : []} onAdd={handleAddMember} isAdding={assignDepartment.isPending} />
     </div>
   );
 }

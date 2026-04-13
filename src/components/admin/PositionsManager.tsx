@@ -7,8 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Edit, Trash2, Briefcase, ListTodo, Users, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +17,9 @@ import { useDepartments } from "@/hooks/useDepartments";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
 import { Position, PositionTaskTemplate } from "@/services/positionsService";
+import { PositionFormDialog } from "@/components/positions/PositionFormDialog";
+import { TaskTemplateFormDialog } from "@/components/positions/TaskTemplateFormDialog";
+import { AssignmentsTab } from "@/components/admin/positions/AssignmentsTab";
 
 export const PositionsManager = () => {
   const { user } = useAuth();
@@ -187,55 +190,10 @@ export const PositionsManager = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Cargos da Empresa</CardTitle>
-                <Dialog open={isPositionDialogOpen} onOpenChange={setIsPositionDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button onClick={() => { setEditingPosition(null); setPositionForm({ name: "", description: "", department_id: "", level: 1, is_active: true }); }}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Novo Cargo
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>{editingPosition ? "Editar Cargo" : "Novo Cargo"}</DialogTitle>
-                      <DialogDescription>Configure o cargo e suas características</DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Nome do Cargo *</Label>
-                        <Input value={positionForm.name} onChange={(e) => setPositionForm({ ...positionForm, name: e.target.value })} placeholder="Ex: Analista de Vendas" />
-                      </div>
-                      <div>
-                        <Label>Descrição</Label>
-                        <Textarea value={positionForm.description} onChange={(e) => setPositionForm({ ...positionForm, description: e.target.value })} placeholder="Responsabilidades do cargo..." />
-                      </div>
-                      <div>
-                        <Label>Departamento</Label>
-                        <Select value={positionForm.department_id} onValueChange={(v) => setPositionForm({ ...positionForm, department_id: v })}>
-                          <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
-                          <SelectContent>
-                            {departments.map((d) => (
-                              <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Nível Hierárquico</Label>
-                        <Input type="number" min={1} max={10} value={positionForm.level} onChange={(e) => setPositionForm({ ...positionForm, level: parseInt(e.target.value) || 1 })} />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch checked={positionForm.is_active} onCheckedChange={(c) => setPositionForm({ ...positionForm, is_active: c })} />
-                        <Label>Cargo ativo</Label>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsPositionDialogOpen(false)}>Cancelar</Button>
-                      <Button onClick={handleSavePosition} disabled={createPosition.isPending || updatePosition.isPending}>
-                        {editingPosition ? "Salvar" : "Criar"}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <Button onClick={() => { setEditingPosition(null); setPositionForm({ name: "", description: "", department_id: "", level: 1, is_active: true }); setIsPositionDialogOpen(true); }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Cargo
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -430,91 +388,17 @@ export const PositionsManager = () => {
           </Card>
         </TabsContent>
 
-        {/* VÍNCULOS TAB */}
         <TabsContent value="assignments" className="mt-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Vínculos Usuário-Cargo</CardTitle>
-                <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Atribuir Cargo
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Atribuir Cargo a Usuário</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Usuário *</Label>
-                        <Select value={assignForm.user_id} onValueChange={(v) => setAssignForm({ ...assignForm, user_id: v })}>
-                          <SelectTrigger><SelectValue placeholder="Selecione o usuário" /></SelectTrigger>
-                          <SelectContent>
-                            {profiles.map((p) => (
-                              <SelectItem key={p.id} value={p.id}>{p.display_name || p.email}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Cargo *</Label>
-                        <Select value={assignForm.position_id} onValueChange={(v) => setAssignForm({ ...assignForm, position_id: v })}>
-                          <SelectTrigger><SelectValue placeholder="Selecione o cargo" /></SelectTrigger>
-                          <SelectContent>
-                            {positions.map((p) => (
-                              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch checked={assignForm.is_primary} onCheckedChange={(c) => setAssignForm({ ...assignForm, is_primary: c })} />
-                        <Label>Cargo principal</Label>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>Cancelar</Button>
-                      <Button onClick={handleAssignPosition} disabled={assignPosition.isPending}>Atribuir</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-3">
-                  {userPositions.map((up, index) => (
-                    <motion.div
-                      key={up.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between p-4 rounded-lg bg-muted/50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <Users className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{up.profiles?.display_name || up.profiles?.email || "Usuário"}</p>
-                          <p className="text-sm text-muted-foreground">{up.positions?.name || "Cargo desconhecido"}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {up.is_primary && <Badge>Principal</Badge>}
-                        <Button variant="ghost" size="icon" onClick={() => removeUserPosition.mutate(up.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+          <AssignmentsTab
+            userPositions={userPositions}
+            positions={positions}
+            profiles={profiles}
+            onAssign={async (data) => {
+              await assignPosition.mutateAsync({ userId: data.user_id, positionId: data.position_id, isPrimary: data.is_primary });
+            }}
+            onRemove={(id) => removeUserPosition.mutate(id)}
+            isAssigning={assignPosition.isPending}
+          />
         </TabsContent>
       </Tabs>
     </div>
