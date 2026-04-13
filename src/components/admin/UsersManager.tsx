@@ -8,17 +8,13 @@ import {
   Shield,
   UserCog,
   User,
-  Mail,
-  Calendar,
   Award,
   Flame,
   Coins,
   ChevronLeft,
   ChevronRight,
   Building2,
-  Plus,
   Trash2,
-  Check,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,25 +38,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useProfiles } from "@/hooks/useProfiles";
@@ -80,16 +57,18 @@ import {
   useBulkAssignDepartment,
   useBulkRemoveFromDepartments,
 } from "@/hooks/useAdminUsers";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import {
+  roleConfig,
+  AssignRoleDialog,
+  AssignDeptDialog,
+  RemoveRoleConfirm,
+  BulkAssignRoleDialog,
+  BulkAssignDeptDialog,
+  BulkRemoveRoleConfirm,
+  BulkRemoveDeptsConfirm,
+} from "./users";
 
 const ITEMS_PER_PAGE = 10;
-
-const roleConfig: Record<AppRole, { label: string; color: string; icon: React.ElementType }> = {
-  admin: { label: "Admin", color: "bg-red-500/20 text-red-500", icon: Shield },
-  manager: { label: "Gestor", color: "bg-amber-500/20 text-amber-500", icon: UserCog },
-  employee: { label: "Colaborador", color: "bg-blue-500/20 text-blue-500", icon: User },
-};
 
 export function UsersManager() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -104,10 +83,8 @@ export function UsersManager() {
   const [removeRoleConfirm, setRemoveRoleConfirm] = useState<{ userId: string; role: AppRole } | null>(null);
   const [removingDeptMemberId, setRemovingDeptMemberId] = useState<string | null>(null);
   
-  // Debounce search query for better performance
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   
-  // Bulk action states
   const [bulkRoleDialog, setBulkRoleDialog] = useState(false);
   const [bulkDeptDialog, setBulkDeptDialog] = useState(false);
   const [bulkRole, setBulkRole] = useState<AppRole>("employee");
@@ -123,33 +100,36 @@ export function UsersManager() {
   const removeRole = useRemoveRole();
   const assignDepartment = useAssignDepartment();
   const removeDepartmentMember = useRemoveDepartmentMember();
-  
-  // Bulk mutations
   const bulkAssignRole = useBulkAssignRole();
   const bulkRemoveRole = useBulkRemoveRole();
   const bulkAssignDepartment = useBulkAssignDepartment();
   const bulkRemoveFromDepartments = useBulkRemoveFromDepartments();
 
   // Build user roles map
-  const userRolesMap = new Map<string, AppRole[]>();
-  allRoles?.forEach((r) => {
-    const existing = userRolesMap.get(r.user_id) || [];
-    existing.push(r.role);
-    userRolesMap.set(r.user_id, existing);
-  });
+  const userRolesMap = useMemo(() => {
+    const map = new Map<string, AppRole[]>();
+    allRoles?.forEach((r) => {
+      const existing = map.get(r.user_id) || [];
+      existing.push(r.role);
+      map.set(r.user_id, existing);
+    });
+    return map;
+  }, [allRoles]);
 
   // Build user departments map
-  const userDeptMap = new Map<string, { id: string; name: string; isManager: boolean }[]>();
-  allTeamMembers?.forEach((tm) => {
-    const dept = departments?.find((d) => d.id === tm.department_id);
-    if (dept) {
-      const existing = userDeptMap.get(tm.user_id) || [];
-      existing.push({ id: tm.id, name: dept.name, isManager: tm.is_manager });
-      userDeptMap.set(tm.user_id, existing);
-    }
-  });
+  const userDeptMap = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; isManager: boolean }[]>();
+    allTeamMembers?.forEach((tm) => {
+      const dept = departments?.find((d) => d.id === tm.department_id);
+      if (dept) {
+        const existing = map.get(tm.user_id) || [];
+        existing.push({ id: tm.id, name: dept.name, isManager: tm.is_manager });
+        map.set(tm.user_id, existing);
+      }
+    });
+    return map;
+  }, [allTeamMembers, departments]);
 
-  // Fuzzy search with Fuse.js
   const searchResults = useFuseSearch(
     profiles || [],
     ['display_name', 'email'],
@@ -157,16 +137,11 @@ export function UsersManager() {
     { ...SEARCH_PRESETS.loose, limit: 100 }
   );
 
-  // Filter after fuzzy search
   const filteredUsers = searchResults.map(r => r.item).filter((user) => {
     const userRoles = userRolesMap.get(user.id) || [];
     const matchesRole = filterRole === "all" || userRoles.includes(filterRole as AppRole);
-
     const userDepts = userDeptMap.get(user.id) || [];
-    const matchesDept =
-      filterDepartment === "all" ||
-      userDepts.some((d) => d.name === filterDepartment);
-
+    const matchesDept = filterDepartment === "all" || userDepts.some((d) => d.name === filterDepartment);
     return matchesRole && matchesDept;
   });
 
@@ -236,8 +211,6 @@ export function UsersManager() {
     }
   }, [removeDepartmentMember]);
 
-  const clearSelection = useCallback(() => setSelectedUsers([]), []);
-
   if (profilesLoading) {
     return (
       <Card className="border-border/50">
@@ -261,10 +234,7 @@ export function UsersManager() {
               <Input
                 placeholder="Buscar por nome ou email..."
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 className="pl-10"
               />
             </div>
@@ -288,9 +258,7 @@ export function UsersManager() {
               <SelectContent>
                 <AllSelectItem label="Todos os Deptos" />
                 {departments?.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.name}>
-                    {dept.name}
-                  </SelectItem>
+                  <SelectItem key={dept.id} value={dept.name}>{dept.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -303,86 +271,42 @@ export function UsersManager() {
 
       {/* Bulk Actions */}
       {selectedUsers.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-primary/30 bg-primary/5">
             <CardContent className="p-3">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm font-medium">
                   {selectedUsers.length} selecionado{selectedUsers.length > 1 ? "s" : ""}
                 </span>
-                
                 <div className="h-4 w-px bg-border" />
-                
-                {/* Bulk Assign Role */}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setBulkRoleDialog(true)}
-                  disabled={bulkAssignRole.isPending}
-                >
+                <Button variant="outline" size="sm" onClick={() => setBulkRoleDialog(true)} disabled={bulkAssignRole.isPending}>
                   <Shield className="w-4 h-4 mr-2" />
                   Atribuir Role
                 </Button>
-                
-                {/* Bulk Assign Dept */}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setBulkDeptDialog(true)}
-                  disabled={bulkAssignDepartment.isPending}
-                >
+                <Button variant="outline" size="sm" onClick={() => setBulkDeptDialog(true)} disabled={bulkAssignDepartment.isPending}>
                   <Building2 className="w-4 h-4 mr-2" />
                   Adicionar a Depto
                 </Button>
-                
                 <div className="h-4 w-px bg-border" />
-                
-                {/* Bulk Remove Role */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-destructive hover:text-destructive"
-                      disabled={bulkRemoveRole.isPending}
-                    >
+                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" disabled={bulkRemoveRole.isPending}>
                       <Trash2 className="w-4 h-4 mr-2" />
                       Remover Role
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => setBulkRemoveRoleConfirm("admin")}>
-                      Admin
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setBulkRemoveRoleConfirm("manager")}>
-                      Gestor
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setBulkRemoveRoleConfirm("employee")}>
-                      Colaborador
-                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setBulkRemoveRoleConfirm("admin")}>Admin</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setBulkRemoveRoleConfirm("manager")}>Gestor</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setBulkRemoveRoleConfirm("employee")}>Colaborador</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                
-                {/* Bulk Remove from Depts */}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-destructive hover:text-destructive"
-                  onClick={() => setBulkRemoveDeptsConfirm(true)}
-                  disabled={bulkRemoveFromDepartments.isPending}
-                >
+                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={() => setBulkRemoveDeptsConfirm(true)} disabled={bulkRemoveFromDepartments.isPending}>
                   <Trash2 className="w-4 h-4 mr-2" />
                   Remover de Deptos
                 </Button>
-                
                 <div className="flex-1" />
-                
-                <Button variant="ghost" size="sm" onClick={() => setSelectedUsers([])}>
-                  Limpar seleção
-                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setSelectedUsers([])}>Limpar seleção</Button>
               </div>
             </CardContent>
           </Card>
@@ -392,15 +316,12 @@ export function UsersManager() {
       {/* Users Table */}
       <Card className="border-border/50">
         <CardHeader className="pb-0">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Usuários
-            </CardTitle>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Usuários
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {/* Table Header */}
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-border bg-muted/30 text-sm font-medium text-muted-foreground">
             <div className="col-span-1 flex items-center">
               <Checkbox
@@ -415,7 +336,6 @@ export function UsersManager() {
             <div className="col-span-2 text-right">Ações</div>
           </div>
 
-          {/* Table Body */}
           <AnimatePresence mode="popLayout">
             {paginatedUsers.map((user, index) => {
               const userRoles = userRolesMap.get(user.id) || [];
@@ -431,10 +351,7 @@ export function UsersManager() {
                   className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 hover:bg-muted/20 transition-colors items-center"
                 >
                   <div className="col-span-1">
-                    <Checkbox
-                      checked={selectedUsers.includes(user.id)}
-                      onCheckedChange={() => handleSelectUser(user.id)}
-                    />
+                    <Checkbox checked={selectedUsers.includes(user.id)} onCheckedChange={() => handleSelectUser(user.id)} />
                   </div>
                   
                   <div className="col-span-3 flex items-center gap-3">
@@ -455,14 +372,11 @@ export function UsersManager() {
                       {userRoles.length === 0 ? (
                         <Badge variant="outline" className="text-xs opacity-50">Nenhum</Badge>
                       ) : (
-                        userRoles.map((role) => {
-                          const config = roleConfig[role];
-                          return (
-                            <Badge key={role} className={`text-xs ${config.color}`}>
-                              {config.label}
-                            </Badge>
-                          );
-                        })
+                        userRoles.map((role) => (
+                          <Badge key={role} className={`text-xs ${roleConfig[role].color}`}>
+                            {roleConfig[role].label}
+                          </Badge>
+                        ))
                       )}
                     </div>
                   </div>
@@ -474,8 +388,7 @@ export function UsersManager() {
                       ) : (
                         userDepts.map((dept) => (
                           <Badge key={dept.id} variant="outline" className="text-xs">
-                            {dept.name}
-                            {dept.isManager && " 👑"}
+                            {dept.name}{dept.isManager && " 👑"}
                           </Badge>
                         ))
                       )}
@@ -484,18 +397,9 @@ export function UsersManager() {
 
                   <div className="col-span-2">
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Award className="w-3 h-3 text-primary" />
-                        Lv.{user.level}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Flame className="w-3 h-3 text-amber-500" />
-                        {user.streak}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Coins className="w-3 h-3 text-yellow-500" />
-                        {user.coins}
-                      </span>
+                      <span className="flex items-center gap-1"><Award className="w-3 h-3 text-primary" />Lv.{user.level}</span>
+                      <span className="flex items-center gap-1"><Flame className="w-3 h-3 text-amber-500" />{user.streak}</span>
+                      <span className="flex items-center gap-1"><Coins className="w-3 h-3 text-yellow-500" />{user.coins}</span>
                     </div>
                   </div>
 
@@ -510,27 +414,18 @@ export function UsersManager() {
                         <DropdownMenuLabel>Gerenciar</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => { setRoleDialogUser(user.id); setSelectedRole("employee"); }}>
-                          <Shield className="w-4 h-4 mr-2" />
-                          Atribuir Role
+                          <Shield className="w-4 h-4 mr-2" />Atribuir Role
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => { setDeptDialogUser(user.id); setSelectedDept(""); }}>
-                          <Building2 className="w-4 h-4 mr-2" />
-                          Adicionar a Depto
+                          <Building2 className="w-4 h-4 mr-2" />Adicionar a Depto
                         </DropdownMenuItem>
                         {userRoles.length > 0 && (
                           <>
                             <DropdownMenuSeparator />
-                            <DropdownMenuLabel className="text-xs text-muted-foreground">
-                              Remover Role
-                            </DropdownMenuLabel>
+                            <DropdownMenuLabel className="text-xs text-muted-foreground">Remover Role</DropdownMenuLabel>
                             {userRoles.map((role) => (
-                              <DropdownMenuItem
-                                key={role}
-                                onClick={() => setRemoveRoleConfirm({ userId: user.id, role })}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                {roleConfig[role].label}
+                              <DropdownMenuItem key={role} onClick={() => setRemoveRoleConfirm({ userId: user.id, role })} className="text-destructive">
+                                <Trash2 className="w-4 h-4 mr-2" />{roleConfig[role].label}
                               </DropdownMenuItem>
                             ))}
                           </>
@@ -538,16 +433,9 @@ export function UsersManager() {
                         {userDepts.length > 0 && (
                           <>
                             <DropdownMenuSeparator />
-                            <DropdownMenuLabel className="text-xs text-muted-foreground">
-                              Remover de Depto
-                            </DropdownMenuLabel>
+                            <DropdownMenuLabel className="text-xs text-muted-foreground">Remover de Depto</DropdownMenuLabel>
                             {userDepts.map((dept) => (
-                              <DropdownMenuItem
-                                key={dept.id}
-                                onClick={() => handleRemoveDepartmentMember(dept.id)}
-                                className="text-destructive"
-                                disabled={removingDeptMemberId === dept.id}
-                              >
+                              <DropdownMenuItem key={dept.id} onClick={() => handleRemoveDepartmentMember(dept.id)} className="text-destructive" disabled={removingDeptMemberId === dept.id}>
                                 {removingDeptMemberId === dept.id ? (
                                   <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
                                 ) : (
@@ -578,315 +466,110 @@ export function UsersManager() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Página {currentPage} de {totalPages}
-          </p>
+          <p className="text-sm text-muted-foreground">Página {currentPage} de {totalPages}</p>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
+            <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-            >
+            <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
       )}
 
-      {/* Assign Role Dialog */}
-      <Dialog open={!!roleDialogUser} onOpenChange={() => setRoleDialogUser(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Atribuir Role</DialogTitle>
-            <DialogDescription>
-              Selecione o role a ser atribuído ao usuário
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Role</Label>
-              <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as AppRole)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-red-500" />
-                      Admin
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="manager">
-                    <div className="flex items-center gap-2">
-                      <UserCog className="w-4 h-4 text-amber-500" />
-                      Gestor
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="employee">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-blue-500" />
-                      Colaborador
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRoleDialogUser(null)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleAssignRole} disabled={assignRole.isPending}>
-              {assignRole.isPending ? "Atribuindo..." : "Atribuir"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Dialogs */}
+      <AssignRoleDialog
+        open={!!roleDialogUser}
+        onClose={() => setRoleDialogUser(null)}
+        selectedRole={selectedRole}
+        onRoleChange={setSelectedRole}
+        onAssign={handleAssignRole}
+        isPending={assignRole.isPending}
+      />
 
-      {/* Assign Department Dialog */}
-      <Dialog open={!!deptDialogUser} onOpenChange={() => setDeptDialogUser(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar a Departamento</DialogTitle>
-            <DialogDescription>
-              Selecione o departamento
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Departamento</Label>
-              <Select value={selectedDept} onValueChange={setSelectedDept}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments?.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeptDialogUser(null)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleAssignDepartment} disabled={!selectedDept || assignDepartment.isPending}>
-              {assignDepartment.isPending ? "Adicionando..." : "Adicionar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AssignDeptDialog
+        open={!!deptDialogUser}
+        onClose={() => setDeptDialogUser(null)}
+        selectedDept={selectedDept}
+        onDeptChange={setSelectedDept}
+        departments={departments || []}
+        onAssign={handleAssignDepartment}
+        isPending={assignDepartment.isPending}
+      />
 
-      {/* Remove Role Confirmation */}
-      <AlertDialog open={!!removeRoleConfirm} onOpenChange={() => setRemoveRoleConfirm(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover Role</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja remover o role{" "}
-              <strong>{removeRoleConfirm?.role && roleConfig[removeRoleConfirm.role].label}</strong>?
-              Esta ação pode afetar as permissões do usuário.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleRemoveRole}
-              className="bg-destructive text-destructive-foreground"
-            >
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <RemoveRoleConfirm
+        open={!!removeRoleConfirm}
+        onClose={() => setRemoveRoleConfirm(null)}
+        role={removeRoleConfirm?.role || null}
+        onConfirm={handleRemoveRole}
+      />
 
-      {/* Bulk Assign Role Dialog */}
-      <Dialog open={bulkRoleDialog} onOpenChange={setBulkRoleDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Atribuir Role em Lote</DialogTitle>
-            <DialogDescription>
-              Atribuir role para {selectedUsers.length} usuário{selectedUsers.length > 1 ? "s" : ""} selecionado{selectedUsers.length > 1 ? "s" : ""}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Role</Label>
-              <Select value={bulkRole} onValueChange={(v) => setBulkRole(v as AppRole)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-red-500" />
-                      Admin
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="manager">
-                    <div className="flex items-center gap-2">
-                      <UserCog className="w-4 h-4 text-amber-500" />
-                      Gestor
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="employee">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-blue-500" />
-                      Colaborador
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBulkRoleDialog(false)}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={async () => {
-                try {
-                  const result = await bulkAssignRole.mutateAsync({ userIds: selectedUsers, role: bulkRole });
-                  toast.success(`Role atribuído para ${result.successful} usuário(s)`);
-                  setBulkRoleDialog(false);
-                  setSelectedUsers([]);
-                } catch {
-                  toast.error("Erro ao atribuir roles");
-                }
-              }} 
-              disabled={bulkAssignRole.isPending}
-            >
-              {bulkAssignRole.isPending ? "Atribuindo..." : `Atribuir para ${selectedUsers.length}`}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <BulkAssignRoleDialog
+        open={bulkRoleDialog}
+        onClose={() => setBulkRoleDialog(false)}
+        selectedCount={selectedUsers.length}
+        role={bulkRole}
+        onRoleChange={setBulkRole}
+        onAssign={async () => {
+          try {
+            const result = await bulkAssignRole.mutateAsync({ userIds: selectedUsers, role: bulkRole });
+            toast.success(`Role atribuído para ${result.successful} usuário(s)`);
+            setBulkRoleDialog(false);
+            setSelectedUsers([]);
+          } catch { toast.error("Erro ao atribuir roles"); }
+        }}
+        isPending={bulkAssignRole.isPending}
+      />
 
-      {/* Bulk Assign Department Dialog */}
-      <Dialog open={bulkDeptDialog} onOpenChange={setBulkDeptDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar a Departamento em Lote</DialogTitle>
-            <DialogDescription>
-              Adicionar {selectedUsers.length} usuário{selectedUsers.length > 1 ? "s" : ""} ao departamento
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Departamento</Label>
-              <Select value={bulkDept} onValueChange={setBulkDept}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments?.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBulkDeptDialog(false)}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={async () => {
-                try {
-                  const result = await bulkAssignDepartment.mutateAsync({ userIds: selectedUsers, departmentId: bulkDept });
-                  toast.success(`${result.successful} usuário(s) adicionado(s) ao departamento`);
-                  setBulkDeptDialog(false);
-                  setBulkDept("");
-                  setSelectedUsers([]);
-                } catch {
-                  toast.error("Erro ao adicionar ao departamento");
-                }
-              }} 
-              disabled={!bulkDept || bulkAssignDepartment.isPending}
-            >
-              {bulkAssignDepartment.isPending ? "Adicionando..." : `Adicionar ${selectedUsers.length}`}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <BulkAssignDeptDialog
+        open={bulkDeptDialog}
+        onClose={() => setBulkDeptDialog(false)}
+        selectedCount={selectedUsers.length}
+        dept={bulkDept}
+        onDeptChange={setBulkDept}
+        departments={departments || []}
+        onAssign={async () => {
+          try {
+            const result = await bulkAssignDepartment.mutateAsync({ userIds: selectedUsers, departmentId: bulkDept });
+            toast.success(`${result.successful} usuário(s) adicionado(s) ao departamento`);
+            setBulkDeptDialog(false);
+            setBulkDept("");
+            setSelectedUsers([]);
+          } catch { toast.error("Erro ao adicionar ao departamento"); }
+        }}
+        isPending={bulkAssignDepartment.isPending}
+      />
 
-      {/* Bulk Remove Role Confirmation */}
-      <AlertDialog open={!!bulkRemoveRoleConfirm} onOpenChange={() => setBulkRemoveRoleConfirm(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover Role em Lote</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja remover o role{" "}
-              <strong>{bulkRemoveRoleConfirm && roleConfig[bulkRemoveRoleConfirm].label}</strong>{" "}
-              de {selectedUsers.length} usuário{selectedUsers.length > 1 ? "s" : ""}?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                if (!bulkRemoveRoleConfirm) return;
-                try {
-                  const result = await bulkRemoveRole.mutateAsync({ userIds: selectedUsers, role: bulkRemoveRoleConfirm });
-                  toast.success(`Role removido de ${result.successful} usuário(s)`);
-                  setBulkRemoveRoleConfirm(null);
-                  setSelectedUsers([]);
-                } catch {
-                  toast.error("Erro ao remover roles");
-                }
-              }}
-              className="bg-destructive text-destructive-foreground"
-            >
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <BulkRemoveRoleConfirm
+        open={!!bulkRemoveRoleConfirm}
+        onClose={() => setBulkRemoveRoleConfirm(null)}
+        role={bulkRemoveRoleConfirm}
+        selectedCount={selectedUsers.length}
+        onConfirm={async () => {
+          if (!bulkRemoveRoleConfirm) return;
+          try {
+            const result = await bulkRemoveRole.mutateAsync({ userIds: selectedUsers, role: bulkRemoveRoleConfirm });
+            toast.success(`Role removido de ${result.successful} usuário(s)`);
+            setBulkRemoveRoleConfirm(null);
+            setSelectedUsers([]);
+          } catch { toast.error("Erro ao remover roles"); }
+        }}
+      />
 
-      {/* Bulk Remove from Departments Confirmation */}
-      <AlertDialog open={bulkRemoveDeptsConfirm} onOpenChange={setBulkRemoveDeptsConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover de Departamentos em Lote</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja remover {selectedUsers.length} usuário{selectedUsers.length > 1 ? "s" : ""}{" "}
-              de todos os departamentos?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                try {
-                  const result = await bulkRemoveFromDepartments.mutateAsync(selectedUsers);
-                  toast.success(`${result.successful} usuário(s) removido(s) dos departamentos`);
-                  setBulkRemoveDeptsConfirm(false);
-                  setSelectedUsers([]);
-                } catch {
-                  toast.error("Erro ao remover dos departamentos");
-                }
-              }}
-              className="bg-destructive text-destructive-foreground"
-            >
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <BulkRemoveDeptsConfirm
+        open={bulkRemoveDeptsConfirm}
+        onClose={setBulkRemoveDeptsConfirm}
+        selectedCount={selectedUsers.length}
+        onConfirm={async () => {
+          try {
+            const result = await bulkRemoveFromDepartments.mutateAsync(selectedUsers);
+            toast.success(`${result.successful} usuário(s) removido(s) dos departamentos`);
+            setBulkRemoveDeptsConfirm(false);
+            setSelectedUsers([]);
+          } catch { toast.error("Erro ao remover dos departamentos"); }
+        }}
+      />
     </div>
   );
 }
