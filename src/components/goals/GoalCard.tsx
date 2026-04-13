@@ -15,7 +15,7 @@ interface GoalCardProps {
   goal: Goal;
   selectedGoal: string | null;
   setSelectedGoal: (id: string | null) => void;
-  newKeyResult: { title: string; target_value: number; metric_type: string; unit: string };
+  newKeyResult: { title: string; target_value: number; metric_type: "percentage" | "number" | "currency" | "boolean"; unit: string };
   setNewKeyResult: (v: { title: string; target_value: number; metric_type: "percentage" | "number" | "currency" | "boolean"; unit: string }) => void;
   onAddKeyResult: (goalId: string) => void;
   onUpdateGoal: (params: { goalId: string; updates: Partial<Goal> }) => void;
