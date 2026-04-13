@@ -55,25 +55,7 @@ const categoryLabels: Record<string, string> = {
   roles: "Cargos",
 };
 
-const CustomTooltip = ({ active, payload, label }: RechartsTooltipProps) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-popover border border-border rounded-lg p-3 shadow-xl">
-        <p className="font-medium text-foreground mb-2">{label}</p>
-        {payload.map((entry: RechartsTooltipPayloadItem, index: number) => (
-          <p key={index} className="text-sm flex items-center gap-2">
-            <span
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: entry.color }}
-            />
-            {entry.name}: {entry.value}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
+// CustomTooltip moved to AnalyticsChartTabs
 
 export default function RealTimeAnalytics() {
   const navigate = useNavigate();
