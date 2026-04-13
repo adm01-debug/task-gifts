@@ -2,211 +2,27 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowLeft,
-  TrendingUp,
-  TrendingDown,
-  Users,
-  Target,
-  Clock,
-  Award,
-  AlertTriangle,
-  Download,
-  Calendar,
-  BarChart3,
-  PieChart,
-  Activity,
-  Loader2,
+  ArrowLeft, Users, Target, Clock, Award, AlertTriangle, Download, Calendar, BarChart3, Activity,
 } from "lucide-react";
 import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart as RechartsPie,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+  AreaChart, Area, BarChart, Bar, PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  useCompletionTrend,
-  useDepartmentPerformance,
-  useQuestDifficultyDistribution,
-  useWeeklyEngagement,
-  useTopQuests,
-  useStrugglingAreas,
-  useEngagementMetrics,
+  useCompletionTrend, useDepartmentPerformance, useQuestDifficultyDistribution, useWeeklyEngagement, useTopQuests, useStrugglingAreas, useEngagementMetrics,
 } from "@/hooks/useEngagementReports";
 import { toast } from "sonner";
-
-// Stat Card Component
-const StatCard = ({
-  icon: Icon,
-  label,
-  value,
-  subValue,
-  change,
-  changeType,
-  color,
-  delay,
-  loading = false,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  subValue?: string;
-  change?: string;
-  changeType?: "positive" | "negative" | "neutral";
-  color: string;
-  delay: number;
-  loading?: boolean;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.4 }}
-  >
-    <Card className="relative overflow-hidden p-5 bg-card/50 backdrop-blur-sm border-border/50">
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-transparent" 
-           style={{ background: `linear-gradient(135deg, ${color}10 0%, transparent 50%)` }} />
-      
-      <div className="relative">
-        {loading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-10 w-10 rounded-xl" />
-            <Skeleton className="h-8 w-20" />
-            <Skeleton className="h-4 w-24" />
-          </div>
-        ) : (
-          <>
-            <div className="flex items-start justify-between">
-              <div
-                className="p-2.5 rounded-xl"
-                style={{ backgroundColor: `${color}20` }}
-              >
-                <Icon className="w-5 h-5" style={{ color }} />
-              </div>
-              {change && (
-                <div
-                  className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
-                    changeType === "positive"
-                      ? "bg-green-500/10 text-green-400"
-                      : changeType === "negative"
-                      ? "bg-red-500/10 text-red-400"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {changeType === "positive" ? (
-                    <TrendingUp className="w-3 h-3" />
-                  ) : changeType === "negative" ? (
-                    <TrendingDown className="w-3 h-3" />
-                  ) : null}
-                  {change}
-                </div>
-              )}
-            </div>
-            <div className="mt-4">
-              <p className="text-3xl font-bold text-foreground">{value}</p>
-              {subValue && <p className="text-sm text-muted-foreground mt-0.5">{subValue}</p>}
-              <p className="text-sm text-muted-foreground mt-1">{label}</p>
-            </div>
-          </>
-        )}
-      </div>
-    </Card>
-  </motion.div>
-);
-
-// Chart Card wrapper
-const ChartCard = ({
-  title,
-  subtitle,
-  children,
-  action,
-  delay = 0,
-  loading = false,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-  action?: React.ReactNode;
-  delay?: number;
-  loading?: boolean;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.4 }}
-  >
-    <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h3 className="font-semibold text-foreground">{title}</h3>
-          {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-        </div>
-        {action}
-      </div>
-      {loading ? (
-        <div className="h-72 space-y-4 p-4">
-          <div className="flex items-end justify-between h-full gap-3">
-            {[...Array(7)].map((_, i) => (
-              <div key={i} className="flex-1 flex flex-col justify-end gap-2">
-                <Skeleton className="w-full" style={{ height: `${Math.random() * 50 + 30}%` }} />
-                <Skeleton className="h-3 w-full" />
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        children
-      )}
-    </Card>
-  </motion.div>
-);
-
-// Custom tooltip for charts
-const CustomTooltip = ({ active, payload, label }: { 
-  active?: boolean; 
-  payload?: Array<{ name: string; value: number | string; color?: string }>;
-  label?: string;
-}) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-popover border border-border rounded-lg p-3 shadow-xl">
-        <p className="font-medium text-foreground mb-1">{label}</p>
-        {payload.map((entry, index: number) => (
-          <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {entry.name}: {entry.value}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
+import { StatCard, ChartCard, EngagementCustomTooltip, StrugglingAreasSection } from "@/components/engagement/EngagementCharts";
 
 export default function EngagementReports() {
   const navigate = useNavigate();
   const [period, setPeriod] = useState("6m");
 
-  // Fetch real data
   const periodMonths = period === "1m" ? 1 : period === "3m" ? 3 : period === "6m" ? 6 : 12;
   const { data: completionTrend, isLoading: loadingTrend } = useCompletionTrend(periodMonths);
   const { data: departmentPerformance, isLoading: loadingDepts } = useDepartmentPerformance();
@@ -216,39 +32,18 @@ export default function EngagementReports() {
   const { data: strugglingAreas, isLoading: loadingStruggle } = useStrugglingAreas();
   const { data: metrics, isLoading: loadingMetrics } = useEngagementMetrics();
 
-  const handleExport = () => {
-    toast.success("Relatório exportado com sucesso!");
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50"
-      >
+      <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Voltar">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Relatórios de Engajamento</h1>
-                <p className="text-sm text-muted-foreground">
-                  Métricas e ROI do treinamento corporativo
-                </p>
-              </div>
+              <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Voltar"><ArrowLeft className="w-5 h-5" /></Button>
+              <div><h1 className="text-xl font-bold text-foreground">Relatórios de Engajamento</h1><p className="text-sm text-muted-foreground">Métricas e ROI do treinamento corporativo</p></div>
             </div>
-
             <div className="flex items-center gap-3">
               <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger className="w-36">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-36"><Calendar className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1m">Último mês</SelectItem>
                   <SelectItem value="3m">Últimos 3 meses</SelectItem>
@@ -256,217 +51,88 @@ export default function EngagementReports() {
                   <SelectItem value="1y">Último ano</SelectItem>
                 </SelectContent>
               </Select>
-
-              <Button variant="outline" className="gap-2" onClick={handleExport}>
-                <Download className="w-4 h-4" />
-                Exportar
-              </Button>
+              <Button variant="outline" className="gap-2" onClick={() => toast.success("Relatório exportado com sucesso!")}><Download className="w-4 h-4" />Exportar</Button>
             </div>
           </div>
         </div>
       </motion.header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        {/* Key Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            icon={Clock}
-            label="Horas de Treinamento"
-            value={metrics?.totalTrainingHours.toLocaleString() || "0"}
-            subValue="horas investidas"
-            change={metrics?.totalTrainingHours ? "+18%" : undefined}
-            changeType="positive"
-            color="#6366f1"
-            delay={0}
-            loading={loadingMetrics}
-          />
-          <StatCard
-            icon={Target}
-            label="Taxa de Conclusão"
-            value={`${metrics?.avgCompletionRate || 0}%`}
-            subValue="média geral"
-            change={metrics?.avgCompletionRate ? "+12%" : undefined}
-            changeType="positive"
-            color="#10b981"
-            delay={0.1}
-            loading={loadingMetrics}
-          />
-          <StatCard
-            icon={Award}
-            label="Certificações Emitidas"
-            value={metrics?.totalCertifications.toString() || "0"}
-            subValue="no período"
-            change={metrics?.totalCertifications ? "+24%" : undefined}
-            changeType="positive"
-            color="#f59e0b"
-            delay={0.2}
-            loading={loadingMetrics}
-          />
-          <StatCard
-            icon={Activity}
-            label="Score de Engajamento"
-            value={`${metrics?.engagementScore || 0}/100`}
-            subValue={metrics?.engagementScore && metrics.engagementScore >= 70 ? "excelente" : "em desenvolvimento"}
-            change={metrics?.engagementScore ? "+5pts" : undefined}
-            changeType="positive"
-            color="#8b5cf6"
-            delay={0.3}
-            loading={loadingMetrics}
-          />
+          <StatCard icon={Clock} label="Horas de Treinamento" value={metrics?.totalTrainingHours.toLocaleString() || "0"} subValue="horas investidas" change={metrics?.totalTrainingHours ? "+18%" : undefined} changeType="positive" color="#6366f1" delay={0} loading={loadingMetrics} />
+          <StatCard icon={Target} label="Taxa de Conclusão" value={`${metrics?.avgCompletionRate || 0}%`} subValue="média geral" change={metrics?.avgCompletionRate ? "+12%" : undefined} changeType="positive" color="#10b981" delay={0.1} loading={loadingMetrics} />
+          <StatCard icon={Award} label="Certificações Emitidas" value={metrics?.totalCertifications.toString() || "0"} subValue="no período" change={metrics?.totalCertifications ? "+24%" : undefined} changeType="positive" color="#f59e0b" delay={0.2} loading={loadingMetrics} />
+          <StatCard icon={Activity} label="Score de Engajamento" value={`${metrics?.engagementScore || 0}/100`} subValue={metrics?.engagementScore && metrics.engagementScore >= 70 ? "excelente" : "em desenvolvimento"} change={metrics?.engagementScore ? "+5pts" : undefined} changeType="positive" color="#8b5cf6" delay={0.3} loading={loadingMetrics} />
         </div>
 
-        {/* Main Charts */}
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="bg-muted/50">
-            <TabsTrigger value="overview" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Visão Geral
-            </TabsTrigger>
-            <TabsTrigger value="departments" className="gap-2">
-              <Users className="h-4 w-4" />
-              Por Departamento
-            </TabsTrigger>
-            <TabsTrigger value="difficulty" className="gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Áreas Críticas
-            </TabsTrigger>
+            <TabsTrigger value="overview" className="gap-2"><BarChart3 className="h-4 w-4" />Visão Geral</TabsTrigger>
+            <TabsTrigger value="departments" className="gap-2"><Users className="h-4 w-4" />Por Departamento</TabsTrigger>
+            <TabsTrigger value="difficulty" className="gap-2"><AlertTriangle className="h-4 w-4" />Áreas Críticas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
-              {/* Completion Trend */}
-              <ChartCard
-                title="Tendência de Conclusões"
-                subtitle="Trilhas completadas vs iniciadas"
-                delay={0.1}
-                loading={loadingTrend}
-              >
+              <ChartCard title="Tendência de Conclusões" subtitle="Trilhas completadas vs iniciadas" delay={0.1} loading={loadingTrend}>
                 <div className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={completionTrend || []}>
                       <defs>
-                        <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="colorStarted" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                        </linearGradient>
+                        <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.3} /><stop offset="95%" stopColor="#10b981" stopOpacity={0} /></linearGradient>
+                        <linearGradient id="colorStarted" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} /><stop offset="95%" stopColor="#6366f1" stopOpacity={0} /></linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Area
-                        type="monotone"
-                        dataKey="started"
-                        name="Iniciadas"
-                        stroke="#6366f1"
-                        fillOpacity={1}
-                        fill="url(#colorStarted)"
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="completed"
-                        name="Completadas"
-                        stroke="#10b981"
-                        fillOpacity={1}
-                        fill="url(#colorCompleted)"
-                      />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" /><XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} /><YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                      <Tooltip content={<EngagementCustomTooltip />} /><Legend />
+                      <Area type="monotone" dataKey="started" name="Iniciadas" stroke="#6366f1" fillOpacity={1} fill="url(#colorStarted)" />
+                      <Area type="monotone" dataKey="completed" name="Completadas" stroke="#10b981" fillOpacity={1} fill="url(#colorCompleted)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </ChartCard>
 
-              {/* Weekly Engagement */}
-              <ChartCard
-                title="Engajamento Semanal"
-                subtitle="Distribuição por dia da semana"
-                delay={0.2}
-                loading={loadingWeekly}
-              >
+              <ChartCard title="Engajamento Semanal" subtitle="Distribuição por dia da semana" delay={0.2} loading={loadingWeekly}>
                 <div className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={weeklyEngagement || []}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Bar dataKey="hours" name="Horas" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="quests" name="Quests" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" /><XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} /><YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                      <Tooltip content={<EngagementCustomTooltip />} /><Legend />
+                      <Bar dataKey="hours" name="Horas" fill="#8b5cf6" radius={[4, 4, 0, 0]} /><Bar dataKey="quests" name="Quests" fill="#06b6d4" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </ChartCard>
             </div>
 
-            {/* Top Quests Table */}
             <ChartCard title="Quests Mais Populares" subtitle="Ranking por conclusões" delay={0.3} loading={loadingTop}>
               <div className="space-y-3">
                 {(topQuests || []).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    Nenhuma quest completada ainda.
-                  </p>
-                ) : (
-                  topQuests?.map((quest, index) => (
-                    <motion.div
-                      key={quest.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 + index * 0.05 }}
-                      className="flex items-center gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground truncate">{quest.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Tempo médio: {quest.avgTime}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-foreground">{quest.completions}</p>
-                        <p className="text-xs text-muted-foreground">conclusões</p>
-                      </div>
-                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30">
-                        ★ {quest.rating.toFixed(1)}
-                      </Badge>
-                    </motion.div>
-                  ))
-                )}
+                  <p className="text-sm text-muted-foreground text-center py-8">Nenhuma quest completada ainda.</p>
+                ) : topQuests?.map((quest, index) => (
+                  <motion.div key={quest.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + index * 0.05 }} className="flex items-center gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">{index + 1}</div>
+                    <div className="flex-1 min-w-0"><p className="font-medium text-foreground truncate">{quest.name}</p><p className="text-sm text-muted-foreground">Tempo médio: {quest.avgTime}</p></div>
+                    <div className="text-right"><p className="font-semibold text-foreground">{quest.completions}</p><p className="text-xs text-muted-foreground">conclusões</p></div>
+                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30">★ {quest.rating.toFixed(1)}</Badge>
+                  </motion.div>
+                ))}
               </div>
             </ChartCard>
           </TabsContent>
 
           <TabsContent value="departments" className="space-y-6">
             <div className="grid lg:grid-cols-3 gap-6">
-              {/* Department Performance Chart */}
               <div className="lg:col-span-2">
-                <ChartCard
-                  title="Performance por Departamento"
-                  subtitle="Taxa de conclusão comparativa"
-                  delay={0.1}
-                  loading={loadingDepts}
-                >
+                <ChartCard title="Performance por Departamento" subtitle="Taxa de conclusão comparativa" delay={0.1} loading={loadingDepts}>
                   <div className="h-80">
                     {(departmentPerformance || []).length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-muted-foreground">
-                        Nenhum departamento encontrado.
-                      </div>
+                      <div className="flex items-center justify-center h-full text-muted-foreground">Nenhum departamento encontrado.</div>
                     ) : (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={departmentPerformance || []} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                          <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                          <YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={80} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend />
-                          <Bar dataKey="completion" name="Conclusão %" fill="#10b981" radius={[0, 4, 4, 0]} />
-                          <Bar dataKey="engagement" name="Engajamento" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" /><XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} /><YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={80} />
+                          <Tooltip content={<EngagementCustomTooltip />} /><Legend />
+                          <Bar dataKey="completion" name="Conclusão %" fill="#10b981" radius={[0, 4, 4, 0]} /><Bar dataKey="engagement" name="Engajamento" fill="#6366f1" radius={[0, 4, 4, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
@@ -474,31 +140,17 @@ export default function EngagementReports() {
                 </ChartCard>
               </div>
 
-              {/* Difficulty Distribution */}
               <ChartCard title="Distribuição por Dificuldade" delay={0.2} loading={loadingDiff}>
                 <div className="h-80">
                   {(difficultyDistribution || []).every(d => d.value === 0) ? (
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                      Nenhuma quest ativa.
-                    </div>
+                    <div className="flex items-center justify-center h-full text-muted-foreground">Nenhuma quest ativa.</div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPie>
-                        <Pie
-                          data={difficultyDistribution || []}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={100}
-                          paddingAngle={4}
-                          dataKey="value"
-                          label={({ name, value }) => value > 0 ? `${name}: ${value}%` : ""}
-                        >
-                          {(difficultyDistribution || []).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
+                        <Pie data={difficultyDistribution || []} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value" label={({ name, value }) => value > 0 ? `${name}: ${value}%` : ""}>
+                          {(difficultyDistribution || []).map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                         </Pie>
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<EngagementCustomTooltip />} />
                       </RechartsPie>
                     </ResponsiveContainer>
                   )}
@@ -506,50 +158,15 @@ export default function EngagementReports() {
               </ChartCard>
             </div>
 
-            {/* Department Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {(departmentPerformance || []).map((dept, index) => (
-                <motion.div
-                  key={dept.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + index * 0.05 }}
-                >
+                <motion.div key={dept.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + index * 0.05 }}>
                   <Card className="p-5 bg-card/50 backdrop-blur-sm border-border/50">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-semibold text-foreground">{dept.name}</h4>
-                      <Badge
-                        variant="outline"
-                        className={
-                          dept.completion >= 80
-                            ? "border-green-500/50 text-green-500"
-                            : dept.completion >= 60
-                            ? "border-yellow-500/50 text-yellow-500"
-                            : "border-red-500/50 text-red-500"
-                        }
-                      >
-                        {dept.completion}%
-                      </Badge>
-                    </div>
+                    <div className="flex items-center justify-between mb-4"><h4 className="font-semibold text-foreground">{dept.name}</h4><Badge variant="outline" className={dept.completion >= 80 ? "border-green-500/50 text-green-500" : dept.completion >= 60 ? "border-yellow-500/50 text-yellow-500" : "border-red-500/50 text-red-500"}>{dept.completion}%</Badge></div>
                     <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-muted-foreground">Conclusão</span>
-                          <span className="font-medium">{dept.completion}%</span>
-                        </div>
-                        <Progress value={dept.completion} className="h-1.5" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-muted-foreground">Engajamento</span>
-                          <span className="font-medium">{dept.engagement}%</span>
-                        </div>
-                        <Progress value={dept.engagement} className="h-1.5" />
-                      </div>
-                      <div className="pt-2 border-t border-border flex justify-between text-sm">
-                        <span className="text-muted-foreground">Tempo médio</span>
-                        <span className="font-medium">{dept.avgTime}h</span>
-                      </div>
+                      <div><div className="flex justify-between text-sm mb-1"><span className="text-muted-foreground">Conclusão</span><span className="font-medium">{dept.completion}%</span></div><Progress value={dept.completion} className="h-1.5" /></div>
+                      <div><div className="flex justify-between text-sm mb-1"><span className="text-muted-foreground">Engajamento</span><span className="font-medium">{dept.engagement}%</span></div><Progress value={dept.engagement} className="h-1.5" /></div>
+                      <div className="pt-2 border-t border-border flex justify-between text-sm"><span className="text-muted-foreground">Tempo médio</span><span className="font-medium">{dept.avgTime}h</span></div>
                     </div>
                   </Card>
                 </motion.div>
@@ -558,96 +175,7 @@ export default function EngagementReports() {
           </TabsContent>
 
           <TabsContent value="difficulty" className="space-y-6">
-            <ChartCard
-              title="Áreas com Alto Abandono"
-              subtitle="Quests com taxa de abandono ≥ 20%"
-              delay={0.1}
-              loading={loadingStruggle}
-            >
-              <div className="space-y-4">
-                {(strugglingAreas || []).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    Nenhuma área crítica identificada. Excelente!
-                  </p>
-                ) : (
-                  strugglingAreas?.map((area, index) => (
-                    <motion.div
-                      key={area.name}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 + index * 0.05 }}
-                      className="p-4 rounded-lg bg-destructive/5 border border-destructive/20"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <AlertTriangle className="w-4 h-4 text-destructive" />
-                            <h4 className="font-semibold text-foreground">{area.name}</h4>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Taxa de abandono: <span className="text-destructive font-medium">{area.dropRate}%</span>
-                          </p>
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className={
-                            area.difficulty === "Expert"
-                              ? "border-red-500/50 text-red-500"
-                              : area.difficulty === "Difícil"
-                              ? "border-orange-500/50 text-orange-500"
-                              : "border-yellow-500/50 text-yellow-500"
-                          }
-                        >
-                          {area.difficulty}
-                        </Badge>
-                      </div>
-                      <div className="mt-3">
-                        <Progress value={100 - area.dropRate} className="h-2" />
-                      </div>
-                      <div className="mt-3 p-3 rounded bg-muted/50">
-                        <p className="text-xs text-muted-foreground">
-                          <strong>Recomendação:</strong> Considere dividir em módulos menores ou adicionar materiais de apoio.
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
-              </div>
-            </ChartCard>
-
-            {/* Recommendations */}
-            <Card className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-border/50">
-              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Target className="w-5 h-5 text-primary" />
-                Recomendações de Melhoria
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-background/50">
-                  <h4 className="font-medium text-foreground mb-2">📚 Conteúdo</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Divida quests longas em módulos de 15-20 minutos para melhorar retenção.
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-background/50">
-                  <h4 className="font-medium text-foreground mb-2">🎮 Gamificação</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Adicione checkpoints com recompensas parciais para manter motivação.
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-background/50">
-                  <h4 className="font-medium text-foreground mb-2">👥 Social</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Implemente mentorias para quests de alta dificuldade.
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-background/50">
-                  <h4 className="font-medium text-foreground mb-2">📊 Feedback</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Colete feedback após cada módulo para identificar pontos de fricção.
-                  </p>
-                </div>
-              </div>
-            </Card>
+            <StrugglingAreasSection strugglingAreas={strugglingAreas} loading={loadingStruggle} />
           </TabsContent>
         </Tabs>
       </main>

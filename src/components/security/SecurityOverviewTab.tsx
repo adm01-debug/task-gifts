@@ -15,7 +15,7 @@ interface SecurityOverviewTabProps {
   hasPasskeys: boolean;
   devices: Array<{ id: string; is_trusted: boolean }> | undefined;
   devicesLoading: boolean;
-  stats: { active_sessions?: number; unresolved_alerts?: number; failed_logins?: number } | undefined;
+  stats: { active_sessions?: number; unresolved_alerts?: number; failed_logins?: number; rate_limit_violations?: number; blocked_ips?: number } | undefined;
   statsLoading: boolean;
   deviceAlerts: Array<{ id: string; user_agent: string | null; ip_address: unknown; created_at: string; is_acknowledged: boolean }> | undefined;
   setActiveTab: (tab: string) => void;
