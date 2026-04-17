@@ -118,7 +118,7 @@ export default function Goals() {
   if (isMobile) {
     return (
       <PageWrapper pageName="Goals">
-        <MobilePageLayout title="Goals & OKRs" subtitle="Gerencie seus objetivos" backTo="/" icon={Target}>
+        <MobilePageLayout title="Goals & OKRs" subtitle="Gerencie seus objetivos" icon={Target}>
           {pageContent}
         </MobilePageLayout>
       </PageWrapper>
