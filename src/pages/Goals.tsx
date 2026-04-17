@@ -26,6 +26,8 @@ export default function Goals() {
   const { goals, teamGoals, companyGoals, isLoading, createGoal, updateGoal, createKeyResult, deleteGoal, isCreating } = useGoals();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  const [newKeyResult, setNewKeyResult] = useState<{ title: string; target_value: number; metric_type: "percentage" | "number" | "currency" | "boolean"; unit: string }>({ title: "", target_value: 100, metric_type: "percentage", unit: "%" });
   const [newGoal, setNewGoal] = useState({ title: "", description: "", goal_type: "personal", priority: "medium", due_date: "" });
 
   const handleCreateGoal = () => {
