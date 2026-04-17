@@ -62,7 +62,7 @@ export default function Goals() {
             setSelectedGoal={setSelectedGoal}
             newKeyResult={newKeyResult}
             setNewKeyResult={setNewKeyResult}
-            onAddKeyResult={(goalId) => createKeyResult({ goal_id: goalId, ...newKeyResult, current_value: 0 })}
+            onAddKeyResult={(goalId) => createKeyResult({ goal_id: goalId, ...newKeyResult })}
             onUpdateGoal={({ goalId, updates }) => updateGoal({ goalId, updates })}
             onDeleteGoal={deleteGoal}
           />
@@ -118,7 +118,7 @@ export default function Goals() {
   if (isMobile) {
     return (
       <PageWrapper pageName="Goals">
-        <MobilePageLayout title="Goals & OKRs" subtitle="Gerencie seus objetivos" backTo="/" icon={<Target className="h-5 w-5 text-primary" />}>
+        <MobilePageLayout title="Goals & OKRs" subtitle="Gerencie seus objetivos" backTo="/" icon={Target}>
           {pageContent}
         </MobilePageLayout>
       </PageWrapper>
@@ -131,7 +131,7 @@ export default function Goals() {
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border px-4 md:px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center gap-4">
             <DesktopBackButton />
-            <div><GlobalBreadcrumbs items={[{ label: "Início", href: "/" }, { label: "Goals & OKRs" }]} /><h1 className="text-xl font-bold">Goals & OKRs</h1></div>
+            <div><GlobalBreadcrumbs /><h1 className="text-xl font-bold">Goals & OKRs</h1></div>
           </div>
         </header>
         {pageContent}
