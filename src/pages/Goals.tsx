@@ -26,6 +26,8 @@ export default function Goals() {
   const { goals, teamGoals, companyGoals, isLoading, createGoal, updateGoal, createKeyResult, deleteGoal, isCreating } = useGoals();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  const [newKeyResult, setNewKeyResult] = useState<{ title: string; target_value: number; metric_type: "percentage" | "number" | "currency" | "boolean"; unit: string }>({ title: "", target_value: 100, metric_type: "percentage", unit: "%" });
   const [newGoal, setNewGoal] = useState({ title: "", description: "", goal_type: "personal", priority: "medium", due_date: "" });
 
   const handleCreateGoal = () => {
@@ -53,7 +55,17 @@ export default function Goals() {
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {list.map((goal) => (
-          <GoalCard key={goal.id} goal={goal} updateGoal={updateGoal} deleteGoal={deleteGoal} createKeyResult={createKeyResult} />
+          <GoalCard
+            key={goal.id}
+            goal={goal}
+            selectedGoal={selectedGoal}
+            setSelectedGoal={setSelectedGoal}
+            newKeyResult={newKeyResult}
+            setNewKeyResult={setNewKeyResult}
+            onAddKeyResult={(goalId) => createKeyResult({ goal_id: goalId, ...newKeyResult })}
+            onUpdateGoal={({ goalId, updates }) => updateGoal({ goalId, updates })}
+            onDeleteGoal={deleteGoal}
+          />
         ))}
       </div>
     )
@@ -106,7 +118,7 @@ export default function Goals() {
   if (isMobile) {
     return (
       <PageWrapper pageName="Goals">
-        <MobilePageLayout title="Goals & OKRs" subtitle="Gerencie seus objetivos" backTo="/" icon={<Target className="h-5 w-5 text-primary" />}>
+        <MobilePageLayout title="Goals & OKRs" subtitle="Gerencie seus objetivos" icon={Target}>
           {pageContent}
         </MobilePageLayout>
       </PageWrapper>
@@ -119,7 +131,7 @@ export default function Goals() {
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border px-4 md:px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center gap-4">
             <DesktopBackButton />
-            <div><GlobalBreadcrumbs items={[{ label: "Início", href: "/" }, { label: "Goals & OKRs" }]} /><h1 className="text-xl font-bold">Goals & OKRs</h1></div>
+            <div><GlobalBreadcrumbs /><h1 className="text-xl font-bold">Goals & OKRs</h1></div>
           </div>
         </header>
         {pageContent}
