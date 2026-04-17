@@ -19,7 +19,15 @@ import {
   UrgentAlertCard, CompactAlertCard,
   type CopilotAlert,
 } from "@/components/copilot/CopilotAlertSection";
-import { CopilotSuggestionsCard, type CopilotSuggestion } from "@/components/copilot/CopilotSuggestions";
+import { CopilotSuggestions } from "@/components/copilot/CopilotSuggestions";
+
+interface CopilotSuggestion {
+  id: string;
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  priority: "high" | "medium" | "low";
+}
 
 export function AICopilotDashboard() {
   const navigate = useNavigate();
@@ -228,7 +236,7 @@ export function AICopilotDashboard() {
         </Card>
       </div>
 
-      <CopilotSuggestionsCard suggestions={suggestions} />
+      <CopilotSuggestions suggestions={suggestions} />
     </div>
   );
 }
