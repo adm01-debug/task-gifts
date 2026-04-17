@@ -55,7 +55,17 @@ export default function Goals() {
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {list.map((goal) => (
-          <GoalCard key={goal.id} goal={goal} updateGoal={updateGoal} deleteGoal={deleteGoal} createKeyResult={createKeyResult} />
+          <GoalCard
+            key={goal.id}
+            goal={goal}
+            selectedGoal={selectedGoal}
+            setSelectedGoal={setSelectedGoal}
+            newKeyResult={newKeyResult}
+            setNewKeyResult={setNewKeyResult}
+            onAddKeyResult={(goalId) => createKeyResult({ goal_id: goalId, ...newKeyResult, current_value: 0 })}
+            onUpdateGoal={({ goalId, updates }) => updateGoal({ goalId, updates })}
+            onDeleteGoal={deleteGoal}
+          />
         ))}
       </div>
     )
